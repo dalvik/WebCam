@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, WebCamActivity!</string>
+    <string name="app_name">WebCam</string>
+    <string name="user_name">账号：</string>
+    <string name="user_name_hint">请输入账号</string>
+    <string name="password">密码：</string>
+    <string name="password_hint">请输入密码</string>
+    <string name="keep_user_pass">记住用户名和密码</string>
+    <string name="user_login">登录</string>
+    <string name="user_exit">取消</string>
+    <string name="version">2.5.10</string>
+    <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>
+</resources>

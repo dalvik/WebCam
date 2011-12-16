@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical" 
+	    android:background="@drawable/jbshape">
+	   
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="@string/version"
+	        android:layout_alignParentTop="true"
+	        android:layout_marginRight="15dip"
+	        android:layout_marginTop="15dip"
+	        android:gravity="right"/>
+	    
+	    <TableLayout android:layout_width="fill_parent"
+	        android:id="@+id/user_input"
+		    android:layout_height="wrap_content"
+		    android:layout_centerInParent="true"
+		    android:stretchColumns="1,2,3"
+		    android:shrinkColumns="1,2,3">
+	        
+	        <TableRow>
+	            <TextView
+			        android:text=""
+			        android:gravity="center"/>
+	            
+	             <TextView
+			        android:layout_height="wrap_content"
+			        android:layout_width="wrap_content"
+			        android:text="@string/user_name"
+			        android:gravity="right"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			      
+			      <EditText
+			        android:layout_height="wrap_content"
+			        android:layout_width="15dip"
+			        android:maxWidth="20dip"
+			        android:hint="@string/user_name_hint"
+			        android:singleLine="true"
+			        android:gravity="left"/>
+			      
+			      <TextView
+			        android:text=""
+			        android:gravity="center"/>
+	        </TableRow>
+	        
+	        <TableRow>
+	            <TextView
+			        android:text=""
+			        android:gravity="center"/>
+	            
+	             <TextView
+			        android:layout_height="wrap_content"
+			        android:layout_width="wrap_content"
+			        android:text="@string/password"
+			        android:gravity="right"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			      
+			      <EditText
+			        android:layout_height="wrap_content"
+			        android:layout_width="15dip"
+			        android:maxWidth="20dip"
+			        android:singleLine="true"
+			        android:hint="@string/password_hint"
+			        android:gravity="left"/>
+			      
+			      <TextView
+			        android:text=""
+			        android:gravity="center"/>
+	        </TableRow>
+	        
+	            
+	    <TableLayout android:layout_width="fill_parent"
+	        android:id="@+id/user_check"
+		    android:layout_below="@+id/user_input"
+		    android:layout_height="wrap_content"
+		    android:stretchColumns="0,2"
+		    android:shrinkColumns="0,2">
+	        
+	        <TableRow >
+		        <TextView
+			        android:text=""
+			        android:gravity="center"/>
+		        <CheckBox
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:gravity="center"
+		            android:text="@string/keep_user_pass"
+		            android:checked="true">
+		        </CheckBox>  
+	            <TextView
+				        android:text=""
+				        android:gravity="center"/>
+	        </TableRow>
+	     </TableLayout>
+	     
+	     <TableLayout android:layout_width="fill_parent"
+		    android:layout_below="@+id/user_check"
+		    android:layout_height="wrap_content"
+		    android:layout_margin="10dip"
+		    android:stretchColumns="0,3"
+		    android:shrinkColumns="0,3">
+	        
+	        <TableRow >
+		        <TextView
+				        android:text=""
+				        android:gravity="center"/>
+		        <Button
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:gravity="center"
+		            android:padding="10dip"
+		            android:width="70dip"
+		            android:layout_marginRight="5dip"
+		            android:text="@string/user_login">
+		        </Button>
+		        <Button
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:gravity="center"
+		            android:padding="10dip"
+		            android:width="70dip"
+		            android:layout_marginLeft="5dip"
+		            android:text="@string/user_exit">
+		        </Button>
+	            <TextView
+				        android:text=""
+				        android:gravity="center"/>
+	        </TableRow>
+	     </TableLayout>
+	   </TableLayout>
+	   
+	   <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="@string/cory_right"
+	        android:layout_alignParentBottom="true"
+	        android:layout_marginBottom="20dip"
+	        android:gravity="center"/>
+</RelativeLayout>
