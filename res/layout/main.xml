@@ -17,8 +17,8 @@
 	        android:id="@+id/user_input"
 		    android:layout_height="wrap_content"
 		    android:layout_centerInParent="true"
-		    android:stretchColumns="1,2,3"
-		    android:shrinkColumns="1,2,3">
+		    android:stretchColumns="0,4"
+		    android:shrinkColumns="2,3">
 	        
 	        <TableRow>
 	            <TextView
@@ -32,14 +32,16 @@
 			        android:gravity="right"
 			        android:textAppearance="?android:attr/textAppearanceMedium" />
 			      
-			      <EditText
+			      <EditText android:id="@+id/username"
 			        android:layout_height="wrap_content"
-			        android:layout_width="15dip"
-			        android:maxWidth="20dip"
+			        android:layout_width="wrap_content"
 			        android:hint="@string/user_name_hint"
 			        android:singleLine="true"
 			        android:gravity="left"/>
 			      
+			      <TextView
+			        android:text=""
+			        android:gravity="center"/>
 			      <TextView
 			        android:text=""
 			        android:gravity="center"/>
@@ -57,11 +59,11 @@
 			        android:gravity="right"
 			        android:textAppearance="?android:attr/textAppearanceMedium" />
 			      
-			      <EditText
+			      <EditText android:id="@+id/password"
 			        android:layout_height="wrap_content"
-			        android:layout_width="15dip"
-			        android:maxWidth="20dip"
+			        android:layout_width="wrap_content"
 			        android:singleLine="true"
+			        android:password="true"
 			        android:hint="@string/password_hint"
 			        android:gravity="left"/>
 			      
@@ -78,17 +80,20 @@
 		    android:stretchColumns="0,2"
 		    android:shrinkColumns="0,2">
 	        
-	        <TableRow >
+	        <TableRow>
+	            
 		        <TextView
 			        android:text=""
 			        android:gravity="center"/>
-		        <CheckBox
+		        
+		        <CheckBox android:id="@+id/keepuserpwd"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:gravity="center"
 		            android:text="@string/keep_user_pass"
 		            android:checked="true">
-		        </CheckBox>  
+		        </CheckBox>
+		        
 	            <TextView
 				        android:text=""
 				        android:gravity="center"/>
@@ -106,7 +111,8 @@
 		        <TextView
 				        android:text=""
 				        android:gravity="center"/>
-		        <Button
+		        
+		        <Button android:id="@+id/userLogin"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:gravity="center"
@@ -115,7 +121,8 @@
 		            android:layout_marginRight="5dip"
 		            android:text="@string/user_login">
 		        </Button>
-		        <Button
+		        
+		        <Button android:id="@+id/user_exit"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:gravity="center"
@@ -124,13 +131,15 @@
 		            android:layout_marginLeft="5dip"
 		            android:text="@string/user_exit">
 		        </Button>
+		        
 	            <TextView
 				        android:text=""
 				        android:gravity="center"/>
 	        </TableRow>
+	        
 	     </TableLayout>
 	   </TableLayout>
-	   
+
 	   <TextView android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:text="@string/cory_right"
