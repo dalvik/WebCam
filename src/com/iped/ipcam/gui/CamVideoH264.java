@@ -15,13 +15,21 @@ import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.GridView;
+import android.widget.LinearLayout;
 
 /**
  * H.264的功能分为两层，
@@ -41,12 +49,17 @@ import android.view.View;
  */
 public class CamVideoH264 extends Activity {
 
+	
 	private Thread thread = null;
 
 	private boolean flag = true;
 
 	private VideoView videoView = null;
 
+	private int screenWidth = 0;
+	
+	private int screenHeight = 0;
+	
 	private String TAG = "CamVideoH264";
 
 	@Override
@@ -54,8 +67,23 @@ public class CamVideoH264 extends Activity {
 		super.onCreate(savedInstanceState);
 		// thread = new Thread(new SocketThread());
 		// thread.start();
-		videoView = new VideoView(this);
-		setContentView(videoView);
+		DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
+        setContentView(R.layout.videoview);
+        LinearLayout container = (LinearLayout) findViewById(R.id.container);
+        videoView = (VideoView) findViewById(R.id.videoview);
+        ControlPanel controlPanel = new ControlPanel(this, videoView, 300,LayoutParams.FILL_PARENT);
+        container.addView(controlPanel);
+/*        
+ * 
+ 
+    
+      * 
+        videoView.init(screenWidth, screenHeight);
+*/		//videoView = new VideoView(this);
+		//setContentView(videoView);
 		//videoView.playVideo();
 		//new Thread(new SocketThread()).start();
 	}
@@ -111,7 +139,6 @@ public class CamVideoH264 extends Activity {
 				String temp = "";
 				//FileOutputStream fos = new FileOutputStream(new File("/sdcard/"+ System.currentTimeMillis() + ".h264"));
 				while ((i = dis.read(b)) != -1 && flag) {
-					
 					//temp = new String(b, 0, i, "ISO-8859-1");
 					//fos.write(b, 0, i);
 					//fos.flush();
@@ -134,6 +161,7 @@ class VideoView extends View implements Runnable {
 
 	public native int InitDecoder();
 
+
 	public native int UninitDecoder();
 
 	public native int DecoderNal(byte[] in, int insize, byte[] out);
@@ -146,21 +174,32 @@ class VideoView extends View implements Runnable {
 
 	int mTrans = 0x0F0F0F0F;
 
+	private int width = 0;
+	
+	private int height = 0;
+	
 	private String TAG = "VideoView";
 
-	public VideoView(Context context) {
-		super(context);
+	public VideoView(Context context, AttributeSet attrs) {
+		super(context, attrs);
 	}
 
 	public void playVideo() {
 		new Thread(this).start();
 	}
 
+	public void init(int screenWidth, int screenHeight) {
+		this.width = screenWidth;
+		this.height = screenHeight;
+	}
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		VideoBit.copyPixelsFromBuffer(buffer);// makeBuffer(data565, N));
-		canvas.drawBitmap(VideoBit, 0, 0, null);
+		//VideoBit.copyPixelsFromBuffer(buffer);// makeBuffer(data565, N));
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		canvas.drawBitmap(bitmap, 0,0, new Paint(Color.WHITE));
+		System.out.println("ondraw");
 	}
 
 	@Override
