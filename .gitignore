@@ -1,2 +1,5 @@
 .class
+obj/
+lib/
 bin/
+gen/

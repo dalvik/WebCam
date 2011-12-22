@@ -36,15 +36,16 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f050001;
-        public static final int cory_right=0x7f05000a;
+        public static final int cory_right=0x7f05000b;
         public static final int hello=0x7f050000;
         public static final int keep_user_pass=0x7f050006;
         public static final int password=0x7f050004;
         public static final int password_hint=0x7f050005;
-        public static final int user_exit=0x7f050008;
+        public static final int user_exit=0x7f050009;
         public static final int user_login=0x7f050007;
         public static final int user_name=0x7f050002;
         public static final int user_name_hint=0x7f050003;
-        public static final int version=0x7f050009;
+        public static final int username_null=0x7f050008;
+        public static final int version=0x7f05000a;
     }
 }

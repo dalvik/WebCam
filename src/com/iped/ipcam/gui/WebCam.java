@@ -1,6 +1,7 @@
 package com.iped.ipcam.gui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class WebCam extends Activity implements OnClickListener{
 
@@ -20,6 +22,7 @@ public class WebCam extends Activity implements OnClickListener{
 	private CheckBox keepPwd = null;
 	
 	private SharedPreferences settings = null;
+
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,17 +42,26 @@ public class WebCam extends Activity implements OnClickListener{
         }
         loginButton.setOnClickListener(this);
         userExit.setOnClickListener(this);
+        
     }
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.userLogin:
+			String username = userName.getText().toString();
+			if(null == username || "".equalsIgnoreCase(username)) {
+				Toast.makeText(WebCam.this, getResources().getString(R.string.username_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
 			if(keepPwd.isChecked()) {
-				saveUserInfo(userName.getText().toString(), password.getText().toString(), keepPwd.isChecked());
+				saveUserInfo(username, password.getText().toString(), keepPwd.isChecked());
 			} else {
 				saveUserInfo("", "", keepPwd.isChecked());
 			}
+			Intent intent = new Intent(WebCam.this, CamVideoH264.class);
+			startActivity(intent);
+			WebCam.this.finish();
 			break;
 		case R.id.user_exit:
 			WebCam.this.finish();
@@ -63,4 +75,5 @@ public class WebCam extends Activity implements OnClickListener{
 	public void saveUserInfo(String username, String pwd, boolean flag) {
 		settings.edit().putString("USERNAME", username).putString("PASSWORD", pwd).putBoolean("KEEP_USER_INFO", flag).commit();
 	}
+	
 }
