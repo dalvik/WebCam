@@ -74,12 +74,10 @@ public class CamVideoH264 extends Activity {
         setContentView(R.layout.videoview);
         LinearLayout container = (LinearLayout) findViewById(R.id.container);
         videoView = (VideoView) findViewById(R.id.videoview);
-        ControlPanel controlPanel = new ControlPanel(this, videoView, 300,LayoutParams.FILL_PARENT);
+        ControlPanel controlPanel = new ControlPanel(this, videoView, 200,LayoutParams.FILL_PARENT);
         container.addView(controlPanel);
 /*        
  * 
- 
-    
       * 
         videoView.init(screenWidth, screenHeight);
 */		//videoView = new VideoView(this);
@@ -114,7 +112,6 @@ public class CamVideoH264 extends Activity {
 		 -   char frameHeight[4]                                   4个字节
 		 
 		 数据包头长：                                                                                                                              57个字节
-		 
 		 
 		 数据内容   char rowData[]                                    余下为数据
 		 
@@ -249,7 +246,6 @@ class VideoView extends View implements Runnable {
 			}
 
 			if (readByteLength <= 0) { // 读取完成
-				System.out.println("bytesRead end break = " + readByteLength);				
 				break;
 			}
 			sockBufferUsedLength = 0;
@@ -306,11 +302,8 @@ class VideoView extends View implements Runnable {
 		for (i = 0; i < sockRemain; i++) {
 			temp = sockBuf[i + sockBufferUsedSize];
 			nalBuf[i + nalBufUsed] = temp;
-			//System.out.println("first mtrans = " + mTrans + " temp = " + temp);
 			mTrans <<= 8;
-			//System.out.println("second mtrans = " + mTrans + " temp = " + temp);
 			mTrans |= temp;
-			//System.out.println("third mtrans = " + mTrans + "  temp = " + temp);
 			if (mTrans == 1){ // 找到一个开始字
 				i++;
 				break;

@@ -22,7 +22,17 @@
             </intent-filter>
         </activity>
         
+        <activity android:name=".WebTabWidget" android:theme="@android:style/Theme.NoTitleBar"/>
+
         <activity android:name=".CamVideoH264"/>
+        
+        <activity android:name=".DeviceManager"/>
+        
+        <activity android:name=".DeviceParamSets"/>
+        
+        <activity android:name=".PlayBack"/>
+        
+        <activity android:name=".SystemSettings"/>
         
     </application>
 

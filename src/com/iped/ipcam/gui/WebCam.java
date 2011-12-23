@@ -42,7 +42,8 @@ public class WebCam extends Activity implements OnClickListener{
         }
         loginButton.setOnClickListener(this);
         userExit.setOnClickListener(this);
-        Intent intent = new Intent(WebCam.this, CamVideoH264.class);
+        Intent intent = new Intent(WebCam.this, WebTabWidget.class);
+        //Intent intent = new Intent(WebCam.this, CamVideoH264.class);
 		startActivity(intent);
     }
 

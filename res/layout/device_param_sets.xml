@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+
+    <TableLayout
+        android:id="@+id/user_input"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:shrinkColumns="2,3"
+        android:stretchColumns="0,4" >
+
+        <TableRow >
+
+            <TextView
+                android:gravity="center"
+                android:text="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="params sets"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+            <TextView
+                android:gravity="center"
+                android:text="" />
+
+            <TextView
+                android:gravity="center"
+                android:text="" />
+        </TableRow>
+
+
+    </TableLayout>
+
+
+</RelativeLayout>
