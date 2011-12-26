@@ -13,7 +13,14 @@
     <string name="user_exit">取消</string>
     
     <string name="default_activity_str">视频</string>
+    
     <string name="device_manager_str">设备管理</string>
+    	<string name="auto_serch_str">自动搜索</string>	
+    	<string name="manu_add_str">手工添加</string>	
+    	<string name="clear_all_str">全部清除</string>	
+    	<string name="device_edit_str">修改</string>	
+    	<string name="device_del_str">删除</string>	
+    	<string name="no_device_online">没有在线设备</string>
     <string name="device_params_sets_str">参数设置</string>
     <string name="play_back_str">视频回放</string>
     <string name="system_settings_str">系统设置</string>

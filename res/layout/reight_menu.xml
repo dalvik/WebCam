@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+
+    <TableLayout
+        android:id="@+id/user_input"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <TableRow >
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="左上"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中上"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="右上"/>
+        </TableRow>
+
+
+        <TableRow >
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="左"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="右"/>
+        </TableRow>
+        
+        <TableRow >
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="左下"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中下"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="右下"/>
+        </TableRow>
+            
+    </TableLayout>
+
+	<TableLayout android:layout_below="@+id/user_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TableRow >
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="33"/>
+            
+            <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="44"/>
+        </TableRow>
+    </TableLayout>
+</RelativeLayout>

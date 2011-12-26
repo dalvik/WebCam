@@ -4,40 +4,47 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-
     <TableLayout
-        android:id="@+id/user_input"
+        android:id="@+id/user_oper"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:shrinkColumns="2,3"
-        android:stretchColumns="0,4" >
+        android:layout_alignParentBottom="true"
+        android:background="@color/lightdark"
+        android:stretchColumns="0,1,2" >
 
         <TableRow >
 
-            <TextView
-                android:gravity="center"
-                android:text="" />
-
-            <TextView
+            <Button android:id="@+id/auto_search"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="right"
-                android:text="system settings"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-            <TextView
                 android:gravity="center"
-                android:text="" />
+                android:text="@string/auto_serch_str" />
 
-            <TextView
+            <Button android:id="@+id/manul_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="" />
+                android:text="@string/manu_add_str" />
+
+            <Button android:id="@+id/clear_all"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear_all_str" />
         </TableRow>
-
-
     </TableLayout>
 
+    <ListView android:id="@+id/android:list"
+        android:layout_above="@+id/user_oper"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/lightdark"
+        android:cacheColorHint="@color/lightdark"/>
 
+    <TextView android:id="@id/android:empty"  
+              android:layout_width="fill_parent"  
+              android:layout_height="fill_parent"  
+              android:textColor="@color/yellow"
+              android:gravity="center"
+              android:text="@string/no_device_online"/>  
 </RelativeLayout>

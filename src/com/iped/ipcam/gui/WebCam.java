@@ -27,7 +27,7 @@ public class WebCam extends Activity implements OnClickListener{
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.login);
         settings = getSharedPreferences(WebCam.class.getName(), 0);
         userName = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);

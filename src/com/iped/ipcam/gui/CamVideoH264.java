@@ -1,9 +1,7 @@
 package com.iped.ipcam.gui;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -15,21 +13,18 @@ import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.SurfaceView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 /**
  * H.264的功能分为两层，
@@ -48,7 +43,6 @@ import android.widget.LinearLayout;
  *
  */
 public class CamVideoH264 extends Activity {
-
 	
 	private Thread thread = null;
 
@@ -71,14 +65,27 @@ public class CamVideoH264 extends Activity {
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        setContentView(R.layout.videoview);
+        setContentView(R.layout.pre_videoview);
         LinearLayout container = (LinearLayout) findViewById(R.id.container);
         videoView = (VideoView) findViewById(R.id.videoview);
-        ControlPanel controlPanel = new ControlPanel(this, videoView, 200,LayoutParams.FILL_PARENT);
+        LayoutInflater factory = LayoutInflater.from(this);
+        View view = factory.inflate(R.layout.reight_menu, null);
+        ControlPanel controlPanel = new ControlPanel(this, videoView,  LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
         container.addView(controlPanel);
+       // controlPanel.addView(view);
+        //videoView.playVideo();
+        
+        
+      //新建测试组件  
+        TextView tvTest=new TextView(this);  
+        tvTest.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));  
+        tvTest.setText("测试组件，红字白底");  
+        tvTest.setTextColor(Color.RED);  
+        tvTest.setBackgroundColor(Color.WHITE);  
+        //加入到Panel里面  
+        controlPanel.addView(tvTest);
+        
 /*        
- * 
-      * 
         videoView.init(screenWidth, screenHeight);
 */		//videoView = new VideoView(this);
 		//setContentView(videoView);
@@ -193,10 +200,14 @@ class VideoView extends View implements Runnable {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		//VideoBit.copyPixelsFromBuffer(buffer);// makeBuffer(data565, N));
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+/*		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
 		canvas.drawBitmap(bitmap, 0,0, new Paint(Color.WHITE));
 		System.out.println("ondraw");
+*/		//VideoBit.copyPixelsFromBuffer(buffer);// makeBuffer(data565, N));
+		
+		 VideoBit.copyPixelsFromBuffer(buffer);//makeBuffer(data565, N));
+	    	
+	     canvas.drawBitmap(VideoBit, 0, 0, null); 
 	}
 
 	@Override

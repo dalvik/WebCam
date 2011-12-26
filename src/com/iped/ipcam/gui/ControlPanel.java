@@ -13,9 +13,9 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	private Context context;
 	
 	/** Handle的宽度，与Panel等高 */
-	private final static int HANDLE_WIDTH = 70;
+	private final static int HANDLE_WIDTH = 40;
 	/** 每次自动展开/收缩的范围 */
-	private final static int MOVE_WIDTH =120;
+	private final static int MOVE_WIDTH = 300;
 	
 	private int rightMargin = 0;
 	
@@ -25,6 +25,12 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	
 	private PanelCloseEvent panelCloseEvent = null;
 	
+	
+	/*
+	 * 
+	 * ViewFilpper 
+	 * 
+	 */
 	public ControlPanel(Context context, View videoView, int width, int height) {
 		super(context);
 		this.context = context;
@@ -35,13 +41,14 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		
 		// 设置ControlPanel本身的属性
 		LayoutParams lp = new LayoutParams(width, height);
+		System.out.println(width+ "  " + height);
 		lp.rightMargin = -lp.width + HANDLE_WIDTH;
 		rightMargin = Math.abs(lp.rightMargin);
 		this.setLayoutParams(lp);
 		setOrientation(LinearLayout.HORIZONTAL);
 		
 		buttonHandle = new Button(context);
-		buttonHandle.setText("click");
+		buttonHandle.setText("c");
 		buttonHandle.setLayoutParams(new LayoutParams(HANDLE_WIDTH,height));
 		buttonHandle.setOnClickListener(this);
 		addView(buttonHandle);
@@ -52,10 +59,8 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		LayoutParams lp = (LayoutParams)ControlPanel.this.getLayoutParams();
 		if(lp.rightMargin<0) {// close status
 			new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
-			System.out.println(" + " +lp.rightMargin + " move =" + MOVE_WIDTH);
-		} else { // open status
+		} else { //open status
 			new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
-			System.out.println(lp.rightMargin + "---" + " move=" + (-MOVE_WIDTH));
 		}
 	}
 	
@@ -85,7 +90,6 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 			} else {
 				times = rightMargin / Math.abs(params[0]) + 1;
 			}
-			System.out.println("doInBackground" + params[0] + "-----=" + times);
 			for(int i = 0; i < times; i++) {
 				publishProgress(params);
 				try {
@@ -112,7 +116,6 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 				panelCloseEvent.onPanelClosed(ControlPanel.this);
 			}
 			ControlPanel.this.setLayoutParams(lp);
-			System.out.println("onProgressUpdate=" + values);
 		}
 		
 	}
