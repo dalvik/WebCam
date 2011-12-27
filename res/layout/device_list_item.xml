@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/RelativeLayout_Item"
 	android:layout_width="fill_parent" 
 	android:layout_height="wrap_content"
@@ -7,70 +7,77 @@
 	
 	<TextView android:id="@+id/device_name"
         android:padding="7dip"
-	    android:layout_centerVertical="true"
+        android:textSize="24dip"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
-		
-	<LinearLayout android:id="@+id/linearLayout"
-		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
-		android:orientation="vertical" 
-		android:layout_toRightOf="@+id/message_image"
-		android:padding="7dip"
-		android:layout_weight="1">
-		
-		<TextView android:id="@+id/device_type"
-			android:layout_centerVertical="true"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" 
-			android:maxLength="15"
-			android:gravity="left"
-			android:textSize="17dip"
-			android:textColor="#FFFFFFFF"/>
-		
-		<TextView android:id="@+id/device_ip_address"
-			android:layout_centerVertical="true"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" 
-			android:maxLength="20"
-			android:gravity="left"
-			android:textSize="10dip" 
-			android:textColor="#FFFFFFFF"/>
-	</LinearLayout>
-	
-	<RelativeLayout
-		android:layout_width="fill_parent" 
+		android:textColor="#FFFFFFFF"/>
+
+	<LinearLayout android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
-		android:orientation="vertical" 
-		android:layout_marginLeft="5dip"
-		android:layout_weight="1">
-		
-		<TextView android:id="@+id/device_tcp_port"
-			android:layout_width="wrap_content" 
-		    android:layout_height="wrap_content"
-		    android:singleLine="true"
-			android:textSize="15dip"
-			android:layout_marginLeft="15dip"
-			android:layout_alignParentLeft="true"
-			android:textColor="#FFFFFFFF"/>
+	    android:orientation="vertical"
+	    android:padding="7dip">
+	    
+	    <LinearLayout android:id="@+id/linearLayout"
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:orientation="horizontal" 
+			android:layout_weight="1">
 			
-		<TextView android:id="@+id/device_udp_port"
-			android:layout_marginLeft="10dip"
-			android:layout_toRightOf="@+id/device_tcp_port"
-			android:layout_width="wrap_content" 
-		    android:layout_height="wrap_content"
-		    android:singleLine="true"
-			android:textSize="15dip"
-			android:textColor="#FFFFFFFF"/>
-		
-		<TextView android:id="@+id/device_gateway"
-			android:layout_width="wrap_content" 
-		    android:layout_height="wrap_content"
-		    android:singleLine="true"
-			android:textSize="15dip"
-			android:layout_marginRight="10dip"
-			android:layout_alignParentRight="true"
-			android:textColor="#FFFFFFFF"/>
-	</RelativeLayout>
-		
-</RelativeLayout>
+			<TextView android:id="@+id/device_type"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" 
+				android:maxLength="15"
+				android:textSize="17dip"
+				android:textColor="#FFFFFFFF"/>
+			
+			<TextView android:id="@+id/device_ip_address"
+				android:layout_width="fill_parent"
+				android:layout_weight="1"
+				android:layout_height="fill_parent" 
+				android:maxLength="20"
+				android:textSize="15dip" 
+				android:textColor="#FFFFFFFF"/>
+			
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_weight="1"
+				android:layout_height="fill_parent" 
+				android:maxLength="20"
+				android:textSize="15dip" 
+				android:textColor="#FFFFFFFF"/>
+		</LinearLayout>
+	
+	    
+	    <LinearLayout
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:orientation="horizontal" 
+			android:layout_weight="1">
+			
+			<TextView android:id="@+id/device_tcp_port"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" 
+			    android:singleLine="true"
+				android:textSize="10dip"
+				android:textColor="#FFFFFFFF"/>
+				
+			<TextView android:id="@+id/device_udp_port"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" 
+			    android:singleLine="true"
+				android:textSize="10dip"
+				android:textColor="#FFFFFFFF"/>
+			
+			<TextView android:id="@+id/device_gateway"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" 
+			    android:singleLine="true"
+				android:textSize="10dip"
+				android:textColor="#FFFFFFFF"/>
+		</LinearLayout>
+	</LinearLayout>
+</LinearLayout>

@@ -20,12 +20,58 @@
     	<string name="clear_all_str">全部清除</string>	
     	<string name="device_edit_str">修改</string>	
     	<string name="device_del_str">删除</string>	
+    	<string name="device_preview_str">预览</string>	
     	<string name="no_device_online">没有在线设备</string>
+    	<string name="device_type_str">类型：</string>
+    	<string name="device_ip_str">IP：</string>
+    	<string name="device_tcp_str">TCP：</string>
+    	<string name="device_udp_str">UDP：</string>
+    	<string name="device_gateway_str">网关：</string>
     <string name="device_params_sets_str">参数设置</string>
+    	<string name="device_params_info_str">设备信息:</string>
+    	<string name="device_params_version_str">软件版本：</string>
+    	<string name="device_params_device_name_str">设备名称：</string>
+    	<string name="device_params_address_type_str">地址类型：</string>
+    	<string name="device_params_device_address_str">设备地址：</string>
+    	<string name="device_params_inside_total_space_str">内置磁盘总容量：</string>
+    	<string name="device_params_outside_total_space_str">移动磁盘总容量：</string>
+    	<string name="device_params_recorde_total_time_str">可录制时间：</string>
+    	
+    	<string name="device_params_recorde_type_str">录制方式：</string>
+    	<string name="device_params_recorde_type_inside_str">内置磁盘</string>
+    	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
+    	<string name="device_params_recorde_type_close_str">关闭</string>
+
+    	<string name="device_params_recorde_speed_str">录像码流：</string>
+    	<string name="device_params_recorde_real_speed_str">实际码率：</string>
+    	<string name="device_params_recorde_frame_size_str">画面大小：</string>
+    	<string name="device_params_recorde_frame_speed_str">帧率：</string>
+    	<string name="device_params_recorde_comp_quar_str">压缩质量：</string>
+    	<string name="device_params_recorde_comp_type_str">压缩方式：</string>
+    	
+    	<string name="device_params_monitor_speed_str">监控码流：</string>
+    	<string name="device_params_monitor_frame_size_str">画面大小：</string>
+
+    	<string name="device_params_date_str">设备时间：</string>
+    	<string name="device_params_sync_date_str">同步系统时间</string>
+    	
+    	    
     <string name="play_back_str">视频回放</string>
+    	<string name="video_download">下载</string>
+    	<string name="video_delete">删除</string>
+    	<string name="video_playback">回放</string>
+    	<string name="video_preview_no_video_str">没有可回放的视频</string>
+    	<string name="video_preview_name_str">名称：</string>
+    	<string name="video_preview_start_time_str">开始时间：</string>
+    	<string name="video_preview_end_time_str">结束时间：</string>
     <string name="system_settings_str">系统设置</string>
-        
-        
+        <string name="system_settings_save_path_hint_str">监控录像保存路径</string>
+        <string name="system_settings_save_path_str">保存路径：</string>
+        <string name="system_settings_preview_str">浏览</string>
+        <string name="system_settings_device_name_str">设备名称：</string>
+        <string name="system_settings_device_ip_str">设备地址：</string>
+        <string name="system_settings_device_update_str">升级</string>
+        <string name="system_settings_device_cancle_str">取消</string>
         
     <string name="version">2.5.10</string>
     <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>

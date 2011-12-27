@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -27,6 +26,9 @@ public class DeviceManager extends ListActivity {
 	private final int MENU_EDIT = Menu.FIRST;
 	
 	private final int MENU_DEL = Menu.FIRST + 1;
+	
+	private final int MENU_PREVIEW = Menu.FIRST + 2;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -53,6 +55,7 @@ public class DeviceManager extends ListActivity {
 		menu.setHeaderTitle(device.getDeviceName());
 		menu.add(0, MENU_EDIT, 1, getString(R.string.device_edit_str));
 		menu.add(0, MENU_DEL, 2, getString(R.string.device_del_str));
+		menu.add(0, MENU_PREVIEW, 3, getString(R.string.device_preview_str));
 	}
 	
 	@Override

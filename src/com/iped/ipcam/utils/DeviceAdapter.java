@@ -14,12 +14,14 @@ import com.iped.ipcam.pojo.Device;
 
 public class DeviceAdapter extends BaseAdapter {
 
+	private Context context;
 	private List<Device> deviceList = null;
 	
 	private LayoutInflater inflater = null;
 	
 	public DeviceAdapter(List<Device> deviceList, Context context) {
 		this.deviceList = deviceList;
+		this.context = context;
 		inflater = LayoutInflater.from(context);
 	}
 	
@@ -48,7 +50,7 @@ public class DeviceAdapter extends BaseAdapter {
 		if(convertView == null) {
 			convertView = inflater.inflate(R.layout.device_list_item, null);
 			viewHolder.name = (TextView) convertView.findViewById(R.id.device_name);
-			viewHolder.type = (TextView) convertView.findViewById(R.id.device_name);
+			viewHolder.type = (TextView) convertView.findViewById(R.id.device_type);
 			viewHolder.ip = (TextView) convertView.findViewById(R.id.device_ip_address);
 			viewHolder.tcp = (TextView) convertView.findViewById(R.id.device_tcp_port);
 			viewHolder.udp = (TextView) convertView.findViewById(R.id.device_udp_port);
@@ -57,11 +59,11 @@ public class DeviceAdapter extends BaseAdapter {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		viewHolder.name.setText(device.getDeviceName());
-		viewHolder.type.setText(device.getDeviceType());
-		viewHolder.ip.setText(device.getDeviceIp());
-		viewHolder.tcp.setText(device.getDeviceTcpPort());
-		viewHolder.udp.setText(device.getDeviceUdpPort());
-		viewHolder.gateWay.setText(device.getDeviceGateWay());
+		viewHolder.type.setText(context.getResources().getText(R.string.device_type_str) + device.getDeviceType());
+		viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceIp());
+		viewHolder.tcp.setText(context.getResources().getText(R.string.device_tcp_str) + device.getDeviceTcpPort());
+		viewHolder.udp.setText(context.getResources().getText(R.string.device_udp_str) + device.getDeviceUdpPort());
+		viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceGateWay());
 		convertView.setTag(viewHolder);
 		return convertView;
 	}

@@ -1,43 +1,287 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-
-    <TableLayout
-        android:id="@+id/user_input"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:shrinkColumns="2,3"
-        android:stretchColumns="0,4" >
-
-        <TableRow >
-
-            <TextView
-                android:gravity="center"
-                android:text="" />
-
-            <TextView
-                android:layout_width="wrap_content"
+    android:layout_height="fill_parent">
+    
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical" >
+	
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:textColor="@color/white"
+	    	android:textSize="20dip"
+	    	android:text="@string/device_params_info_str"/>
+	    
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	    
+	    <TableLayout  android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:stretchColumns="1,3"
+	    	android:padding="3dip">
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_version_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_device_name_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	        </TableRow>
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_address_type_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_device_address_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	        </TableRow>
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_inside_total_space_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_outside_total_space_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	        </TableRow>
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_total_time_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text=""/>
+	            
+	        </TableRow>
+	        
+	    </TableLayout>
+	    
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	    
+	     <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="right"
-                android:text="params sets"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:orientation="horizontal" >
 
+	          <TextView android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:textSize="20dip"
+		    	android:textColor="@color/white"
+		    	android:text="@string/device_params_recorde_type_str"/>
+	    
+                <RadioGroup android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:orientation="horizontal">
+	            
+	                <RadioButton android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:text="@string/device_params_recorde_type_inside_str"/>
+	                
+	                <RadioButton android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:text="@string/device_params_recorde_type_outsize_str"/>
+	                
+	            </RadioGroup>
+	            
+	            <CheckBox android:layout_width="fill_parent"
+    				android:layout_height="wrap_content"
+    				android:layout_weight="1"
+    				android:focusable="false"
+    				android:text="@string/device_params_recorde_type_close_str"
+    				android:checked="true"/>
+         </LinearLayout>
+         
+	         
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	    
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:textColor="@color/white"
+	    	android:textSize="20dip"
+	    	android:text="@string/device_params_recorde_speed_str"/>
+	    
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+        
+	    <TableLayout  android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:stretchColumns="1,3"
+	    	android:padding="3dip">
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_real_speed_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text=""/>
+	        </TableRow>
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_frame_size_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_frame_speed_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	        </TableRow>
+	        
+	        <TableRow >
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_comp_quar_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	            
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_recorde_comp_type_str"/>
+	            
+	            <EditText android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:singleLine="true"/>
+	        </TableRow>
+	    </TableLayout>
+	    
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	          
+	     <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
 
-            <TextView
-                android:gravity="center"
-                android:text="" />
+	          <TextView android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:textSize="20dip"
+		    	android:textColor="@color/white"
+		    	android:text="@string/device_params_monitor_speed_str"/>
+	    
+	            
+	          <TextView android:layout_width="fill_parent"
+		    	android:layout_height="fill_parent"
+		    	android:textColor="@color/white"
+		    	android:layout_weight="1"
+		    	android:text="@string/device_params_monitor_frame_size_str"/>
+	    
+	           <Spinner android:layout_width="fill_parent"
+		    	android:layout_height="fill_parent"
+		    	android:layout_weight="1"/>
+         </LinearLayout>
+         
+	      <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	      
+	       <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
 
-            <TextView
-                android:gravity="center"
-                android:text="" />
-        </TableRow>
-
-
-    </TableLayout>
-
-
-</RelativeLayout>
+	          <TextView android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:textSize="20dip"
+		    	android:textColor="@color/white"
+		    	android:text="@string/device_params_date_str"/>
+	    
+	            
+	          <DatePicker android:layout_width="wrap_content"
+               		android:layout_height="wrap_content"/>
+	    
+	           <TimePicker android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"/>
+	           
+	           <Button android:layout_width="wrap_content"
+               		android:layout_height="wrap_content"
+               		android:text="@string/device_params_sync_date_str"/>
+         </LinearLayout>
+         
+	      <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	      
+	       <TextView android:layout_width="fill_parent"
+	    	  android:layout_height="30dip"/>
+	      
+	</LinearLayout>
+</ScrollView>
