@@ -18,6 +18,7 @@ public class WebTabWidget extends TabActivity {
 		TabHost.TabSpec tabSpec;
 		Intent intent;
 		intent = new Intent(this, CamVideoH264.class);
+		//intent = new Intent(this, LeftVideoView.class);
 		tabSpec = tabHost.newTabSpec("VIDEO")
 		.setIndicator(resources.getString(R.string.default_activity_str)).setContent(intent);
 		tabHost.addTab(tabSpec);

@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -54,6 +56,16 @@ public class CamVideoH264 extends Activity {
 	
 	private int screenHeight = 0;
 	
+	private  ImageView imageView = null;
+	
+	private Button leftUpButton = null;
+	
+	private Button midUpButton = null;
+	
+	private Button rightUpButton = null;
+	
+	private ControlPanel rightControlPanel = null;
+	
 	private String TAG = "CamVideoH264";
 
 	@Override
@@ -65,34 +77,38 @@ public class CamVideoH264 extends Activity {
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
+        
         setContentView(R.layout.pre_videoview);
-        LinearLayout container = (LinearLayout) findViewById(R.id.container);
-        videoView = (VideoView) findViewById(R.id.videoview);
+        imageView = (ImageView) findViewById(R.id.imageview);
+        imageView.setBackgroundResource(R.drawable.shutdown_bg);
+        
+        LinearLayout layout = (LinearLayout) findViewById(R.id.container);
+        
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
-        ControlPanel controlPanel = new ControlPanel(this, videoView,  LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
-        container.addView(controlPanel);
-       // controlPanel.addView(view);
-        //videoView.playVideo();
         
-        
-      //新建测试组件  
-        TextView tvTest=new TextView(this);  
-        tvTest.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));  
-        tvTest.setText("测试组件，红字白底");  
-        tvTest.setTextColor(Color.RED);  
-        tvTest.setBackgroundColor(Color.WHITE);  
-        //加入到Panel里面  
-        controlPanel.addView(tvTest);
-        
-/*        
-        videoView.init(screenWidth, screenHeight);
-*/		//videoView = new VideoView(this);
+		rightControlPanel = new ControlPanel(this, imageView,  230, LayoutParams.FILL_PARENT);
+		
+		layout.addView(rightControlPanel);
+		
+		rightControlPanel.fillPanelContainer(view);
+		
+        // videoView.playVideo();
+		//videoView.init(screenWidth, screenHeight);
+		//videoView = new VideoView(this);
 		//setContentView(videoView);
 		//videoView.playVideo();
 		//new Thread(new SocketThread()).start();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		leftUpButton = (Button) findViewById(R.id.left_up);
+		leftUpButton.measure(0, 0);
+		rightControlPanel.updateControlView(leftUpButton.getMeasuredWidth() * 3);
+	}
+	
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -104,11 +120,8 @@ public class CamVideoH264 extends Activity {
 	}
 
 	private class SocketThread implements Runnable {
-
 		private Socket socket = null;
-
 		private DataInputStream dis = null;
-
 		/**
 		 -   char[] head = {0,0,0,1,0xc}; 00 00 00 00 67           5个字节
 		 -   char packageSequenceNumber[8],0,1,2,3,4....不重复              8个字节
@@ -117,19 +130,12 @@ public class CamVideoH264 extends Activity {
 		 -   char frameRateUS[8]                                   8个字节
 		 -   char frameWidth[4]                                    4个字节
 		 -   char frameHeight[4]                                   4个字节
-		 
 		 数据包头长：                                                                                                                              57个字节
-		 
 		 数据内容   char rowData[]                                    余下为数据
-		 
 		00 00 00 01 67
-		
 		42 00 1e ab 40 58 09 32
-		
 		00 00 00 01 68 ce 38 80 00 00 00 01 65 88
-		
 		82
-		
 		 */
 		@Override
 		public void run() {
@@ -164,7 +170,6 @@ class VideoView extends View implements Runnable {
 	}
 
 	public native int InitDecoder();
-
 
 	public native int UninitDecoder();
 
