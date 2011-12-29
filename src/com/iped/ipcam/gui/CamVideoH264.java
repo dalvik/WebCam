@@ -1,21 +1,30 @@
 package com.iped.ipcam.gui;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+
+import com.iped.ipcam.utils.CamCmdListHelper;
+import com.iped.ipcam.utils.Constants;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Bitmap.Config;
+import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -24,9 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 /**
  * H.264的功能分为两层，
@@ -56,7 +63,7 @@ public class CamVideoH264 extends Activity {
 	
 	private int screenHeight = 0;
 	
-	private  ImageView imageView = null;
+	//private  ImageView imageView = null;
 	
 	private Button leftUpButton = null;
 	
@@ -79,22 +86,22 @@ public class CamVideoH264 extends Activity {
         screenHeight = dm.heightPixels;
         
         setContentView(R.layout.pre_videoview);
-        imageView = (ImageView) findViewById(R.id.imageview);
-        imageView.setBackgroundResource(R.drawable.shutdown_bg);
+        //imageView = (ImageView) findViewById(R.id.imageview);
+        videoView = (VideoView) findViewById(R.id.videoview);
+        //imageView.setBackgroundResource(R.drawable.shutdown_bg);
         
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
         
-		rightControlPanel = new ControlPanel(this, imageView,  230, LayoutParams.FILL_PARENT);
+		rightControlPanel = new ControlPanel(this, videoView,  230, LayoutParams.FILL_PARENT);
 		
 		layout.addView(rightControlPanel);
-		
+		//new Thread(new QueryDeviceThread()).start();
 		rightControlPanel.fillPanelContainer(view);
-		
-        // videoView.playVideo();
-		//videoView.init(screenWidth, screenHeight);
+		videoView.init(screenWidth, screenHeight);
+        //videoView.playVideo();
 		//videoView = new VideoView(this);
 		//setContentView(videoView);
 		//videoView.playVideo();
@@ -105,8 +112,10 @@ public class CamVideoH264 extends Activity {
 	protected void onResume() {
 		super.onResume();
 		leftUpButton = (Button) findViewById(R.id.left_up);
-		leftUpButton.measure(0, 0);
-		rightControlPanel.updateControlView(leftUpButton.getMeasuredWidth() * 3);
+		if(leftUpButton != null) {
+			leftUpButton.measure(0, 0);
+			rightControlPanel.updateControlView(leftUpButton.getMeasuredWidth() * 3);
+		}
 	}
 	
 	@Override
@@ -119,6 +128,47 @@ public class CamVideoH264 extends Activity {
 		 */
 	}
 
+	private class QueryDeviceThread implements Runnable {
+
+		private byte[] bufTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+		
+		@Override
+		public void run() {
+			System.out.println("started..");
+			DatagramSocket datagramSocket = null;
+			try {
+				datagramSocket = new DatagramSocket();
+				datagramSocket.setSoTimeout(600);
+				byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+				System.arraycopy(tem, 0, bufTemp, 0, tem.length);
+				System.out.println(InetAddress.getByName("192.168.1.211"));
+				DatagramPacket packet = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.210"), Constants.UDPPORT); 
+				datagramSocket.send(packet);
+				System.out.println("send..");
+			} catch (SocketException e) {
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+			}
+			DatagramPacket dp = new DatagramPacket(bufTemp, bufTemp.length);
+			try {
+				datagramSocket.receive(dp);
+				String info = new String(bufTemp);
+				System.out.println("receive inof = : " + info);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("----" + e.getLocalizedMessage());
+			}
+			System.out.println("over..");
+		}
+		
+	}
+	
 	private class SocketThread implements Runnable {
 		private Socket socket = null;
 		private DataInputStream dis = null;
@@ -147,12 +197,11 @@ public class CamVideoH264 extends Activity {
 				socket.connect(socketAddress, 15000);
 				dis = new DataInputStream(socket.getInputStream());
 				String temp = "";
-				//FileOutputStream fos = new FileOutputStream(new File("/sdcard/"+ System.currentTimeMillis() + ".h264"));
+				FileOutputStream fos = new FileOutputStream(new File("/sdcard/"+ System.currentTimeMillis() + ".h264"));
 				while ((i = dis.read(b)) != -1 && flag) {
-					//temp = new String(b, 0, i, "ISO-8859-1");
-					//fos.write(b, 0, i);
-					//fos.flush();
-					//System.out.println(temp.substring(0, 5) + "----");
+					temp = new String(b, 0, i, "ISO-8859-1");
+					fos.write(b, 0, i);
+					fos.flush();
 				}
 			} catch (UnknownHostException e) {
 				e.printStackTrace();

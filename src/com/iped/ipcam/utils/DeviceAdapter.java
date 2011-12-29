@@ -61,8 +61,8 @@ public class DeviceAdapter extends BaseAdapter {
 		viewHolder.name.setText(device.getDeviceName());
 		viewHolder.type.setText(context.getResources().getText(R.string.device_type_str) + device.getDeviceType());
 		viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceIp());
-		viewHolder.tcp.setText(context.getResources().getText(R.string.device_tcp_str) + device.getDeviceTcpPort());
-		viewHolder.udp.setText(context.getResources().getText(R.string.device_udp_str) + device.getDeviceUdpPort());
+		viewHolder.tcp.setText(context.getResources().getText(R.string.device_tcp_str) + "" + device.getDeviceTcpPort());
+		viewHolder.udp.setText(context.getResources().getText(R.string.device_udp_str) + "" + device.getDeviceUdpPort());
 		viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceGateWay());
 		convertView.setTag(viewHolder);
 		return convertView;

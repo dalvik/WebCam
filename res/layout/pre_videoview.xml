@@ -4,17 +4,17 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-
+<!--
      <ImageView android:id="@+id/imageview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="center" />
       
-    <!-- 
+       -->
       <com.iped.ipcam.gui.VideoView 
      	android:id="@+id/videoview"
      	android:layout_width="fill_parent"   
      	android:layout_height="fill_parent"
      />
-     -->
+   
 </LinearLayout>

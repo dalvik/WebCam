@@ -8,9 +8,9 @@ public class Device {
 	
 	private String deviceIp;
 	
-	private String deviceTcpPort;
+	private int deviceTcpPort;
 	
-	private String deviceUdpPort;
+	private int deviceUdpPort;
 	
 	private String deviceGateWay;
 
@@ -19,7 +19,7 @@ public class Device {
 	}
 
 	public Device(String deviceName, String deviceType, String deviceIp,
-			String deviceTcpPort, String deviceUdpPort, String deviceGateWay) {
+			int deviceTcpPort, int deviceUdpPort, String deviceGateWay) {
 		super();
 		this.deviceName = deviceName;
 		this.deviceType = deviceType;
@@ -53,19 +53,19 @@ public class Device {
 		this.deviceIp = deviceIp;
 	}
 
-	public String getDeviceTcpPort() {
+	public int getDeviceTcpPort() {
 		return deviceTcpPort;
 	}
 
-	public void setDeviceTcpPort(String deviceTcpPort) {
+	public void setDeviceTcpPort(int deviceTcpPort) {
 		this.deviceTcpPort = deviceTcpPort;
 	}
 
-	public String getDeviceUdpPort() {
+	public int getDeviceUdpPort() {
 		return deviceUdpPort;
 	}
 
-	public void setDeviceUdpPort(String deviceUdpPort) {
+	public void setDeviceUdpPort(int deviceUdpPort) {
 		this.deviceUdpPort = deviceUdpPort;
 	}
 
@@ -76,5 +76,5 @@ public class Device {
 	public void setDeviceGateWay(String deviceGateWay) {
 		this.deviceGateWay = deviceGateWay;
 	}
-	
+
 }

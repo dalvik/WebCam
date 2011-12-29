@@ -15,7 +15,8 @@
     <string name="default_activity_str">视频</string>
     
     <string name="device_manager_str">设备管理</string>
-    	<string name="auto_serch_str">自动搜索</string>	
+    	<string name="auto_serch_str">自动搜索</string>
+    	<string name="auto_search_tips_str">正在为您搜索，请稍等...</string>	
     	<string name="manu_add_str">手工添加</string>	
     	<string name="clear_all_str">全部清除</string>	
     	<string name="device_edit_str">修改</string>	
@@ -57,6 +58,8 @@
     	
     	    
     <string name="play_back_str">视频回放</string>
+    	<string name="play_back_auto_search_video_str">视频搜索</string>
+    	<string name="play_back_auto_claer_all_str">清除全部</string>
     	<string name="video_download">下载</string>
     	<string name="video_delete">删除</string>
     	<string name="video_playback">回放</string>
