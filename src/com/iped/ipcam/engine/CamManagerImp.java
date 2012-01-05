@@ -21,6 +21,8 @@ public class CamManagerImp implements ICamManager {
 
 	private List<Device> deviceList = new ArrayList<Device>();
 	
+	private Thread queryThread = null;
+	
 	public CamManagerImp() {
 
 	}
@@ -98,9 +100,20 @@ public class CamManagerImp implements ICamManager {
 	}
 
 	public void startThread(Handler handler) {
-		new Thread(new QueryCamThread(handler)).start();
+		if(queryThread == null || !queryThread.isAlive()) {
+			queryThread = new Thread(new QueryCamThread(handler));
+			queryThread.start();
+		}
 	}
-
+	
+	@Override
+	public void stopThread() {
+		if(queryThread != null && queryThread.isAlive()) {
+			queryThread.interrupt();
+			queryThread = null;
+		}
+	}
+	
 	class QueryCamThread implements Runnable {
 		
 		private DatagramSocket datagramSocket = null;
@@ -117,16 +130,18 @@ public class CamManagerImp implements ICamManager {
 			this.handler = handler;
 		}
 		
+		
 		@Override
 		public void run() {
 			byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
 			float max = 100;
 			float per = max/Constants.MAXVALUE;
-			for(int i=1; i<Constants.MAXVALUE; i++) {
+			for(int i=1; i<255; i++) {
 				try {
 					datagramSocket = new DatagramSocket();
-					datagramSocket.setSoTimeout(Constants.TIMEOUT);
+					datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
 					datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
+					//datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.121"), 60000);
 					datagramSocket.send(datagramPacket);
 					DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 					datagramSocket.receive(rece);

@@ -59,14 +59,18 @@
     	    
     <string name="play_back_str">视频回放</string>
     	<string name="play_back_auto_search_video_str">视频搜索</string>
-    	<string name="play_back_auto_claer_all_str">清除全部</string>
+    	<string name="play_back_auto_clear_all_str">清除全部</string>
     	<string name="video_download">下载</string>
     	<string name="video_delete">删除</string>
     	<string name="video_playback">回放</string>
     	<string name="video_preview_no_video_str">没有可回放的视频</string>
-    	<string name="video_preview_name_str">名称：</string>
+    	<string name="video_preview_name_str">名           称：</string>
+    	<string name="video_preview_address_str">地         址：</string>
     	<string name="video_preview_start_time_str">开始时间：</string>
     	<string name="video_preview_end_time_str">结束时间：</string>
+    	<string name="play_back_auto_search_button_str">搜索</string>
+    	<string name="play_back_auto_cancle_button_str">取消</string>
+    	
     <string name="system_settings_str">系统设置</string>
         <string name="system_settings_save_path_hint_str">监控录像保存路径</string>
         <string name="system_settings_save_path_str">保存路径：</string>

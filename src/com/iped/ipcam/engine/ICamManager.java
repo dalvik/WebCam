@@ -27,4 +27,7 @@ public interface ICamManager {
 	public boolean isOnline(String ip, int port);
 	
 	public void startThread(Handler handler);
+	
+	public void stopThread();
+	
 }

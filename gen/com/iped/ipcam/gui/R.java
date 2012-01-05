@@ -463,9 +463,7 @@ public final class R {
     }
     public static final class id {
         public static final int RelativeLayout_Item=0x7f070000;
-        public static final int auto_search=0x7f070015;
         public static final int auto_search_button=0x7f070009;
-        public static final int clear_all=0x7f070016;
         public static final int clear_all_button=0x7f07000b;
         public static final int container=0x7f07000c;
         public static final int device_gateway=0x7f070007;
@@ -474,24 +472,34 @@ public final class R {
         public static final int device_tcp_port=0x7f070005;
         public static final int device_type=0x7f070003;
         public static final int device_udp_port=0x7f070006;
+        public static final int end_date_buttion=0x7f070020;
+        public static final int end_time_buttion=0x7f070021;
         public static final int gridview=0x7f07000d;
         public static final int keepuserpwd=0x7f070012;
-        public static final int left_up=0x7f070018;
+        public static final int left_up=0x7f070023;
         public static final int linearLayout=0x7f070002;
         public static final int manul_add_button=0x7f07000a;
-        public static final int mid_up=0x7f070019;
+        public static final int mid_up=0x7f070024;
         public static final int password=0x7f070010;
-        public static final int right_up=0x7f07001a;
+        public static final int play_back_clear_all=0x7f070016;
+        public static final int play_back_video_address=0x7f07001a;
+        public static final int play_back_video_search=0x7f070015;
+        public static final int play_back_video_search_addr=0x7f07001d;
+        public static final int play_back_video_search_name=0x7f07001c;
+        public static final int play_back_video_size=0x7f07001b;
+        public static final int right_up=0x7f070025;
+        public static final int start_date_buttion=0x7f07001e;
+        public static final int start_time_buttion=0x7f07001f;
         public static final int userLogin=0x7f070013;
         public static final int user_check=0x7f070011;
         public static final int user_exit=0x7f070014;
         public static final int user_input=0x7f07000e;
         public static final int user_oper=0x7f070008;
         public static final int username=0x7f07000f;
-        public static final int video_preview_end_time=0x7f07001d;
-        public static final int video_preview_start_time=0x7f07001c;
-        public static final int video_preview_type=0x7f07001b;
-        public static final int videoview=0x7f070017;
+        public static final int video_preview_end_time=0x7f070019;
+        public static final int video_preview_start_time=0x7f070018;
+        public static final int video_preview_type=0x7f070017;
+        public static final int videoview=0x7f070022;
     }
     public static final class layout {
         public static final int device_list_item=0x7f030000;
@@ -500,18 +508,19 @@ public final class R {
         public static final int left_view=0x7f030003;
         public static final int login=0x7f030004;
         public static final int play_back=0x7f030005;
-        public static final int pre_videoview=0x7f030006;
-        public static final int reight_menu=0x7f030007;
-        public static final int system_settings=0x7f030008;
-        public static final int video_list_item=0x7f030009;
-        public static final int web_tab_widget=0x7f03000a;
+        public static final int play_back_video_list_item=0x7f030006;
+        public static final int play_back_video_search_dlg=0x7f030007;
+        public static final int pre_videoview=0x7f030008;
+        public static final int reight_menu=0x7f030009;
+        public static final int system_settings=0x7f03000a;
+        public static final int web_tab_widget=0x7f03000b;
     }
     public static final class string {
         public static final int app_name=0x7f060001;
         public static final int auto_search_tips_str=0x7f06000d;
         public static final int auto_serch_str=0x7f06000c;
         public static final int clear_all_str=0x7f06000f;
-        public static final int cory_right=0x7f060043;
+        public static final int cory_right=0x7f060046;
         public static final int default_activity_str=0x7f06000a;
         public static final int device_del_str=0x7f060011;
         public static final int device_edit_str=0x7f060010;
@@ -551,29 +560,32 @@ public final class R {
         public static final int no_device_online=0x7f060013;
         public static final int password=0x7f060004;
         public static final int password_hint=0x7f060005;
-        public static final int play_back_auto_claer_all_str=0x7f060032;
+        public static final int play_back_auto_cancle_button_str=0x7f06003c;
+        public static final int play_back_auto_clear_all_str=0x7f060032;
+        public static final int play_back_auto_search_button_str=0x7f06003b;
         public static final int play_back_auto_search_video_str=0x7f060031;
         public static final int play_back_str=0x7f060030;
-        public static final int system_settings_device_cancle_str=0x7f060041;
-        public static final int system_settings_device_ip_str=0x7f06003f;
-        public static final int system_settings_device_name_str=0x7f06003e;
-        public static final int system_settings_device_update_str=0x7f060040;
-        public static final int system_settings_preview_str=0x7f06003d;
-        public static final int system_settings_save_path_hint_str=0x7f06003b;
-        public static final int system_settings_save_path_str=0x7f06003c;
-        public static final int system_settings_str=0x7f06003a;
+        public static final int system_settings_device_cancle_str=0x7f060044;
+        public static final int system_settings_device_ip_str=0x7f060042;
+        public static final int system_settings_device_name_str=0x7f060041;
+        public static final int system_settings_device_update_str=0x7f060043;
+        public static final int system_settings_preview_str=0x7f060040;
+        public static final int system_settings_save_path_hint_str=0x7f06003e;
+        public static final int system_settings_save_path_str=0x7f06003f;
+        public static final int system_settings_str=0x7f06003d;
         public static final int user_exit=0x7f060009;
         public static final int user_login=0x7f060007;
         public static final int user_name=0x7f060002;
         public static final int user_name_hint=0x7f060003;
         public static final int username_null=0x7f060008;
-        public static final int version=0x7f060042;
+        public static final int version=0x7f060045;
         public static final int video_delete=0x7f060034;
         public static final int video_download=0x7f060033;
         public static final int video_playback=0x7f060035;
-        public static final int video_preview_end_time_str=0x7f060039;
+        public static final int video_preview_address_str=0x7f060038;
+        public static final int video_preview_end_time_str=0x7f06003a;
         public static final int video_preview_name_str=0x7f060037;
         public static final int video_preview_no_video_str=0x7f060036;
-        public static final int video_preview_start_time_str=0x7f060038;
+        public static final int video_preview_start_time_str=0x7f060039;
     }
 }

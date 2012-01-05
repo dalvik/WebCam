@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -131,8 +132,15 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	private void showProgress() {
 		progressDialog = new ProgressDialog(DeviceManager.this);
 		progressDialog.setTitle(getResources().getString(R.string.auto_search_tips_str));
-		progressDialog.setCancelable(false);
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.show();
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK) {
+			camManager.stopThread();
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

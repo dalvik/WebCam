@@ -2,6 +2,10 @@ package com.iped.ipcam.pojo;
 
 public class Video {
 
+	private int index;
+	
+	private int fileLength;
+	
 	private String videoName;
 	
 	private String videoStartTime;
@@ -12,8 +16,11 @@ public class Video {
 		super();
 	}
 
-	public Video(String videoName, String videoStartTime, String videoEndTime) {
+	public Video(int index, int fileLength, String videoName,
+			String videoStartTime, String videoEndTime) {
 		super();
+		this.index = index;
+		this.fileLength = fileLength;
 		this.videoName = videoName;
 		this.videoStartTime = videoStartTime;
 		this.videoEndTime = videoEndTime;
@@ -41,6 +48,22 @@ public class Video {
 
 	public void setVideoEndTime(String videoEndTime) {
 		this.videoEndTime = videoEndTime;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public int getFileLength() {
+		return fileLength;
+	}
+
+	public void setFileLength(int fileLength) {
+		this.fileLength = fileLength;
 	}
 	
 }

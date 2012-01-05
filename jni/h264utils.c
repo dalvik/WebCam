@@ -193,6 +193,7 @@ void avcodec_default_free_buffers(AVCodecContext *s)
     s->internal_buffer_count=0;
 }
 
+
 AVCodecContext *avcodec_alloc_context(void)
 {
     AVCodecContext *avctx= av_malloc(sizeof(AVCodecContext));

@@ -48,7 +48,7 @@ public class VideoAdapter extends BaseAdapter {
 		ViewHolder viewHolder = new ViewHolder();
 		Video video = getItem(position);
 		if(convertView == null) {
-			convertView = inflater.inflate(R.layout.video_list_item, null);
+			convertView = inflater.inflate(R.layout.play_back_video_list_item, null);
 			viewHolder.name = (TextView) convertView.findViewById(R.id.video_preview_type);
 			viewHolder.start = (TextView) convertView.findViewById(R.id.video_preview_start_time);
 			viewHolder.end = (TextView) convertView.findViewById(R.id.video_preview_end_time);

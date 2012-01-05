@@ -57,26 +57,6 @@ void DeleteYUVTab()
 	av_free(rgb_2_pix);
 }
 
-
-
-//====================================================
-
-/*
- * Class:     h264_com_VView
- * Method:    InitDecoder
- * Signature: ()I
- */
-jint Java_com_iped_ipcam_gui_VideoView_InitDecoder(JNIEnv* env, jobject thiz) {
-	CreateYUVTab_16();
-	
-	c = avcodec_alloc_context(); 
-	avcodec_open(c); 
-
-	picture  = avcodec_alloc_frame();//picture= malloc(sizeof(AVFrame));
-	LOGI("InitDecoder....");
-	return 1;
-}
-
 void CreateYUVTab_16()
 {
 	int i;
@@ -130,44 +110,6 @@ void CreateYUVTab_16()
 	r_2_pix += 256;
 	g_2_pix += 256;
 	b_2_pix += 256;
-}
-
-
-/*
- * Class:     h264_com_VView
- * Method:    DecoderNal
- * Signature: ([B[I)I
- */
-jint Java_com_iped_ipcam_gui_VideoView_DecoderNal(JNIEnv* env, jobject thiz, jbyteArray in, jint nalLen, jbyteArray out)
-{
-	int i;
-	int imod;
-	int got_picture;
-
-	jbyte * Buf = (jbyte*)(*env)->GetByteArrayElements(env, in, 0);
-	jbyte * Pixel= (jbyte*)(*env)->GetByteArrayElements(env, out, 0);
-	
-	int consumed_bytes = decode_frame(c, picture, &got_picture, Buf, nalLen); 
-
-	if(consumed_bytes > 0)
-	{
-		DisplayYUV_16((int*)Pixel, picture->data[0], picture->data[1], picture->data[2], c->width, c->height, picture->linesize[0], picture->linesize[1], iWidth);	
-/*
-		for(i=0; i<c->height; i++)
-			fwrite(picture->data[0] + i * picture->linesize[0], 1, c->width, outf);
-
-		for(i=0; i<c->height/2; i++)
-			fwrite(picture->data[1] + i * picture->linesize[1], 1, c->width/2, outf);
-
-		for(i=0; i<c->height/2; i++)
-			fwrite(picture->data[2] + i * picture->linesize[2], 1, c->width/2, outf);
-// */
-	}
-	
-    (*env)->ReleaseByteArrayElements(env, in, Buf, 0);    
-    (*env)->ReleaseByteArrayElements(env, out, Pixel, 0); 
-
-	return consumed_bytes;	
 }
 
 void DisplayYUV_16(unsigned int *pdst1, unsigned char *y, unsigned char *u, unsigned char *v, int width, int height, int src_ystride, int src_uvstride, int dst_ystride)
@@ -242,13 +184,30 @@ void DisplayYUV_16(unsigned int *pdst1, unsigned char *y, unsigned char *u, unsi
 	}
 }
 
+//====================================================
+
+/*
+ * Class:     h264_com_VView
+ * Method:    InitDecoder
+ * Signature: ()I
+ */
+jint Java_com_iped_testvideo_MyVideoView_InitDecoder(JNIEnv* env, jobject thiz) {
+	CreateYUVTab_16();
+	
+	c = avcodec_alloc_context(); 
+	avcodec_open(c); 
+
+	picture  = avcodec_alloc_frame();//picture= malloc(sizeof(AVFrame));
+	LOGI("InitDecoder....");
+	return 1;
+}
 
 /*
  * Class:     h264_com_VView
  * Method:    UninitDecoder
  * Signature: ()I
  */
-jint Java_com_iped_ipcam_gui_VideoView_UninitDecoder(JNIEnv* env, jobject thiz)
+jint Java_com_iped_testvideo_MyVideoView_UninitDecoder(JNIEnv* env, jobject thiz)
 {
 	if(c)
 	{
@@ -270,3 +229,39 @@ jint Java_com_iped_ipcam_gui_VideoView_UninitDecoder(JNIEnv* env, jobject thiz)
 	return 1;	
 }
 
+/*
+ * Class:     h264_com_VView
+ * Method:    DecoderNal
+ * Signature: ([B[I)I
+ */
+jint Java_com_iped_testvideo_MyVideoView_DecoderNal(JNIEnv* env, jobject thiz, jbyteArray in, jint nalLen, jbyteArray out)
+{
+	int i;
+	int imod;
+	int got_picture;
+
+	jbyte * Buf = (jbyte*)(*env)->GetByteArrayElements(env, in, 0);
+	jbyte * Pixel= (jbyte*)(*env)->GetByteArrayElements(env, out, 0);
+	
+	int consumed_bytes = decode_frame(c, picture, &got_picture, Buf, nalLen); 
+
+	if(consumed_bytes > 0)
+	{
+		DisplayYUV_16((int*)Pixel, picture->data[0], picture->data[1], picture->data[2], c->width, c->height, picture->linesize[0], picture->linesize[1], iWidth);	
+/*
+		for(i=0; i<c->height; i++)
+			fwrite(picture->data[0] + i * picture->linesize[0], 1, c->width, outf);
+
+		for(i=0; i<c->height/2; i++)
+			fwrite(picture->data[1] + i * picture->linesize[1], 1, c->width/2, outf);
+
+		for(i=0; i<c->height/2; i++)
+			fwrite(picture->data[2] + i * picture->linesize[2], 1, c->width/2, outf);
+// */
+	}
+	
+    (*env)->ReleaseByteArrayElements(env, in, Buf, 0);    
+    (*env)->ReleaseByteArrayElements(env, out, Pixel, 0); 
+
+	return consumed_bytes;	
+}

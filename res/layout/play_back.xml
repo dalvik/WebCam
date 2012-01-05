@@ -14,17 +14,17 @@
 
         <TableRow >
 
-            <Button android:id="@+id/auto_search"
+            <Button android:id="@+id/play_back_video_search"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/auto_serch_str" />
+                android:text="@string/play_back_auto_search_video_str" />
 
-            <Button android:id="@+id/clear_all"
+            <Button android:id="@+id/play_back_clear_all"
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/clear_all_str" />
+                android:text="@string/play_back_auto_clear_all_str" />
         </TableRow>
     </TableLayout>
 
