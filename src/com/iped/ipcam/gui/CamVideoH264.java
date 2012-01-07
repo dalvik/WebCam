@@ -194,7 +194,7 @@ public class CamVideoH264 extends Activity {
 				byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
 				System.arraycopy(tem, 0, bufTemp, 0, tem.length);
 				System.out.println(InetAddress.getByName("192.168.1.211"));
-				DatagramPacket packet = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.210"), Constants.UDPPORT); 
+				DatagramPacket packet = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.141"), Constants.UDPPORT); 
 				datagramSocket.send(packet);
 				System.out.println("send..");
 			} catch (SocketException e) {
@@ -270,7 +270,7 @@ class MyVideoView extends View implements Runnable {
 
 	private final static int NALBUFLENGTH = 320*480 * 2;
 	
-	private final static int SOCKETBUFLENGTH = 64200;
+	private final static int SOCKETBUFLENGTH = 342000;
 	
 	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 	
@@ -338,7 +338,7 @@ class MyVideoView extends View implements Runnable {
 			DatagramSocket datagramSocket = new DatagramSocket();
 			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			//datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.121"), 60000);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.141"), 60000);
 			datagramSocket.send(datagramPacket);
 			System.out.println("send udp packet...");
 			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
@@ -347,7 +347,7 @@ class MyVideoView extends View implements Runnable {
 			//String info = new String(buffTemp);
 			//if(info != null) {
 				//Log.d(TAG, "receive inof = : " + info);
-				SocketAddress socketAddress = new InetSocketAddress("192.168.1.121", 1234);
+				SocketAddress socketAddress = new InetSocketAddress("192.168.1.141", 1234);
 				socket = new Socket();
 				socket.connect(socketAddress, 15000);
 				dis = new DataInputStream(socket.getInputStream());
@@ -365,7 +365,7 @@ class MyVideoView extends View implements Runnable {
 		while (!Thread.currentThread().isInterrupted() && dis != null) {
 			try {
 				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从文件流里面读取的字节的长度  <0时读取完毕
-				//System.out.println("rece.........");
+				//System.out.println("rece........." + Thread.currentThread().isInterrupted());
 			} catch (IOException e) {
 				Log.d(TAG, e.getLocalizedMessage());
 			}
@@ -376,7 +376,6 @@ class MyVideoView extends View implements Runnable {
 			sockBufferUsedLength = 0;
 			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
 				try {
-					
 					nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
 				}catch(Exception e) {
 					
@@ -406,7 +405,7 @@ class MyVideoView extends View implements Runnable {
 		if(fis != null) {
 			try {
 				fis.close();
-				System.out.println("over.......");
+				Log.d("CamVideoH264", "over......."  + Thread.currentThread().isInterrupted());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -433,9 +432,19 @@ class MyVideoView extends View implements Runnable {
 				looperFlag = true;
 				return -1;
 			} else if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 + sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed] == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
+				/*if((i + 3+ sockBufferUsed) < SOCKETBUFLENGTH) {
+					if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 + sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed] == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
+						looperFlag = true;
+						return -2;
+					} 
+				} else {
+					nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
+					nalBufUsedLength++;
+					sockBufferUsedLength++;
+				}*/
 				looperFlag = true;
 				return -2;
-			} else {
+			}else {
 				nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
 				sockBufferUsedLength++;
