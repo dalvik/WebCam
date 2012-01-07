@@ -2,6 +2,10 @@ package com.iped.ipcam.utils;
 
 public class Constants {
 
+	public final static int DEFAULTUSERSELECT = 2010;
+	
+	public final static int HIDETEAUTOSEARCH = 2011;
+	
 	public final static int UPDATEAUTOSEARCH = 2012;
 	
 	public final static int UPDATEDEVICELIST = 2013;
@@ -24,7 +28,7 @@ public class Constants {
 	
 	public final static int COMMNICATEBUFFERSIZE = 1024;
 	
-	public final static int DEVICESEARCHTIMEOUT = 150;
+	public final static int DEVICESEARCHTIMEOUT = 10000;
 	
 	public final static int VIDEOSEARCHTIMEOUT = 30000;
 	

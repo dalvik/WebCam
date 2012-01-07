@@ -77,4 +77,12 @@ public class Device {
 		this.deviceGateWay = deviceGateWay;
 	}
 
+	@Override
+	public String toString() {
+		return "Device [deviceGateWay=" + deviceGateWay + ", deviceIp="
+				+ deviceIp + ", deviceName=" + deviceName + ", deviceTcpPort="
+				+ deviceTcpPort + ", deviceType=" + deviceType
+				+ ", deviceUdpPort=" + deviceUdpPort + "]";
+	}
+
 }

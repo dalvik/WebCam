@@ -16,4 +16,15 @@ public class DateUtil {
 		}
 		return date;
 	}
+	
+	public static Date formatTimeToDate2(String dateStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		Date date = null;
+		try {
+			date = sdf.parse(dateStr);
+		} catch (ParseException e) {
+			return new Date();
+		}
+		return date;
+	}
 }

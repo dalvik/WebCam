@@ -52,12 +52,16 @@ public class VideoAdapter extends BaseAdapter {
 			viewHolder.name = (TextView) convertView.findViewById(R.id.video_preview_type);
 			viewHolder.start = (TextView) convertView.findViewById(R.id.video_preview_start_time);
 			viewHolder.end = (TextView) convertView.findViewById(R.id.video_preview_end_time);
+			viewHolder.addr = (TextView) convertView.findViewById(R.id.play_back_video_address);
+			viewHolder.size = (TextView) convertView.findViewById(R.id.play_back_video_size);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		viewHolder.name.setText(context.getResources().getText(R.string.video_preview_name_str) + video.getVideoName());
 		viewHolder.start.setText(context.getResources().getText(R.string.video_preview_start_time_str) + video.getVideoStartTime());
 		viewHolder.end.setText(context.getResources().getText(R.string.video_preview_end_time_str) + video.getVideoEndTime());
+		viewHolder.addr.setText(context.getResources().getText(R.string.video_preview_addr_str) + video.getAddress());
+		viewHolder.size.setText(context.getResources().getText(R.string.video_preview_length_str) + "" + video.getFileLength()/1000 + " kb");
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
@@ -69,6 +73,11 @@ public class VideoAdapter extends BaseAdapter {
 		public TextView start;
 		
 		public TextView end;
+		
+		public TextView addr;
+		
+		public TextView size;
+		
 			
 	}
 }
