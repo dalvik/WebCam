@@ -13,18 +13,25 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 
 public class CamManagerImp implements ICamManager {
 
+	
 	private List<Device> deviceList = new ArrayList<Device>();
 	
 	private Thread queryThread = null;
 	
+	private int selectIndex = 0;
+	
+	private String TAG = "CamManagerImp";
+	
 	public CamManagerImp() {
-
+		Device d = new Device("192.168.1.211", "Ip Camera", "192.168.1.211", Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
+			deviceList.add(d);
 	}
 	
 	@Override
@@ -70,6 +77,14 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
+	public Device getSelectDevice() {
+		if(selectIndex<deviceList.size()) {
+			return getDevice(selectIndex);
+		}
+		return null;
+	}
+	
+	@Override
 	public Device getDeviceByName(String name) {
 		// TODO Auto-generated method stub
 		return null;
@@ -81,9 +96,36 @@ public class CamManagerImp implements ICamManager {
 	}
 
 	@Override
-	public boolean isOnline(String ip, int port) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isOnline(String ip, int port) throws CamManagerException {
+		DatagramSocket datagramSocket = null;
+		 byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+		
+		byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+		try {
+			datagramSocket = new DatagramSocket();
+			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
+			datagramSocket.send(datagramPacket);
+			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+			datagramSocket.receive(rece);
+			Log.d(TAG, "receive inof ");
+			return true;
+		} catch (SocketException e) {
+			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+			throw new CamManagerException(e);
+		} catch (UnknownHostException e) {
+			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+			throw new CamManagerException(e);
+		} catch (IOException e) {
+			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+			throw new CamManagerException(e);
+		} finally {
+			if(datagramSocket != null) {
+				datagramSocket.close();
+				datagramSocket = null;
+			}
+		}
+		
 	}
 	
 	@Override
@@ -109,66 +151,128 @@ public class CamManagerImp implements ICamManager {
 	@Override
 	public void stopThread() {
 		if(queryThread != null && queryThread.isAlive()) {
-			queryThread.interrupt();
+			try {
+				queryThread.join(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			queryThread = null;
 		}
 	}
 	
+	public void setSelectInde(int selectIndex) {	
+		this.selectIndex = selectIndex;
+	}
+	
 	class QueryCamThread implements Runnable {
-		
-		private DatagramSocket datagramSocket = null;
-		
-		private DatagramPacket datagramPacket = null;
-		
-		private byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
 		
 		private Handler handler;
 		
 		private static final String TAG = "QueryCamThread";
 		
+		private int i = 0;
+		
+		private byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+		
+		private byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+		
 		private QueryCamThread(Handler handler) {
 			this.handler = handler;
 		}
 		
-		
 		@Override
 		public void run() {
-			byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-			float max = 100;
-			float per = max/Constants.MAXVALUE;
-			for(int i=1; i<255; i++) {
+			//float max = 100;
+			//final float per = max/Constants.MAXVALUE;
+			new MyTimer(handler).start();
+			long l = System.currentTimeMillis();
+			for(i=1; i<25; i++) {
 				try {
-					datagramSocket = new DatagramSocket();
-					datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-					datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
-					//datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.121"), 60000);
-					datagramSocket.send(datagramPacket);
-					DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-					datagramSocket.receive(rece);
-					String info = new String(buffTemp);
-					if(info != null) {
-						Log.d(TAG, "receive inof = : " + info);
-						addCam(Constants.DEFAULTSEARCHIP + i);
-						handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-					}
-				} catch (UnknownHostException e) {
-					Log.d(TAG, "AutoSearchThread run 1 " + e.getMessage());
-					continue;
-				} catch (SocketException e) {
-					Log.d(TAG, "AutoSearchThread run 2 " + e.getMessage());
-					continue;
-				} catch (IOException e) {
-					Log.d(TAG, "AutoSearchThread run 3 " + e.getMessage());
-					continue;
-				} finally {
-					datagramSocket.close();
-					datagramSocket = null;
-					Message message = handler.obtainMessage();
-					message.what = Constants.UPDATEAUTOSEARCH;
-					message.arg1 = (int)(i*per);
-					handler.sendMessage(message);
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
+				new Thread() {
+					public void run() {
+						try {
+							/*if(isOnline(Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT)) {
+								addCam(Constants.DEFAULTSEARCHIP + i);
+								handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+							}*/
+							DatagramSocket datagramSocket = null;
+							try {
+								datagramSocket = new DatagramSocket();
+								datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
+								DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
+								datagramSocket.send(datagramPacket);
+								DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+								datagramSocket.receive(rece);
+								Log.d(TAG, "receive inof ");
+							} catch (SocketException e) {
+								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+								throw new CamManagerException(e);
+							} catch (UnknownHostException e) {
+								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+								throw new CamManagerException(e);
+							} catch (IOException e) {
+								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
+								throw new CamManagerException(e);
+							} finally {
+								if(datagramSocket != null) {
+									datagramSocket.close();
+									datagramSocket = null;
+								}
+							}
+						} catch (CamManagerException e) {
+							Log.d(TAG, "AutoSearchThread run 0 " + e.getMessage());
+						}/* finally {
+							Message message = handler.obtainMessage();
+							message.what = Constants.UPDATEAUTOSEARCH;
+							message.arg1 = (int)(i*per);
+							handler.sendMessage(message);
+						}*/
+					}
+				}.start();
 			}
+			Log.d(TAG, "start thread use time : " + (System.currentTimeMillis() - l)/1000);
+		}
+	}
+	
+	class MyTimer extends Thread {
+		
+		private int i = 0;
+		
+		private Handler handler;
+		
+		public MyTimer(Handler handler) {
+			this.handler = handler;
+		}
+		
+		public void run() {
+			float max = 100;
+			try {
+				while(i<max) {
+					i++;
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} finally {
+						Message message = handler.obtainMessage();
+						message.what = Constants.UPDATEAUTOSEARCH;
+						message.arg1 = i;//int)(i*per);
+						handler.sendMessage(message);
+					}
+				}
+			} catch(Exception  e) {
+				
+			} finally {
+				Message message = handler.obtainMessage();
+				message.what = Constants.HIDETEAUTOSEARCH;
+				handler.sendMessage(message);
+			}
+			
 		}
 	}
 }
