@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.os.Handler;
@@ -14,12 +15,19 @@ import android.os.Handler;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DateUtil;
 
 public class VideoManagerImp implements IVideoManager {
 
 	private VideoSearchThread videoSearchThread = null;
 	
 	private List<Video> videoList = new ArrayList<Video>();
+	
+	private String device;
+	
+	private Date start;
+	
+	private Date end;
 	
 	public VideoManagerImp() {
 		
@@ -28,6 +36,13 @@ public class VideoManagerImp implements IVideoManager {
 	@Override
 	public List<Video> getVideoList() {
 		return videoList;
+	}
+
+	@Override
+	public void videoSearchInit(String device, Date start, Date end) {
+		this.device = device;
+		this.start = start;
+		this.end = end;
 	}
 	
 	@Override
@@ -56,15 +71,15 @@ public class VideoManagerImp implements IVideoManager {
 		public void run() {
 			byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
 			byte [] tem = CamCmdListHelper.GetCmd_NetFiles.getBytes();
-			DatagramSocket datagramSocket;
+			DatagramSocket datagramSocket = null;
 			//00068000:00fff5b2:20120104165801-20120104170649
 			try {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 				System.arraycopy(tem, 0, buffTemp, 0, tem.length);
-				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName("192.168.1.211"), 60000);
+				System.out.println(device);
+				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(device), 60000);
 				datagramSocket.send(datagramPacket);
-				System.out.println("sended, and wait rece....");
 				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 				datagramSocket.receive(rece);
 				splitFilesInfoFromBuf(deleteZero(buffTemp));
@@ -76,6 +91,9 @@ public class VideoManagerImp implements IVideoManager {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
+				if(datagramSocket != null) {
+					datagramSocket.close();
+				}
 				handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
 			}
 		}
@@ -117,13 +135,23 @@ public class VideoManagerImp implements IVideoManager {
 			String fileLength = s.substring(9, 17);
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
+			if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
+				return ;
+			}
 			int i = Integer.parseInt(index, 16);
 			int l = Integer.parseInt(fileLength, 16);
+			int j = Integer.parseInt(fileLength, 16);
 			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(i, l, "test", start, end);
+			Video video = new Video(i, device, start, end, j, device);
 			videoList.add(video);
 		}
 		
+		private boolean checkDate(Date d1, Date d2) {
+			if(start.before(d1) && end.after(d2)) {
+				return true;
+			}
+			return false;
+		}
 		
 		public void updateList() {
 			handler.sendEmptyMessage(Constants.UPDATEVIDEOLIST);
