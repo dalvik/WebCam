@@ -14,8 +14,10 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -25,6 +27,8 @@ import com.iped.ipcam.utils.DeviceAdapter;
 
 public class DeviceManager extends ListActivity implements OnClickListener {
 
+	private ListView listView = null;
+	
 	private DeviceAdapter adapter = null;
 	
 	private final int MENU_EDIT = Menu.FIRST;
@@ -41,6 +45,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	
 	private ProgressDialog progressDialog = null;
 	
+	private int lastSelected = 0;
+	
 	private static final String TAG = "DeviceManager";
 	
 	private Handler handler = new Handler() {
@@ -54,8 +60,15 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					progressDialog.dismiss();
 				}
 				break;
-			case Constants.UPDATEDEVICELIST:
+			case Constants.HIDETEAUTOSEARCH:
 				adapter.notifyDataSetChanged();
+				break;
+			case Constants.UPDATEDEVICELIST:
+				progressDialog.dismiss();
+				break;
+			case Constants.DEFAULTUSERSELECT:
+				listView.requestFocusFromTouch();
+				listView.setSelection(lastSelected);	
 				break;
 			default:
 				break;
@@ -71,7 +84,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		claerCamButton = (Button) findViewById(R.id.clear_all_button);
 		camManager = CamMagFactory.getCamManagerInstance();
 		adapter = new DeviceAdapter(camManager.getCamList(), this);
-		getListView().setAdapter(adapter);
+		listView = getListView();
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(itemClickListener);
 		registerForContextMenu(getListView());
 		autoSearchButton.setOnClickListener(this);
 		claerCamButton.setOnClickListener(this);
@@ -106,6 +121,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		case MENU_DEL:
 			camManager.delCam(infor.position);
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+			break;
+		case MENU_PREVIEW:
+			WebTabWidget.tabHost.setCurrentTabByTag("VIDEOPREVIEW");
 			break;
 		default:
 			break;
@@ -143,4 +161,21 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
+	
+	private OnItemClickListener itemClickListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int index,
+				long arg3) {
+			listView.requestFocusFromTouch();
+			lastSelected = index;
+			listView.setSelection(index);
+			camManager.setSelectInde(index);
+		}
+	};
+	
+	protected void onResume() {
+		super.onResume();
+		handler.sendMessageDelayed(handler.obtainMessage(Constants.DEFAULTUSERSELECT), 50);
+	};
 }
