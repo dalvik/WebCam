@@ -9,17 +9,19 @@ import android.widget.TabWidget;
 
 public class WebTabWidget extends TabActivity {
 
+	public static TabHost tabHost = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.web_tab_widget);
 		Resources resources = getResources();
-		TabHost tabHost = getTabHost();
+		tabHost = getTabHost();
 		TabHost.TabSpec tabSpec;
 		Intent intent;
 		intent = new Intent(this, CamVideoH264.class);
 		//intent = new Intent(this, LeftVideoView.class);
-		tabSpec = tabHost.newTabSpec("VIDEO")
+		tabSpec = tabHost.newTabSpec("VIDEOPREVIEW")
 		.setIndicator(resources.getString(R.string.default_activity_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
 		
@@ -42,6 +44,7 @@ public class WebTabWidget extends TabActivity {
 		tabSpec = tabHost.newTabSpec("SYSTEMSETTINGS")
 		.setIndicator(resources.getString(R.string.system_settings_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
+		tabHost.setCurrentTabByTag("DEVICEMANAGER");
 		TabWidget tabWidget = tabHost.getTabWidget();
 		int count = tabWidget.getChildCount();
 		for(int i = 0; i < count; i++) {
