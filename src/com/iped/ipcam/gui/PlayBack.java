@@ -1,7 +1,8 @@
 package com.iped.ipcam.gui;
 
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -12,6 +13,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,16 +26,23 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.iped.ipcam.engine.CamMagFactory;
+import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.engine.IVideoManager;
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.VideoAdapter;
 
 public class PlayBack extends ListActivity implements OnClickListener {
 
 	private IVideoManager videoManager = null;
+	
+	private ICamManager camManager = null;
 	
 	private List<Video> videoList = null;
 
@@ -65,7 +74,11 @@ public class PlayBack extends ListActivity implements OnClickListener {
 
 	private ProgressDialog videoSearchProgressDialog = null;
 	
+	
+	private int selectIndex = 0;
+	
 	private String TAG = "PlayBack";
+	
 	
 	
 	private Handler handler = new Handler() {
@@ -92,17 +105,27 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.play_back);
 		videoManager = CamMagFactory.getVideoManagerInstance();
+		camManager = CamMagFactory.getCamManagerInstance();
 		videoList = videoManager.getVideoList();
-		//Video video = new Video(1,12, "vodeoName", "2011-12-27 13:32:21","2012-01-27 13:32:21");
-		//videoList.add(video);
 		videoAdapter = new VideoAdapter(videoManager.getVideoList(), this);
 		getListView().setAdapter(videoAdapter);
+		getListView().setOnItemLongClickListener(listener);
 		registerForContextMenu(getListView());
 		videoSearch = (Button) findViewById(R.id.play_back_video_search);
 		clearAll = (Button) findViewById(R.id.play_back_clear_all);
 		videoSearch.setOnClickListener(this);
 		clearAll.setOnClickListener(this);
 	}
+	
+	private OnItemLongClickListener listener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+				int index, long arg3) {
+			selectIndex = index;
+			return false;
+		}
+	};
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -125,7 +148,8 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case DOWNLOAD:
-			
+			Video video = videoList.get(selectIndex);
+			System.out.println(featureId + "=====" + video);
 			break;
 		case DELETE:
 			
@@ -143,7 +167,12 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.play_back_video_search:
-			vodeoSearchDia();
+			Device device = camManager.getSelectDevice();
+			if(device == null) {
+				Toast.makeText(this, getResources().getString(R.string.play_back_select_device_first_str), Toast.LENGTH_SHORT).show();
+			} else {
+				vodeoSearchDia(device.getDeviceIp());
+			}
 			break;
 		case R.id.play_back_clear_all:
 			clearVideoList();
@@ -165,20 +194,45 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		}
 	}
 	
-	private void vodeoSearchDia() {
+	private void vodeoSearchDia(final String device) {
         LayoutInflater factory = LayoutInflater.from(PlayBack.this);
         myDialogView = factory.inflate(R.layout.play_back_video_search_dlg, null);
-        initSearchDlg();
+        initSearchDlg(device);
         dlg = new AlertDialog.Builder(PlayBack.this).setTitle(getResources().getString(R.string.play_back_auto_search_video_str))
         .setView(myDialogView)//
         .setPositiveButton(getResources().getString(R.string.play_back_auto_search_button_str), //
         new DialogInterface.OnClickListener() {//
             public void onClick(DialogInterface dialog, int whichButton) {
-            	showProgress();
-            	videoManager.startSearchThread(handler);
+            	Date startDate = DateUtil.formatTimeToDate2(getStartTime());
+            	Date endDate = DateUtil.formatTimeToDate2(getEndTime());
+            	String s = getStartTime();
+            	String w = getEndTime();
+            	System.out.println(s + "  " + w + " " + endDate);
+            	 if(compareDate(startDate, endDate)) {
+            		 showProgress();
+            		 videoManager.videoSearchInit(device, startDate, endDate);
+            		 videoManager.startSearchThread(handler);
+            		 try {
+            			 Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
+            			 field.setAccessible( true );
+            			 field.set(dialog, true);
+            			 dialog.dismiss();
+            		 } catch  (Exception e) {
+            			 Log.v(TAG, e.getMessage());
+            		 }
+            	 }else {
+            		 Toast.makeText(PlayBack.this, getResources().getString(R.string.play_back_start_above_start_time_str), Toast.LENGTH_SHORT).show();
+            		 try {
+            			 Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
+            			 field.setAccessible( true );
+            			 field.set(dialog, false);
+            			 dialog.dismiss();
+            		 } catch  (Exception e) {
+            			 Log.v(TAG, e.getMessage());
+            		 }
+            	 }
             }
-        }).setNegativeButton(getResources().getString(R.string.play_back_auto_cancle_button_str), null
-       /* new DialogInterface.OnClickListener() {
+        }).setNegativeButton(getResources().getString(R.string.play_back_auto_cancle_button_str), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
             	 try {
              	    Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
@@ -189,7 +243,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
              		Log.v(TAG, e.getMessage());
              	}
             }
-        }*/
+        }
         )
         .create();
         dlg.show();
@@ -210,12 +264,12 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		}
 	}
 	
-	private void initSearchDlg() {
+	private void initSearchDlg(String device) {
 		calendar = Calendar.getInstance();
 		EditText videoSearchName = (EditText) myDialogView.findViewById(R.id.play_back_video_search_name);
         EditText vodeoSearchAddr = (EditText) myDialogView.findViewById(R.id.play_back_video_search_addr);
-        videoSearchName.setText("192.16.1.121");
-        vodeoSearchAddr.setText("192.16.1.121");
+        videoSearchName.setText(device);
+        vodeoSearchAddr.setText(device);
         startSearchDate = (Button) myDialogView.findViewById(R.id.start_date_buttion);
         startSearchTime = (Button) myDialogView.findViewById(R.id.start_time_buttion);
         endSearchDate = (Button) myDialogView.findViewById(R.id.end_date_buttion);
@@ -223,7 +277,6 @@ public class PlayBack extends ListActivity implements OnClickListener {
         startSearchDate.setText(initDateStr());
         String date = initDateStr();
         String time = initTimeStr();
-        System.out.println(date + "  " + time);
         startSearchDate.setText(date);
         startSearchTime.setText(time);
         
@@ -262,6 +315,21 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				button.setText(time);
 			}
 		},calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),true).show();
+	}
+	
+	private String getStartTime() {
+		return startSearchDate.getText() + " " +  startSearchTime.getText();
+	}
+	
+	private String getEndTime() {
+		return endSearchDate.getText() + " " +  endSearchTime.getText();
+	}
+	
+	private boolean compareDate(Date start, Date end) {
+		if(start.before(end)){
+			return true;
+		}
+		return false;
 	}
 	
 	private String format(int x) {
