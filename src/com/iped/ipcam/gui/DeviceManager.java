@@ -136,6 +136,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		switch (item.getItemId()) {
 		case MENU_EDIT:
 			Toast.makeText(this,"edit", Toast.LENGTH_SHORT).show();
+			System.out.println(device);
+			editDevice(device);
 			break;
 
 		case MENU_DEL:
@@ -157,7 +159,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.auto_search_button:
 			showProgress();
-			//test();
 			camManager.startThread(handler);
 			break;
 		case R.id.manul_add_button:
@@ -232,6 +233,50 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 	};
 	
+	private void editDevice(final Device device) {
+		final View addDeviceView = initAddNewDeviceView();
+		final EditText newDeviceNameEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		newDeviceNameEditText.setText(device.getDeviceName());
+		final EditText newDeviceIPEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		newDeviceIPEditText.setText(device.getDeviceIp());
+		final EditText newDeviceGatewayEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		newDeviceGatewayEditText.setText(device.getDeviceGateWay());
+		//final EditText newDeviceSubnetEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		//newDeviceSubnetEditText.setText(device.get());
+		dlg = new AlertDialog.Builder(DeviceManager.this).setTitle(getResources().getString(R.string.device_manager_add_title_str))
+		.setView(addDeviceView)
+		.setPositiveButton(getResources().getString(R.string.device_manager_add_sure_str), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String newDiviceName  = newDeviceIPEditText.getText().toString();
+				String newDiviceIP  = newDeviceIPEditText.getText().toString();
+				if(newDiviceIP== null || newDiviceIP.length() <=0) {
+					unCloseDialog(dlg, R.string.device_manager_add_not_null_str, false);
+				} else {
+					String newDiviceGateway  =  newDeviceGatewayEditText.getText().toString();
+					//String newDiviceSubNet  = ((EditText)addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)).getText().toString();
+					Device deviceNew = new Device(newDiviceName, "IP Camera", newDiviceIP, Constants.TCPPORT, Constants.UDPPORT, newDiviceGateway);
+					//device.setDeviceName(newDiviceName);
+					//device.setDeviceIp(newDiviceIP);
+					 if(camManager.editCam(device, deviceNew)) {
+						 handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+						 unCloseDialog(dlg, -1, true);
+					 } else {
+						 unCloseDialog(dlg, R.string.device_manager_add_same_ip_str, false);
+					 }
+				}
+			}
+		})
+		.setNegativeButton(getResources().getString(R.string.device_manager_add_cancle_str), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				unCloseDialog(dlg, -1, true);
+			}
+		})
+		.create();
+		dlg.show();
+	}
+	
 	
 	private void addNewDevice() {
 		final View addDeviceView = initAddNewDeviceView();
@@ -246,7 +291,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					unCloseDialog(dlg, R.string.device_manager_add_not_null_str, false);
 				} else {
 					String newDiviceGateway  = ((EditText)addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id)).getText().toString();
-				//String newDiviceSubNet  = ((EditText)addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)).getText().toString();
+					//String newDiviceSubNet  = ((EditText)addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)).getText().toString();
 					Device device = new Device(newDiviceName, "IP Camera", newDiviceIP, Constants.TCPPORT, Constants.UDPPORT, newDiviceGateway);
 					 if(camManager.addCam(device)) {
 						 handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
@@ -280,6 +325,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			Log.v(TAG, e.getMessage());
 		}		
 	}
+	
 	private View initAddNewDeviceView() {
 		LayoutInflater inflater =  LayoutInflater.from(DeviceManager.this);
 		View addDeviceView =  inflater.inflate(R.layout.device_manager_add, null);

@@ -121,6 +121,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="255.255.255.0"
+                    android:editable="false"
                     android:singleLine="true" />
 
                 <TextView

@@ -67,6 +67,15 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
+	public boolean editCam(Device deviceOLd, Device deviceNew) {
+		deviceOLd.setDeviceName(deviceNew.getDeviceName());
+		deviceOLd.setDeviceIp(deviceNew.getDeviceIp());
+		deviceOLd.setDeviceGateWay(deviceNew.getDeviceGateWay());
+		return true;
+	}
+	
+	
+	@Override
 	public boolean delCam(int index) {
 		deviceList.remove(index);
 		return false;
