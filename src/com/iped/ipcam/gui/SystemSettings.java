@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 public class SystemSettings extends Activity {
 
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

@@ -23,30 +23,34 @@ public class CamManagerImp implements ICamManager {
 	
 	private List<Device> deviceList = new ArrayList<Device>();
 	
-	private Thread queryThread = null;
+	//private Thread queryThread = null;
+	
+	private QueryCamThread queryThread = null;
 	
 	private int selectIndex = 0;
+
+	private int temp = -1;
+	
+	private int  count = 1;
 	
 	private String TAG = "CamManagerImp";
 	
 	public CamManagerImp() {
-		Device d = new Device("192.168.1.211", "Ip Camera", "192.168.1.211", Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
-			deviceList.add(d);
 	}
 	
 	@Override
 	public Device addCam(String ip) {
-		System.out.println(checkName(ip));
 		Device d = new Device(ip, "Ip Camera", ip, Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
 		if(checkName(ip)) {
 			deviceList.add(d);
+			return d;
 		}
-		return d;
+		return null;
 	}
 
 	private boolean checkName(String ip) {
 		for(Device de:deviceList) {
-			if(ip.equalsIgnoreCase(de.getDeviceName())) {
+			if(ip.equalsIgnoreCase(de.getDeviceIp())) {
 				return false;
 			}
 		}
@@ -54,9 +58,12 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
-	public Device addCam(Device device) {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean addCam(Device device) {
+		if(checkName(device.getDeviceIp())) {
+			deviceList.add(device);
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
@@ -142,10 +149,10 @@ public class CamManagerImp implements ICamManager {
 	}
 
 	public void startThread(Handler handler) {
-		if(queryThread == null || !queryThread.isAlive()) {
-			queryThread = new Thread(new QueryCamThread(handler));
-			queryThread.start();
-		}
+		stopThread();
+		queryThread = new QueryCamThread(handler);
+		queryThread.setDaemon(true);
+		queryThread.start();
 	}
 	
 	@Override
@@ -164,82 +171,122 @@ public class CamManagerImp implements ICamManager {
 		this.selectIndex = selectIndex;
 	}
 	
-	class QueryCamThread implements Runnable {
+	private void updateDeviceList() {
+		queryThread.tes();
+	}
+	
+	public void dismissAutoSearch() {
+		queryThread.dissmiss();
+	}
+	
+	public void updateProgress(int value) {
+		queryThread.updateProgressBar(value * 10);
+	}
+	
+	class QueryCamThread extends Thread {
 		
 		private Handler handler;
 		
-		private static final String TAG = "QueryCamThread";
-		
 		private int i = 0;
-		
-		private byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-		
-		private byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
 		
 		private QueryCamThread(Handler handler) {
 			this.handler = handler;
 		}
 		
+		public void tes() {
+			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+		}
+		
+		public void dissmiss() {
+			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+			/*Message message = handler.obtainMessage();
+			message.what = Constants.UPDATEAUTOSEARCH;
+			message.arg1 = i; //int)(i*per);
+			handler.sendMessage(message);*/
+		}
+		
+		public void updateProgressBar(int value) {
+			Message message = handler.obtainMessage();
+			message.what = Constants.UPDATEAUTOSEARCH;
+			message.arg1 = value; //int)(i*per);
+			if(value>=100){
+				count = 1;
+				temp = -1;
+			}
+			handler.sendMessage(message);
+		}
+		
 		@Override
 		public void run() {
-			//float max = 100;
-			//final float per = max/Constants.MAXVALUE;
-			new MyTimer(handler).start();
-			long l = System.currentTimeMillis();
-			for(i=1; i<25; i++) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				new Thread() {
-					public void run() {
-						try {
-							/*if(isOnline(Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT)) {
-								addCam(Constants.DEFAULTSEARCHIP + i);
-								handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-							}*/
-							DatagramSocket datagramSocket = null;
-							try {
-								datagramSocket = new DatagramSocket();
-								datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-								DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
-								datagramSocket.send(datagramPacket);
-								DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-								datagramSocket.receive(rece);
-								Log.d(TAG, "receive inof ");
-							} catch (SocketException e) {
-								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-								throw new CamManagerException(e);
-							} catch (UnknownHostException e) {
-								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-								throw new CamManagerException(e);
-							} catch (IOException e) {
-								//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-								throw new CamManagerException(e);
-							} finally {
-								if(datagramSocket != null) {
-									datagramSocket.close();
-									datagramSocket = null;
-								}
-							}
-						} catch (CamManagerException e) {
-							Log.d(TAG, "AutoSearchThread run 0 " + e.getMessage());
-						}/* finally {
-							Message message = handler.obtainMessage();
-							message.what = Constants.UPDATEAUTOSEARCH;
-							message.arg1 = (int)(i*per);
-							handler.sendMessage(message);
-						}*/
-					}
-				}.start();
+			for(i=1; i<=10; i++) {
+				new Thread(new QueryOnline(i*26)).start();
 			}
-			Log.d(TAG, "start thread use time : " + (System.currentTimeMillis() - l)/1000);
 		}
 	}
 	
-	class MyTimer extends Thread {
+	
+	class QueryOnline implements Runnable {
+
+		private int index;
+		
+		public QueryOnline(int index) {
+			this.index = index;
+		}
+		
+		
+		@Override
+		public void run() {
+			int i = 0;
+			for(i=index-25; i<=index; i++){
+				if(i>1 && i<255) {
+					test(i);
+				}
+				synchronized (deviceList) {
+			      count++;	
+				}
+				//System.out.println(count + " " + i + " " + count/26);
+				if(temp<count/26) {
+					temp = count/26;
+					updateProgress(temp);
+				}
+			}
+			dismissAutoSearch();
+		}
+		
+		public void test(int ip) {
+			DatagramSocket datagramSocket = null;
+			byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+			try {
+				datagramSocket = new DatagramSocket();
+				datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
+				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1." + ip), Constants.UDPPORT);
+				datagramSocket.send(datagramPacket);
+				DatagramPacket rece = new DatagramPacket(tem, tem.length);
+				datagramSocket.receive(rece);
+				synchronized (deviceList) {
+					addCam(Constants.DEFAULTSEARCHIP + ip);
+					updateDeviceList();
+				}
+				Log.d(TAG, "receive inof //////////////" + "192.168.1." + ip);
+			} catch (SocketException e) {
+				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			} catch (UnknownHostException e) {
+				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			} catch (IOException e) {
+				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			} finally {
+				if(datagramSocket != null) {
+					datagramSocket.close();
+					datagramSocket = null;
+				}
+			}
+		}
+	}
+	
+	
+	
+	
+class MyTimer extends Thread {
 		
 		private int i = 0;
 		
@@ -261,7 +308,7 @@ public class CamManagerImp implements ICamManager {
 					} finally {
 						Message message = handler.obtainMessage();
 						message.what = Constants.UPDATEAUTOSEARCH;
-						message.arg1 = i;//int)(i*per);
+						message.arg1 = i; //int)(i*per);
 						handler.sendMessage(message);
 					}
 				}

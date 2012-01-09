@@ -126,7 +126,13 @@ public class CamVideoH264 extends Activity {
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
 		thread = new Thread(myVideoView);
-		thread.start();
+		
+		
+		//thread.start();
+		
+		
+		
+		
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {

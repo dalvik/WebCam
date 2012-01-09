@@ -11,7 +11,7 @@ public interface ICamManager {
 
 	public List<Device> getCamList();
 	
-	public Device addCam(Device device);
+	public boolean addCam(Device device);
 	
 	public Device addCam(String ip);
 	

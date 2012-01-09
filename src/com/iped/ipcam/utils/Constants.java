@@ -28,7 +28,7 @@ public class Constants {
 	
 	public final static int COMMNICATEBUFFERSIZE = 1024;
 	
-	public final static int DEVICESEARCHTIMEOUT = 10000;
+	public final static int DEVICESEARCHTIMEOUT = 1000;
 	
 	public final static int VIDEOSEARCHTIMEOUT = 30000;
 	
