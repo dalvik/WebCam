@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -135,8 +136,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		Device device = camManager.getDevice(infor.position);
 		switch (item.getItemId()) {
 		case MENU_EDIT:
-			Toast.makeText(this,"edit", Toast.LENGTH_SHORT).show();
-			System.out.println(device);
 			editDevice(device);
 			break;
 
@@ -145,7 +144,11 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 			break;
 		case MENU_PREVIEW:
-			WebTabWidget.tabHost.setCurrentTabByTag("VIDEOPREVIEW");
+			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+			Intent intent = new Intent();
+			intent.putExtra("IPPLAY", device.getDeviceIp());
+			intent.setAction(Constants.ACTION_IPPLAY);
+			sendBroadcast(intent);
 			break;
 		default:
 			break;
@@ -237,9 +240,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		final View addDeviceView = initAddNewDeviceView();
 		final EditText newDeviceNameEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
 		newDeviceNameEditText.setText(device.getDeviceName());
-		final EditText newDeviceIPEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		final EditText newDeviceIPEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_new_addr_id);
 		newDeviceIPEditText.setText(device.getDeviceIp());
-		final EditText newDeviceGatewayEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+		final EditText newDeviceGatewayEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id);
 		newDeviceGatewayEditText.setText(device.getDeviceGateWay());
 		//final EditText newDeviceSubnetEditText = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
 		//newDeviceSubnetEditText.setText(device.get());
@@ -258,6 +261,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					Device deviceNew = new Device(newDiviceName, "IP Camera", newDiviceIP, Constants.TCPPORT, Constants.UDPPORT, newDiviceGateway);
 					//device.setDeviceName(newDiviceName);
 					//device.setDeviceIp(newDiviceIP);
+					System.out.println("old=" + device);
+					System.out.println("new old=" + deviceNew);
 					 if(camManager.editCam(device, deviceNew)) {
 						 handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 						 unCloseDialog(dlg, -1, true);
