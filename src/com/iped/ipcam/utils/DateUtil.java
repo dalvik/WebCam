@@ -27,4 +27,16 @@ public class DateUtil {
 		}
 		return date;
 	}
+	
+	public static String formatTimeStrToTimeStr(String dateStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date date = null;
+		try {
+			date = sdf.parse(dateStr);
+			sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			return sdf.format(date);
+		} catch (ParseException e) {
+			return dateStr;
+		}
+	}
 }
