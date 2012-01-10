@@ -61,11 +61,15 @@ public class VideoAdapter extends BaseAdapter {
 		viewHolder.start.setText(context.getResources().getText(R.string.video_preview_start_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoStartTime()));
 		viewHolder.end.setText(context.getResources().getText(R.string.video_preview_end_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoEndTime()));
 		viewHolder.addr.setText(context.getResources().getText(R.string.video_preview_addr_str) + video.getAddress());
-		viewHolder.size.setText(context.getResources().getText(R.string.video_preview_length_str) + "" + video.getFileLength()/1000 + " kb");
+		viewHolder.size.setText(context.getResources().getText(R.string.video_preview_length_str) + "" + getFileLength(video.getFileLength())/1000 + " kb");
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
 
+	private int getFileLength(String fileLengthHex) {
+		return Integer.parseInt(fileLengthHex, 16);
+	}
+	
 	static class ViewHolder {
 		
 		public TextView name;
