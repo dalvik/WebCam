@@ -229,6 +229,11 @@ public class CamManagerImp implements ICamManager {
 		public void run() {
 			for(i=1; i<=10; i++) {
 				new Thread(new QueryOnline(i*26)).start();
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -237,6 +242,8 @@ public class CamManagerImp implements ICamManager {
 	class QueryOnline implements Runnable {
 
 		private int index;
+
+		byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
 		
 		public QueryOnline(int index) {
 			this.index = index;
@@ -248,7 +255,12 @@ public class CamManagerImp implements ICamManager {
 			int i = 0;
 			for(i=index-25; i<=index; i++){
 				if(i>1 && i<255) {
-					test(i);
+					test(String.valueOf(i));
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 				synchronized (deviceList) {
 			      count++;	
@@ -262,13 +274,12 @@ public class CamManagerImp implements ICamManager {
 			dismissAutoSearch();
 		}
 		
-		public void test(int ip) {
+		public void test(String ip) {
 			DatagramSocket datagramSocket = null;
-			byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
 			try {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1." + ip), Constants.UDPPORT);
+				DatagramPacket datagramPacket = new DatagramPacket(tem, CamCmdListHelper.QueryCmd_Online.length(), InetAddress.getByName("192.168.1." + ip), Constants.UDPPORT);
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(tem, tem.length);
 				datagramSocket.receive(rece);
@@ -285,6 +296,7 @@ public class CamManagerImp implements ICamManager {
 				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
 			} finally {
 				if(datagramSocket != null) {
+					datagramSocket.disconnect();
 					datagramSocket.close();
 					datagramSocket = null;
 				}
