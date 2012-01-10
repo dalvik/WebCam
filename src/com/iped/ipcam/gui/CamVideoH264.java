@@ -2,11 +2,8 @@ package com.iped.ipcam.gui;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,28 +12,25 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Bitmap.Config;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
@@ -69,36 +63,55 @@ public class CamVideoH264 extends Activity {
 	
 	private int screenHeight = 0;
 	
-	//private  ImageView imageView = null;
+	private IpPlayReceiver ipPlayReceiver = new IpPlayReceiver();
 	
 	private Button leftUpButton = null;
 	
-	private Button midUpButton = null;
-	
-	private Button rightUpButton = null;
-	
 	private ControlPanel rightControlPanel = null;
-	
-	private boolean stop = false;
 	
 	private Thread thread = null;
 	
 	private static WakeLock mWakeLock;
 	
+	private ProgressDialog m_Dialog = null;
+	
+	public static String currIpAddress = null;
+	
 	private String TAG = "CamVideoH264";
 
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
-			initThread();
+			//initThread();
+			switch (msg.what) {
+			case Constants.CONNECTTING:
+				startThread();
+				break;
+			case Constants.SHOWCONNDIALOG:
+				String tem = (String) msg.obj;
+				if(currIpAddress != null && currIpAddress.contains(tem) && !myVideoView.getPlayStatus()) {
+					return;
+				}
+				currIpAddress = tem;
+				showProgressDlg();
+				startThread();
+				break;
+			case Constants.HIDECONNDIALOG:
+				hideProgressDlg();
+				break;
+			case Constants.CONNECTERROR:
+				Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
+				break;
+			default:
+				break;
+			}
 		};
 	};
 	
-	private void initThread() {
-		if(thread != null || thread.isAlive()) {
+	private void startThread() {
+		if(thread != null && thread.isAlive()) {
 			try {
 				thread.join(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -109,8 +122,6 @@ public class CamVideoH264 extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// thread = new Thread(new SocketThread());
-		// thread.start();
 		DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
@@ -118,6 +129,7 @@ public class CamVideoH264 extends Activity {
         
         setContentView(R.layout.pre_videoview);
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
+        myVideoView.init(mHandler);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         
         LayoutInflater factory = LayoutInflater.from(this);
@@ -125,27 +137,12 @@ public class CamVideoH264 extends Activity {
 		rightControlPanel = new ControlPanel(this, myVideoView,  230, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
-		thread = new Thread(myVideoView);
-		
-		
-		//thread.start();
-		
-		
-		
-		
+		registerReceiver(ipPlayReceiver, new IntentFilter(Constants.ACTION_IPPLAY));
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {
-	       System.out.println("lock ...");
 	       mWakeLock.acquire();
 	    }
-		//new Thread(new QueryDeviceThread()).start();
-		//videoView.init(screenWidth, screenHeight);
-        //videoView.playVideo();
-		//videoView = new VideoView(this);
-		//setContentView(videoView);
-		//videoView.playVideo();
-		//new Thread(new SocketThread()).start();
 	}
 
 	@Override
@@ -161,31 +158,67 @@ public class CamVideoH264 extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		myVideoView.onStop();
+		dismissProgressDlg();
+		unregisterReceiver(ipPlayReceiver);
 		if(thread != null && !thread.isAlive()) {
 			try {
 				thread.join(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			stop = true;
 			thread = null;
 		}
-		/*
-		 * flag = false; if(thread != null || thread.isAlive()) { try {
-		 * thread.join(); thread = null; } catch (InterruptedException e) {
-		 * e.printStackTrace(); } }
-		 */
+
 	}
 
 	@Override
     protected void onDestroy() {
     	super.onDestroy();
     	 if(mWakeLock.isHeld() == true) {
-    		 System.out.println("reelase ...");
     		 mWakeLock.release();
          }
     }
+	
+	private void showProgressDlg() {
+		if(m_Dialog == null) {
+			m_Dialog = new ProgressDialog(CamVideoH264.this);
+			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			m_Dialog.setCancelable(false);
+			m_Dialog.setMessage(getResources().getText(R.string.connection));
+		}
+		m_Dialog.show();
+	}
+	
+	private void hideProgressDlg() {
+		if(m_Dialog != null && m_Dialog.isShowing()) {
+			m_Dialog.hide();
+		}
+	}
+	
+	private void dismissProgressDlg() {
+		if(m_Dialog != null) {
+			m_Dialog.dismiss();
+		}
+	}
+	
+	private class IpPlayReceiver extends BroadcastReceiver {
 
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(intent != null) {
+				String ip = intent.getStringExtra("IPPLAY");
+				if(ip != null && ip.length()>0) {
+					Message msg = mHandler.obtainMessage();
+					msg.obj = ip;
+					msg.what = Constants.SHOWCONNDIALOG;
+					mHandler.sendMessage(msg);
+				}
+			}
+		}
+		
+	}
+	
 	private class QueryDeviceThread implements Runnable {
 
 		private byte[] bufTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
@@ -269,197 +302,4 @@ public class CamVideoH264 extends Activity {
 		}
 	}
 }
-
-
-class MyVideoView extends View implements Runnable {
-
-
-	private final static int NALBUFLENGTH = 320*480 * 2;
-	
-	private final static int SOCKETBUFLENGTH = 342000;
-	
-	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
-	
-	byte[] pixel = new byte[NALBUFLENGTH];
-	
-	byte[] nalBuf = new byte[NALBUFLENGTH];// 80k
-
-	ByteBuffer buffer = ByteBuffer.wrap(nalBuf);
-	
-	int nalSizeTemp = 0;
-	
-	int nalBufUsedLength = 0;
-	
-	byte[] socketBuf = new byte[SOCKETBUFLENGTH];
-	
-	FileInputStream fis = null;
-	
-	int readLengthFromSocket = 0;
-	
-	int sockBufferUsedLength;
-	
-	boolean firstStartFlag = true;
-	
-	boolean looperFlag = false;
-	
-	private Socket socket = null;
-	
-	private DataInputStream dis = null;
-	
-	private boolean stop = false;
-
-	private SurfaceHolder holder;
-	
-	private static final String TAG = "ReadStreamThread";
-	
-	private Handler handler;
-	
-	public MyVideoView(Context context) {
-		super(context);
-	}
-	
-	public MyVideoView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-	}
-
-	void init(Handler handler) {
-		this.handler = handler;
-	}
-	
-	
-	@Override
-	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
-		//video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-		if(video != null) {
-			canvas.drawBitmap(video, 0, 0, null);
-		}
-	}
-	
-	private byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-	
-	public void run() {
-		try {
-			byte [] tem = CamCmdListHelper.SetCmd_StartVideo.getBytes();
-			DatagramSocket datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			//datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.141"), 60000);
-			datagramSocket.send(datagramPacket);
-			System.out.println("send udp packet...");
-			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			System.out.println("ready rece ....");
-			//datagramSocket.receive(rece);
-			//String info = new String(buffTemp);
-			//if(info != null) {
-				//Log.d(TAG, "receive inof = : " + info);
-				SocketAddress socketAddress = new InetSocketAddress("192.168.1.141", 1234);
-				socket = new Socket();
-				socket.connect(socketAddress, 15000);
-				dis = new DataInputStream(socket.getInputStream());
-				System.out.println("dis=" + dis);
-			//}
-			//fis = new FileInputStream(new File("/sdcard/video_test.dat"));
-			//fis = new FileInputStream(new File("/sdcard/a.jpeg"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		long start = System.currentTimeMillis();
-		int i = 0;
-		while (!Thread.currentThread().isInterrupted() && dis != null) {
-			try {
-				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从文件流里面读取的字节的长度  <0时读取完毕
-				//System.out.println("rece........." + Thread.currentThread().isInterrupted());
-			} catch (IOException e) {
-				Log.d(TAG, e.getLocalizedMessage());
-			}
-			if (readLengthFromSocket <= 0) { // 读取完成
-				System.out.println("read over break....");
-				break;
-			}
-			sockBufferUsedLength = 0;
-			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
-				try {
-					nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
-				}catch(Exception e) {
-					
-				}
-				while(looperFlag && !stop) {
-					looperFlag = false;
-					if(nalSizeTemp == -2) {
-						if(nalBufUsedLength>0) {
-							i++;
-							if(i%50 ==0) {
-								long end = System.currentTimeMillis() / 1000 - start / 1000;
-								System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
-							}
-							copyPixl();
-						}
-						nalBuf[0] = -1;
-						nalBuf[1] = -40;
-						nalBuf[2] = -1;
-						nalBuf[3] = -32;
-						sockBufferUsedLength += 4;
-						nalBufUsedLength = 4;
-						break;
-					}
-				}
-			}
-		}
-		if(fis != null) {
-			try {
-				fis.close();
-				Log.d("CamVideoH264", "over......."  + Thread.currentThread().isInterrupted());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public void copyPixl() {
-		/*for(int i=0; i<nalBufUsedLength; i++) {
-			System.out.print(byte2HexString(nalBuf[i]) + " ");
-		}*/
-		video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-		if(video != null && !stop) {
-			postInvalidate();
-		}
-	}
-	
-	 
-	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf, int sockBufferUsed, int socketBufRemain) {
-		int i = 0;
-		for(i=0; i<socketBufRemain; i++) {
-			if(firstStartFlag && socketBuf[i] == 0 && socketBuf[i+1] == 0 && socketBuf[i+2] == 0 && socketBuf[i+3] == 1) {
-				firstStartFlag = false;
-				sockBufferUsedLength += 65;
-				looperFlag = true;
-				return -1;
-			} else if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 + sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed] == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
-				/*if((i + 3+ sockBufferUsed) < SOCKETBUFLENGTH) {
-					if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 + sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed] == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
-						looperFlag = true;
-						return -2;
-					} 
-				} else {
-					nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
-					nalBufUsedLength++;
-					sockBufferUsedLength++;
-				}*/
-				looperFlag = true;
-				return -2;
-			}else {
-				nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
-				nalBufUsedLength++;
-				sockBufferUsedLength++;
-			}
-		}
-		looperFlag = true;
-		return i;
-	}
-
-}
-
 
