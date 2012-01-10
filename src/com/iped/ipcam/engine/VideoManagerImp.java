@@ -23,7 +23,7 @@ public class VideoManagerImp implements IVideoManager {
 	
 	private List<Video> videoList = new ArrayList<Video>();
 	
-	private String device;
+	private String deviceName;
 	
 	private Date start;
 	
@@ -40,7 +40,7 @@ public class VideoManagerImp implements IVideoManager {
 
 	@Override
 	public void videoSearchInit(String device, Date start, Date end) {
-		this.device = device;
+		this.deviceName = device;
 		this.start = start;
 		this.end = end;
 	}
@@ -77,8 +77,8 @@ public class VideoManagerImp implements IVideoManager {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 				System.arraycopy(tem, 0, buffTemp, 0, tem.length);
-				System.out.println(device);
-				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(device), 60000);
+				System.out.println(deviceName);
+				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(deviceName), 60000);
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 				datagramSocket.receive(rece);
@@ -139,10 +139,9 @@ public class VideoManagerImp implements IVideoManager {
 				return ;
 			}
 			int i = Integer.parseInt(index, 16);
-			int l = Integer.parseInt(fileLength, 16);
 			int j = Integer.parseInt(fileLength, 16);
 			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(i, device, start, end, j, device);
+			Video video = new Video(i, deviceName, start, end, j, deviceName);
 			videoList.add(video);
 		}
 		

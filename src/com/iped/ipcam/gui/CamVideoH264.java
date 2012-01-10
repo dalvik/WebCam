@@ -25,6 +25,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -88,8 +89,10 @@ public class CamVideoH264 extends Activity {
 				break;
 			case Constants.SHOWCONNDIALOG:
 				String tem = (String) msg.obj;
+				Log.d(TAG, "tem =" + tem + " playstatus= " +  myVideoView.getPlayStatus());
 				if(currIpAddress != null && currIpAddress.contains(tem) && !myVideoView.getPlayStatus()) {
-					return;
+					Log.d(TAG, "playStatus =" +  myVideoView.getPlayStatus());
+					//return;
 				}
 				currIpAddress = tem;
 				showProgressDlg();
@@ -115,6 +118,7 @@ public class CamVideoH264 extends Activity {
 				e.printStackTrace();
 			}
 		}
+		myVideoView.onStart();
 		thread = new Thread(myVideoView);
 		thread.start();
 	}
@@ -169,7 +173,6 @@ public class CamVideoH264 extends Activity {
 			}
 			thread = null;
 		}
-
 	}
 
 	@Override
@@ -209,6 +212,7 @@ public class CamVideoH264 extends Activity {
 			if(intent != null) {
 				String ip = intent.getStringExtra("IPPLAY");
 				if(ip != null && ip.length()>0) {
+					Log.d(TAG, "receive ip =" +  ip);
 					Message msg = mHandler.obtainMessage();
 					msg.obj = ip;
 					msg.what = Constants.SHOWCONNDIALOG;

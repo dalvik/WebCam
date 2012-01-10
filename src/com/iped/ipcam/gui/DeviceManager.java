@@ -257,12 +257,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					unCloseDialog(dlg, R.string.device_manager_add_not_null_str, false);
 				} else {
 					String newDiviceGateway  =  newDeviceGatewayEditText.getText().toString();
-					//String newDiviceSubNet  = ((EditText)addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)).getText().toString();
 					Device deviceNew = new Device(newDiviceName, "IP Camera", newDiviceIP, Constants.TCPPORT, Constants.UDPPORT, newDiviceGateway);
-					//device.setDeviceName(newDiviceName);
-					//device.setDeviceIp(newDiviceIP);
-					System.out.println("old=" + device);
-					System.out.println("new old=" + deviceNew);
 					 if(camManager.editCam(device, deviceNew)) {
 						 handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 						 unCloseDialog(dlg, -1, true);

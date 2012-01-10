@@ -15,6 +15,7 @@ public class WebTabWidget extends TabActivity {
 
 	public static TabHost tabHost = null;
 	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -53,6 +54,7 @@ public class WebTabWidget extends TabActivity {
 		int count = tabWidget.getChildCount();
 		for(int i = 0; i < count; i++) {
 			tabWidget.getChildAt(i).getLayoutParams().height  = tabWidget.getChildAt(i).getLayoutParams().height * 2/3;
+			
 		}
 	}
 	

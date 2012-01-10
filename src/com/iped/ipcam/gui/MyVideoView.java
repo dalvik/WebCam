@@ -2,7 +2,6 @@ package com.iped.ipcam.gui;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -20,7 +19,6 @@ import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.View;
 
 import com.iped.ipcam.utils.CamCmdListHelper;
@@ -36,7 +34,7 @@ public class MyVideoView extends View implements Runnable {
 	
 	byte[] pixel = new byte[NALBUFLENGTH];
 	
-	byte[] nalBuf = new byte[NALBUFLENGTH];// 80k
+	byte[] nalBuf = new byte[NALBUFLENGTH];// 
 
 	ByteBuffer buffer = ByteBuffer.wrap(nalBuf);
 	
@@ -59,6 +57,8 @@ public class MyVideoView extends View implements Runnable {
 	private Socket socket = null;
 	
 	private DataInputStream dis = null;
+	
+	private DatagramSocket datagramSocket = null;
 	
 	private boolean stopPlay = false;
 
@@ -90,36 +90,33 @@ public class MyVideoView extends View implements Runnable {
 	public void run() {
 		try {
 			byte [] tem = CamCmdListHelper.SetCmd_StartVideo.getBytes();
-			DatagramSocket datagramSocket = new DatagramSocket();
+			datagramSocket = new DatagramSocket();
 			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			//datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(Constants.DEFAULTSEARCHIP + i), Constants.UDPPORT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.141"), 60000);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), Constants.UDPPORT);
 			datagramSocket.send(datagramPacket);
-			System.out.println("send udp packet...");
 			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 			System.out.println("ready rece ....");
-			//datagramSocket.receive(rece);
-			//String info = new String(buffTemp);
-			//if(info != null) {
-				//Log.d(TAG, "receive inof = : " + info);
-				SocketAddress socketAddress = new InetSocketAddress("192.168.1.141", 1234);
-				socket = new Socket();
-				socket.connect(socketAddress, 15000);
-				dis = new DataInputStream(socket.getInputStream());
-				System.out.println("dis=" + dis);
-			//}
-			//fis = new FileInputStream(new File("/sdcard/video_test.dat"));
-			//fis = new FileInputStream(new File("/sdcard/a.jpeg"));
-		} catch (FileNotFoundException e) {
+			SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
+			socket = new Socket();
+			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
+			if(dis != null) {
+				dis.close();
+			}
+			dis = new DataInputStream(socket.getInputStream());
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			System.out.println("dis=" + dis);
+		}catch (IOException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			onStop();
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			handler.sendEmptyMessage(Constants.CONNECTERROR);
+			return ;
 		}
 		long start = System.currentTimeMillis();
 		int i = 0;
 		while (!Thread.currentThread().isInterrupted() && dis != null && !stopPlay) {
 			try {
-				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从文件流里面读取的字节的长度  <0时读取完毕
+				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从流里面读取的字节的长度  <0时读取完毕
 			} catch (IOException e) {
 				Log.d(TAG, e.getLocalizedMessage());
 			}
@@ -129,11 +126,7 @@ public class MyVideoView extends View implements Runnable {
 			}
 			sockBufferUsedLength = 0;
 			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
-				try {
-					nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
-				}catch(Exception e) {
-					
-				}
+				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
 				while(looperFlag) {
 					looperFlag = false;
 					if(nalSizeTemp == -2) {
@@ -156,15 +149,10 @@ public class MyVideoView extends View implements Runnable {
 				}
 			}
 		}
+		onStop();
+		release();
+		//Thread.currentThread().destroy();
 		System.out.println("onstop===="  + stopPlay);
-		if(fis != null) {
-			try {
-				fis.close();
-				Log.d("CamVideoH264", "over......."  + Thread.currentThread().isInterrupted());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	public void copyPixl() {
@@ -173,7 +161,6 @@ public class MyVideoView extends View implements Runnable {
 			postInvalidate();
 		}
 	}
-	
 	 
 	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf, int sockBufferUsed, int socketBufRemain) {
 		int i = 0;
@@ -208,6 +195,34 @@ public class MyVideoView extends View implements Runnable {
 	
 	public void onStop() {
 		stopPlay = true;
+		release();
+		flushBitmap();
 	}
 
+	private void release() {
+		if(fis != null) {
+			try {
+				fis.close();
+				Log.d("CamVideoH264", "over......."  + Thread.currentThread().isInterrupted());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(datagramSocket != null) {
+			datagramSocket.close();
+			datagramSocket = null;
+		}
+	}
+	
+	private void flushBitmap() {
+		video = Bitmap.createBitmap(320, 480, Config.RGB_565);
+		postInvalidate();
+	}
+	public void onStart() {
+		stopPlay = false;
+	}
+	
+	public boolean getPlayStatus() {
+		return stopPlay;
+	}
 }
