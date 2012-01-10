@@ -24,13 +24,26 @@ public class Constants {
 	
 	public final static String DEFAULTSEARCHIP = "192.168.1.";
 	
-	public final static String DEFAULTWAY = "255.255.255.0";
+	public final static String DEFAULTWAY = "192.168.1.1";
 	
 	public final static int COMMNICATEBUFFERSIZE = 1024;
 	
 	public final static int DEVICESEARCHTIMEOUT = 1000;
 	
 	public final static int VIDEOSEARCHTIMEOUT = 30000;
+	
+	public final static String VIDEOPREVIEW = "VIDEOPREVIEW";
+	
+	public final static String ACTION_IPPLAY = "iped.intent.action.IPPLAY";
+	
+	public final static int SHOWCONNDIALOG = 2017;
+	
+	public final static int HIDECONNDIALOG = 2018;
+	
+	public final static int CONNECTTING = 2019;
+	
+	public final static int CONNECTERROR = 2020;
+	
 	
 	
 }

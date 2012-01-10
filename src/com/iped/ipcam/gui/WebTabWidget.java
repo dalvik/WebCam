@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import com.iped.ipcam.engine.CamMagFactory;
+import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.utils.Constants;
+
 public class WebTabWidget extends TabActivity {
 
 	public static TabHost tabHost = null;
@@ -21,7 +25,7 @@ public class WebTabWidget extends TabActivity {
 		Intent intent;
 		intent = new Intent(this, CamVideoH264.class);
 		//intent = new Intent(this, LeftVideoView.class);
-		tabSpec = tabHost.newTabSpec("VIDEOPREVIEW")
+		tabSpec = tabHost.newTabSpec(Constants.VIDEOPREVIEW)
 		.setIndicator(resources.getString(R.string.default_activity_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
 		
@@ -52,7 +56,10 @@ public class WebTabWidget extends TabActivity {
 		}
 	}
 	
-	
-	
-	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		ICamManager camManager = CamMagFactory.getCamManagerInstance();
+		camManager.clearCamList();
+	}
 }
