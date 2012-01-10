@@ -17,6 +17,7 @@ import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.PackageUtil;
 
 public class CamManagerImp implements ICamManager {
 
@@ -255,7 +256,14 @@ public class CamManagerImp implements ICamManager {
 			int i = 0;
 			for(i=index-25; i<=index; i++){
 				if(i>1 && i<255) {
-					test(String.valueOf(i));
+					//test(String.valueOf(i));
+					boolean res = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
+					if(res) {
+						synchronized (deviceList) {
+							addCam(Constants.DEFAULTSEARCHIP + i);
+							updateDeviceList();
+						}
+					}
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
