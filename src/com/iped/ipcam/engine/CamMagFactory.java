@@ -7,6 +7,8 @@ public class CamMagFactory {
 	
 	public static IVideoManager videoManager = null;
 	
+	public static ICamParasSet camParasSet = null;
+	
 	public static ICamManager getCamManagerInstance() {
 		if(camManager == null) {
 			camManager = new CamManagerImp();
@@ -20,4 +22,13 @@ public class CamMagFactory {
 		}
 		return videoManager;
 	}
+	
+	
+	public static ICamParasSet getCamParasSetInstance() {
+		if(camParasSet == null) {
+			camParasSet = new CamParasSetImp();
+		}
+		return camParasSet;
+	}
+	
 }
