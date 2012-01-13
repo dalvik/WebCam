@@ -64,7 +64,7 @@ public class CamVideoH264 extends Activity {
 	
 	private int screenHeight = 0;
 	
-	private IpPlayReceiver ipPlayReceiver = new IpPlayReceiver();
+	private IpPlayReceiver ipPlayReceiver = null;
 	
 	private Button leftUpButton = null;
 	
@@ -132,6 +132,8 @@ public class CamVideoH264 extends Activity {
         screenHeight = dm.heightPixels;
         
         setContentView(R.layout.pre_videoview);
+        ipPlayReceiver = new IpPlayReceiver();
+        registerReceiver(ipPlayReceiver, new IntentFilter(Constants.ACTION_IPPLAY));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
@@ -141,7 +143,6 @@ public class CamVideoH264 extends Activity {
 		rightControlPanel = new ControlPanel(this, myVideoView,  230, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
-		registerReceiver(ipPlayReceiver, new IntentFilter(Constants.ACTION_IPPLAY));
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {
@@ -162,9 +163,16 @@ public class CamVideoH264 extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		myVideoView.onStop();
+	}
+
+	@Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	myVideoView.onStop();
 		dismissProgressDlg();
-		unregisterReceiver(ipPlayReceiver);
+		if(ipPlayReceiver != null) {
+			unregisterReceiver(ipPlayReceiver);
+		}
 		if(thread != null && !thread.isAlive()) {
 			try {
 				thread.join(100);
@@ -173,11 +181,6 @@ public class CamVideoH264 extends Activity {
 			}
 			thread = null;
 		}
-	}
-
-	@Override
-    protected void onDestroy() {
-    	super.onDestroy();
     	 if(mWakeLock.isHeld() == true) {
     		 mWakeLock.release();
          }
