@@ -76,5 +76,14 @@ public class Video {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
+	@Override
+	public String toString() {
+		return "Video [address=" + address + ", fileLength=" + fileLength
+				+ ", index=" + index + ", videoEndTime=" + videoEndTime
+				+ ", videoName=" + videoName + ", videoStartTime="
+				+ videoStartTime + "]";
+	}
+	
 	
 }

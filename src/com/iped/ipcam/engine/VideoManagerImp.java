@@ -11,11 +11,13 @@ import java.util.Date;
 import java.util.List;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.PackageUtil;
 
 public class VideoManagerImp implements IVideoManager {
 
@@ -28,6 +30,9 @@ public class VideoManagerImp implements IVideoManager {
 	private Date start;
 	
 	private Date end;
+	
+	private String  TAG = "VideoManagerImp";
+	
 	
 	public VideoManagerImp() {
 		
@@ -58,6 +63,31 @@ public class VideoManagerImp implements IVideoManager {
 		videoSearchThread = new VideoSearchThread(handler);
 		videoSearchThread.start();
 	}
+	
+	@Override
+	public boolean deleteFiles(Handler handler,  String startIndex, String endIndex, String ip) {
+		new Thread(new DeleteFileThread(handler, startIndex, endIndex, ip)).start();
+		return false;
+	}
+	
+	@Override
+	public boolean removeVideoByIndex(String index) {
+		int l = videoList.size();
+		for (int i = 0; i < l; i++) {
+			Video video = videoList.get(i);
+			if(video.getIndex().equalsIgnoreCase(index)) {
+				videoList.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public void clearVideoList() {
+		videoList.clear();
+	}
+	
 
 	class VideoSearchThread extends Thread {
 		
@@ -82,7 +112,7 @@ public class VideoManagerImp implements IVideoManager {
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 				datagramSocket.receive(rece);
-				splitFilesInfoFromBuf(deleteZero(buffTemp));
+				splitFilesInfoFromBuf(PackageUtil.deleteZero(buffTemp));
 				updateList();
 			} catch (SocketException e) {
 				e.printStackTrace();
@@ -98,22 +128,6 @@ public class VideoManagerImp implements IVideoManager {
 			}
 		}
 		
-		private byte[] deleteZero(byte[]files) {
-			int index = 0;
-			int length = files.length;
-			if(length<8) {
-				return files;
-			}
-			for(int i=8;i<length;i++){
-				if(files[i] == 0) {
-					break;
-				}
-				index = i;
-			}
-			byte[] temp = new byte[index-8];
-			System.arraycopy(files, 8, temp, 0, index-8);
-			return temp;
-		}
 		
 		//00000000:00fff094:20120104150759-20120104151643
 		public void splitFilesInfoFromBuf(byte[]files) {
@@ -135,13 +149,18 @@ public class VideoManagerImp implements IVideoManager {
 			String fileLength = s.substring(9, 17);
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
+			if((fileLength != null && fileLength.trim().length()<=0) || (end != null && end.trim().length()<=0)) {
+				Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
+				videoList.add(video);
+				return;
+			} 
 			if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
 				return ;
 			}
-			int i = Integer.parseInt(index, 16);
-			int j = Integer.parseInt(fileLength, 16);
+			//int i = Integer.parseInt(index, 16);
+			//int j = Integer.parseInt(fileLength, 16);
 			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(i, deviceName, start, end, j, deviceName);
+			Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
 			videoList.add(video);
 		}
 		
@@ -155,5 +174,62 @@ public class VideoManagerImp implements IVideoManager {
 		public void updateList() {
 			handler.sendEmptyMessage(Constants.UPDATEVIDEOLIST);
 		}
+	}
+
+	private class DeleteFileThread implements Runnable {
+
+		private Handler handler;
+		
+		private String startIndex;
+		
+		private String endIndex;
+		
+		private String ip;
+		
+		public DeleteFileThread(Handler handler, String startIndex, String endIndex, String ip) {
+			this.handler = handler;
+			this.startIndex = startIndex;
+			this.endIndex = endIndex;
+			this.ip = ip;
+		}
+		
+		@Override
+		public void run() {
+			byte [] tem = (CamCmdListHelper.DelCmd_DeleteFiles+ startIndex + endIndex).getBytes();
+			DatagramSocket datagramSocket = null;
+			try {
+				datagramSocket = new DatagramSocket();
+				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.UDPPORT);
+				datagramSocket.send(datagramPacket);
+				DatagramPacket rece = new DatagramPacket(tem, tem.length);
+				datagramSocket.receive(rece);
+				String info = new String(tem);
+				Log.d(TAG, "Receive inof //////////////" + info);
+				if(info != null && info.toUpperCase().contains("OK")) {
+					if(!startIndex.equals(endIndex.trim())) {
+						clearVideoList();
+						handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+					} else {
+						boolean flag = removeVideoByIndex(startIndex);
+						if(flag) {
+							handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+						} else {
+							handler.sendEmptyMessage(Constants.DELETEFILEERROR);
+						}
+					}
+			   }
+			} catch (IOException e) {
+				handler.sendEmptyMessage(Constants.DELETEFILEERROR);
+				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			} finally {
+				if(datagramSocket != null) {
+					datagramSocket.disconnect();
+					datagramSocket.close();
+					datagramSocket = null;
+				}
+			}
+		}
+		
 	}
 }

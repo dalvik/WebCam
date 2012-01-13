@@ -15,5 +15,10 @@ public interface IVideoManager {
 	
 	public void startSearchThread(Handler handler);
 	
+	public boolean deleteFiles(Handler handler, String startIndex, String endIndex, String ip);
+	
+	public boolean removeVideoByIndex(String index);
+	
+	public void clearVideoList();
 	
 }
