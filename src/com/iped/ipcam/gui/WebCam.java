@@ -27,13 +27,13 @@ public class WebCam extends Activity implements OnClickListener{
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
+        setContentView(R.layout.webview_login);
         settings = getSharedPreferences(WebCam.class.getName(), 0);
-        userName = (EditText) findViewById(R.id.username);
-        password = (EditText) findViewById(R.id.password);
-        keepPwd = (CheckBox) findViewById(R.id.keepuserpwd);
-        loginButton = (Button) findViewById(R.id.userLogin);
-        Button userExit = (Button) findViewById(R.id.user_exit);
+        userName = (EditText) findViewById(R.id.webview_username);
+        password = (EditText) findViewById(R.id.webview_password);
+        keepPwd = (CheckBox) findViewById(R.id.webview_keepuserpwd);
+        loginButton = (Button) findViewById(R.id.webview_userLogin);
+        Button userExit = (Button) findViewById(R.id.webview_user_exit);
         boolean flag = settings.getBoolean("KEEP_USER_INFO", false);
         keepPwd.setChecked(flag);
         if(flag) {
@@ -51,7 +51,7 @@ public class WebCam extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.userLogin:
+		case R.id.webview_userLogin:
 			String username = userName.getText().toString();
 			if(null == username || "".equalsIgnoreCase(username)) {
 				Toast.makeText(WebCam.this, getResources().getString(R.string.username_null), Toast.LENGTH_SHORT).show();
@@ -66,7 +66,7 @@ public class WebCam extends Activity implements OnClickListener{
 			startActivity(intent);
 			WebCam.this.finish();
 			break;
-		case R.id.user_exit:
+		case R.id.webview_user_exit:
 			WebCam.this.finish();
 			break;
 

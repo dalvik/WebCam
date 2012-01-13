@@ -64,22 +64,70 @@
     	<string name="device_params_recorde_speed_str">录像码流：</string>
     	<string name="device_params_recorde_real_speed_str">实际码率：</string>
     	<string name="device_params_recorde_frame_size_str">画面大小：</string>
+    		<string-array name="frame_size_array">
+    		    <item>4CIF (704 x 576)</item>
+    		    <item>VGA (640 x 480)</item>
+    		    <item>CIF (352 x 288)</item>
+    		    <item>QVGA (320 x 240)</item>
+    		    <item>QCIF (176 x 144)</item>
+    		    <item>SQCIF (128 x 96)</item>
+    		</string-array>
     	<string name="device_params_recorde_frame_speed_str">帧率：</string>
+    		<string-array name="frame_rate_array">
+    		    <item>4</item>
+    		    <item>8</item>
+    		    <item>12</item>
+    		    <item>25</item>
+    		</string-array>
     	<string name="device_params_recorde_comp_quar_str">压缩质量：</string>
+    		<string-array name="compress_quar_array">
+    		    <item>VBR</item>
+    		    <item>200</item>
+    		    <item>400</item>
+    		    <item>600</item>
+    		    <item>800</item>
+    		    <item>1000</item>
+    		    <item>2000</item>
+    		    <item>3000</item>
+    		</string-array>
     	<string name="device_params_recorde_comp_type_str">压缩方式：</string>
+    		<string-array name="compress_type_array">
+    		    <item>h264</item>
+    		</string-array>
     	
     	<string name="device_params_monitor_speed_str">监控码流：</string>
     	<string name="device_params_monitor_frame_size_str">画面大小：</string>
-
+    	    <string-array name="monitor_frame_size_array">
+    		    <item>4CIF (704 x 576)</item>
+    		    <item>VGA (640 x 480)</item>
+    		    <item>CIF (352 x 288)</item>
+    		    <item>QVGA (320 x 240)</item>
+    		    <item>QCIF (176 x 144)</item>
+    		    <item>SQCIF (128 x 96)</item>
+    		</string-array>
     	<string name="device_params_date_str">设备时间：</string>
     	<string name="device_params_sync_date_str">同步系统时间</string>
-    	
+    	<string name="device_params_no_device_select_str">请先选择查看的设备</string>
+    	<string name="device_params_request_error_str">查询出错</string>
+    	<string name="device_params_not_online_str">设备不在线</string>
+    	<string name="device_params_request_config_str">正在获取配置信息</string>
+    	<string name="device_params_static_ip_str">静态IP</string>
+    	<string name="device_params_dynamic_ip_str">动态IP</string>
     	    
     <string name="play_back_str">视频回放</string>
     	<string name="play_back_auto_search_video_str">视频搜索</string>
     	<string name="play_back_auto_clear_all_str">清除全部</string>
+    	<string name="play_back_auto_clear_no_files_str">暂无文件</string>
+    		<string name="play_back_clear_dlg_title_str">清除确认</string>
+    		<string name="play_back_clear_dlg_message_str">确定情况全部视频文件吗</string>
+    		<string name="play_back_clear_dlg_sure_str">确定</string>
+    		<string name="play_back_clear_dlg_cancle_str">取消</string>
     	<string name="video_download">下载</string>
     	<string name="video_delete">删除</string>
+    		<string name="video_delete_ing">正在删除。。。</string>
+    		<string name="video_clear_ing">正在 清空。。。</string>
+    		<string name="video_delete_success">恭喜，操作成功^_^！</string>
+    		<string name="video_delete_error">操作失败-_-</string>
     	<string name="video_playback">回放</string>
     	<string name="video_preview_no_video_str">没有可回放的视频</string>
     	<string name="video_preview_name_str">名      称：</string>
@@ -95,10 +143,22 @@
     	
     <string name="system_settings_str">系统设置</string>
         <string name="system_settings_save_path_hint_str">监控录像保存路径</string>
+	        <string name="system_settings_save_path_preview_str">路径浏览</string>
+	        <string name="system_settings_save_path_preview_sure_str">确定</string>
+	        <string name="system_settings_save_path_preview_cancle_str">取消</string>
+	        <string name="system_settings_save_path_back_str">返回</string>
+	        <string name="system_settings_save_path_choice_str">选择</string>
+	        <string name="file_cannotopen">不能打开目录</string>
+	        
         <string name="system_settings_save_path_str">保存路径：</string>
         <string name="system_settings_preview_str">浏览</string>
         <string name="system_settings_device_name_str">设备名称：</string>
+        <string name="system_settings_device_name_hint_str">设备名称</string>
         <string name="system_settings_device_ip_str">设备地址：</string>
+        <string name="system_settings_device_ip_hint_str">设备地址</string>
+        <string name="system_settings_device_bin_addr_str">Bin文件</string>
+        <string name="system_settings_device_bin_addr_hint_str">升级文件路径</string>
+        <string name="system_settings_update_str">浏览</string>
         <string name="system_settings_device_update_str">升级</string>
         <string name="system_settings_device_cancle_str">取消</string>
         
