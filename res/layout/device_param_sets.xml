@@ -29,8 +29,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_version_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_version" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
@@ -38,8 +40,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_device_name_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_name" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	        </TableRow>
 	        
@@ -49,8 +53,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_address_type_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_addr_type" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
@@ -58,8 +64,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_device_address_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_address" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	        </TableRow>
 	        
@@ -69,8 +77,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_inside_total_space_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_in_tatal_space"  
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
@@ -78,8 +88,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_outside_total_space_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_out_tatal_space"  
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	        </TableRow>
 	        
@@ -89,8 +101,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_total_time_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText  android:id="@+id/device_param_enable_recorde_time"   
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
@@ -139,6 +153,7 @@
     				android:layout_height="wrap_content"
     				android:layout_weight="1"
     				android:focusable="false"
+    				android:editable="false"
     				android:text="@string/device_params_recorde_type_close_str"
     				android:checked="true"/>
          </LinearLayout>
@@ -169,8 +184,10 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_real_speed_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_params_recorde_real_speed_id" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
@@ -185,18 +202,20 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_frame_size_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
+	            <Spinner android:id="@+id/device_params_recorde_frame_size_id" 
+		            android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"
+			    	/>
 	            
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_frame_speed_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
+	            <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+		            android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"
+			    	/>
 	        </TableRow>
 	        
 	        <TableRow >
@@ -205,18 +224,18 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_comp_quar_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
+	             <Spinner android:id="@+id/device_params_recorde_comp_quar_id" 
+		            android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"/>
 	            
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_comp_type_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
+	           <Spinner android:id="@+id/device_params_recorde_comp_type_id" 
+		            android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"/>
 	        </TableRow>
 	    </TableLayout>
 	    
@@ -243,7 +262,8 @@
 		    	android:layout_weight="1"
 		    	android:text="@string/device_params_monitor_frame_size_str"/>
 	    
-	           <Spinner android:layout_width="fill_parent"
+	           <Spinner android:id="@+id/device_params_monitor_frame_size_id" 
+	            android:layout_width="fill_parent"
 		    	android:layout_height="fill_parent"
 		    	android:layout_weight="1"/>
          </LinearLayout>
@@ -265,10 +285,10 @@
 		    	android:text="@string/device_params_date_str"/>
 	    
 	            
-	          <DatePicker android:layout_width="wrap_content"
+	          <TextView android:layout_width="wrap_content"
                		android:layout_height="wrap_content"/>
 	    
-	           <TimePicker android:layout_width="wrap_content"
+	           <TextView android:layout_width="wrap_content"
                 	android:layout_height="wrap_content"/>
 	           
 	           <Button android:layout_width="wrap_content"
