@@ -67,6 +67,9 @@ public class VideoAdapter extends BaseAdapter {
 	}
 
 	private int getFileLength(String fileLengthHex) {
+		if(fileLengthHex != null && fileLengthHex.trim().length()<=0) {
+			return 0;
+		}
 		return Integer.parseInt(fileLengthHex, 16);
 	}
 	
