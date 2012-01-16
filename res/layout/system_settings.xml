@@ -24,7 +24,7 @@
                 android:text="@string/system_settings_save_path_str"
                 android:textColor="@color/white" />
 
-            <EditText
+            <EditText android:id="@+id/system_settings_save_path_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
@@ -32,7 +32,7 @@
                 android:maxLength="30"
                 android:singleLine="true" />
 
-            <Button
+            <Button android:id="@+id/system_settings_preview_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dip"
@@ -64,11 +64,11 @@
                     android:text="@string/system_settings_device_name_str"
                     android:textColor="@color/white" />
 
-                <EditText
+                <EditText android:id="@+id/system_settings_device_name_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dip"
-                    android:hint="@string/system_settings_save_path_hint_str"
+                    android:hint="@string/system_settings_device_name_hint_str"
                     android:maxLength="30"
                     android:singleLine="true" />
             </LinearLayout>
@@ -87,11 +87,11 @@
                     android:text="@string/system_settings_device_ip_str"
                     android:textColor="@color/white" />
 
-                <EditText
+                <EditText android:id="@+id/system_settings_device_ip_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dip"
-                    android:hint="@string/system_settings_save_path_hint_str"
+                    android:hint="@string/system_settings_device_ip_hint_str"
                     android:maxLength="30"
                     android:singleLine="true" />
             </LinearLayout>
@@ -107,22 +107,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dip"
                     android:layout_marginRight="10dip"
-                    android:text="@string/system_settings_save_path_str"
+                    android:text="@string/system_settings_device_bin_addr_str"
                     android:textColor="@color/white" />
 
-                <EditText
+                <EditText android:id="@+id/system_settings_device_bin_addr_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dip"
-                    android:hint="@string/system_settings_save_path_hint_str"
-                    android:maxLength="30"
+                    android:hint="@string/system_settings_device_bin_addr_hint_str"
                     android:singleLine="true" />
 
-                <Button
+                <Button android:id="@+id/system_settings_device_bin_update_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dip"
-                    android:text="@string/system_settings_preview_str" />
+                    android:text="@string/system_settings_update_str" />
             </LinearLayout>
         </LinearLayout>
 
@@ -133,7 +132,7 @@
             android:background="@color/darkgray"
             android:orientation="horizontal" >
 
-            <Button
+            <Button android:id="@+id/system_settings_device_update_id"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1"
