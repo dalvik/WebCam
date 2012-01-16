@@ -111,6 +111,7 @@ public class CamVideoH264 extends Activity {
 	};
 	
 	private void startThread() {
+		myVideoView.onStop();
 		if(thread != null && thread.isAlive()) {
 			try {
 				thread.join(100);
@@ -122,6 +123,7 @@ public class CamVideoH264 extends Activity {
 		thread = new Thread(myVideoView);
 		thread.start();
 	}
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
