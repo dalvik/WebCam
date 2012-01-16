@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:id="@+id/line1">
+	
+	 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+	    android:id="@+id/top_bar"
+	    android:background="@color/darkgrey"
+	    android:gravity="center_vertical"
+	    android:layout_alignParentTop="true">
+	    
+	    <Button  android:id="@+id/dir_preview_back_button" 
+			 android:layout_width="wrap_content"
+			 android:layout_height="wrap_content"
+	         android:layout_alignParentRight="true"
+	         android:layout_marginRight="5dip"
+	         android:text="@string/system_settings_save_path_back_str"
+	         android:gravity="center_horizontal"/>
+		
+	     <TextView android:id="@+id/path_title" 
+         	 android:layout_height="wrap_content"
+			 android:layout_width="wrap_content"
+			 android:gravity="center"
+			 android:layout_marginTop="5dip"
+			 android:textColor="@color/white"
+			 android:layout_marginLeft="5dip"
+			 android:maxLength="40"
+			 android:textAppearance="?android:attr/textAppearanceMedium"/>
+					     
+	</RelativeLayout>
+	
+	<ProgressBar android:id="@+id/loadingProgress"
+		android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_centerInParent="true"
+		android:indeterminate="false"
+		style="?android:attr/progressBarStyleLarge"
+		android:visibility="gone" />
+		
+	 <LinearLayout android:id="@+id/bottom_id"
+	          xmlns:android="http://schemas.android.com/apk/res/android"
+	          android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:background="@color/darkgray"
+	          android:layout_alignParentBottom="true"
+	          android:orientation="horizontal" >
+	
+	          <Button android:id="@+id/system_settings_save_path_preview_sure_id"
+	              android:layout_width="fill_parent"
+	              android:layout_height="fill_parent"
+	              android:layout_weight="1"
+	              android:text="@string/system_settings_save_path_preview_sure_str" />
+	
+	          <Button android:id="@+id/system_settings_save_path_preview_cancle_id"
+	              android:layout_width="fill_parent"
+	              android:layout_height="fill_parent"
+	              android:layout_weight="1"
+	              android:text="@string/system_settings_save_path_preview_cancle_str" />
+	      </LinearLayout>
+        
+	<ListView android:id="@+id/android:list"
+	    android:layout_above="@+id/bottom_id"
+		android:layout_below="@id/top_bar"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:focusable="true"/>
+	
+    <Button android:id="@id/android:empty"  
+        	  android:layout_below="@+id/top_bar"
+              android:layout_width="wrap_content"  
+              android:layout_height="wrap_content"  
+              android:textColor="@color/white"
+              android:layout_centerHorizontal="true"
+              android:text="@string/system_settings_save_path_choice_str"
+              android:gravity="center_horizontal"/>
+   
+</RelativeLayout>
