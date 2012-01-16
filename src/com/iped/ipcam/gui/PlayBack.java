@@ -8,11 +8,11 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -36,6 +36,7 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.ProgressUtil;
 import com.iped.ipcam.utils.VideoAdapter;
 
 public class PlayBack extends ListActivity implements OnClickListener {
@@ -72,14 +73,11 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	
 	private Calendar calendar = null;
 
-	private ProgressDialog videoSearchProgressDialog = null;
-	
+	//private ProgressDialog videoSearchProgressDialog = null;
 	
 	private int selectIndex = 0;
 	
 	private String TAG = "PlayBack";
-	
-	
 	
 	private Handler handler = new Handler() {
 		@Override
@@ -92,7 +90,24 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				videoAdapter.notifyDataSetChanged();
 				break;
 			case Constants.DISSMISVIDEOSEARCHDLG:
-				hideProgress();
+				ProgressUtil.hideProgress();
+				break;
+			case Constants.DELETEFILES:
+				ProgressUtil.showProgress(R.string.video_delete_ing, PlayBack.this);
+				break;
+			case Constants.DELETEFILESUCCESS:
+				ProgressUtil.hideProgress();
+				videoAdapter.notifyDataSetChanged();
+				Toast.makeText(PlayBack.this, getResources().getString(R.string.video_delete_success), Toast.LENGTH_SHORT).show();
+				break;
+			case Constants.DELETEFILEERROR:
+				Toast.makeText(PlayBack.this, getResources().getString(R.string.video_delete_error), Toast.LENGTH_SHORT).show();
+				ProgressUtil.hideProgress();
+				break;
+			case Constants.CLEARFILES:
+				//Toast.makeText(PlayBack.this, getResources().getString(R.string.video_delete_success), Toast.LENGTH_SHORT).show();
+				//hideProgress();
+				ProgressUtil.showProgress(R.string.video_clear_ing, PlayBack.this);
 				break;
 			default:
 				break;
@@ -146,13 +161,16 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		Video video = videoList.get(selectIndex);
+		System.out.println(featureId + "=====" + video);
 		switch (item.getItemId()) {
 		case DOWNLOAD:
-			Video video = videoList.get(selectIndex);
-			System.out.println(featureId + "=====" + video);
 			break;
 		case DELETE:
-			
+			String index = video.getIndex();
+			IVideoManager videoManager = CamMagFactory.getVideoManagerInstance();
+			videoManager.deleteFiles(handler, index, index+" ", video.getAddress());
+			handler.sendEmptyMessage(Constants.DELETEFILES);
 			break;
 		case PLAYBACK:
 			
@@ -175,7 +193,8 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			}
 			break;
 		case R.id.play_back_clear_all:
-			clearVideoList();
+			//clearVideoList();
+			clearAlertDlg();
 			break;
 		case R.id.start_date_buttion:
 			setDateStr(startSearchDate);
@@ -205,11 +224,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
             public void onClick(DialogInterface dialog, int whichButton) {
             	Date startDate = DateUtil.formatTimeToDate2(getStartTime());
             	Date endDate = DateUtil.formatTimeToDate2(getEndTime());
-            	String s = getStartTime();
-            	String w = getEndTime();
-            	System.out.println(s + "  " + w + " " + endDate);
+            	//String s = getStartTime();
+            	//String w = getEndTime();
             	 if(compareDate(startDate, endDate)) {
-            		 showProgress();
+            		 ProgressUtil.showProgress(R.string.auto_search_tips_str,PlayBack.this);
             		 videoManager.videoSearchInit(device, startDate, endDate);
             		 videoManager.startSearchThread(handler);
             		 try {
@@ -248,21 +266,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
         .create();
         dlg.show();
 	}
-	
-	private void showProgress() {
-		hideProgress();
-		videoSearchProgressDialog = new ProgressDialog(PlayBack.this);
-		videoSearchProgressDialog.setTitle(getResources().getString(R.string.auto_search_tips_str));
-		videoSearchProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		videoSearchProgressDialog.show();
-	}
-	
-	private void hideProgress() {
-		if(videoSearchProgressDialog != null) {
-			videoSearchProgressDialog.dismiss();
-			videoSearchProgressDialog = null;
-		}
-	}
+
 	
 	private void initSearchDlg(String device) {
 		calendar = Calendar.getInstance();
@@ -341,8 +345,34 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	}
 	
 	
-	private void clearVideoList() {
-		videoList.clear();
-		videoAdapter.notifyDataSetChanged();
+
+	private void clearAlertDlg() {
+		final int count = videoAdapter.getCount();
+		if(count<=0) {
+			Toast.makeText(PlayBack.this, getResources().getString(R.string.play_back_auto_clear_no_files_str), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		new AlertDialog.Builder(PlayBack.this).setTitle(getResources().getString(R.string.play_back_clear_dlg_title_str))
+		.setMessage(getResources().getString(R.string.play_back_clear_dlg_message_str))
+		.setPositiveButton(getResources().getString(R.string.play_back_clear_dlg_sure_str), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				IVideoManager videoManager = CamMagFactory.getVideoManagerInstance();
+				Video videoStart = videoAdapter.getItem(0);
+				Video videoEnd = videoAdapter.getItem(count-1);
+				
+				videoManager.deleteFiles(handler, videoStart.getIndex(), videoEnd.getIndex() + " ", videoStart.getAddress());
+				Message msg = handler.obtainMessage();
+				handler.sendMessage(msg);
+				handler.sendEmptyMessage(Constants.CLEARFILES);
+			}
+		})
+		.setNegativeButton(getResources().getString(R.string.play_back_auto_cancle_button_str), null).create().show();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		ProgressUtil.dismissProgress();
 	}
 }

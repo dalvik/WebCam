@@ -47,4 +47,27 @@ public class Constants {
 	public final static int RECONNECT = 2030;
 	
 	
+	public final static int DELETEFILES = 2040;
+	
+	public final static int DELETEFILESUCCESS = 2050;
+	
+	public final static int DELETEFILEERROR = 2060;
+	
+	public final static int CLEARFILES = 2070;
+	
+	//-------------------------------------------
+	
+	public final static int SHOWQUERYCONFIGDLG = 2080;
+	
+	public final static int HIDEQUERYCONFIGDLG = 2090;
+	
+	public final static int QUERYCONFIGERROR = 2100;
+	
+	//---------------------------------------------
+	
+	public final static int SHOWPREVIEWDIRDLG = 2110;
+	
+	public final static int SHOWBINPREVIEWDIRDLG = 2120;
+	
+	
 }
