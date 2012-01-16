@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:id="@+id/line1">
+	
+	 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+	    android:id="@+id/top_bar"
+	    android:gravity="center_vertical"
+	    android:layout_alignParentTop="true">
+	    
+	    <ImageButton  android:id="@+id/book_back_button" 
+			 android:layout_width="wrap_content"
+			 android:layout_height="wrap_content"
+	         android:layout_alignParentRight="true"
+	         android:gravity="center_horizontal"/>
+		
+	     <TextView android:id="@+id/path_title" 
+         	 android:layout_height="wrap_content"
+			 android:layout_width="wrap_content"
+			 android:gravity="center"
+			 android:layout_marginTop="5dip"
+			 android:textColor="@color/white"
+			 android:layout_marginLeft="5dip"
+			 android:maxLength="40"
+			 android:textAppearance="?android:attr/textAppearanceMedium"/>
+					     
+		
+		<ImageButton  android:id="@+id/book_search_button" 
+			 android:layout_width="wrap_content"
+			 android:layout_height="wrap_content"
+			 android:layout_marginRight="20dip"
+			  android:layout_alignParentRight="true"
+	         android:gravity="center_horizontal"/>
+		          
+	</RelativeLayout>
+	
+	<ProgressBar android:id="@+id/loadingProgress"
+		android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_centerInParent="true"
+		android:indeterminate="false"
+		style="?android:attr/progressBarStyleLarge"
+		android:visibility="gone" />
+		
+		
+	<ListView android:id="@+id/android:list"
+		android:layout_below="@id/top_bar"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:paddingTop="15dip"
+		android:focusable="true"/>
+	
+    <TextView android:id="@id/android:empty"  
+              android:layout_width="fill_parent"  
+              android:layout_height="wrap_content"  
+              android:textColor="@color/white"
+              android:textSize="40dip"
+              android:layout_centerVertical="true"
+              android:gravity="center"/>  
+</RelativeLayout>
