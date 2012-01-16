@@ -14,6 +14,8 @@
  	
  	<uses-permission android:name="android.permission.DEVICE_POWER" /> 
  	
+ 	<uses-permission android:name="android.permission.RESTART_PACKAGES"/>  
+ 	
     <!--  android:name=".WebTabWidget" -->
         
     <application
@@ -43,6 +45,10 @@
         <activity android:name=".PlayBack"/>
         
         <activity android:name=".SystemSettings"/>
+        
+        <activity android:name=".List1" android:theme="@android:style/Theme.Dialog"/>
+        
+        <activity android:name=".DirPreview" android:theme="@android:style/Theme.NoTitleBar"/>
         
     </application>
 

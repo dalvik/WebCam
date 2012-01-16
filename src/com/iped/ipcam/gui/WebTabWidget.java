@@ -1,5 +1,6 @@
 package com.iped.ipcam.gui;
 
+import android.app.ActivityManager;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -68,5 +69,16 @@ public class WebTabWidget extends TabActivity {
 		super.onDestroy();
 		ICamManager camManager = CamMagFactory.getCamManagerInstance();
 		camManager.clearCamList();
+		int sdk_Version = android.os.Build.VERSION.SDK_INT;  
+		if (sdk_Version >= 8) {  
+			Intent startMain = new Intent(Intent.ACTION_MAIN);  
+			startMain.addCategory(Intent.CATEGORY_HOME);  
+			startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+			startActivity(startMain);  
+			System.exit(0);  
+		} else if (sdk_Version < 8) {  
+			ActivityManager activityMgr = (ActivityManager) getSystemService(ACTIVITY_SERVICE);  
+			activityMgr.restartPackage(getPackageName());  
+		}
 	}
 }
