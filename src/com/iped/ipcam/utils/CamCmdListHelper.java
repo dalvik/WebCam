@@ -6,12 +6,15 @@ public class CamCmdListHelper {
 	public final static String QueryCmd_Video = "get_transport_type:1";
 	public final static String SetCmd_StartVideo = "set_transport_type:tcp\n";
 	public final static String SetCmd_ResetVideo = "restart_server:0";
-	public final static String GetCmd_Config = "GetConfig:";
+	public final static String GetCmd_Config = "GetConfig:1 ";
 	public final static String SetCmd_Config = "SetConfig:";
 	public final static String GetCmd_Time = "GetTime:0";
-	public final static String GetCmd_Statue = "GetRecordStatue:0";
+	public final static String GetCmd_Statue = "GetRecordStatue:0 ";
 	public final static String SetCmd_Statue = "SetRecordStatue:";
 	public final static String SetCmd_ChangeIP = "SetIpAddress:";
 	public final static String GetCmd_NetFiles = "GetNandRecordFile:";
 	public final static String SetCmd_PlayNetFiles = "ReplayRecord:";
+	
+	public final static String DelCmd_DeleteFiles = "DeleteFile:";
+	
 }
