@@ -30,7 +30,7 @@ public class LeftVideoView extends Activity {
         panel.setPanelClosedEvent(panelClosedEvent);  
         panel.setPanelOpenedEvent(panelOpenedEvent);  
           
-        gridview.setBackgroundResource(R.drawable.shutdown_bg);
+        //gridview.setBackgroundResource(R.drawable.shutdown_bg);
     }  
   
     PanelClosedEvent panelClosedEvent =new PanelClosedEvent(){  
