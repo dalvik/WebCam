@@ -57,6 +57,15 @@ public class WebTabWidget extends TabActivity {
 			tabWidget.getChildAt(i).getLayoutParams().height  = tabWidget.getChildAt(i).getLayoutParams().height * 2/3;
 			
 		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				UdtTools.sendFile("/mnt/sdcard/test.amr", "5000");
+			}
+		}).start();
+		UdtTools.recvFile("192.168.1.101", "5000", "/mnt/sdcard/test.amr", "/mnt/sdcard/abcdeeee.amr");
+		
 	}
 	
 	@Override
