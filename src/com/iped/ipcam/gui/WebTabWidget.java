@@ -12,6 +12,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
@@ -23,6 +24,8 @@ import com.iped.ipcam.utils.ThroughNetUtil;
 public class WebTabWidget extends TabActivity {
 
 	public static TabHost tabHost = null;
+	
+	private String TAG = "WebTabWidget";
 	
 	private Handler handler = new Handler() {
 		@Override
@@ -44,8 +47,7 @@ public class WebTabWidget extends TabActivity {
 					socket.send(packet);
 					System.out.println("port 1 sucess");
 				} catch (Exception e) {
-					e.printStackTrace();
-					return;
+					Log.d(TAG, "----> send port 1 " + e.getLocalizedMessage());
 				}
 				
 				try {
@@ -56,8 +58,7 @@ public class WebTabWidget extends TabActivity {
 					socket.send(packet);
 					System.out.println("port 2 sucess");
 				} catch (Exception e) {
-					e.printStackTrace();
-					return;
+					Log.d(TAG, "----> send port 2 " + e.getLocalizedMessage());
 				}
 				
 				try {
@@ -68,8 +69,7 @@ public class WebTabWidget extends TabActivity {
 					socket.send(packet);
 					System.out.println("port 3 sucess");
 				} catch (Exception e) {
-					e.printStackTrace();
-					return;
+					Log.d(TAG, "----> send port 3 " + e.getLocalizedMessage());
 				}
 			}
 			super.handleMessage(msg);

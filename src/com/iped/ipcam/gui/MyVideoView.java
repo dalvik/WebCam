@@ -89,7 +89,7 @@ public class MyVideoView extends View implements Runnable {
 	
 	public void run() {
 		try {
-			byte [] tem = CamCmdListHelper.SetCmd_StartVideo.getBytes();
+			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
 			datagramSocket = new DatagramSocket();
 			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), Constants.UDPPORT);

@@ -59,7 +59,7 @@ public class ThroughNetUtil implements Runnable {
 	@Override
 	public void run() {
 		boolean flag = false;
-		int num = 10;
+		int num = 3;
 		while(!flag) {
 			DatagramSocket udpSocket = null;
 			try {
@@ -85,11 +85,13 @@ public class ThroughNetUtil implements Runnable {
 						DatagramPacket rp = new DatagramPacket(buf, 64);
 						try {
 							udpSocket.receive(rp);
-							if(buf[0] == SendUDTCommon.NET_CAMERA_OK.ordinal()) {
-								int packetLength = rp.getLength();
-								byte[] receSize = new byte[2];
+							if(buf[0] == SendUDTCommon.NET_CAMERA_PEER_PORTS.ordinal()) {
+								int packetLength = rp.getLength(); // 13
+								byte[] receSize = new byte[2];//
 								System.arraycopy(buf, 1, receSize, 0, 2);
 								int receContentLength = ByteUtil.bytesToShort(receSize);
+								System.out.println(receSize[0] + " " + receSize[1]);
+								System.out.println(packetLength + "  " + receContentLength);
 								if((receContentLength + 3) == packetLength) {
 									byte[] ipByte = new byte[4];
 									byte[] port1Byte = new byte[2];
@@ -117,9 +119,17 @@ public class ThroughNetUtil implements Runnable {
 									msg.setData(bundle);
 									handler.sendMessage(msg);
 									flag = true; 
+									Log.d(TAG,	"ThroughNetUtil get ip and tree port from server success  " + flag);
+									break;
+								}else {
+									flag = false;	
+									Log.d(TAG,	"ThroughNetUtil get unlegal package from server when quest ip and tree port" + flag);
 								}
+							}else {
+								System.out.println(buf[0] + " " + buf[1] + " " + buf[2] + " " + buf[3] + " " + buf[4] + " " + buf[5] + " " + buf[6] + " " + buf[7] + " " + buf[8] + " " + buf[9] + " " + buf[10] + " " + buf[11] + " " + buf[12]);
+								Log.d(TAG,	"ThroughNetUtil get unfull package from server when quest ip and tree port" + flag);
+								flag = false;
 							}
-							flag = false;
 						} catch (IOException e) {
 							Log.d(TAG, "ThroughNetUtil receive ip and port info error ! " + e.getLocalizedMessage());
 							flag = false;

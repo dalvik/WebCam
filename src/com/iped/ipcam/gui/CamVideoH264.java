@@ -37,13 +37,12 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 
 /**
- * H.264的功能分为两层，
- * 视频编码层(VCL，Video Coding Layer)
- * 网络提取层(NAL，Network Abstraction Layer)
- * 
- * 在VCL和NAL之间定义了一个基于分组方式的接口，打包和相应的信令属于NAL的一部分。
- * 	   这样，高效率编码和网络适应性的任务分别由VCL和NAL来完成。VCL数据是编码处理后的输出，它表示被压缩编码后的视频数据序列。
- * 	   在VCL数据传输和存储之前，这些编码的VCL数据先被映射或封装进NAL单元中。
+     H.264的功能分为两层，
+             视频编码层(VCL，Video Coding Layer)
+             网络提取层(NAL，Network Abstraction Layer)
+             在VCL和NAL之间定义了一个基于分组方式的接口，打包和相应的信令属于NAL的一部分。
+  	   这样，高效率编码和网络适应性的任务分别由VCL和NAL来完成。VCL数据是编码处理后的输出，它表示被压缩编码后的视频数据序列。
+  	   在VCL数据传输和存储之前，这些编码的VCL数据先被映射或封装进NAL单元中。
      VCL包括基于块的运动补偿、混合编码和一些新特性。
      NAL负责针对下层网络的特性对数据进行封装，包括成帧、发信号给逻辑信道、利用同步信息等。
      NAL从VCL获得数据，包括头信息、段结构信息和实际载荷，NAL的任务就是正确地将它们映射到传输协议上。
