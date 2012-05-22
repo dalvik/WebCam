@@ -69,5 +69,10 @@ public class Constants {
 	
 	public final static int SHOWBINPREVIEWDIRDLG = 2120;
 	
+	// 
+	public final static int SHOWTOASTMSG = 4100;
+	
+	public final static int SHOWRESULTDIALOG = 4200;
+	
 	
 }

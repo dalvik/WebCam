@@ -125,7 +125,7 @@ public class WebTabWidget extends TabActivity {
 		}).start();
 		UdtTools.recvFile("192.168.1.101", "5000", "/mnt/sdcard/test.amr", "/mnt/sdcard/abcdeeee.amr");
 		*/
-		new Thread(new ThroughNetUtil(handler)).start();
+		//new Thread(new ThroughNetUtil(handler)).start();
 	}
 	
 	@Override

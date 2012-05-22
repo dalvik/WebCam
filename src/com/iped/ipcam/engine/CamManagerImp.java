@@ -117,7 +117,7 @@ public class CamManagerImp implements ICamManager {
 	@Override
 	public boolean isOnline(String ip, int port) throws CamManagerException {
 		DatagramSocket datagramSocket = null;
-		 byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+		byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
 		
 		byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
 		try {

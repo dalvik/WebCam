@@ -17,7 +17,7 @@ public class ThroughNetUtil implements Runnable {
 	
 	private String TAG = "ThroughNet";
 
-	enum SendUDTCommon {
+	public enum SendUDTCommon {
 		/**
 		 * 提示对方接收到的数据不完整， 或其他错误 0
 		 */
@@ -90,8 +90,6 @@ public class ThroughNetUtil implements Runnable {
 								byte[] receSize = new byte[2];//
 								System.arraycopy(buf, 1, receSize, 0, 2);
 								int receContentLength = ByteUtil.bytesToShort(receSize);
-								System.out.println(receSize[0] + " " + receSize[1]);
-								System.out.println(packetLength + "  " + receContentLength);
 								if((receContentLength + 3) == packetLength) {
 									byte[] ipByte = new byte[4];
 									byte[] port1Byte = new byte[2];
