@@ -13,9 +13,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.os.Environment;
-import android.widget.Toast;
-
-import com.iped.ipcam.gui.R;
 
 /** 文件处理工具类 **/
 public class FileUtil {
