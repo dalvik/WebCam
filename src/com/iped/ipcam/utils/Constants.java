@@ -75,4 +75,18 @@ public class Constants {
 	public final static int SHOWRESULTDIALOG = 4200;
 	
 	
+	// 发送UDP打洞成功的消息
+	public final static int SENDGETTHREEPORTMSG = 4500;
+	
+	public final static int SENDGETTHREEPORTTIMOUTMSG = 4600;
+	
+	//
+	public final static int BINDLOCALPORT1 = 60001;
+	
+	public final static int BINDLOCALPORT2 = 60001;
+	
+	public final static int BINDLOCALPORT3 = 60001;
+	
+	
+	
 }

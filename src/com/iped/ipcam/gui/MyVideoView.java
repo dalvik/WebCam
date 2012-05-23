@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,12 +21,13 @@ import android.view.View;
 
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class MyVideoView extends View implements Runnable {
 
-	private final static int NALBUFLENGTH = 320*480 * 2;
+	private final static int NALBUFLENGTH = 320*480 ; //320*480 * 2
 	
-	private final static int SOCKETBUFLENGTH = 342000;
+	private final static int SOCKETBUFLENGTH = 3420;
 	
 	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 	
@@ -62,6 +61,8 @@ public class MyVideoView extends View implements Runnable {
 	
 	private boolean stopPlay = false;
 
+	private int result = -1;
+	
 	private static final String TAG = "ReadStreamThread";
 	
 	private Handler handler;
@@ -89,22 +90,28 @@ public class MyVideoView extends View implements Runnable {
 	
 	public void run() {
 		try {
-			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
-			datagramSocket = new DatagramSocket();
+			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Udp.getBytes();
+			ThroughNetUtil netUtil = CamVideoH264.getInstance();
+			datagramSocket = netUtil.getPort1();
 			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), Constants.UDPPORT);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
 			datagramSocket.send(datagramPacket);
+			DatagramSocket port2 = netUtil.getPort2();
 			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			System.out.println("ready rece ....");
-			SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
+			System.out.println("ready rece ...." + " " + CamVideoH264.currIpAddress + " " + CamVideoH264.currPort);
+			int localPort2 =  port2.getLocalPort();
+			//port2.close();
+			result = UdtTools.initSocket(CamVideoH264.currIpAddress,localPort2, CamVideoH264.currPort);
+			System.out.println("result=" + result);
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
 			socket = new Socket();
 			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
 			if(dis != null) {
 				dis.close();
 			}
 			dis = new DataInputStream(socket.getInputStream());
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			System.out.println("dis=" + dis);
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);*/
 		}catch (IOException e) {
 			e.printStackTrace();
 			onStop();
@@ -114,8 +121,39 @@ public class MyVideoView extends View implements Runnable {
 		}
 		long start = System.currentTimeMillis();
 		int i = 0;
-		while (!Thread.currentThread().isInterrupted() && dis != null && !stopPlay) {
-			try {
+		//byte[] buf = new byte[1024];
+		while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
+			readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
+			if (readLengthFromSocket <= 0) { // 读取完成
+				System.out.println("read over break....");
+				break;
+			}
+			sockBufferUsedLength = 0;
+			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
+				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
+				while(looperFlag) {
+					looperFlag = false;
+					if(nalSizeTemp == -2) {
+						if(nalBufUsedLength>0) {
+							i++;
+							if(i%50 ==0) {
+								long end = System.currentTimeMillis() / 1000 - start / 1000;
+								System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
+							}
+							copyPixl();
+						}
+						nalBuf[0] = -1;
+						nalBuf[1] = -40;
+						nalBuf[2] = -1;
+						nalBuf[3] = -32;
+						sockBufferUsedLength += 4;
+						nalBufUsedLength = 4;
+						break;
+					}
+				}
+			}
+			//System.out.println("size = " + size + "   " + buf[100]);
+			/*try {
 				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从流里面读取的字节的长度  <0时读取完毕
 			} catch (IOException e) {
 				Log.d(TAG, e.getLocalizedMessage());
@@ -147,7 +185,7 @@ public class MyVideoView extends View implements Runnable {
 						break;
 					}
 				}
-			}
+			}*/
 		}
 		onStop();
 		release();
@@ -200,6 +238,7 @@ public class MyVideoView extends View implements Runnable {
 	}
 
 	private void release() {
+		UdtTools.release();
 		if(fis != null) {
 			try {
 				fis.close();
@@ -225,4 +264,33 @@ public class MyVideoView extends View implements Runnable {
 	public boolean getPlayStatus() {
 		return stopPlay;
 	}
+	
+	/*
+	 
+	 try {
+			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
+			datagramSocket = new DatagramSocket();
+			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.currPort);
+			datagramSocket.send(datagramPacket);
+			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+			System.out.println("ready rece ....");
+			SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
+			socket = new Socket();
+			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
+			if(dis != null) {
+				dis.close();
+			}
+			dis = new DataInputStream(socket.getInputStream());
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			System.out.println("dis=" + dis);
+		}catch (IOException e) {
+			e.printStackTrace();
+			onStop();
+			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			handler.sendEmptyMessage(Constants.CONNECTERROR);
+			return ;
+		}
+	 
+	 */
 }

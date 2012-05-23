@@ -15,6 +15,12 @@ public class ThroughNetUtil implements Runnable {
 
 	private Handler handler;
 	
+	private DatagramSocket port1 = null;
+	
+	private DatagramSocket port2 = null;
+	
+	private DatagramSocket port3 = null;
+	
 	private String TAG = "ThroughNet";
 
 	public enum SendUDTCommon {
@@ -91,6 +97,7 @@ public class ThroughNetUtil implements Runnable {
 								System.arraycopy(buf, 1, receSize, 0, 2);
 								int receContentLength = ByteUtil.bytesToShort(receSize);
 								if((receContentLength + 3) == packetLength) {
+									System.out.println(buf[0] + " " + buf[1] + " " + buf[2] + " " + buf[3] + " " + buf[4] + " " + buf[5] + " " + buf[6] + " " + buf[7] + " " + buf[8] + " " + buf[9] + " " + buf[10] + " " + buf[11] + " " + buf[12] );
 									byte[] ipByte = new byte[4];
 									byte[] port1Byte = new byte[2];
 									byte[] port2Byte  = new byte[2];
@@ -100,20 +107,24 @@ public class ThroughNetUtil implements Runnable {
 									System.arraycopy(buf, 9, port2Byte , 0, 2);
 									System.arraycopy(buf, 11, port3Byte , 0, 2);
 									//int ip = ByteUtil.bytesToInt(ipByte);
-									int port1 = ByteUtil.bytesToShort(port1Byte);
-									int port2 = ByteUtil.bytesToShort(port2Byte);
-									int port3 = ByteUtil.bytesToShort(port3Byte);
+									int port1 = ByteUtil.bytesToUshort(port1Byte);
+									int port2 = ByteUtil.bytesToUshort(port2Byte);
+									int port3 = ByteUtil.bytesToUshort(port3Byte);
 									Bundle bundle = new Bundle();
 									/*System.out.println(ipByte[0] + " " + ipByte[1] + " " +ipByte[2] + " " + ipByte[2]);
 									System.out.println(port1Byte[0] + " " + port1Byte[1]);
 									System.out.println(port2Byte[0] + " " + port2Byte[1]);
 									System.out.println(port3Byte[0] + " " + port3Byte[1]);*/
-									bundle.putString("IPADDRESS", InetAddress.getByAddress(ipByte).toString());
+									String ipaddress = InetAddress.getByAddress(ipByte).toString();
+									if(ipaddress.startsWith("/")) {
+										ipaddress = ipaddress.substring(1);
+									}
+									bundle.putString("IPADDRESS", ipaddress);
 									bundle.putInt("PORT1", port1>0?port1:-port1);
 									bundle.putInt("PORT2", port2>0?port2:-port2);
 									bundle.putInt("PORT3", port3>0?port3:-port3);
 									Message msg = handler.obtainMessage();
-									msg.what = 1;
+									msg.what = Constants.SENDGETTHREEPORTMSG;
 									msg.setData(bundle);
 									handler.sendMessage(msg);
 									flag = true; 
@@ -137,11 +148,12 @@ public class ThroughNetUtil implements Runnable {
 			}
 			num--;
 			try {
-				Thread.sleep(20000);
+				Thread.sleep(15000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			if(num<=0) {
+				handler.sendEmptyMessage(Constants.SENDGETTHREEPORTTIMOUTMSG);
 				flag = true;
 			}
 			Log.d(TAG,	"ThroughNetUtil try connect num = " + num);
@@ -168,16 +180,17 @@ public class ThroughNetUtil implements Runnable {
 		System.arraycopy(sendDataContent, 0, sendData, l1 + l3, l2);
 		DatagramPacket datagramPacket;
 		try {
-			DatagramSocket port1 = new DatagramSocket(); 
+			port1 = new DatagramSocket(); //Constants.BINDLOCALPORT1
 			datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 					InetAddress.getByName(Common.SERVER_IP),
 					Common.INTERACTIVE_PORT);
 			port1.setSoTimeout(20000);
 			port1.send(datagramPacket);
 			Log.d(TAG,	"send port 1 success");
-			port1.close();
-			port1 = null;
 		} catch (Exception e) {
+			if(port1 != null) {
+				port1.close();
+			}
 			Log.d(TAG, "ThroughNetUtil send port 1 error! " + e.getLocalizedMessage());
 			return false;
 		}
@@ -189,16 +202,18 @@ public class ThroughNetUtil implements Runnable {
 			byte[] rece = rp.getData();
 			if (rece[0] == SendUDTCommon.NET_CAMERA_OK.ordinal()) {
 				try {
-					DatagramSocket port2 = new DatagramSocket(); 
+					port2 = new DatagramSocket(); //Constants.BINDLOCALPORT2
 					datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 							InetAddress.getByName(Common.SERVER_IP),
 							Common.INTERACTIVE_PORT);
+					port2.setReuseAddress(true);
 					port2.setSoTimeout(20000);
 					port2.send(datagramPacket);
 					Log.d(TAG,	"send port 2 success");
-					port2.close();
-					port2 = null;
 				} catch (Exception e) {
+					if(port2 != null) {
+						port2.close();
+					}
 					Log.d(TAG, "ThroughNetUtil send port 2 error! " + e.getLocalizedMessage());
 					return false;
 				}
@@ -207,16 +222,17 @@ public class ThroughNetUtil implements Runnable {
 					Log.d(TAG,	"receive relay port 2 ");
 					if (rece[0] == SendUDTCommon.NET_CAMERA_OK.ordinal()) {
 						try {
-							DatagramSocket port3 = new DatagramSocket(); 
+							port3 = new DatagramSocket(); //Constants.BINDLOCALPORT3
 							datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 									InetAddress.getByName(Common.SERVER_IP),
 									Common.INTERACTIVE_PORT);
 							port3.setSoTimeout(20000);
 							port3.send(datagramPacket);
 							Log.d(TAG,	"send port 3 success");
-							port3.close();
-							port3 = null;
 						} catch (Exception e) {
+							if(port3 != null) {
+								port3.close();
+							}
 							Log.d(TAG, "ThroughNetUtil send port 3 error! " + e.getLocalizedMessage());
 							return false;
 						}
@@ -339,4 +355,30 @@ public class ThroughNetUtil implements Runnable {
 		}
 		return false;
 	}
+
+	public DatagramSocket getPort1() {
+		return port1;
+	}
+
+	public void setPort1(DatagramSocket port1) {
+		this.port1 = port1;
+	}
+
+	public DatagramSocket getPort2() {
+		return port2;
+	}
+
+	public void setPort2(DatagramSocket port2) {
+		this.port2 = port2;
+	}
+
+	public DatagramSocket getPort3() {
+		return port3;
+	}
+
+	public void setPort3(DatagramSocket port3) {
+		this.port3 = port3;
+	}
+	
+	
 }

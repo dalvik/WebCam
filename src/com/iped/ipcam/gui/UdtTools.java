@@ -9,6 +9,10 @@ public class UdtTools {
 		System.loadLibrary("RecvFile");
 	}
 	
-	static public native int recvFile(String ip,String port, String remoteName,String localName);
-	static public native int sendFile(String sendFileName, String port);
+	public static  native int recvFile(String ip,String port, String remoteName,String localName);
+	public static native int sendFile(String sendFileName, String port);
+	public static native int initSocket(String remoteIp, int localPort, int remotePort);
+	public static native int recvVideoData(byte[] buf, int bufferLength);
+	public static native int release();
+	
 }

@@ -1,80 +1,20 @@
 package com.iped.ipcam.gui;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-
 import android.app.ActivityManager;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class WebTabWidget extends TabActivity {
 
 	public static TabHost tabHost = null;
-	
-	private String TAG = "WebTabWidget";
-	
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			Bundle bundle = msg.getData();
-			if(bundle != null) {
-				String ip = "183.128.48.201";//bundle.getString("IPADDRESS");
-				int port1 = bundle.getInt("PORT1");
-				int port2 = bundle.getInt("PORT2");
-				int port3 = bundle.getInt("PORT3");
-				System.out.println("rece ip info = " +  ip + " " + port1 + " " + port2 +  " " + port3);
-				int l = 2;
-				byte[] b = new byte[l];
-				try {
-					DatagramSocket socket = new DatagramSocket();
-					DatagramPacket packet = new DatagramPacket(b, l, InetAddress.getByName(ip), port1);
-					socket.send(packet);
-					socket.send(packet);
-					socket.send(packet);
-					System.out.println("port 1 sucess");
-				} catch (Exception e) {
-					Log.d(TAG, "----> send port 1 " + e.getLocalizedMessage());
-				}
-				
-				try {
-					DatagramSocket socket = new DatagramSocket();
-					DatagramPacket packet = new DatagramPacket(b, l, InetAddress.getByName(ip), port2);
-					socket.send(packet);
-					socket.send(packet);
-					socket.send(packet);
-					System.out.println("port 2 sucess");
-				} catch (Exception e) {
-					Log.d(TAG, "----> send port 2 " + e.getLocalizedMessage());
-				}
-				
-				try {
-					DatagramSocket socket = new DatagramSocket();
-					DatagramPacket packet = new DatagramPacket(b, l, InetAddress.getByName(ip), port3);
-					socket.send(packet);
-					socket.send(packet);
-					socket.send(packet);
-					System.out.println("port 3 sucess");
-				} catch (Exception e) {
-					Log.d(TAG, "----> send port 3 " + e.getLocalizedMessage());
-				}
-			}
-			super.handleMessage(msg);
-		}
-	};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +65,6 @@ public class WebTabWidget extends TabActivity {
 		}).start();
 		UdtTools.recvFile("192.168.1.101", "5000", "/mnt/sdcard/test.amr", "/mnt/sdcard/abcdeeee.amr");
 		*/
-		//new Thread(new ThroughNetUtil(handler)).start();
 	}
 	
 	@Override

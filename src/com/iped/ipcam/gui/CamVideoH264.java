@@ -1,17 +1,9 @@
 package com.iped.ipcam.gui;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -33,8 +25,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.ThroughNetUtil;
 
 /**
      H.264的功能分为两层，
@@ -77,8 +69,14 @@ public class CamVideoH264 extends Activity {
 	
 	public static String currIpAddress = null;
 	
+	public static int currPort = 1234;
+	
+	public static int port1 = 1234;
+	
+	private static ThroughNetUtil netUtil = null;
+	
 	private String TAG = "CamVideoH264";
-
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -95,13 +93,61 @@ public class CamVideoH264 extends Activity {
 				}
 				currIpAddress = tem;
 				showProgressDlg();
-				startThread();
+				//startThread();
 				break;
 			case Constants.HIDECONNDIALOG:
 				hideProgressDlg();
 				break;
 			case Constants.CONNECTERROR:
 				Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
+				break;
+			case Constants.SENDGETTHREEPORTMSG:
+				Bundle bundle = msg.getData();
+				if(bundle != null) {
+					currIpAddress = bundle.getString("IPADDRESS");  //"183.128.48.201";
+					port1 = bundle.getInt("PORT1");
+					int port2 = bundle.getInt("PORT2");
+					currPort = port2;
+					int port3 = bundle.getInt("PORT3");
+					System.out.println("rece ip info = " +  currIpAddress + " " + port1 + " " + port2 +  " " + port3);
+					int l = 2;
+					byte[] b = new byte[l];
+					try {
+						DatagramSocket socket1 = netUtil.getPort1();
+						if(socket1 != null) {
+							DatagramPacket packet = new DatagramPacket(b, l, InetAddress.getByName(currIpAddress), port1);
+							socket1.send(packet);
+							socket1.send(packet);
+							socket1.send(packet);
+							System.out.println("port 1 sucess");
+						}
+						DatagramSocket socket2 = netUtil.getPort2();
+						if(socket2 != null) {
+							DatagramPacket packet2 = new DatagramPacket(b, l, InetAddress.getByName(currIpAddress), port2);
+							socket2.send(packet2);
+							socket2.send(packet2);
+							socket2.send(packet2);
+							System.out.println("port 2 sucess");
+						}
+						DatagramSocket socket3 = netUtil.getPort3();
+						if(socket3 != null) {
+							DatagramPacket packet3 = new DatagramPacket(b, l, InetAddress.getByName(currIpAddress), port3);
+							socket3.send(packet3);
+							socket3.send(packet3);
+							socket3.send(packet3);
+							System.out.println("port 3 sucess");
+							
+						}
+					} catch (Exception e) {
+						Log.d(TAG, "----> send port " + e.getLocalizedMessage());
+					} finally{
+						mHandler.sendEmptyMessage(Constants.CONNECTTING);
+					}
+				}
+				break;
+			case Constants.SENDGETTHREEPORTTIMOUTMSG:
+				Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
+				hideProgressDlg();
 				break;
 			default:
 				break;
@@ -217,6 +263,8 @@ public class CamVideoH264 extends Activity {
 				String ip = intent.getStringExtra("IPPLAY");
 				if(ip != null && ip.length()>0) {
 					Log.d(TAG, "receive ip =" +  ip);
+					netUtil = new ThroughNetUtil(mHandler);
+					new Thread(netUtil).start();
 					Message msg = mHandler.obtainMessage();
 					msg.obj = ip;
 					msg.what = Constants.SHOWCONNDIALOG;
@@ -227,6 +275,12 @@ public class CamVideoH264 extends Activity {
 		
 	}
 	
+	public static ThroughNetUtil getInstance() {
+		return netUtil;
+	}
+	
+	
+	/*
 	private class QueryDeviceThread implements Runnable {
 
 		private byte[] bufTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
@@ -267,11 +321,9 @@ public class CamVideoH264 extends Activity {
 		}
 		
 	}
+	*/
 	
-	private class SocketThread implements Runnable {
-		private Socket socket = null;
-		private DataInputStream dis = null;
-		/**
+	/**
 		 -   char[] head = {0,0,0,1,0xc}; 00 00 00 00 67           5个字节
 		 -   char packageSequenceNumber[8],0,1,2,3,4....不重复              8个字节
 		 报      char startTimeStamp[14] YYYYMMDDHHMMSS                14个字节
@@ -285,7 +337,11 @@ public class CamVideoH264 extends Activity {
 		42 00 1e ab 40 58 09 32
 		00 00 00 01 68 ce 38 80 00 00 00 01 65 88
 		82
-		 */
+	 */
+	/*
+	private class SocketThread implements Runnable {
+		private Socket socket = null;
+		private DataInputStream dis = null;
 		@Override
 		public void run() {
 			try {
@@ -308,6 +364,6 @@ public class CamVideoH264 extends Activity {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 }
 
