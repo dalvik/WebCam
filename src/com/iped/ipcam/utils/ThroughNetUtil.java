@@ -136,7 +136,7 @@ public class ThroughNetUtil implements Runnable {
 								}
 							}else {
 								System.out.println(buf[0] + " " + buf[1] + " " + buf[2] + " " + buf[3] + " " + buf[4] + " " + buf[5] + " " + buf[6] + " " + buf[7] + " " + buf[8] + " " + buf[9] + " " + buf[10] + " " + buf[11] + " " + buf[12]);
-								Log.d(TAG,	"ThroughNetUtil get unfull package from server when quest ip and tree port" + flag);
+								Log.d(TAG,	"ThroughNetUtil get unfull package from server when quest ip and tree port " + flag);
 								flag = false;
 							}
 						} catch (IOException e) {
@@ -223,6 +223,7 @@ public class ThroughNetUtil implements Runnable {
 					if (rece[0] == SendUDTCommon.NET_CAMERA_OK.ordinal()) {
 						try {
 							port3 = new DatagramSocket(); //Constants.BINDLOCALPORT3
+							port3.setReuseAddress(true);
 							datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 									InetAddress.getByName(Common.SERVER_IP),
 									Common.INTERACTIVE_PORT);

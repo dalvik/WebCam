@@ -14,12 +14,16 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
 import com.iped.ipcam.utils.CamCmdListHelper;
+import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.ThroughNetUtil;
 
@@ -28,6 +32,10 @@ public class MyVideoView extends View implements Runnable {
 	private final static int NALBUFLENGTH = 320*480 ; //320*480 * 2
 	
 	private final static int SOCKETBUFLENGTH = 3420;
+	
+	private final static int AUDIOBUFFERSIZE = 128;
+	
+	private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 	
 	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 	
@@ -63,16 +71,24 @@ public class MyVideoView extends View implements Runnable {
 
 	private int result = -1;
 	
+	private byte[] audioBuffer = new byte[AUDIOBUFFERSIZE];
+	
+	private byte[] audioBufferStore = new byte[AUDIOBUFFERSTOERLENGTH];
+	
 	private static final String TAG = "ReadStreamThread";
 	
 	private Handler handler;
 	
+	private Context context;
+	
 	public MyVideoView(Context context) {
 		super(context);
+		this.context = context;
 	}
 	
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		this.context = context;
 	}
 
 	void init(Handler handler) {
@@ -97,12 +113,13 @@ public class MyVideoView extends View implements Runnable {
 			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
 			datagramSocket.send(datagramPacket);
 			DatagramSocket port2 = netUtil.getPort2();
+			DatagramSocket port3 = netUtil.getPort3();
 			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			System.out.println("ready rece ...." + " " + CamVideoH264.currIpAddress + " " + CamVideoH264.currPort);
+			System.out.println("ready rece ...." + " " + CamVideoH264.currIpAddress + " " + CamVideoH264.currPort + " remote video Port=" + CamVideoH264.port2 + " remote audio port=" +CamVideoH264.port3);
 			int localPort2 =  port2.getLocalPort();
 			//port2.close();
-			result = UdtTools.initSocket(CamVideoH264.currIpAddress,localPort2, CamVideoH264.currPort);
-			System.out.println("result=" + result);
+			result = UdtTools.initSocket(CamVideoH264.currIpAddress, localPort2, CamVideoH264.port2, port3.getLocalPort(), CamVideoH264.port3);
+			System.out.println("socket init result = " + result);
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
 			socket = new Socket();
@@ -122,6 +139,7 @@ public class MyVideoView extends View implements Runnable {
 		long start = System.currentTimeMillis();
 		int i = 0;
 		//byte[] buf = new byte[1024];
+		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
 			readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
 			if (readLengthFromSocket <= 0) { // ¶ÁÈ¡Íê³É
@@ -265,8 +283,63 @@ public class MyVideoView extends View implements Runnable {
 		return stopPlay;
 	}
 	
+	class RecvAudio implements Runnable {
+		
+		private int num = 0;
+		
+		private AudioTrack m_out_trk = null; 
+		int pcmBufferSize = 1280 * Common.CHANEL;
+		byte[] pcmArr = new byte[pcmBufferSize];
+				
+		public RecvAudio() {
+			
+		}
+		
+		@Override
+		public void run() {
+			int init = UdtTools.initAmrDecoder();
+			System.out.println("amr deocder init " + init);
+			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(8000,
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT);
+			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
+                     AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                     AudioFormat.ENCODING_PCM_16BIT,
+                     m_out_buf_size,
+                     AudioTrack.MODE_STREAM);
+			m_out_trk.play();
+			while(!stopPlay) {
+				num++;
+				int size = UdtTools.recvAudioData(audioBuffer, AUDIOBUFFERSIZE);
+				UdtTools.amrDecoder(audioBuffer, size, pcmArr, 0, Common.CHANEL);
+				//System.out.println("audio size = " + size + "  "+ returnSize);
+				//m_out_trk.write(pcmArr, 0, pcmBufferSize);
+				mergeAudioBuffer(pcmArr,pcmBufferSize);
+			}
+			if(m_out_trk != null) {
+				UdtTools.exitAmrDecoder();
+				m_out_trk.stop();
+				m_out_trk.release();
+				m_out_trk = null;
+			}
+		}
+		
+		private void mergeAudioBuffer(byte[] pcmBuffer, int pcmBufferLength) {
+			for(int i=0; i<pcmBufferLength;i++) {
+				int tmpIndex = i + pcmBufferLength * num;
+				//if(tmpIndex > AUDIOBUFFERSTOERLENGTH -1) {
+					audioBufferStore[tmpIndex] = pcmBuffer[i];
+				//}
+			}
+			if(num % 9 == 0) {
+				num = 0;
+				m_out_trk.write(audioBufferStore, 0, AUDIOBUFFERSTOERLENGTH);
+			}
+		}
+	}
+	
+	
 	/*
-	 
 	 try {
 			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
 			datagramSocket = new DatagramSocket();

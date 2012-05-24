@@ -9,7 +9,7 @@ public class Common {
 	
 	public final static int INTERACTIVE_PORT = 4300;
 	
-	public final static String SERVER_IP = "kejialiu.net";
+	public final static String SERVER_IP = "udp.iped.com.cn";
 	
 	public final static int PORT_COUNT = 3;
 	
@@ -21,5 +21,6 @@ public class Common {
 	
 	public final static byte NET_CAMERA_FAILED = 0;
 	
+	public final static byte CHANEL = 1;
 	
 }

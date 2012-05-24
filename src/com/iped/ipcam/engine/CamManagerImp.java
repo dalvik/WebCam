@@ -37,7 +37,7 @@ public class CamManagerImp implements ICamManager {
 	private String TAG = "CamManagerImp";
 	
 	public CamManagerImp() {
-		Device d = new Device("11111", "Ip Camera", "192.168.1.141", Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
+		Device d = new Device("11111", "Ip Camera", "192.168.1.127", Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
 		deviceList.add(d);
 	}
 	

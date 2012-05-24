@@ -73,6 +73,10 @@ public class CamVideoH264 extends Activity {
 	
 	public static int port1 = 1234;
 	
+	public static int port2 = -1;
+	
+	public static int port3 = -1;
+	
 	private static ThroughNetUtil netUtil = null;
 	
 	private String TAG = "CamVideoH264";
@@ -106,9 +110,9 @@ public class CamVideoH264 extends Activity {
 				if(bundle != null) {
 					currIpAddress = bundle.getString("IPADDRESS");  //"183.128.48.201";
 					port1 = bundle.getInt("PORT1");
-					int port2 = bundle.getInt("PORT2");
+					port2 = bundle.getInt("PORT2");
 					currPort = port2;
-					int port3 = bundle.getInt("PORT3");
+					port3 = bundle.getInt("PORT3");
 					System.out.println("rece ip info = " +  currIpAddress + " " + port1 + " " + port2 +  " " + port3);
 					int l = 2;
 					byte[] b = new byte[l];
