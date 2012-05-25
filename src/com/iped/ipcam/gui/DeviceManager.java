@@ -43,6 +43,7 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
+import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.ThroughNetUtil.SendUDTCommon;
 
 public class DeviceManager extends ListActivity implements OnClickListener {
@@ -90,6 +91,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				hideProgress();
 				break;
 			case Constants.UPDATEDEVICELIST:
+				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				adapter.notifyDataSetChanged();
 				break;
 			case Constants.DEFAULTUSERSELECT:
@@ -124,6 +126,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		claerCamButton = (Button) findViewById(R.id.clear_all_button);
 		camManager = CamMagFactory.getCamManagerInstance();
 		adapter = new DeviceAdapter(camManager.getCamList(), this);
+		camManager.getCamList().addAll(FileUtil.fetchDeviceFromFile(this));
+		//adapter = new DeviceAdapter(, this);
 		listView = getListView();
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(itemClickListener);
@@ -332,6 +336,12 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		dlg.show();
 	}
 
+	@Override
+	protected void onDestroy() {
+		FileUtil.persistentDevice(this,camManager.getCamList());
+		super.onDestroy();
+	}
+	
 	private void addNewDevice() {
 		final View addDeviceView = initAddNewDeviceView();
 		final CheckBox serchConfig = (CheckBox) addDeviceView
@@ -445,8 +455,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	}
 
 	private void updateComponentState(View addDeviceView, boolean isChecked) {
-		addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext)
-				.setEnabled(isChecked);
+		addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext).setEnabled(isChecked);
 		addDeviceView.findViewById(R.id.device_manager_new_addr_id).setEnabled(
 				!isChecked);
 		addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id)
@@ -557,7 +566,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 						handler.sendMessage(msg);
 					}else {
 						//Toast.makeText(DeviceManager.this, "query error",Toast.LENGTH_LONG).show();
-						System.out.println("--*******--");
 						Message msg = handler.obtainMessage();
 						msg.what = Constants.SHOWTOASTMSG;
 						msg.arg1 = R.string.device_manager_find_device_id_error;
@@ -612,7 +620,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				}
 			}
 		}
-		
 	}
 
 	private AlertDialog ad  = null;

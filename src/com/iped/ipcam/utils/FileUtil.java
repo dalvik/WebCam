@@ -2,9 +2,13 @@ package com.iped.ipcam.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -12,11 +16,17 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
+
+import com.iped.ipcam.pojo.Device;
 
 /** 文件处理工具类 **/
 public class FileUtil {
 
+	private static String TAG = "FileUtil";
+	
 	/** 获取SD路径 **/
 	public static String getDefaultPath() {
 		// 判断sd卡是否存在
@@ -116,4 +126,75 @@ public class FileUtil {
 	}
 	
 	
+	public static void persistentDevice(Context context, List<Device> deviceList) {
+		File file = new File(context.getFilesDir().getPath() + File.separator +  Constants.DEVICELIST);
+		if(file.exists()) {
+			file.delete();
+		}
+		FileOutputStream fos = null;
+		try {
+			file.createNewFile();
+			StringBuffer sb = new StringBuffer();
+			for(Device device:deviceList) {
+				sb.append(device.getDeviceName() + "&" + device.getDeviceIp() + "&" + device.getDeviceType() + "&" + device.getDeviceTcpPort() + "&" 
+						+ device.getDeviceUdpPort() + "&" + device.getDeviceGateWay() +"\n");
+			}
+			fos = new FileOutputStream(file);
+			fos.write(sb.toString().getBytes());
+			fos.flush();
+		} catch (IOException e) {
+			Log.d(TAG, "FileUtil persistentDevice " + e.getStackTrace());
+		} finally {
+			if(fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fos = null;
+			}
+		}
+	}
+	
+	public static List<Device> fetchDeviceFromFile(Context context) {
+		List<Device> deviceList = new ArrayList<Device>();
+		File file = new File(context.getFilesDir().getPath() + File.separator + Constants.DEVICELIST);
+		if(!file.exists()) {
+			return deviceList;
+		}
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(file));
+			String str = null;
+			while((str = br.readLine())!= null) {
+				String[] info = str.split("&");
+				int l = info.length;
+				//System.out.println("device info str=" + str + " length="  + l);
+				if(l<6) {
+					continue;
+				}
+				Device device = new Device();
+				device.setDeviceName(info[0]);
+				device.setDeviceIp(info[1]);
+				device.setDeviceType(info[2]);
+				device.setDeviceTcpPort(Integer.parseInt(info[3]));
+				device.setDeviceUdpPort(Integer.parseInt(info[4]));
+				device.setDeviceGateWay(info[5]);
+				deviceList.add(device);
+			}
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return deviceList;
+	}
 }

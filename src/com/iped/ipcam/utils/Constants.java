@@ -2,6 +2,9 @@ package com.iped.ipcam.utils;
 
 public class Constants {
 
+	// device list
+	public final static String DEVICELIST = "device_list.conf";
+	
 	public final static int DEFAULTUSERSELECT = 2010;
 	
 	public final static int HIDETEAUTOSEARCH = 2011;
