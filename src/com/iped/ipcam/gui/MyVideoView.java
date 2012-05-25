@@ -33,9 +33,13 @@ public class MyVideoView extends View implements Runnable {
 	
 	private final static int SOCKETBUFLENGTH = 3420;
 	
-	private final static int AUDIOBUFFERSIZE = 128;
+	private final static int RECEAUDIOBUFFERSIZE = 128 * Common.CHANEL * 3;
 	
-	private final static int AUDIOBUFFERSTOERLENGTH = 12800;
+	private final static int SERVERSENDBUFFERSIZE = 128;
+	
+	//private final static int AUDIOBUFFERTMPSIZE = 1280;
+	
+	//private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 	
 	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 	
@@ -71,9 +75,9 @@ public class MyVideoView extends View implements Runnable {
 
 	private int result = -1;
 	
-	private byte[] audioBuffer = new byte[AUDIOBUFFERSIZE];
+	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 1];
 	
-	private byte[] audioBufferStore = new byte[AUDIOBUFFERSTOERLENGTH];
+	//private byte[] audioBufferStore = new byte[AUDIOBUFFERSTOERLENGTH];
 	
 	private static final String TAG = "ReadStreamThread";
 	
@@ -118,7 +122,7 @@ public class MyVideoView extends View implements Runnable {
 			System.out.println("ready rece ...." + " " + CamVideoH264.currIpAddress + " " + CamVideoH264.currPort + " remote video Port=" + CamVideoH264.port2 + " remote audio port=" +CamVideoH264.port3);
 			int localPort2 =  port2.getLocalPort();
 			//port2.close();
-			result = UdtTools.initSocket(CamVideoH264.currIpAddress, localPort2, CamVideoH264.port2, port3.getLocalPort(), CamVideoH264.port3);
+			result = UdtTools.initSocket(CamVideoH264.currIpAddress, localPort2, CamVideoH264.port2, port3.getLocalPort(), CamVideoH264.port3, RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
 			System.out.println("socket init result = " + result);
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
@@ -212,7 +216,7 @@ public class MyVideoView extends View implements Runnable {
 	}
 	
 	public void copyPixl() {
-		video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
+		//video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 		if(video != null) {
 			postInvalidate();
 		}
@@ -231,7 +235,7 @@ public class MyVideoView extends View implements Runnable {
 					if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 + sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed] == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
 						looperFlag = true;
 						return -2;
-					} 
+					} Synthesis
 				} else {
 					nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
 					nalBufUsedLength++;
@@ -272,7 +276,7 @@ public class MyVideoView extends View implements Runnable {
 	}
 	
 	private void flushBitmap() {
-		video = Bitmap.createBitmap(320, 480, Config.RGB_565);
+		//video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 		postInvalidate();
 	}
 	public void onStart() {
@@ -286,10 +290,9 @@ public class MyVideoView extends View implements Runnable {
 	class RecvAudio implements Runnable {
 		
 		private int num = 0;
-		
 		private AudioTrack m_out_trk = null; 
-		int pcmBufferSize = 1280 * Common.CHANEL;
-		byte[] pcmArr = new byte[pcmBufferSize];
+		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Common.CHANEL * 10;
+		byte[] pcmArr = new byte[pcmBufferLength];
 				
 		public RecvAudio() {
 			
@@ -309,12 +312,22 @@ public class MyVideoView extends View implements Runnable {
                      AudioTrack.MODE_STREAM);
 			m_out_trk.play();
 			while(!stopPlay) {
-				num++;
-				int size = UdtTools.recvAudioData(audioBuffer, AUDIOBUFFERSIZE);
-				UdtTools.amrDecoder(audioBuffer, size, pcmArr, 0, Common.CHANEL);
+				//arg[0] server send audio buffer length
+				//arg[1] client recv big audio buffer 
+				//arg[2] client recv big audio buffer length same length with audio init  
+				int recvDataLength = UdtTools.recvAudioData(SERVERSENDBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
+				if(recvDataLength <=0) {
+					break;
+				}
+				if(audioBuffer[0] != 60 || audioBuffer[32] != 60 || audioBuffer[64] != 60 || audioBuffer[96] != 60) {
+					System.out.println(audioBuffer[0] + " " + audioBuffer[32] + "  " + audioBuffer[64] + " " + audioBuffer[96]);
+				}
+				int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
+				//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength + " " + RECEAUDIOBUFFERSIZE * Common.CHANEL * 100);
+				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 				//System.out.println("audio size = " + size + "  "+ returnSize);
-				//m_out_trk.write(pcmArr, 0, pcmBufferSize);
-				mergeAudioBuffer(pcmArr,pcmBufferSize);
+				m_out_trk.write(pcmArr, 0, RECEAUDIOBUFFERSIZE * Common.CHANEL * 10);
+				//mergeAudioBuffer(pcmArr,pcmBufferSize);
 			}
 			if(m_out_trk != null) {
 				UdtTools.exitAmrDecoder();
@@ -328,16 +341,15 @@ public class MyVideoView extends View implements Runnable {
 			for(int i=0; i<pcmBufferLength;i++) {
 				int tmpIndex = i + pcmBufferLength * num;
 				//if(tmpIndex > AUDIOBUFFERSTOERLENGTH -1) {
-					audioBufferStore[tmpIndex] = pcmBuffer[i];
+					//audioBufferStore[tmpIndex] = pcmBuffer[i];
 				//}
 			}
-			if(num % 9 == 0) {
+			if(num % 8 == 0) {
 				num = 0;
-				m_out_trk.write(audioBufferStore, 0, AUDIOBUFFERSTOERLENGTH);
+				//m_out_trk.write(audioBufferStore, 0, AUDIOBUFFERSTOERLENGTH);
 			}
 		}
 	}
-	
 	
 	/*
 	 try {
