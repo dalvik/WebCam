@@ -57,17 +57,73 @@
     	<string name="device_gateway_str">网关：</string>
     <string name="device_params_sets_str">参数设置</string>
     	<string name="device_params_info_str">设备信息:</string>
+    	<string name="device_param_inentify_str">设备ID:</string>
     	<string name="device_params_version_str">软件版本：</string>
     	<string name="device_params_device_name_str">设备名称：</string>
     	<string name="device_params_address_type_str">地址类型：</string>
     	<string name="device_params_device_address_str">设备地址：</string>
-    	<string name="device_params_inside_total_space_str">内置磁盘总容量：</string>
+    	<string name="device_params_inside_total_space_str">TF卡容量：</string>
     	<string name="device_params_outside_total_space_str">移动磁盘总容量：</string>
+    	<string name="device_params_storage_device_str">存储设备：</string>
+    	<string name="device_params_recorde_type_inside_str">TF卡</string>
+    	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
     	<string name="device_params_recorde_total_time_str">可录制时间：</string>
     	
-    	<string name="device_params_recorde_type_str">录制方式：</string>
-    	<string name="device_params_recorde_type_inside_str">内置磁盘</string>
-    	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
+    	<string name="device_params_network_set_str">网卡设置：</string>
+    	<string name="device_params_network_intelligent_mode_str">智能选择网络</string>
+    	<string name="device_params_network_wire_mode_str">有线网络</string>
+    	<string name="device_params_network_wireless_mode_str">无线网络</string>
+    	<!-- 有线设置 -->
+    	<string name="device_params_wireuse_network_set_str">有线网络设置</string>
+    	<string name="device_params_wireuse_audo_ipaddress_mode_str">自动获得IP地址</string>
+    	<string name="device_params_wireuse_static_ipaddress_mode_str">静态IP地址</string>
+    	<string name="device_params_wireuse_ip_address_str">IP地址</string>
+    	<string name="device_params_wireuse_getway_address_str">网关地址</string>
+    	<string name="device_params_wireuse_sub_address_str">掩码地址</string>
+    	<string name="device_params_wireuse_set_dns1_str">DNS1</string>
+    	<string name="device_params_wireuse_set_dns2_str">DNS2</string>
+    	
+    	
+	    <!-- 无线设置 -->
+	    <string name="device_params_wireless_network_set_str">无线网络设置</string>
+    	<string name="device_params_wireless_audo_ipaddress_mode_str">自动获得IP地址</string>
+    	<string name="device_params_wireless_static_ipaddress_mode_str">静态IP地址</string>
+    	<string name="device_params_wireless_ip_address_str">IP地址</string>
+    	<string name="device_params_wireless_getway_address_str">网关地址</string>
+    	<string name="device_params_wireless_sub_address_str">掩码地址</string>
+    	<string name="device_params_wireless_set_dns1_str">DNS1</string>
+    	<string name="device_params_wireless_set_dns2_str">DNS2</string>
+    	<!-- 录制设置 -->
+    	<string name="device_params_video_record_set_str">录制设置：</string>
+    	<string name="device_params_video_record_frame_rate_set_str">帧率</string>
+    	<string name="device_params_video_record_frame_size_set_str">画面尺寸</string>
+    	<string name="device_params_video_record_set_one_str">录像设置一</string>
+    	<string name="device_params_video_record_set_two_str">录像设置二(当没有物体移动时，慢速录像)</string>
+    	<string name="device_params_video_record_set_three_str">录像设置三(当有物体移动时，快速录像)</string>
+    	<!-- 监控设置 -->
+    	<string name="device_params_monitor_set_str">监控设置：</string>
+    	<string name="device_params_monitor_self_mode_set_str">自定义模式(帧率可调，画面同录像一致)</string>
+    	<string name="device_params_monitor_intelligent_mode_set_str">智能模式(根据网络性能，自动调节画面和帧率)</string>
+    	<!-- 其他设置 -->
+    	<string name="device_params_other_set_str">其他设置：</string>
+    	<string name="device_params_other_set_sound_str">声音设置：</string>
+    	<string name="device_params_other_set_sound_open_str">开</string>
+    	<string name="device_params_other_set_sound_close_str">关</string>
+    	<string name="device_params_other_set_mobile_alarm_str">移动侦测报警</string>
+    	<string name="device_params_other_set_mobile_alarm_offset_str">灵敏度</string>
+    	<string name="device_params_other_set_mobile_alarm_email_str">报警邮箱设置</string>
+    	<string name="device_params_other_set_security_str">安全设置</string>
+    	<string name="device_params_other_set_visit_password_str">访问密码</string>
+    	<string name="device_params_other_set_time_str">时间设置</string>
+    	<string name="device_params_other_set_time_date_format_str">年/月/日</string>
+    	<string name="device_params_other_set_time_time_format_str">时/分/秒</string>
+    	<string name="device_params_other_set_system_str">同步系统时间</string>
+    	<string name="device_params_other_set_security_visit_password_str">访问密码设置</string>
+    	<string name="device_params_reset_set_factory_para_str">恢复出厂设置</string>
+    	<string name="device_params_set_sure_str">确认</string>
+    	<string name="device_params_set_cancle_str">取消</string>
+    	
+    	<string name="device_params_recorde_type_str">录制设置：</string>
     	<string name="device_params_recorde_type_close_str">关闭</string>
 
     	<string name="device_params_recorde_speed_str">录像码流：</string>
