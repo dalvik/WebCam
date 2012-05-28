@@ -3,9 +3,7 @@ package com.iped.ipcam.gui;
 public class UdtTools {
 
 	static {
-		//System.loadLibrary("m");
 		System.loadLibrary("udt");
-		System.loadLibrary("stlport_shared");
 		System.loadLibrary("RecvFile");
 		System.loadLibrary("amr");
 	}

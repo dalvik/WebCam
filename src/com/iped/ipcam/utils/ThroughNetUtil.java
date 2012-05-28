@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,9 @@ public class ThroughNetUtil implements Runnable {
 	private DatagramSocket port3 = null;
 	
 	private String TAG = "ThroughNet";
+	
+	private byte[] buf = new byte[1024 * 2];
+	
 
 	public enum SendUDTCommon {
 		/**
@@ -70,7 +74,7 @@ public class ThroughNetUtil implements Runnable {
 			DatagramSocket udpSocket = null;
 			try {
 				udpSocket = new DatagramSocket();
-				udpSocket.setSoTimeout(20000);
+				udpSocket.setSoTimeout(10000);
 			} catch (SocketException e) {
 				if(udpSocket != null) {
 					udpSocket.close();
@@ -87,7 +91,7 @@ public class ThroughNetUtil implements Runnable {
 					flag = sendCreatePortCommond(udpSocket);
 					Log.d(TAG,	"sendCreatePortCommond result " + flag);
 					if(flag) {
-						byte[] buf = new byte[64];
+						
 						DatagramPacket rp = new DatagramPacket(buf, 64);
 						try {
 							udpSocket.receive(rp);
@@ -184,7 +188,7 @@ public class ThroughNetUtil implements Runnable {
 			datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 					InetAddress.getByName(Common.SERVER_IP),
 					Common.INTERACTIVE_PORT);
-			port1.setSoTimeout(20000);
+			port1.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			port1.send(datagramPacket);
 			Log.d(TAG,	"send port 1 success");
 		} catch (Exception e) {
@@ -194,7 +198,6 @@ public class ThroughNetUtil implements Runnable {
 			Log.d(TAG, "ThroughNetUtil send port 1 error! " + e.getLocalizedMessage());
 			return false;
 		}
-		byte[] buf = new byte[64];
 		DatagramPacket rp = new DatagramPacket(buf, 64);
 		try {
 			udpSocket.receive(rp);
@@ -207,7 +210,7 @@ public class ThroughNetUtil implements Runnable {
 							InetAddress.getByName(Common.SERVER_IP),
 							Common.INTERACTIVE_PORT);
 					port2.setReuseAddress(true);
-					port2.setSoTimeout(20000);
+					port2.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					port2.send(datagramPacket);
 					Log.d(TAG,	"send port 2 success");
 				} catch (Exception e) {
@@ -227,7 +230,7 @@ public class ThroughNetUtil implements Runnable {
 							datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
 									InetAddress.getByName(Common.SERVER_IP),
 									Common.INTERACTIVE_PORT);
-							port3.setSoTimeout(20000);
+							port3.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 							port3.send(datagramPacket);
 							Log.d(TAG,	"send port 3 success");
 						} catch (Exception e) {
@@ -292,7 +295,6 @@ public class ThroughNetUtil implements Runnable {
 							+ e.getLocalizedMessage());
 			return false;
 		}
-		byte[] buf = new byte[64];
 		DatagramPacket rp = new DatagramPacket(buf, 64);
 		try {
 			udpSocket.receive(rp);
@@ -340,7 +342,6 @@ public class ThroughNetUtil implements Runnable {
 							+ e.getLocalizedMessage());
 			return false;
 		}
-		byte[] buf = new byte[64];
 		DatagramPacket rp = new DatagramPacket(buf, 64);
 		try {
 			udpSocket.receive(rp);
@@ -381,5 +382,10 @@ public class ThroughNetUtil implements Runnable {
 		this.port3 = port3;
 	}
 	
+	public void clearRecvBuffer() {
+		if(buf != null) {
+			Arrays.fill(buf, (byte)0);
+		}
+	}
 	
 }

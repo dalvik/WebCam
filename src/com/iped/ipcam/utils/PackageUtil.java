@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.gui.CamVideoH264;
 
 import android.util.Log;
 
@@ -80,30 +81,43 @@ public class PackageUtil {
 		byte [] tem = cmdType.getBytes();
 		byte[] receArr = new byte[Constants.COMMNICATEBUFFERSIZE];
 		DatagramSocket datagramSocket = null;
+		ThroughNetUtil netUtil = CamVideoH264.getInstance();
+		if(netUtil == null) {
+			return null;
+		}
+		StringBuffer sb = new StringBuffer();
 		String tmp = null;
 		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
+			datagramSocket = netUtil.getPort1(); //new DatagramSocket();
+			if(datagramSocket == null) {
+				return null;
+			}
+			netUtil.clearRecvBuffer();
+			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
 			datagramSocket.send(datagramPacket);
 			DatagramPacket rece = new DatagramPacket(receArr, Constants.COMMNICATEBUFFERSIZE);
-			datagramSocket.receive(rece);
-			tmp = new String(receArr);
-			//Log.d(TAG, "Receive inof //////////////" + tmp);
-			return tmp.trim();
-		} catch (SocketException e) {
-			//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-		} catch (UnknownHostException e) {
-			//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-		} catch (IOException e) {
-			//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-		} finally {
-			if(datagramSocket != null) {
-				datagramSocket.disconnect();
-				datagramSocket.close();
-				datagramSocket = null;
+			int recvLength = 0;
+			while(true) {
+				datagramSocket.receive(rece);
+				int l = rece.getLength();
+				byte[] ipByte = new byte[4];
+				System.arraycopy(receArr, 0, ipByte, 0, 4);
+				recvLength += Integer.parseInt(new String(ipByte).trim());
+				tmp = new String(receArr,4,l-4).trim();
+				sb.append(tmp);
+				Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
+				if(recvLength>1000) {
+					break;
+				}
 			}
-		}
+			return sb.toString();
+		} catch (SocketException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} catch (UnknownHostException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} catch (IOException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} 
 		return tmp;
 	}
 	

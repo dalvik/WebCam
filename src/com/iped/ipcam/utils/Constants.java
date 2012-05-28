@@ -33,7 +33,7 @@ public class Constants {
 	
 	public final static int DEVICESEARCHTIMEOUT = 1000;
 	
-	public final static int VIDEOSEARCHTIMEOUT = 30000;
+	public final static int VIDEOSEARCHTIMEOUT = 15000;
 	
 	public final static String VIDEOPREVIEW = "VIDEOPREVIEW";
 	

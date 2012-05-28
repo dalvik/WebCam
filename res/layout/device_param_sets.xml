@@ -29,7 +29,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_device_name_str"/>
 	            
-	            <EditText android:id="@+id/device_param_name" 
+	            <EditText android:id="@+id/device_param_set_name" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -40,7 +40,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_param_inentify_str"/>
 	            
-	            <EditText android:id="@+id/device_param_inentify" 
+	            <EditText android:id="@+id/device_param_set_inentify" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -51,7 +51,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_version_str"/>
 	            
-	            <EditText android:id="@+id/device_param_version" 
+	            <EditText android:id="@+id/device_param_set_version" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -66,7 +66,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_inside_total_space_str"/>
 	            
-	            <EditText android:id="@+id/device_param_in_tatal_space" 
+	            <EditText android:id="@+id/device_param_set_tfcard_tatal_space" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -77,7 +77,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_outside_total_space_str"/>
 	            
-	            <EditText android:id="@+id/device_param_out_tatal_space" 
+	            <EditText android:id="@+id/device_param_set_sdcard_tatal_space" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -91,7 +91,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_storage_device_str"/>
 	            
-	             <RadioGroup android:id="@+id/device_params_storage_device_id" 
+	             <RadioGroup android:id="@+id/device_param_set_storage_device_mode" 
 	                    android:layout_width="wrap_content"
 	    			    android:layout_height="wrap_content"
 	    				android:layout_weight="1"
@@ -115,7 +115,7 @@
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_recorde_total_time_str"/>
 	            
-	            <EditText  android:id="@+id/device_param_enable_recorde_time"   
+	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
@@ -144,23 +144,30 @@
 		    	android:textColor="@color/white"
 		    	android:text="@string/device_params_network_set_str"/>
 	    
-                <RadioGroup android:layout_width="fill_parent"
-	    				android:layout_height="fill_parent"
-	    				android:layout_weight="1"
-	    				android:orientation="horizontal">
+                <RadioGroup
+                    android:id="@+id/device_param_set_network_mode" 
+                    android:layout_width="fill_parent"
+	    			android:layout_height="fill_parent"
+	    			android:layout_weight="1"
+	    			android:orientation="horizontal">
 	            
-	                <RadioButton android:layout_width="fill_parent"
+	                <RadioButton
+	                    android:id="@+id/device_param_set_network_mode_intelligent"
+	                    android:layout_width="fill_parent"
 	    				android:layout_height="fill_parent"
 	    				android:layout_weight="1"
-	    				android:checked="true"
 	    				android:text="@string/device_params_network_intelligent_mode_str"/>
 	                
-	                <RadioButton android:layout_width="fill_parent"
+	                <RadioButton 
+	                    android:id="@+id/device_param_set_network_mode_wireuse"
+	                    android:layout_width="fill_parent"
 	    				android:layout_height="fill_parent"
 	    				android:layout_weight="1"
 	    				android:text="@string/device_params_network_wire_mode_str"/>
 	                
-	                <RadioButton android:layout_width="fill_parent"
+	                <RadioButton
+	                    android:id="@+id/device_param_set_network_mode_wireless" 
+	                    android:layout_width="fill_parent"
 	    				android:layout_height="fill_parent"
 	    				android:layout_weight="1"
 	    				android:text="@string/device_params_network_wireless_mode_str"/>
@@ -176,22 +183,28 @@
 	           
 		    	<TableLayout  android:layout_width="fill_parent"
 			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="1,3,5"
+			    	android:stretchColumns="3,5"
 			    	android:padding="3dip">
 	                
 		    	    <TableRow >
-		    	         <RadioGroup android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:orientation="horizontal">
+		    	         <RadioGroup
+		    	            android:id="@+id/device_param_set_wireuse_network_mode"  
+		    	            android:layout_width="fill_parent"
+			    			android:layout_height="fill_parent"
+			    			android:layout_weight="1"
+			    			android:orientation="horizontal">
 			            
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireuse_network_mode_auto"   
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:checked="true"
 			    				android:text="@string/device_params_wireuse_audo_ipaddress_mode_str"/>
 			                
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireuse_network_mode_static"   
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_wireuse_static_ipaddress_mode_str"/>
@@ -206,7 +219,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireuse_ip_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_in_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireuse_ip_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -218,7 +231,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireuse_getway_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_out_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireuse_gateway_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -230,7 +243,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireuse_sub_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_out_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireuse_subway_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -244,7 +257,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireuse_set_dns1_str"/>
 			            
-			            <EditText android:id="@+id/device_params_set_dns1_id" 
+			            <EditText android:id="@+id/device_param_set_wireuse_dns1_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -255,7 +268,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireuse_set_dns2_str"/>
 			            
-			            <EditText android:id="@+id/device_params_set_dns1_id" 
+			            <EditText android:id="@+id/device_param_set_wireuse_dns2_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -277,18 +290,23 @@
 			    	android:padding="3dip">
 	                
 		    	    <TableRow >
-		    	         <RadioGroup android:layout_width="fill_parent"
+		    	         <RadioGroup android:id="@+id/device_param_set_wireless_network_mode"  
+		    	                android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:orientation="horizontal">
 			            
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireless_network_mode_audo" 
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:checked="true"
 			    				android:text="@string/device_params_wireless_audo_ipaddress_mode_str"/>
 			                
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireless_network_static" 
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_wireless_static_ipaddress_mode_str"/>
@@ -303,7 +321,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireless_ip_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_in_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireless_ip_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -315,7 +333,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireless_getway_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_out_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireless_gateway_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -327,7 +345,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireless_sub_address_str"/>
 			            
-			            <EditText android:id="@+id/device_param_out_tatal_space" 
+			            <EditText android:id="@+id/device_param_set_wireless_subway_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -341,7 +359,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireless_set_dns1_str"/>
 			            
-			            <EditText android:id="@+id/device_params_set_dns1_id" 
+			            <EditText android:id="@+id/device_param_set_wireless_dns1_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"
@@ -352,7 +370,7 @@
 			    			android:textColor="@color/white"
 			    			android:text="@string/device_params_wireless_set_dns2_str"/>
 			            
-			            <EditText android:id="@+id/device_params_set_dns1_id" 
+			            <EditText android:id="@+id/device_param_set_wireless_dns2_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:editable="false"

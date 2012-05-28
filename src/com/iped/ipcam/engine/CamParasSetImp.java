@@ -1,5 +1,9 @@
 package com.iped.ipcam.engine;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,12 +13,27 @@ import com.iped.ipcam.pojo.CamConfig;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.ParaUtil;
 
 public class CamParasSetImp implements ICamParasSet {
 
+	private Thread getCamParaThread = null;
+	
+	private Map<String, String> paraMap = new HashMap<String, String>();
+	
 	@Override
 	public CamParasSetImp getCamPara(String ip, Handler handler) {
-		new Thread(new CamGetParas(ip, handler)).start();
+		System.out.println("getCampara....");
+		if(getCamParaThread != null) {
+			try {
+				getCamParaThread.join(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			getCamParaThread = null;
+		}
+		getCamParaThread = new Thread(new CamGetParas(ip, handler));
+		getCamParaThread.start();
 		return null;
 	}
 	
@@ -38,21 +57,23 @@ public class CamParasSetImp implements ICamParasSet {
 				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 				return;
 			}
-			String rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Statue, ip, Constants.UDPPORT);
-			System.out.println("*/"  +rece.trim()+"/0");
+			String rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
+			System.out.println("recv===="+ rece);
 			if(rece != null) {
-				String[] info = rece.split("\n");
-				for(String s:info) {
-					System.out.println("-" + s.trim());
-				}
-				if(info.length>4) {
+				ParaUtil.putParaByString(rece, paraMap);
+				handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+				/*Set<String> s = paraMap.keySet();
+				for(String ss:s){
+					System.out.println(ss + " " + paraMap.get(ss));
+				}*/
+				/*if(info.length>4) {
 					CamConfig camConfig = new CamConfig();
 					camConfig.setVersion(info[0].trim());
 					camConfig.setInTotalSpace(info[1].trim());
 					camConfig.setOutTotalSpace(info[2].trim());
 					camConfig.setAddrType(info[3].trim());
 					camConfig.setValidRecordTime(info[4].trim());
-					
+					System.out.println(ip + " " + Constants.UDPPORT);
 					rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
 					if(rece != null) {
 						String[] info2 = rece.split("\n");
@@ -79,10 +100,15 @@ public class CamParasSetImp implements ICamParasSet {
 					}
 				}else {
 					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				}
+				}*/
 			} else {
 				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 			}
 		}
 	}
+
+	public Map<String, String> getParaMap() {
+		return paraMap;
+	}
+
 }

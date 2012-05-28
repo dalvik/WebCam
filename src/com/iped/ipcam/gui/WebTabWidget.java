@@ -49,7 +49,8 @@ public class WebTabWidget extends TabActivity {
 		tabSpec = tabHost.newTabSpec("SYSTEMSETTINGS")
 		.setIndicator(resources.getString(R.string.system_settings_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
-		tabHost.setCurrentTabByTag("DEVICEMANAGER");
+		//tabHost.setCurrentTabByTag("DEVICEMANAGER");
+		tabHost.setCurrentTab(2);
 		TabWidget tabWidget = tabHost.getTabWidget();
 		int count = tabWidget.getChildCount();
 		for(int i = 0; i < count; i++) {
