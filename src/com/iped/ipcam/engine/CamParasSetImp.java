@@ -1,15 +1,11 @@
 package com.iped.ipcam.engine;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 
 import com.iped.ipcam.exception.CamManagerException;
-import com.iped.ipcam.pojo.CamConfig;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
@@ -19,7 +15,7 @@ public class CamParasSetImp implements ICamParasSet {
 
 	private Thread getCamParaThread = null;
 	
-	private Map<String, String> paraMap = new HashMap<String, String>();
+	private Map<String, String> paraMap = new LinkedHashMap<String, String>();
 	
 	@Override
 	public CamParasSetImp getCamPara(String ip, Handler handler) {

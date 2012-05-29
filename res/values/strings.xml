@@ -111,6 +111,12 @@
     	<string name="device_params_other_set_sound_close_str">关</string>
     	<string name="device_params_other_set_mobile_alarm_str">移动侦测报警</string>
     	<string name="device_params_other_set_mobile_alarm_offset_str">灵敏度</string>
+    	<string name="device_params_other_set_mobile_alarm_offset_prompt_str">灵敏度</string>
+    		<string-array name="mobile_alarm_offset_prompt_array">
+    		    <item>1</item>
+		        <item>2</item>
+		        <item>3</item>
+    		</string-array>
     	<string name="device_params_other_set_mobile_alarm_email_str">报警邮箱设置</string>
     	<string name="device_params_other_set_security_str">安全设置</string>
     	<string name="device_params_other_set_visit_password_str">访问密码</string>
@@ -129,21 +135,22 @@
     	<string name="device_params_recorde_speed_str">录像码流：</string>
     	<string name="device_params_recorde_real_speed_str">实际码率：</string>
     	<string name="device_params_recorde_frame_size_str">画面大小：</string>
-    		<string-array name="frame_size_array">
-    		    <item>4CIF (704 x 576)</item>
-    		    <item>VGA (640 x 480)</item>
-    		    <item>CIF (352 x 288)</item>
-    		    <item>QVGA (320 x 240)</item>
-    		    <item>QCIF (176 x 144)</item>
-    		    <item>SQCIF (128 x 96)</item>
-    		</string-array>
+    		  <string-array name="monitor_frame_size">
+			        <item>720P(1280*720)</item>
+			        <item>VGA(640*480)</item>
+			        <item>QVGA(320*240)</item>
+			    </string-array>
+    
     	<string name="device_params_recorde_frame_speed_str">帧率：</string>
     		<string-array name="frame_rate_array">
-    		    <item>4</item>
-    		    <item>8</item>
-    		    <item>12</item>
-    		    <item>25</item>
+    		    <item>1</item>
+		        <item>2</item>
+		        <item>4</item>
+		        <item>8</item>
+		        <item>12</item>
+		        <item>24</item>
     		</string-array>
+      
     	<string name="device_params_recorde_comp_quar_str">压缩质量：</string>
     		<string-array name="compress_quar_array">
     		    <item>VBR</item>
@@ -161,15 +168,7 @@
     		</string-array>
     	
     	<string name="device_params_monitor_speed_str">监控码流：</string>
-    	<string name="device_params_monitor_frame_size_str">画面大小：</string>
-    	    <string-array name="monitor_frame_size_array">
-    		    <item>4CIF (704 x 576)</item>
-    		    <item>VGA (640 x 480)</item>
-    		    <item>CIF (352 x 288)</item>
-    		    <item>QVGA (320 x 240)</item>
-    		    <item>QCIF (176 x 144)</item>
-    		    <item>SQCIF (128 x 96)</item>
-    		</string-array>
+    	
     	<string name="device_params_date_str">设备时间：</string>
     	<string name="device_params_sync_date_str">同步系统时间</string>
     	<string name="device_params_no_device_select_str">请先选择查看的设备</string>

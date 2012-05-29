@@ -121,6 +121,29 @@ public class PackageUtil {
 		return tmp;
 	}
 	
+	public static void sendPackageNoRecv(String cmdType, String ip, int port) {
+		byte [] tem = cmdType.getBytes();
+		DatagramSocket datagramSocket = null;
+		ThroughNetUtil netUtil = CamVideoH264.getInstance();
+		if(netUtil == null) {
+			return;
+		}
+		try {
+			datagramSocket = netUtil.getPort1(); //new DatagramSocket();
+			if(datagramSocket == null) {
+				return ;
+			}
+			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
+			datagramSocket.send(datagramPacket);
+		} catch (SocketException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} catch (UnknownHostException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} catch (IOException e) {
+			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+		} 
+	}
+	
 	public static byte[] deleteZero(byte[]files) {
 		int index = 0;
 		int length = files.length;

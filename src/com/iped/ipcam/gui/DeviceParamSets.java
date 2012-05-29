@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -16,7 +17,10 @@ import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.CamParasSetImp;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
 
 public class DeviceParamSets extends Activity {
@@ -83,6 +87,22 @@ public class DeviceParamSets extends Activity {
 
 	private Spinner monitorFrameSizeSpinner = null;
 
+	private RadioGroup soundFlagSet = null;
+	
+	private RadioGroup mobileAlarmSet = null;
+	
+	private Spinner sensitvSet = null;
+	
+	private RadioButton recordSetOne = null;
+	
+	private Spinner recordRateOne = null;
+	
+	private RadioButton selfSetMonitor = null;
+	
+	private EditText alarmEmailEditText = null;
+	
+	private EditText securityVisitPass = null;
+	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -130,6 +150,7 @@ public class DeviceParamSets extends Activity {
 	}
 
 	private void lookupEditText() {
+		
 		deviceNameEditText = (EditText) findViewById(R.id.device_param_set_name);
 		deviceIdEditText = (EditText) findViewById(R.id.device_param_set_inentify);
 		versionEditText = (EditText) findViewById(R.id.device_param_set_version);
@@ -151,12 +172,20 @@ public class DeviceParamSets extends Activity {
 		wirelessDNS1Address = (EditText) findViewById(R.id.device_param_set_wireless_dns1_address);
 		wirelessDNS2Address = (EditText) findViewById(R.id.device_param_set_wireless_dns2_address);
 
+		recordSetOne = (RadioButton) findViewById(R.id.device_params_video_record_set_one_id);
+		recordRateOne = (Spinner) findViewById(R.id.device_params_set_recorde_frame_rate_one_id);
+		selfSetMonitor = (RadioButton) findViewById(R.id.device_params_monitor_self_mode_set_id);
+		soundFlagSet = (RadioGroup) findViewById(R.id.device_params_other_set_sound_open_id);
+		mobileAlarmSet = (RadioGroup) findViewById(R.id.device_params_other_set_mobile_alarm_flag_id);
+		sensitvSet = (Spinner) findViewById(R.id.device_params_other_set_mobile_alarm_offset_prompt_id);
+		alarmEmailEditText = (EditText) findViewById(R.id.device_params_other_set_mobile_alarm_email_id);
+		securityVisitPass = (EditText) findViewById(R.id.device_params_other_set_security_id);
+		
 		// addrTypeEditText = (EditText)
 		// findViewById(R.id.device_param_addr_type);
 		// addressEditText = (EditText) findViewById(R.id.device_param_address);
 		// frameRateEditText = (EditText)
 		// findViewById(R.id.device_params_recorde_real_speed_id);
-
 		// frameSizeSpinner = (Spinner)
 		// findViewById(R.id.device_params_recorde_frame_size_id);
 		/*
@@ -202,6 +231,7 @@ public class DeviceParamSets extends Activity {
 	}
 
 	private void initializeEditText(Map<String, String> paraMap) {
+		send(paraMap);
 		deviceNameEditText.setText(paraMap.containsKey("name")? paraMap.get("name") : "");
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
 		versionEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
@@ -245,6 +275,74 @@ public class DeviceParamSets extends Activity {
 		wirelessSubAddess.setText(paraMap.containsKey("inet_wlan_mask")? paraMap.get("inet_wlan_mask") : "");
 		wirelessDNS1Address.setText(paraMap.containsKey("inet_wlan_dns1")? paraMap.get("inet_wlan_dns1") : "");
 		wirelessDNS2Address.setText(paraMap.containsKey("inet_wlan_dns2")? paraMap.get("inet_wlan_dns2") : "");
+		
+		if(paraMap.containsKey("record_mode")) {
+			String s = paraMap.get("record_mode");
+			if("inteligent".equals(s)) {
+				recordSetOne.setChecked(true);
+			} else {
+				recordSetOne.setChecked(false);
+			}
+		}
+		
+		if(paraMap.containsKey("record_normal_speed")) {
+			String s = paraMap.get("record_normal_speed");
+			if("2".equals(s)) {
+				recordRateOne.setSelection(1);
+			} else if("4".equals(s)){
+				recordRateOne.setSelection(2);
+			}else if("8".equals(s)){
+				recordRateOne.setSelection(3);
+			}else if("12".equals(s)){
+				recordRateOne.setSelection(4);
+			}else if("24".equals(s)){
+				recordRateOne.setSelection(5);
+			} else {
+				recordRateOne.setSelection(0);
+			}
+		}
+		
+		
+		if(paraMap.containsKey("monitor_mode")) {
+			String s = paraMap.get("monitor_mode");
+			if("normal".equals(s)) {
+				selfSetMonitor.setChecked(true);
+			} else {
+				selfSetMonitor.setChecked(false);
+			}
+		}
+		
+		if(paraMap.containsKey("sound_duplex")) {
+			String s = paraMap.get("sound_duplex");
+			if("1".equals(s)) {
+				soundFlagSet.check(R.id.device_params_other_set_sound_open_flag_id);
+			} else {
+				soundFlagSet.check(R.id.device_params_other_set_sound_close_flag_id);
+			}
+		}
+		
+		if(paraMap.containsKey("email_alarm")) {
+			String s = paraMap.get("email_alarm");
+			if("1".equals(s)) {
+				mobileAlarmSet.check(R.id.device_params_other_set_mobile_alarm_flag_open_id);
+			} else {
+				mobileAlarmSet.check(R.id.device_params_other_set_mobile_alarm_flag_close_id);
+			}
+		}
+		
+		if(paraMap.containsKey("record_sensitivity")) {
+			String s = paraMap.get("record_sensitivity");
+			if("2".equals(s)) {
+				sensitvSet.setSelection(1);
+			} else if("3".equals(s)) {
+				sensitvSet.setSelection(2);
+			} else  {
+				sensitvSet.setSelection(0);
+			}
+		}
+	
+		alarmEmailEditText.setText(paraMap.containsKey("mailbox")? paraMap.get("mailbox") : "");
+		securityVisitPass.setText(paraMap.containsKey("password")? paraMap.get("password") : "");
 	}
 
 	@Override
@@ -253,4 +351,18 @@ public class DeviceParamSets extends Activity {
 		ProgressUtil.dismissProgress();
 	}
 
+	public void send(Map<String, String> paraMap) {
+		PackageUtil.sendPackageNoRecv(CamCmdListHelper.SetCmd_Config, "", 0);
+		String ws = ParaUtil.enCapsuPara(paraMap);
+		System.out.println("----" + ws);
+		int l = ws.length();
+		if(l>1000) {
+			PackageUtil.sendPackageNoRecv(new String("0996") + ws.substring(0,996), "", 0);
+			System.out.println("pagcage one");
+		}
+		String a = ws.substring(996);
+		int left = a.length();// l - 1000;
+		PackageUtil.sendPackageNoRecv(new String("0" + left) + a, "", 0);
+		System.out.println("pagcage two");
+	}
 }

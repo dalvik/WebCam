@@ -29,19 +29,19 @@ import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class MyVideoView extends View implements Runnable {
 
-	private final static int NALBUFLENGTH = 320*480 ; //320*480 * 2
+	private final static int NALBUFLENGTH = 6000*800 ; //320*480 * 2
 	
 	private final static int SOCKETBUFLENGTH = 3420;
 	
-	private final static int RECEAUDIOBUFFERSIZE = 128 * Common.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 1024 * Common.CHANEL * 1;
 	
-	private final static int SERVERSENDBUFFERSIZE = 128;
+	private final static int SERVERSENDBUFFERSIZE = 1024;
 	
 	//private final static int AUDIOBUFFERTMPSIZE = 1280;
 	
 	//private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 	
-	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
+	private Bitmap video = Bitmap.createBitmap(600, 800, Config.RGB_565);
 	
 	byte[] pixel = new byte[NALBUFLENGTH];
 	
@@ -325,7 +325,7 @@ public class MyVideoView extends View implements Runnable {
 					System.out.println(audioBuffer[0] + " " + audioBuffer[32] + "  " + audioBuffer[64] + " " + audioBuffer[96]);
 				}*/
 					int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
-					//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength + " " + RECEAUDIOBUFFERSIZE * Common.CHANEL * 100);
+					//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
 					//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 					//System.out.println("audio size = " + size + "  "+ returnSize);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);

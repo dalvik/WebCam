@@ -5,7 +5,7 @@
     
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    android:orientation="vertical" >
 	
 	    <TextView android:layout_width="fill_parent"
@@ -15,9 +15,10 @@
 	    	android:text="@string/device_params_info_str"/>
 	    
 	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
+	    	android:layout_height="3dp"
 	    	android:background="?android:attr/listDivider"/>
 	    
+	    <!-- 设备信息 -->
 	    <TableLayout  android:layout_width="fill_parent"
 	    	android:layout_height="wrap_content"
 	    	android:stretchColumns="1,3,5"
@@ -58,9 +59,9 @@
 	    			android:singleLine="true"/>
 	            
 	        </TableRow>
-	        
+
+	        <!-- TF storeage -->
 	        <TableRow >
-	            <!-- TF storeage -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
@@ -83,18 +84,26 @@
 	    			android:editable="false"
 	    			android:singleLine="true"/>
 	        </TableRow>
+		    
+	    </TableLayout>
+	    
+	    <!-- 存储设备 -->
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"
+		    android:orientation="horizontal" >
 	        
-	        <TableRow >
-		        <!-- 存储设备 -->
-	            <TextView android:layout_width="wrap_content"
+	         <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
+	    			android:layout_weight="1"
 	    			android:text="@string/device_params_storage_device_str"/>
-	            
+	             
 	             <RadioGroup android:id="@+id/device_param_set_storage_device_mode" 
 	                    android:layout_width="wrap_content"
 	    			    android:layout_height="wrap_content"
-	    				android:layout_weight="1"
+	    			    android:layout_weight="1"
 	    				android:orientation="horizontal">
 	            
 	                <RadioButton android:layout_width="wrap_content"
@@ -113,24 +122,27 @@
 	             <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
+	    			android:layout_weight="1"
 	    			android:text="@string/device_params_recorde_total_time_str"/>
 	            
 	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
+	    			android:layout_weight="1"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text=""/>
-	        </TableRow>
-	    </TableLayout>
+			    	android:layout_height="wrap_content"
+			    	android:layout_weight="1"
+			    	android:text=""/>
+			    
+	    </LinearLayout>
 	    
 	    <TextView android:layout_width="fill_parent"
 	    	android:layout_height="3px"
 	    	android:background="?android:attr/listDivider"/>
+	    
 	    <!-- 网卡设置 -->
 	     <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
@@ -147,8 +159,7 @@
                 <RadioGroup
                     android:id="@+id/device_param_set_network_mode" 
                     android:layout_width="fill_parent"
-	    			android:layout_height="fill_parent"
-	    			android:layout_weight="1"
+	    			android:layout_height="wrap_content"
 	    			android:orientation="horizontal">
 	            
 	                <RadioButton
@@ -174,20 +185,21 @@
 	                
 	            </RadioGroup>
 	           
+                
+	            <!-- 有线网络设置 -->
                 <TextView android:layout_width="wrap_content"
 			    	android:layout_height="wrap_content"
 			    	android:textSize="20dip"
 			    	android:textColor="@color/white"
 			    	android:text="@string/device_params_wireuse_network_set_str"/>
 	    
-	           
-		    	<TableLayout  android:layout_width="fill_parent"
-			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="3,5"
-			    	android:padding="3dip">
-	                
-		    	    <TableRow >
-		    	         <RadioGroup
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="1"
+				    android:orientation="horizontal" >
+	        
+                    <RadioGroup
 		    	            android:id="@+id/device_param_set_wireuse_network_mode"  
 		    	            android:layout_width="fill_parent"
 			    			android:layout_height="fill_parent"
@@ -209,11 +221,16 @@
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_wireuse_static_ipaddress_mode_str"/>
 			                
-			            </RadioGroup>
-		    	    </TableRow>
-		    	    
+			        </RadioGroup>
+               </LinearLayout>
+               
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="1dip">
+	                
+			         <!-- ip address  -->
 		    	     <TableRow >
-			            <!-- ip address  -->
 			            <TextView android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
 			    			android:textColor="@color/white"
@@ -282,15 +299,13 @@
 			    	android:textColor="@color/white"
 			    	android:text="@string/device_params_wireless_network_set_str"/>
 	    
-	           
-		        <!-- 无线网络设置 -->
-		    	<TableLayout  android:layout_width="fill_parent"
-			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="1,3,5"
-			    	android:padding="3dip">
-	                
-		    	    <TableRow >
-		    	         <RadioGroup android:id="@+id/device_param_set_wireless_network_mode"  
+	    	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="1"
+				    android:orientation="horizontal" >
+	        
+	    	         <RadioGroup android:id="@+id/device_param_set_wireless_network_mode"  
 		    	                android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
@@ -311,8 +326,15 @@
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_wireless_static_ipaddress_mode_str"/>
 			                
-			            </RadioGroup>
-		    	    </TableRow>
+			        </RadioGroup>
+			            
+		    	</LinearLayout>
+	           
+		        <!-- 无线网络设置 -->
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="3dip">
 		    	    
 		    	     <TableRow >
 			            <!-- ip address  -->
@@ -396,17 +418,17 @@
 			    	android:textColor="@color/white"
 			    	android:text="@string/device_params_video_record_set_str"/>
 	          
-		        <!-- 无线网络设置 -->
 		    	<TableLayout  android:layout_width="fill_parent"
 			    	android:layout_height="wrap_content"
 			    	android:stretchColumns="1,3,5"
 			    	android:padding="3dip">
 	            
 		    	    <TableRow >
-		    	          <RadioButton android:layout_width="fill_parent"
+		    	          <RadioButton
+		    	                android:id="@+id/device_params_video_record_set_one_id" 
+		    	                android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
-			    				android:checked="true"
 			    				android:text="@string/device_params_video_record_set_one_str"/>
 		    	          
 			               <TextView android:layout_width="wrap_content"
@@ -414,26 +436,30 @@
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
 			               
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_rate_one_id" 
+					            android:layout_width="wrap_content"
+					            android:prompt="@string/device_params_recorde_frame_speed_str"
+					            android:entries="@array/frame_rate_array"
+						    	android:layout_height="wrap_content"/>
 		    	          
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
 		    	          
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_size_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:entries="@array/monitor_frame_size"
+					    	android:prompt="@string/device_params_recorde_frame_size_str"/>
 		    	    </TableRow>
 		    	    
 		    	    <TableRow >
 		    	          <RadioButton android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
-			    				android:checked="true"
-			    				android:text="@string/device_params_video_record_set_two_str"/>
+			    				android:text="@string/device_params_video_record_set_two_str"
+			    				android:enabled="false"/>
 			                
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
@@ -442,7 +468,9 @@
 			               
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
 		    	          
 		    	           <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
@@ -451,14 +479,16 @@
 		    	          
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
 		    	    </TableRow>
 		    	    
 		    	    <TableRow >
 		    	          <RadioButton android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
-			    				android:checked="true"
+			    				android:enabled="false"
 			    				android:text="@string/device_params_video_record_set_three_str"/>
 			                
 		    	          <TextView android:layout_width="wrap_content"
@@ -468,7 +498,9 @@
 			               
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
 		    	          
 		    	           <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
@@ -477,7 +509,9 @@
 		    	          
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
 		    	    </TableRow>
 		    	</TableLayout>
 	         
@@ -506,10 +540,11 @@
 			    	android:padding="3dip">
 	            
 		    	    <TableRow >
-		    	          <RadioButton android:layout_width="fill_parent"
+		    	          <RadioButton
+		    	                android:id="@+id/device_params_monitor_self_mode_set_id" 
+		    	                android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
-			    				android:checked="true"
 			    				android:text="@string/device_params_monitor_self_mode_set_str"/>
 		    	          
 			               <TextView android:layout_width="wrap_content"
@@ -519,7 +554,8 @@
 			               
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"/>
 		    	          
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
@@ -528,14 +564,15 @@
 		    	          
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"/>
 		    	    </TableRow>
 		    	    
 		    	      <TableRow >
 		    	          <RadioButton android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
-			    				android:checked="true"
+			    				android:enabled="false"
 			    				android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
 		    	          
 			               <TextView android:layout_width="wrap_content"
@@ -545,7 +582,8 @@
 			               
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:enabled="false"/>
 		    	          
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
@@ -554,7 +592,8 @@
 		    	          
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:enabled="false"/>
 		    	    </TableRow>
 		       </TableLayout>
 	     </LinearLayout>
@@ -580,25 +619,32 @@
 			    	android:stretchColumns="1,3,5"
 			    	android:padding="3dip">
 	            
-		           <TableRow ><!-- sound set -->
+	               <!-- sound set -->
+		           <TableRow >
 			         <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"
 				    	android:text="@string/device_params_other_set_sound_str"/>
 			         
-		               <RadioGroup android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:orientation="horizontal">
+		               <RadioGroup 
+		                    android:id="@+id/device_params_other_set_sound_open_id"
+		                    android:layout_width="fill_parent"
+		    				android:layout_height="fill_parent"
+		    				android:layout_weight="1"
+		    				android:orientation="horizontal">
 			            
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_sound_open_flag_id"
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:checked="true"
 			    				android:text="@string/device_params_other_set_sound_open_str"/>
 			                
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_sound_close_flag_id"
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_other_set_sound_close_str"/>
@@ -613,18 +659,24 @@
 				    	android:textSize="20dip"
 				    	android:text="@string/device_params_other_set_mobile_alarm_str"/>
 			         
-		               <RadioGroup android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:orientation="horizontal">
+		               <RadioGroup 
+		                    android:id="@+id/device_params_other_set_mobile_alarm_flag_id"
+		                    android:layout_width="fill_parent"
+		    				android:layout_height="fill_parent"
+		    				android:layout_weight="1"
+		    				android:orientation="horizontal">
 			            
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_mobile_alarm_flag_open_id"
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:checked="true"
 			    				android:text="@string/device_params_other_set_sound_open_str"/>
 			                
-			                <RadioButton android:layout_width="fill_parent"
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_mobile_alarm_flag_close_id"
+			                    android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
 			    				android:layout_weight="1"
 			    				android:text="@string/device_params_other_set_sound_close_str"/>
@@ -636,22 +688,25 @@
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_other_set_mobile_alarm_offset_str"/>
 			               
-		    	         <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+		    	         <Spinner android:id="@+id/device_params_other_set_mobile_alarm_offset_prompt_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:entries="@array/mobile_alarm_offset_prompt_array"
+					    	android:prompt="@string/device_params_other_set_mobile_alarm_offset_prompt_str"/>
 		    	          
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_other_set_mobile_alarm_email_str"/>
 		    	          
-		    	          <EditText android:id="@+id/device_params_recorde_frame_speed_id" 
+		    	          <EditText android:id="@+id/device_params_other_set_mobile_alarm_email_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
 		           </TableRow>
 		           
 		           <TableRow ><!-- security set -->
-			         <TextView android:layout_width="fill_parent"
+			         <TextView 
+			            android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"
@@ -665,7 +720,8 @@
 			         
 		               <EditText android:id="@+id/device_params_other_set_security_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:inputType="textPassword"/>
 
 		           </TableRow>
 		           
