@@ -196,7 +196,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		case MENU_PREVIEW:
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 			Intent intent = new Intent();
-			intent.putExtra("IPPLAY", device);
+			Bundle bundle = new Bundle();
+			bundle.putSerializable("IPPLAY", device);
+			intent.putExtras(bundle);
 			intent.setAction(Constants.ACTION_IPPLAY);
 			sendBroadcast(intent);
 			break;
@@ -620,9 +622,12 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				camManager.addCam(device);
-				handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-				unCloseDialog(dlg, -1, true); 
+				if(camManager.addCam(device)) {
+					handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+					unCloseDialog(dlg, -1, true); 
+				} else {
+					showToast(R.string.device_manager_add_device_is__exist);
+				}
 			}
 		}).setNegativeButton(getString(R.string.system_settings_save_path_preview_cancle_str), new DialogInterface.OnClickListener() {
 			@Override
@@ -663,7 +668,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		device.setDeviceWlanMask(paraMap.get("inet_wlan_mask"));
 		device.setDeviceWlanDNS1(paraMap.get("inet_wlan_dns1"));
 		device.setDeviceWlanDNS2(paraMap.get("inet_wlan_dns2"));
-		
+		device.setUnDefine1(ip);
 		device.setDeviceRemoteCmdPort(port1);
 		device.setDeviceRemoteVideoPort(port2);
 		device.setDeviceRemoteAudioPort(port3);

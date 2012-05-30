@@ -137,7 +137,7 @@ public class FileUtil {
 			StringBuffer sb = new StringBuffer();
 			for(Device device:deviceList) {
 				boolean netType = device.getDeviceNetType();
-				sb.append(device.getDeviceName() + "&" + netType + "&");
+				sb.append(device.getDeviceName() + "&" + device.getDeviceID() + "&" + device.getUnDefine1() + "&" + netType + "&");
 				if(netType){
 					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() +"\n");
 				} else {
@@ -181,19 +181,22 @@ public class FileUtil {
 				}
 				Device device = new Device();
 				device.setDeviceName(info[0]);
-				if("true".equals(info[1])) {
+				device.setDeviceID(info[1]);
+				device.setUnDefine1(info[2]);
+				if("true".equals(info[3])) {
 					device.setDeviceNetType(true);
-					device.setDeviceEthIp(info[2]);
-					device.setDeviceEthGateWay(info[3]);
+					device.setDeviceEthIp(info[4]);
+					device.setDeviceEthGateWay(info[5]);
 				}else {
 					device.setDeviceNetType(false);
-					device.setDeviceWlanIp(info[2]);
-					device.setDeviceWlanGateWay(info[3]);
+					device.setDeviceWlanIp(info[4]);
+					device.setDeviceWlanGateWay(info[5]);
 				}
-				device.setDeviceRemoteCmdPort(Integer.parseInt(info[4]));
-				device.setDeviceRemoteVideoPort(Integer.parseInt(info[5]));
-				device.setDeviceRemoteAudioPort(Integer.parseInt(info[6]));
+				device.setDeviceRemoteCmdPort(Integer.parseInt(info[6]));
+				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));
+				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
 				deviceList.add(device);
+				System.out.println("get device form file "  + device);
 			}
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());

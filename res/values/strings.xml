@@ -32,6 +32,7 @@
     		<string name="device_manager_new_device_id_not_number">设备ID号必须为数字</string>
     		<string name="device_manager_find_device_id_error">查询设备ID失败</string>
     		<string name="device_manager_find_device_id_not_online">设备不在线</string>
+    		<string name="device_manager_add_device_is__exist">设备已经存在</string>
     		<string name="device_manager_new_device_title">添加新设备</string>
     		<string name="device_manager_new_device_message">确认添加新设备</string>
     		<string name="device_manager_new_device_subnet_parameter_id">局域网参数</string>

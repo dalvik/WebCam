@@ -92,12 +92,6 @@ public class CamVideoH264 extends Activity {
 				startThread();
 				break;
 			case Constants.SHOWCONNDIALOG:
-				String tem = "";
-				if(currIpAddress != null && currIpAddress.contains(tem) && !myVideoView.getPlayStatus()) {
-					Log.d(TAG, "playStatus =" +  myVideoView.getPlayStatus());
-					//return;
-				}
-				currIpAddress = tem;
 				showProgressDlg();
 				//startThread();
 				break;
@@ -144,6 +138,10 @@ public class CamVideoH264 extends Activity {
 							System.out.println("port 3 sucess");
 							
 						}
+						device.setUnDefine1(currIpAddress);
+						device.setDeviceRemoteCmdPort(port1);
+						device.setDeviceRemoteVideoPort(port2);
+						device.setDeviceRemoteAudioPort(port3);
 					} catch (Exception e) {
 						Log.d(TAG, "----> send port " + e.getLocalizedMessage());
 					} finally{
@@ -163,6 +161,7 @@ public class CamVideoH264 extends Activity {
 	
 	private void startThread() {
 		myVideoView.onStop();
+		myVideoView.setDevice(device);
 		if(thread != null && thread.isAlive()) {
 			try {
 				thread.join(100);
@@ -266,19 +265,24 @@ public class CamVideoH264 extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(intent != null) {
-				Object obj = intent.getStringExtra("IPPLAY");
-				if(obj instanceof Device) {
-					device = (Device) obj;
-					Log.d(TAG, "receive device info =" +  device);
-					Message msg = mHandler.obtainMessage();
-					if(device.getDeviceNetType()) {
-						netUtil = new ThroughNetUtil(mHandler,false,Integer.parseInt(device.getDeviceID()));
-						new Thread(netUtil).start();
-						msg.what = Constants.SHOWCONNDIALOG;
-						mHandler.sendMessage(msg);
-					} else {
-						msg.what = Constants.SHOWCONNDIALOG;
-						mHandler.sendMessage(msg);
+				Bundle bundle = intent.getExtras();
+				if(bundle != null) {
+					Object obj = bundle.getSerializable("IPPLAY");
+					if(obj != null && obj instanceof Device) {
+						device = (Device) obj;
+						Log.d(TAG, "receive device info =" +  device);
+						Message msg = mHandler.obtainMessage();
+						if(device.getDeviceNetType()) {
+							System.out.println(Integer.parseInt(device.getDeviceID(),16));
+							netUtil = new ThroughNetUtil(mHandler,false,Integer.parseInt(device.getDeviceID(),16));
+							new Thread(netUtil).start();
+							msg.what = Constants.SHOWCONNDIALOG;
+							mHandler.sendMessage(msg);
+						} else {
+							msg.what = Constants.SHOWCONNDIALOG;
+							mHandler.sendMessage(msg);
+							mHandler.sendEmptyMessage(Constants.CONNECTTING);
+						}
 					}
 				}
 				}

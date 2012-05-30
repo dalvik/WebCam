@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
@@ -22,6 +24,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
@@ -29,9 +32,9 @@ import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class MyVideoView extends View implements Runnable {
 
-	private final static int NALBUFLENGTH = 6000*800 ; //320*480 * 2
+	private final static int NALBUFLENGTH = 320*480 * 2 ; //600*800*2
 	
-	private final static int SOCKETBUFLENGTH = 3420;
+	private final static int SOCKETBUFLENGTH = 342000;
 	
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Common.CHANEL * 1;
 	
@@ -65,9 +68,9 @@ public class MyVideoView extends View implements Runnable {
 	
 	boolean looperFlag = false;
 	
-	private Socket socket = null;
+	private DataInputStream videoDis = null;
 	
-	private DataInputStream dis = null;
+	private DataInputStream audioDis = null;
 	
 	private DatagramSocket datagramSocket = null;
 	
@@ -82,6 +85,8 @@ public class MyVideoView extends View implements Runnable {
 	private Handler handler;
 	
 	private Context context;
+	
+	private Device device;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -107,23 +112,23 @@ public class MyVideoView extends View implements Runnable {
 	}
 	
 	public void run() {
-		try {
-			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Udp.getBytes();
-			ThroughNetUtil netUtil = CamVideoH264.getInstance();
-			datagramSocket = netUtil.getPort1();
-			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
-			datagramSocket.send(datagramPacket);
-			DatagramSocket port2 = netUtil.getPort2();
-			DatagramSocket port3 = netUtil.getPort3();
-			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			System.out.println("ready rece ...." + " " + CamVideoH264.currIpAddress + " " + CamVideoH264.currPort + " remote video Port=" + CamVideoH264.port2 + " remote audio port=" +CamVideoH264.port3);
-			int localPort2 =  port2.getLocalPort();
-			//port2.close();
-			result = UdtTools.initSocket(CamVideoH264.currIpAddress, localPort2, CamVideoH264.port2, port3.getLocalPort(), CamVideoH264.port3, RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
-			System.out.println("socket init result = " + result);
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
+		if(device.getDeviceNetType()) {
+			try {
+				byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Udp.getBytes();
+				ThroughNetUtil netUtil = CamVideoH264.getInstance();
+				datagramSocket = netUtil.getPort1();
+				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+				String ipAdd = device.getUnDefine1();
+				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAdd), device.getDeviceRemoteCmdPort());
+				datagramSocket.send(datagramPacket);
+				DatagramSocket port2 = netUtil.getPort2();
+				DatagramSocket port3 = netUtil.getPort3();
+				System.out.println("ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteAudioPort() + " remote audio port=" +device.getDeviceRemoteVideoPort());
+				int localPort2 =  port2.getLocalPort();
+				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), port3.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
+				System.out.println("socket init result = " + result);
+				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+				/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
 			socket = new Socket();
 			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
 			if(dis != null) {
@@ -131,81 +136,119 @@ public class MyVideoView extends View implements Runnable {
 			}
 			dis = new DataInputStream(socket.getInputStream());
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);*/
-		}catch (IOException e) {
-			e.printStackTrace();
-			onStop();
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			handler.sendEmptyMessage(Constants.CONNECTERROR);
-			return ;
-		}
-		long start = System.currentTimeMillis();
-		int i = 0;
-		//byte[] buf = new byte[1024];
-		new Thread(new RecvAudio()).start();
-		while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
-			readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
-			if (readLengthFromSocket <= 0) { // 读取完成
-				System.out.println("read over break....");
-				break;
+			}catch (IOException e) {
+				e.printStackTrace();
+				onStop();
+				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+				handler.sendEmptyMessage(Constants.CONNECTERROR);
+				return ;
 			}
-			sockBufferUsedLength = 0;
-			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
-				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
-				while(looperFlag) {
-					looperFlag = false;
-					if(nalSizeTemp == -2) {
-						if(nalBufUsedLength>0) {
-							i++;
-							if(i%50 ==0) {
-								long end = System.currentTimeMillis() / 1000 - start / 1000;
-								System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
+			long start = System.currentTimeMillis();
+			int i = 0;
+			//byte[] buf = new byte[1024];
+			new Thread(new RecvAudio()).start();
+			while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
+				readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
+				if (readLengthFromSocket <= 0) { // 读取完成
+					System.out.println("read over break....");
+					break;
+				}
+				sockBufferUsedLength = 0;
+				while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
+					nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
+					while(looperFlag) {
+						looperFlag = false;
+						if(nalSizeTemp == -2) {
+							if(nalBufUsedLength>0) {
+								i++;
+								if(i%50 ==0) {
+									long end = System.currentTimeMillis() / 1000 - start / 1000;
+									System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
+								}
+								copyPixl();
 							}
-							copyPixl();
+							nalBuf[0] = -1;
+							nalBuf[1] = -40;
+							nalBuf[2] = -1;
+							nalBuf[3] = -32;
+							sockBufferUsedLength += 4;
+							nalBufUsedLength = 4;
+							break;
 						}
-						nalBuf[0] = -1;
-						nalBuf[1] = -40;
-						nalBuf[2] = -1;
-						nalBuf[3] = -32;
-						sockBufferUsedLength += 4;
-						nalBufUsedLength = 4;
-						break;
 					}
 				}
 			}
-			//System.out.println("size = " + size + "   " + buf[100]);
-			/*try {
-				readLengthFromSocket = dis.read(socketBuf,0, SOCKETBUFLENGTH);//   从流里面读取的字节的长度  <0时读取完毕
-			} catch (IOException e) {
-				Log.d(TAG, e.getLocalizedMessage());
-			}
-			if (readLengthFromSocket <= 0) { // 读取完成
-				System.out.println("read over break....");
-				break;
-			}
-			sockBufferUsedLength = 0;
-			while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
-				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
-				while(looperFlag) {
-					looperFlag = false;
-					if(nalSizeTemp == -2) {
-						if(nalBufUsedLength>0) {
-							i++;
-							if(i%50 ==0) {
-								long end = System.currentTimeMillis() / 1000 - start / 1000;
-								System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
-							}
-							copyPixl();
-						}
-						nalBuf[0] = -1;
-						nalBuf[1] = -40;
-						nalBuf[2] = -1;
-						nalBuf[3] = -32;
-						sockBufferUsedLength += 4;
-						nalBufUsedLength = 4;
+			
+		}else {
+			Socket socket = new Socket();
+			 try {
+					byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
+					datagramSocket = new DatagramSocket();
+					datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+					String ipAddress = device.getDeviceWlanIp();
+					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceRemoteCmdPort());
+					datagramSocket.send(datagramPacket);
+					//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+					System.out.println("ready rece ....");
+					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceRemoteVideoPort());
+					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
+					if(videoDis != null) {
+						videoDis.close();
+					}
+					videoDis = new DataInputStream(socket.getInputStream());
+					handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+					System.out.println("dis=" + videoDis);
+				}catch (IOException e) {
+					releaseTcpSocket(videoDis, socket);
+					onStop();
+					handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+					handler.sendEmptyMessage(Constants.CONNECTERROR);
+					return ;
+				}
+			 
+			    long start = System.currentTimeMillis();
+				int i = 0;
+				//byte[] buf = new byte[1024];
+				new Thread(new RecvAudio()).start();
+				while (!Thread.currentThread().isInterrupted() && !stopPlay) {
+					try {
+						readLengthFromSocket = videoDis.read(socketBuf,0, SOCKETBUFLENGTH);
+					} catch (IOException e) {
+						e.printStackTrace();
+						releaseTcpSocket(videoDis, socket);
+						System.out.println("read exception break....");
 						break;
 					}
+					if (readLengthFromSocket <= 0) { // 读取完成
+						System.out.println("read over break....");
+						releaseTcpSocket(videoDis, socket);
+						break;
+					}
+					sockBufferUsedLength = 0;
+					while(readLengthFromSocket - sockBufferUsedLength>0) {// remain socket buf length
+						nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf, sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
+						while(looperFlag) {
+							looperFlag = false;
+							if(nalSizeTemp == -2) {
+								if(nalBufUsedLength>0) {
+									i++;
+									if(i%50 ==0) {
+										long end = System.currentTimeMillis() / 1000 - start / 1000;
+										System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
+									}
+									copyPixl();
+								}
+								nalBuf[0] = -1;
+								nalBuf[1] = -40;
+								nalBuf[2] = -1;
+								nalBuf[3] = -32;
+								sockBufferUsedLength += 4;
+								nalBufUsedLength = 4;
+								break;
+							}
+						}
+					}
 				}
-			}*/
 		}
 		onStop();
 		release();
@@ -308,14 +351,57 @@ public class MyVideoView extends View implements Runnable {
                      AudioFormat.ENCODING_PCM_16BIT,
                      m_out_buf_size,
                      AudioTrack.MODE_STREAM);
-			try{
-				m_out_trk.play();
+			m_out_trk.play();
+			stopPlay = false;
+			if(device.getDeviceNetType()) {
+				try{
+					while(!stopPlay) {
+						//arg[0] server send audio buffer length arg[1] client recv big audio buffer 
+						//arg[2] client recv big audio buffer length same length with audio init  
+						int recvDataLength = UdtTools.recvAudioData(SERVERSENDBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
+						//System.out.println(recvDataLength + "----------------------");
+						if(recvDataLength <=0) {
+							stopPlay = true;
+							break;
+						}
+						int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
+						//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
+						//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
+						//System.out.println("audio size = " + size + "  "+ returnSize);
+						m_out_trk.write(pcmArr, 0, pcmBufferLength);
+					}
+				}catch(Exception e) {
+					stopPlay = true;
+				}
+			} else {
+				Socket socket = new Socket();
+				SocketAddress socketAddress = new InetSocketAddress(device.getDeviceWlanIp(), device.getDeviceRemoteAudioPort());
+				try {
+					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
+					if(audioDis != null) {
+						audioDis.close();
+					}
+					audioDis = new DataInputStream(socket.getInputStream());
+					System.out.println("audio dis=" + videoDis);
+				} catch (IOException e) {
+					e.printStackTrace();
+					stopPlay = true;
+					releaseTcpSocket(videoDis, socket);
+					return;
+				}
+				stopPlay = false;
 				while(!stopPlay) {
-					//arg[0] server send audio buffer length arg[1] client recv big audio buffer 
-					//arg[2] client recv big audio buffer length same length with audio init  
-					int recvDataLength = UdtTools.recvAudioData(SERVERSENDBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
+					int recvDataLength = -1;
+					try {
+						recvDataLength = audioDis.read(audioBuffer,0, RECEAUDIOBUFFERSIZE);
+					} catch (IOException e) {
+						stopPlay = true;
+						e.printStackTrace();
+						break;
+					}
 					//System.out.println(recvDataLength + "----------------------");
 					if(recvDataLength <=0) {
+						stopPlay = true;
 						break;
 					}
 					int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
@@ -324,8 +410,6 @@ public class MyVideoView extends View implements Runnable {
 					//System.out.println("audio size = " + size + "  "+ returnSize);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
 				}
-			}catch(Exception e) {
-				stopPlay = true;
 			}
 			if(m_out_trk != null) {
 				m_out_trk.stop();
@@ -335,45 +419,34 @@ public class MyVideoView extends View implements Runnable {
 			}
 		}
 		
-		private void mergeAudioBuffer(byte[] pcmBuffer, int pcmBufferLength) {
-			for(int i=0; i<pcmBufferLength;i++) {
-				int tmpIndex = i + pcmBufferLength * num;
-				//if(tmpIndex > AUDIOBUFFERSTOERLENGTH -1) {
-					//audioBufferStore[tmpIndex] = pcmBuffer[i];
-				//}
+	}
+
+	public void releaseTcpSocket(DataInputStream dis, Socket socket) {
+		if(videoDis != null) {
+			try {
+				videoDis.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			if(num % 8 == 0) {
-				num = 0;
-				//m_out_trk.write(audioBufferStore, 0, AUDIOBUFFERSTOERLENGTH);
+		}
+		if(socket != null) {
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		}
 	}
+	public void setDevice(Device device) {
+		this.device = device;
+	}
 	
 	/*
-	 try {
-			byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.currPort);
-			datagramSocket.send(datagramPacket);
-			//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			System.out.println("ready rece ....");
-			SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
-			socket = new Socket();
-			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
-			if(dis != null) {
-				dis.close();
-			}
-			dis = new DataInputStream(socket.getInputStream());
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			System.out.println("dis=" + dis);
-		}catch (IOException e) {
-			e.printStackTrace();
-			onStop();
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			handler.sendEmptyMessage(Constants.CONNECTERROR);
-			return ;
-		}
+	
 	 
 	 */
+	
+	
 }
