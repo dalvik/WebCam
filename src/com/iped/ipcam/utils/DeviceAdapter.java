@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.iped.ipcam.gui.R;
@@ -15,9 +16,12 @@ import com.iped.ipcam.pojo.Device;
 public class DeviceAdapter extends BaseAdapter {
 
 	private Context context;
+	
 	private List<Device> deviceList = null;
 	
 	private LayoutInflater inflater = null;
+	
+	private int checkedIndex;
 	
 	public DeviceAdapter(List<Device> deviceList, Context context) {
 		this.deviceList = deviceList;
@@ -49,6 +53,7 @@ public class DeviceAdapter extends BaseAdapter {
 		Device device = getItem(position);
 		if(convertView == null) {
 			convertView = inflater.inflate(R.layout.device_list_item, null);
+			viewHolder.selectDevice = (RadioButton) convertView.findViewById(R.id.device_select_id);
 			viewHolder.name = (TextView) convertView.findViewById(R.id.device_name);
 			viewHolder.type = (TextView) convertView.findViewById(R.id.device_type);
 			viewHolder.ip = (TextView) convertView.findViewById(R.id.device_ip_address);
@@ -60,6 +65,11 @@ public class DeviceAdapter extends BaseAdapter {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		viewHolder.name.setText(device.getDeviceName());
+		if(position == checkedIndex) {
+			viewHolder.selectDevice.setChecked(true);
+		}else {
+			viewHolder.selectDevice.setChecked(false);
+		}
 		if(device.getDeviceNetType()) {
 			viewHolder.type.setText(context.getResources().getText(R.string.device_manager_add_net_type_wlan_str));
 			viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceEthIp());
@@ -75,8 +85,14 @@ public class DeviceAdapter extends BaseAdapter {
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
-
+	
+	public void setChecked(int checkedIndex) {
+		this.checkedIndex = checkedIndex;
+	}
+	
 	static class ViewHolder {
+		
+		public RadioButton selectDevice;
 		
 		public TextView name;
 

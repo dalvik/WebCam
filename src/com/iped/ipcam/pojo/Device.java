@@ -366,7 +366,7 @@ public class Device implements Serializable{
 		this.unDefine3 = unDefine3;
 	}
 
-	@Override
+/*	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -390,7 +390,7 @@ public class Device implements Serializable{
 		} else if (!deviceID.equals(other.deviceID))
 			return false;
 		return true;
-	}
+	}*/
 
 	@Override
 	public String toString() {

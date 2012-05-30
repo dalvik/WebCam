@@ -292,6 +292,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			lastSelected = index;
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
+			adapter.setChecked(index);
+			adapter.notifyDataSetChanged();	
 		}
 	};
 
