@@ -6,10 +6,12 @@ import java.util.Map;
 import android.os.Handler;
 
 import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.gui.CamVideoH264;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
+import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class CamParasSetImp implements ICamParasSet {
 
@@ -47,18 +49,28 @@ public class CamParasSetImp implements ICamParasSet {
 		@Override
 		public void run() {
 			try {
-				PackageUtil.isOnline(ip, Constants.UDPPORT);
+				//PackageUtil.isOnline(ip, Constants.UDPPORT);
+				ThroughNetUtil netUtil = CamVideoH264.getInstance();
+				if(netUtil == null) {
+					return ;
+				}
+				String rece = PackageUtil.CMDPackage2(netUtil,CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
+				System.out.println("recv===="+ rece);
+				if(rece != null) {
+					ParaUtil.putParaByString(rece, paraMap);
+					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+				} else {
+					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+				}
 			} catch (CamManagerException e) {
 				e.printStackTrace();
 				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 				return;
 			}
-			String rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
-			System.out.println("recv===="+ rece);
-			if(rece != null) {
+		/*	if(rece != null) {
 				ParaUtil.putParaByString(rece, paraMap);
 				handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				/*Set<String> s = paraMap.keySet();
+				Set<String> s = paraMap.keySet();
 				for(String ss:s){
 					System.out.println(ss + " " + paraMap.get(ss));
 				}*/
@@ -96,10 +108,10 @@ public class CamParasSetImp implements ICamParasSet {
 					}
 				}else {
 					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				}*/
+				}
 			} else {
 				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-			}
+			}*/
 		}
 	}
 

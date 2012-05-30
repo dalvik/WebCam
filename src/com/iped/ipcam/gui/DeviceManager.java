@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -37,14 +39,15 @@ import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
-import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
 import com.iped.ipcam.utils.FileUtil;
-import com.iped.ipcam.utils.ThroughNetUtil.SendUDTCommon;
+import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.ParaUtil;
+import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class DeviceManager extends ListActivity implements OnClickListener {
 
@@ -74,6 +77,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 
 	private int lastSelected = 0;
 
+	private Thread throughNetThread = null;
+	
+	private ThroughNetUtil netUtil = null;
+	
 	private static final String TAG = "DeviceManager";
 
 	private Handler handler = new Handler() {
@@ -105,11 +112,29 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			case Constants.SHOWRESULTDIALOG:
 				Bundle bundle = message.getData();
 				if(bundle != null) {
-					String name = bundle.getString("CAMERANAME");
-					String ip = bundle.getString("CAMERAIP");
-					String getway = bundle.getString("CAMERAGETWAY");
-					showResult(name, ip, getway);
+					Object obj = bundle.get("NEW_DEVICE");
+					if(obj instanceof Device) {
+						showResult((Device)obj);
+					}
 				}
+				break;
+			case Constants.SENDGETTHREEPORTMSG:
+				Bundle bd = message.getData();
+				if(bd != null) {
+					String ip = bd.getString("IPADDRESS");
+					int port1 = bd.getInt("PORT1");
+					int port2 = bd.getInt("PORT2");
+					int port3 = bd.getInt("PORT3");
+					hideProgress();
+					getDeviceConfig(ip, port1, port2, port3);
+				}
+				break;
+			case Constants.SENDGETUNFULLPACKAGEMSG:
+				showToast(R.string.device_manager_find_device_id_error);
+				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
+				break;
+			case Constants.SENDGETTHREEPORTTIMOUTMSG:
+				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 				break;
 			default:
 				break;
@@ -171,7 +196,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		case MENU_PREVIEW:
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 			Intent intent = new Intent();
-			intent.putExtra("IPPLAY", device.getDeviceIp());
+			intent.putExtra("IPPLAY", device);
 			intent.setAction(Constants.ACTION_IPPLAY);
 			sendBroadcast(intent);
 			break;
@@ -275,10 +300,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		newDeviceNameEditText.setText(device.getDeviceName());
 		final EditText newDeviceIPEditText = (EditText) addDeviceView
 				.findViewById(R.id.device_manager_new_addr_id);
-		newDeviceIPEditText.setText(device.getDeviceIp());
+		//newDeviceIPEditText.setText(device.getDeviceIp());
 		final EditText newDeviceGatewayEditText = (EditText) addDeviceView
 				.findViewById(R.id.device_manager_new_gateway_addr_id);
-		newDeviceGatewayEditText.setText(device.getDeviceGateWay());
+		//newDeviceGatewayEditText.setText(device.getDeviceGateWay());
 		// final EditText newDeviceSubnetEditText =
 		// (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
 		// newDeviceSubnetEditText.setText(device.get());
@@ -308,9 +333,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 									String newDiviceGateway = newDeviceGatewayEditText
 											.getText().toString();
 									Device deviceNew = new Device(
-											newDiviceName, "IP Camera",
-											newDiviceIP, Constants.TCPPORT,
-											Constants.UDPPORT, newDiviceGateway);
+											newDiviceName, "IP Camera");
 									if (camManager.editCam(device, deviceNew)) {
 										handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 										unCloseDialog(dlg, -1, true);
@@ -375,27 +398,36 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 									String cameraId = ((EditText) addDeviceView
 											.findViewById(R.id.device_manager_new_device_id_edittext))
 											.getText().toString().trim();
-									if (cameraId == null
-											|| cameraId.length() <= 0) {
-										unCloseDialog(
-												dlg,
-												R.string.device_manager_new_device_id_not_null,
+									if (cameraId == null || cameraId.length() <= 0) {
+										unCloseDialog(dlg,R.string.device_manager_new_device_id_not_null,
 												false);
 										return;
 									}
-									if(!cameraId.matches("\\d")) {
+									if(!cameraId.matches("\\d+")) {
 										unCloseDialog(
 												dlg,
 												R.string.device_manager_new_device_id_not_number,
 												false);
 										return;
 									}
-									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, "设备查询", "请稍候");
-									new Thread(new QueryCamera(newDiviceName, cameraId, true))
+									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
+									new Thread(new QueryCamera(newDiviceName, cameraId,"","","","", true))
 											.start();
 								} else {
 									String newDiviceIP = ((EditText) addDeviceView
 											.findViewById(R.id.device_manager_new_addr_id))
+											.getText().toString();
+									String newDiviceGateWay = ((EditText) addDeviceView
+											.findViewById(R.id.device_manager_new_gateway_addr_id))
+											.getText().toString();
+									String newDiviceDNS1 = ((EditText) addDeviceView
+											.findViewById(R.id.device_manager_new_dns1_id))
+											.getText().toString();
+									String newDiviceDNS2 = ((EditText) addDeviceView
+											.findViewById(R.id.device_manager_new_dns2_id))
+											.getText().toString();
+									String newDiviceMask = ((EditText) addDeviceView
+											.findViewById(R.id.device_manager_new_sub_net_addr_id))
 											.getText().toString();
 									if (newDiviceIP == null
 											|| newDiviceIP.length() <= 0) {
@@ -405,40 +437,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 												false);
 										return;
 									}
-									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, "设备查询", "请稍候");
-									new Thread(new QueryCamera(newDiviceName, newDiviceIP,
+									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
+									new Thread(new QueryCamera(newDiviceName, newDiviceIP,newDiviceGateWay,newDiviceMask,newDiviceDNS1,newDiviceDNS2,
 											false)).start();
 								}
-								/*
-								 * String newDiviceName =
-								 * ((EditText)addDeviceView
-								 * .findViewById(R.id.device_manager_add_name_id
-								 * )).getText().toString(); String newDiviceIP =
-								 * ((EditText)addDeviceView.findViewById(R.id.
-								 * device_manager_new_addr_id
-								 * )).getText().toString(); if(newDiviceIP==
-								 * null || newDiviceIP.length() <=0) {
-								 * unCloseDialog(dlg,
-								 * R.string.device_manager_add_not_null_str,
-								 * false); } else { String newDiviceGateway =
-								 * ((EditText)addDeviceView.findViewById(R.id.
-								 * device_manager_new_gateway_addr_id
-								 * )).getText().toString(); //String
-								 * newDiviceSubNet =
-								 * ((EditText)addDeviceView.findViewById
-								 * (R.id.device_manager_new_sub_net_addr_id
-								 * )).getText().toString(); Device device = new
-								 * Device(newDiviceName, "IP Camera",
-								 * newDiviceIP, Constants.TCPPORT,
-								 * Constants.UDPPORT, newDiviceGateway);
-								 * if(camManager.addCam(device)) {
-								 * handler.sendEmptyMessage
-								 * (Constants.UPDATEDEVICELIST);
-								 * unCloseDialog(dlg, -1, true); } else {
-								 * unCloseDialog(dlg,
-								 * R.string.device_manager_add_same_ip_str,
-								 * false); } }
-								 */
 							}
 						})
 				.setNegativeButton(
@@ -460,9 +462,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				!isChecked);
 		addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id)
 				.setEnabled(!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_tcp_port_id)
+		addDeviceView.findViewById(R.id.device_manager_new_dns1_id)
 				.setEnabled(!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_udp_port_id)
+		addDeviceView.findViewById(R.id.device_manager_new_dns2_id)
 				.setEnabled(!isChecked);
 		addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)
 				.setEnabled(!isChecked);
@@ -489,9 +491,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		View addDeviceView = inflater
 				.inflate(R.layout.device_manager_add, null);
 		((EditText) addDeviceView
-				.findViewById(R.id.device_manager_new_tcp_port_id)).setText("");// Constants.TCPPORT+
+				.findViewById(R.id.device_manager_new_dns1_id)).setText("");// Constants.TCPPORT+
 		((EditText) addDeviceView
-				.findViewById(R.id.device_manager_new_udp_port_id)).setText(""); // Constants.UDPPORT+
+				.findViewById(R.id.device_manager_new_dns2_id)).setText(""); // Constants.UDPPORT+
 		return addDeviceView;
 	}
 
@@ -511,97 +513,83 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		
 		private String ip;
 
+		private String gateWay;
+		
+		private String mask;
+		
+		private String dns1;
+		
+		private String dns2;
+		
 		private boolean flag;
 
-		public QueryCamera(String name, String ip, boolean flag) {
+		public QueryCamera(String name, String ip, String gateWay, String mask, String dns1,String dns2, boolean flag) {
 			this.name = name;
 			this.ip = ip;
+			this.gateWay = gateWay;
+			this.mask = mask;
+			this.dns1 = dns1;
+			this.dns2 = dns2;
 			this.flag = flag;
 		}
 
 		@Override
 		public void run() {
-			if (flag) {
-				// 1、构造UDP数据包 请求连接到指定ID的camera
-				System.out.println(Byte.parseByte(ip));
-				byte[] connCameraId = new byte[] { Byte.parseByte(ip) };// common
-																		// id
-				// 2、send data content
-				byte[] sendDataContent = ByteUtil.intToBytes(1);
-				// 3、send data length
-				byte[] sendDataLength = ByteUtil
-						.shortToBytes((short) sendDataContent.length);
-				int l1 = connCameraId.length;
-				int l2 = sendDataContent.length;
-				int l3 = sendDataLength.length;
-				byte[] sendData = new byte[l1 + l2 + l3];
-				// copy commid to send data
-				System.arraycopy(connCameraId, 0, sendData, 0, l1);
-				// copy data length to send data
-				System.arraycopy(sendDataLength, 0, sendData, l1, l3);
-				// copy data content to send data
-				System.arraycopy(sendDataContent, 0, sendData, l1 + l3, l2);
-				DatagramPacket datagramPacket;
-				DatagramSocket socket = null;
-				try {
-					socket = new DatagramSocket();
-					socket.setSoTimeout(10000);
-					datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-							InetAddress.getByName(Common.SERVER_IP),
-							Common.CLIENT_WATCH_PORT);
-					socket.send(datagramPacket);
-					byte[] buf = new byte[64];
-					DatagramPacket rp = new DatagramPacket(buf, 64);
-					socket.receive(rp);
-					byte[] rece = rp.getData();
-					if (rece[0] == SendUDTCommon.NET_CAMERA_OK.ordinal()) {
-						//Toast.makeText(DeviceManager.this, "query success",Toast.LENGTH_LONG).show();
-						Bundle bundle = new Bundle();
-						bundle.putString("CAMERANAME", name);
-						bundle.putString("CAMERAIP", ip);
-						bundle.putString("CAMERAGETWAY", "192.168.1.1");
-						Message msg = handler.obtainMessage();
-						msg.setData(bundle);
-						msg.what = Constants.SHOWRESULTDIALOG;
-						handler.sendMessage(msg);
-					}else {
-						//Toast.makeText(DeviceManager.this, "query error",Toast.LENGTH_LONG).show();
-						Message msg = handler.obtainMessage();
-						msg.what = Constants.SHOWTOASTMSG;
-						msg.arg1 = R.string.device_manager_find_device_id_error;
-						handler.sendMessage(msg);
+			if (flag) {// 根据用户ID添加设备
+				if(throughNetThread != null) {
+					try {
+						throughNetThread.join(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
-				} catch (IOException e) {
-					//Toast.makeText(DeviceManager.this, "query error",Toast.LENGTH_LONG).show();
-					Message msg = handler.obtainMessage();
-					msg.what = Constants.SHOWTOASTMSG;
-					msg.arg1 = R.string.device_manager_find_device_id_error;
-				    handler.sendMessage(msg);
-					Log.d(TAG,
-							"ThroughNetUtil request connect camera by id receive data error! "
-									+ e.getLocalizedMessage());
-				} finally {
-					socket.close();
-					handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 				}
-			} else {
+				netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(ip,16));
+				throughNetThread = new Thread(netUtil);
+				throughNetThread.start();
+			} else {//根据IP地址添加设备
 				DatagramSocket datagramSocket = null;
-				byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
+				byte [] tem = CamCmdListHelper.GetCmd_Config.getBytes();
 				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+				StringBuffer sb = new StringBuffer();
+				String tmp = null;
 				try {
 					datagramSocket = new DatagramSocket();
-					datagramSocket.setSoTimeout(10000);
+					datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.UDPPORT);
 					datagramSocket.send(datagramPacket);
 					DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-					datagramSocket.receive(rece);
-					String info = new String(buffTemp,0, rece.getLength());
-					Log.d(TAG, "Receive inof //////////////" + info);
+					int recvLength = 0;
+					while(true) {
+						datagramSocket.receive(rece);
+						int l = rece.getLength();
+						byte[] ipByte = new byte[4];
+						System.arraycopy(buffTemp, 0, ipByte, 0, 4);
+						recvLength += Integer.parseInt(new String(ipByte).trim());
+						tmp = new String(buffTemp,4,l-4).trim();
+						sb.append(tmp);
+						Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
+						if(recvLength>1000) {
+							break;
+						}
+					}
+					
+					Map<String,String> paraMap = new LinkedHashMap<String,String>();
+					ParaUtil.putParaByString(sb.toString(), paraMap);
+					Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
+					
+					device.setDeviceNetType(false);
+					device.setDeviceWlanIp(ip);
+					device.setDeviceWlanGateWay(gateWay);
+					device.setDeviceWlanMask(mask);
+					device.setDeviceWlanDNS1(dns1);
+					device.setDeviceWlanDNS2(dns2);
+					
+					device.setDeviceRemoteCmdPort(Constants.UDPPORT);
+					device.setDeviceRemoteVideoPort(Constants.TCPPORT);
+					device.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
 					Bundle bundle = new Bundle();
-					bundle.putString("CAMERANAME", name);
-					bundle.putString("CAMERAIP", ip);
-					bundle.putString("CAMERAGETWAY", "192.168.1.1");
 					Message msg = handler.obtainMessage();
+					bundle.putSerializable("NEW_DEVICE", device);
 					msg.setData(bundle);
 					msg.what = Constants.SHOWRESULTDIALOG;
 					handler.sendMessage(msg);
@@ -624,7 +612,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 
 	private AlertDialog ad  = null;
 	
-	private void showResult(final String newDiviceName, final String newDiviceIP, final String newDiviceGateway) {
+	private void showResult(final Device device) {
 		ad = new AlertDialog.Builder(DeviceManager.this)
 		.setTitle(getString(R.string.device_manager_new_device_title))
 		.setMessage(getString(R.string.device_manager_new_device_message))
@@ -632,10 +620,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				Device device = new Device(newDiviceName, "IP Camera",newDiviceIP, Constants.TCPPORT, Constants.UDPPORT, newDiviceGateway);
-				if(camManager.addCam(device)) {
-					handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-				}
+				camManager.addCam(device);
+				handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 				unCloseDialog(dlg, -1, true); 
 			}
 		}).setNegativeButton(getString(R.string.system_settings_save_path_preview_cancle_str), new DialogInterface.OnClickListener() {
@@ -645,5 +631,47 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			}
 		}).create();
 		ad.show();
+	}
+	
+	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
+		DatagramSocket socket = netUtil.getPort1();
+		if(socket == null) {
+			return;
+		}
+		String cmd = null;
+		try {
+			cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config, ip, port1);
+		} catch (CamManagerException e) {
+			Log.d(TAG, e.getLocalizedMessage());
+			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
+			return;
+		}
+		Map<String,String> paraMap = new LinkedHashMap<String,String>();
+		ParaUtil.putParaByString(cmd, paraMap);
+		Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
+		
+		device.setDeviceEthIp(paraMap.get("inet_eth_ip"));
+		device.setDeviceEthGateWay(paraMap.get("inet_eth_gateway"));
+		device.setDeviceEthMask(paraMap.get("inet_eth_mask"));
+		device.setDeviceEthDNS1(paraMap.get("inet_eth_dns1"));
+		device.setDeviceEthDNS2(paraMap.get("inet_eth_dns2"));
+		
+		device.setDeviceNetType(true);
+		
+		device.setDeviceWlanIp(paraMap.get("inet_wlan_ip"));
+		device.setDeviceWlanGateWay(paraMap.get("inet_wlan_gateway"));
+		device.setDeviceWlanMask(paraMap.get("inet_wlan_mask"));
+		device.setDeviceWlanDNS1(paraMap.get("inet_wlan_dns1"));
+		device.setDeviceWlanDNS2(paraMap.get("inet_wlan_dns2"));
+		
+		device.setDeviceRemoteCmdPort(port1);
+		device.setDeviceRemoteVideoPort(port2);
+		device.setDeviceRemoteAudioPort(port3);
+		Message msg = handler.obtainMessage();
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("NEW_DEVICE", device);
+		msg.setData(bundle);
+		msg.what = Constants.SHOWRESULTDIALOG;
+		handler.sendMessage(msg);
 	}
 }

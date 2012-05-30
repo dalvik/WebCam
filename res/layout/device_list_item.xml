@@ -39,7 +39,7 @@
 				android:textSize="15dip" 
 				android:textColor="#FFFFFFFF"/>
 			
-			<TextView 
+			<TextView android:id="@+id/device_gateway"
 				android:layout_width="fill_parent"
 				android:layout_weight="1"
 				android:layout_height="fill_parent" 
@@ -71,7 +71,7 @@
 				android:textSize="10dip"
 				android:textColor="#FFFFFFFF"/>
 			
-			<TextView android:id="@+id/device_gateway"
+			<TextView android:id="@+id/device_audio_port"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
 				android:layout_weight="1" 

@@ -77,8 +77,6 @@ public class MyVideoView extends View implements Runnable {
 	
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 1];
 	
-	//private byte[] audioBufferStore = new byte[AUDIOBUFFERSTOERLENGTH];
-	
 	private static final String TAG = "ReadStreamThread";
 	
 	private Handler handler;
@@ -313,23 +311,18 @@ public class MyVideoView extends View implements Runnable {
 			try{
 				m_out_trk.play();
 				while(!stopPlay) {
-					//arg[0] server send audio buffer length
-					//arg[1] client recv big audio buffer 
+					//arg[0] server send audio buffer length arg[1] client recv big audio buffer 
 					//arg[2] client recv big audio buffer length same length with audio init  
 					int recvDataLength = UdtTools.recvAudioData(SERVERSENDBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
 					//System.out.println(recvDataLength + "----------------------");
 					if(recvDataLength <=0) {
 						break;
 					}
-					/*if(audioBuffer[0] != 60 || audioBuffer[32] != 60 || audioBuffer[64] != 60 || audioBuffer[96] != 60) {
-					System.out.println(audioBuffer[0] + " " + audioBuffer[32] + "  " + audioBuffer[64] + " " + audioBuffer[96]);
-				}*/
 					int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
 					//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
 					//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 					//System.out.println("audio size = " + size + "  "+ returnSize);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
-					//mergeAudioBuffer(pcmArr,pcmBufferSize);
 				}
 			}catch(Exception e) {
 				stopPlay = true;

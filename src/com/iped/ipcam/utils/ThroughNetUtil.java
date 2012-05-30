@@ -22,10 +22,13 @@ public class ThroughNetUtil implements Runnable {
 	
 	private DatagramSocket port3 = null;
 	
+	private int cameraId;
+	
 	private String TAG = "ThroughNet";
 	
 	private byte[] buf = new byte[1024 * 2];
 	
+	private boolean throughNetFlag;
 
 	public enum SendUDTCommon {
 		/**
@@ -60,8 +63,10 @@ public class ThroughNetUtil implements Runnable {
 	};
 
 	
-	public ThroughNetUtil(Handler handler) {
+	public ThroughNetUtil(Handler handler,boolean throughNetFlag,int cameraId) {
 		this.handler = handler;
+		this.throughNetFlag = throughNetFlag;//true break;
+		this.cameraId = cameraId;
 	}
 
 	// 发送数据格式 data[0]command : data[1]-data[2] size :　data[3] - data[size-1]
@@ -74,8 +79,9 @@ public class ThroughNetUtil implements Runnable {
 			DatagramSocket udpSocket = null;
 			try {
 				udpSocket = new DatagramSocket();
-				udpSocket.setSoTimeout(10000);
+				udpSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			} catch (SocketException e) {
+				Log.d(TAG,	"ThroughNetUtil " + e.getLocalizedMessage());
 				if(udpSocket != null) {
 					udpSocket.close();
 					udpSocket = null;
@@ -139,16 +145,27 @@ public class ThroughNetUtil implements Runnable {
 									Log.d(TAG,	"ThroughNetUtil get unlegal package from server when quest ip and tree port" + flag);
 								}
 							}else {
+								if(udpSocket != null) {
+									udpSocket.close();
+								}
 								System.out.println(buf[0] + " " + buf[1] + " " + buf[2] + " " + buf[3] + " " + buf[4] + " " + buf[5] + " " + buf[6] + " " + buf[7] + " " + buf[8] + " " + buf[9] + " " + buf[10] + " " + buf[11] + " " + buf[12]);
 								Log.d(TAG,	"ThroughNetUtil get unfull package from server when quest ip and tree port " + flag);
+								handler.sendEmptyMessage(Constants.SENDGETUNFULLPACKAGEMSG);
 								flag = false;
 							}
 						} catch (IOException e) {
 							Log.d(TAG, "ThroughNetUtil receive ip and port info error ! " + e.getLocalizedMessage());
+							if(udpSocket != null) {
+								udpSocket.close();
+							}
 							flag = false;
 						}
 					}
 				}
+			}
+			if(throughNetFlag) {
+				handler.sendEmptyMessage(Constants.SENDGETTHREEPORTTIMOUTMSG);
+				break;
 			}
 			num--;
 			try {
@@ -161,6 +178,7 @@ public class ThroughNetUtil implements Runnable {
 				flag = true;
 			}
 			Log.d(TAG,	"ThroughNetUtil try connect num = " + num);
+			
 		}
 	}
 
@@ -293,6 +311,9 @@ public class ThroughNetUtil implements Runnable {
 			Log.d(TAG,
 					"ThroughNetUtil request inter active fail! "
 							+ e.getLocalizedMessage());
+			if(udpSocket != null) {
+				udpSocket.close();
+			}
 			return false;
 		}
 		DatagramPacket rp = new DatagramPacket(buf, 64);
@@ -306,6 +327,9 @@ public class ThroughNetUtil implements Runnable {
 			Log.d(TAG,
 					"ThroughNetUtil request connect camera by id receive data error! "
 							+ e.getLocalizedMessage());
+			if(udpSocket != null) {
+				udpSocket.close();
+			}
 			return false;
 		}
 		return false;
@@ -316,7 +340,7 @@ public class ThroughNetUtil implements Runnable {
 		byte[] connCameraId = new byte[] { (byte) SendUDTCommon.NET_CAMERA_ID
 				.ordinal() };// common id
 		// 2、send data content
-		byte[] sendDataContent = ByteUtil.intToBytes(1);
+		byte[] sendDataContent = ByteUtil.intToBytes(cameraId);
 		// 3、send data length
 		byte[] sendDataLength = ByteUtil
 				.shortToBytes((short) sendDataContent.length);
@@ -340,6 +364,9 @@ public class ThroughNetUtil implements Runnable {
 		} catch (Exception e) {
 			Log.d(TAG, "ThroughNetUtil request connect camera id fail! "
 							+ e.getLocalizedMessage());
+			if(udpSocket != null) {
+				udpSocket.close();
+			}
 			return false;
 		}
 		DatagramPacket rp = new DatagramPacket(buf, 64);
@@ -353,6 +380,9 @@ public class ThroughNetUtil implements Runnable {
 			Log.d(TAG,
 					"ThroughNetUtil request connect camera by id receive data error! "
 							+ e.getLocalizedMessage());
+			if(udpSocket != null) {
+				udpSocket.close();
+			}
 			return false;
 		}
 		return false;

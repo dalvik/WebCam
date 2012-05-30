@@ -55,15 +55,23 @@ public class DeviceAdapter extends BaseAdapter {
 			viewHolder.tcp = (TextView) convertView.findViewById(R.id.device_tcp_port);
 			viewHolder.udp = (TextView) convertView.findViewById(R.id.device_udp_port);
 			viewHolder.gateWay = (TextView) convertView.findViewById(R.id.device_gateway);
+			viewHolder.cmd = (TextView) convertView.findViewById(R.id.device_audio_port);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		viewHolder.name.setText(device.getDeviceName());
-		viewHolder.type.setText(context.getResources().getText(R.string.device_type_str) + device.getDeviceType());
-		viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceIp());
-		viewHolder.tcp.setText(context.getResources().getText(R.string.device_tcp_str) + "" + device.getDeviceTcpPort());
-		viewHolder.udp.setText(context.getResources().getText(R.string.device_udp_str) + "" + device.getDeviceUdpPort());
-		viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceGateWay());
+		if(device.getDeviceNetType()) {
+			viewHolder.type.setText(context.getResources().getText(R.string.device_manager_add_net_type_wlan_str));
+			viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceEthIp());
+			viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
+		} else {
+			viewHolder.type.setText(context.getResources().getText(R.string.device_manager_add_net_type_eth_str));
+			viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceWlanIp());
+			viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceWlanGateWay());
+		}
+		viewHolder.tcp.setText(context.getResources().getText(R.string.device_cmd_port_str) + "" + device.getDeviceRemoteCmdPort());
+		viewHolder.udp.setText(context.getResources().getText(R.string.device_diveo_port_str) + "" + device.getDeviceRemoteVideoPort());
+		viewHolder.cmd.setText(context.getResources().getText(R.string.device_audio_port_str) + "" + device.getDeviceRemoteAudioPort());
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
@@ -75,12 +83,13 @@ public class DeviceAdapter extends BaseAdapter {
 		public TextView type;
 		
 		public TextView ip;
+
+		public TextView gateWay;
 		
 		public TextView tcp;
 		
 		public TextView udp;
 		
-		public TextView gateWay;
-			
+		public TextView cmd;	
 	}
 }

@@ -77,14 +77,10 @@ public class PackageUtil {
 		}
 	}
 	
-	public static String CMDPackage2(String cmdType, String ip, int port) {
+	public static String CMDPackage2(ThroughNetUtil netUtil,String cmdType, String ip, int port) throws CamManagerException {
 		byte [] tem = cmdType.getBytes();
 		byte[] receArr = new byte[Constants.COMMNICATEBUFFERSIZE];
 		DatagramSocket datagramSocket = null;
-		ThroughNetUtil netUtil = CamVideoH264.getInstance();
-		if(netUtil == null) {
-			return null;
-		}
 		StringBuffer sb = new StringBuffer();
 		String tmp = null;
 		try {
@@ -92,8 +88,9 @@ public class PackageUtil {
 			if(datagramSocket == null) {
 				return null;
 			}
+			System.out.println(datagramSocket.getLocalPort() + "  " + datagramSocket.getPort());
 			netUtil.clearRecvBuffer();
-			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
 			datagramSocket.send(datagramPacket);
 			DatagramPacket rece = new DatagramPacket(receArr, Constants.COMMNICATEBUFFERSIZE);
 			int recvLength = 0;
@@ -111,14 +108,10 @@ public class PackageUtil {
 				}
 			}
 			return sb.toString();
-		} catch (SocketException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-		} catch (UnknownHostException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
 		} catch (IOException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "PackageUtil CMDPackage2 : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			throw new CamManagerException();
 		} 
-		return tmp;
 	}
 	
 	public static void sendPackageNoRecv(String cmdType, String ip, int port) {

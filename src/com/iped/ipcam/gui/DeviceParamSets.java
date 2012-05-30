@@ -108,7 +108,7 @@ public class DeviceParamSets extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case Constants.SHOWQUERYCONFIGDLG:
-				camParasSet.getCamPara(device.getDeviceIp(), this);
+				//camParasSet.getCamPara(device.getDeviceIp(), this);
 				// ProgressUtil.showProgress(R.string.device_params_request_config_str,
 				// DeviceParamSets.this);
 				break;
@@ -231,11 +231,11 @@ public class DeviceParamSets extends Activity {
 	}
 
 	private void initializeEditText(Map<String, String> paraMap) {
-		send(paraMap);
+		//send(paraMap);
 		deviceNameEditText.setText(paraMap.containsKey("name")? paraMap.get("name") : "");
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
-		versionEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
-		tfCardEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
+		versionEditText.setText(paraMap.containsKey("")? paraMap.get("") : "V12.005.13");
+		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? paraMap.get("tfcard_maxsize") : "");
 		sdCardEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
 		//changeStorageMode.setText("");
 		//valueableRecordeTimeEd.setText("");

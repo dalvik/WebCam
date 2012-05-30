@@ -136,9 +136,15 @@ public class FileUtil {
 			file.createNewFile();
 			StringBuffer sb = new StringBuffer();
 			for(Device device:deviceList) {
-				sb.append(device.getDeviceName() + "&" + device.getDeviceIp() + "&" + device.getDeviceType() + "&" + device.getDeviceTcpPort() + "&" 
-						+ device.getDeviceUdpPort() + "&" + device.getDeviceGateWay() +"\n");
+				boolean netType = device.getDeviceNetType();
+				sb.append(device.getDeviceName() + "&" + netType + "&");
+				if(netType){
+					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() +"\n");
+				} else {
+					sb.append(device.getDeviceWlanIp() + "&" + device.getDeviceWlanGateWay() + "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() +"\n");
+				}
 			}
+			System.out.println(sb.toString());
 			fos = new FileOutputStream(file);
 			fos.write(sb.toString().getBytes());
 			fos.flush();
@@ -170,16 +176,23 @@ public class FileUtil {
 				String[] info = str.split("&");
 				int l = info.length;
 				//System.out.println("device info str=" + str + " length="  + l);
-				if(l<6) {
+				if(l<7) {
 					continue;
 				}
 				Device device = new Device();
 				device.setDeviceName(info[0]);
-				device.setDeviceIp(info[1]);
-				device.setDeviceType(info[2]);
-				device.setDeviceTcpPort(Integer.parseInt(info[3]));
-				device.setDeviceUdpPort(Integer.parseInt(info[4]));
-				device.setDeviceGateWay(info[5]);
+				if("true".equals(info[1])) {
+					device.setDeviceNetType(true);
+					device.setDeviceEthIp(info[2]);
+					device.setDeviceEthGateWay(info[3]);
+				}else {
+					device.setDeviceNetType(false);
+					device.setDeviceWlanIp(info[2]);
+					device.setDeviceWlanGateWay(info[3]);
+				}
+				device.setDeviceRemoteCmdPort(Integer.parseInt(info[4]));
+				device.setDeviceRemoteVideoPort(Integer.parseInt(info[5]));
+				device.setDeviceRemoteAudioPort(Integer.parseInt(info[6]));
 				deviceList.add(device);
 			}
 		} catch (FileNotFoundException e) {

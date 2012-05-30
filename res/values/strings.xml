@@ -22,21 +22,25 @@
     		<string name="device_manager_add_title_str">添加新设备</string>
     		<string name="device_manager_add_str">设备名称</string>
     		<string name="device_manager_add_hint_str">设备名称</string>
+    		<string name="device_manager_add_name_default_str">Dafult</string>
     		<string name="device_manager_local_net_para_str">局域网参数</string>
     		<string name="device_manager_new_addr_str">IP地址</string>
+    		<string name="device_manager_new_addr_default_str">192.168.1.</string>
     		<string name="device_manager_new_device_id">设备ID号</string>
     		<string name="device_manager_new_device_id_hint">请输入设备的ID号</string>
     		<string name="device_manager_new_device_id_not_null">设备ID号不能为空</string>
-    		<string name="device_manager_new_device_id_not_number">设备ID号不能为空</string>
+    		<string name="device_manager_new_device_id_not_number">设备ID号必须为数字</string>
     		<string name="device_manager_find_device_id_error">查询设备ID失败</string>
     		<string name="device_manager_find_device_id_not_online">设备不在线</string>
     		<string name="device_manager_new_device_title">添加新设备</string>
     		<string name="device_manager_new_device_message">确认添加新设备</string>
     		<string name="device_manager_new_device_subnet_parameter_id">局域网参数</string>
-    		<string name="device_manager_new_tcp_port_str">DNS1 </string>
+    		<string name="device_manager_new_dns1_str">DNS1 </string>
     		<string name="device_manager_new_gateway_addr_str">网关地址</string>
-    		<string name="device_manager_new_udp_port_str">DNS2 </string>
+    		<string name="device_manager_new_gateway_addr_default_str">192.168.1.1</string>
+    		<string name="device_manager_new_dns2_str">DNS2 </string>
     		<string name="device_manager_new_sub_net_addr_str">掩码地址</string>
+    		<string name="device_manager_new_sub_net_addr_defualt_str">255.255.255.0</string>
     		<string name="device_manager_new_domain_addr_str">域名</string>
     		<string name="device_manager_public_new_tcp_port_str">TCP端口</string>
     		<string name="device_manager_dynamic_addr_str">动态IP地址</string>
@@ -45,6 +49,10 @@
     		<string name="device_manager_add_cancle_str">取消</string>
     		<string name="device_manager_add_not_null_str">设备IP地址不能为空</string>
     		<string name="device_manager_add_same_ip_str">设备地址冲突</string>
+    		<string name="device_manager_add_net_type_eth_str">内网</string>
+    		<string name="device_manager_add_net_type_wlan_str">外网</string>
+    		<string name="device_manager_add_query_title_str">设备查询</string>
+    		<string name="device_manager_add_query_message_str">请稍后</string>
     	<string name="clear_all_str">全部清除</string>	
     	<string name="device_edit_str">修改</string>	
     	<string name="device_del_str">删除</string>	
@@ -52,9 +60,10 @@
     	<string name="no_device_online">没有在线设备</string>
     	<string name="device_type_str">类型：</string>
     	<string name="device_ip_str">IP：</string>
-    	<string name="device_tcp_str">TCP：</string>
-    	<string name="device_udp_str">UDP：</string>
+    	<string name="device_cmd_port_str">CMD：</string>
+    	<string name="device_diveo_port_str">Video：</string>
     	<string name="device_gateway_str">网关：</string>
+    	<string name="device_audio_port_str">Audio：</string>
     <string name="device_params_sets_str">参数设置</string>
     	<string name="device_params_info_str">设备信息:</string>
     	<string name="device_param_inentify_str">设备ID:</string>
@@ -226,6 +235,6 @@
         <string name="system_settings_device_update_str">升级</string>
         <string name="system_settings_device_cancle_str">取消</string>
         
-    <string name="version">2.5.10</string>
+    <string name="version">12.05.20</string>
     <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>
 </resources>

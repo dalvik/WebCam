@@ -25,6 +25,8 @@ public class Constants {
 	
 	public final static int UDPPORT = 60000;
 	
+	public final static int AUDIOPORT = 5000;
+	
 	public final static String DEFAULTSEARCHIP = "192.168.1.";
 	
 	public final static String DEFAULTWAY = "192.168.1.1";
@@ -82,6 +84,8 @@ public class Constants {
 	public final static int SENDGETTHREEPORTMSG = 4500;
 	
 	public final static int SENDGETTHREEPORTTIMOUTMSG = 4600;
+	
+	public final static int SENDGETUNFULLPACKAGEMSG = 4700;
 	
 	//
 	public final static int BINDLOCALPORT1 = 60001;

@@ -189,7 +189,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			if(device == null) {
 				Toast.makeText(this, getResources().getString(R.string.play_back_select_device_first_str), Toast.LENGTH_SHORT).show();
 			} else {
-				vodeoSearchDia(device.getDeviceIp());
+				//vodeoSearchDia(device.getDeviceIp());
 			}
 			break;
 		case R.id.play_back_clear_all:

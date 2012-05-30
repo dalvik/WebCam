@@ -90,7 +90,11 @@ public class SystemSettings extends Activity implements android.view.View.OnClic
 		Device device = camManager.getSelectDevice();
 		if(device != null) {
 			deviceName.setText(device.getDeviceName());
-			devicdIP.setText(device.getDeviceIp());
+			if(device.getDeviceNetType()) {//Õ‚Õ¯
+				devicdIP.setText(device.getDeviceEthIp());
+			}else {
+				devicdIP.setText(device.getDeviceWlanIp());
+			}
 		}
 	}
 

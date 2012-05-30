@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.ThroughNetUtil;
 
@@ -77,6 +78,8 @@ public class CamVideoH264 extends Activity {
 	
 	public static int port3 = -1;
 	
+	private Device device = null;
+	
 	private static ThroughNetUtil netUtil = null;
 	
 	private String TAG = "CamVideoH264";
@@ -89,8 +92,7 @@ public class CamVideoH264 extends Activity {
 				startThread();
 				break;
 			case Constants.SHOWCONNDIALOG:
-				String tem = (String) msg.obj;
-				Log.d(TAG, "tem =" + tem + " playstatus= " +  myVideoView.getPlayStatus());
+				String tem = "";
 				if(currIpAddress != null && currIpAddress.contains(tem) && !myVideoView.getPlayStatus()) {
 					Log.d(TAG, "playStatus =" +  myVideoView.getPlayStatus());
 					//return;
@@ -113,7 +115,7 @@ public class CamVideoH264 extends Activity {
 					port2 = bundle.getInt("PORT2");
 					currPort = port2;
 					port3 = bundle.getInt("PORT3");
-					System.out.println("rece ip info = " +  currIpAddress + " " + port1 + " " + port2 +  " " + port3);
+					//System.out.println("rece ip info = " +  currIpAddress + " " + port1 + " " + port2 +  " " + port3);
 					int l = 2;
 					byte[] b = new byte[l];
 					try {
@@ -264,110 +266,28 @@ public class CamVideoH264 extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(intent != null) {
-				String ip = intent.getStringExtra("IPPLAY");
-				if(ip != null && ip.length()>0) {
-					Log.d(TAG, "receive ip =" +  ip);
-					netUtil = new ThroughNetUtil(mHandler);
-					new Thread(netUtil).start();
+				Object obj = intent.getStringExtra("IPPLAY");
+				if(obj instanceof Device) {
+					device = (Device) obj;
+					Log.d(TAG, "receive device info =" +  device);
 					Message msg = mHandler.obtainMessage();
-					msg.obj = ip;
-					msg.what = Constants.SHOWCONNDIALOG;
-					mHandler.sendMessage(msg);
+					if(device.getDeviceNetType()) {
+						netUtil = new ThroughNetUtil(mHandler,false,Integer.parseInt(device.getDeviceID()));
+						new Thread(netUtil).start();
+						msg.what = Constants.SHOWCONNDIALOG;
+						mHandler.sendMessage(msg);
+					} else {
+						msg.what = Constants.SHOWCONNDIALOG;
+						mHandler.sendMessage(msg);
+					}
 				}
-			}
+				}
 		}
-		
 	}
 	
 	public static ThroughNetUtil getInstance() {
 		return netUtil;
 	}
-	
-	
-	/*
-	private class QueryDeviceThread implements Runnable {
 
-		private byte[] bufTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-		
-		@Override
-		public void run() {
-			System.out.println("started..");
-			DatagramSocket datagramSocket = null;
-			try {
-				datagramSocket = new DatagramSocket();
-				datagramSocket.setSoTimeout(600);
-				byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-				System.arraycopy(tem, 0, bufTemp, 0, tem.length);
-				System.out.println(InetAddress.getByName("192.168.1.211"));
-				DatagramPacket packet = new DatagramPacket(tem, tem.length, InetAddress.getByName("192.168.1.141"), Constants.UDPPORT); 
-				datagramSocket.send(packet);
-				System.out.println("send..");
-			} catch (SocketException e) {
-				e.printStackTrace();
-				System.out.println(e.getMessage());
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-				System.out.println(e.getMessage());
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println(e.getMessage());
-			}
-			DatagramPacket dp = new DatagramPacket(bufTemp, bufTemp.length);
-			try {
-				datagramSocket.receive(dp);
-				String info = new String(bufTemp);
-				System.out.println("receive inof = : " + info);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("----" + e.getLocalizedMessage());
-			}
-			System.out.println("over..");
-		}
-		
-	}
-	*/
-	
-	/**
-		 -   char[] head = {0,0,0,1,0xc}; 00 00 00 00 67           5个字节
-		 -   char packageSequenceNumber[8],0,1,2,3,4....不重复              8个字节
-		 报      char startTimeStamp[14] YYYYMMDDHHMMSS                14个字节
-		 头      char lastTimeStamp[14]  开始为111111                  14个字节  
-		 -   char frameRateUS[8]                                   8个字节
-		 -   char frameWidth[4]                                    4个字节
-		 -   char frameHeight[4]                                   4个字节
-		 数据包头长：                                                                                                                              57个字节
-		 数据内容   char rowData[]                                    余下为数据
-		00 00 00 01 67
-		42 00 1e ab 40 58 09 32
-		00 00 00 01 68 ce 38 80 00 00 00 01 65 88
-		82
-	 */
-	/*
-	private class SocketThread implements Runnable {
-		private Socket socket = null;
-		private DataInputStream dis = null;
-		@Override
-		public void run() {
-			try {
-				SocketAddress socketAddress = new InetSocketAddress("192.168.1.121", 1234);
-				int i = 0;
-				byte[] b = new byte[512];
-				socket = new Socket();
-				socket.connect(socketAddress, 15000);
-				dis = new DataInputStream(socket.getInputStream());
-				String temp = "";
-				FileOutputStream fos = new FileOutputStream(new File("/sdcard/"+ System.currentTimeMillis() + ".h264"));
-				while ((i = dis.read(b)) != -1 && flag) {
-					temp = new String(b, 0, i, "ISO-8859-1");
-					fos.write(b, 0, i);
-					fos.flush();
-				}
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}*/
 }
 

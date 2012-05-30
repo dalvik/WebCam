@@ -43,17 +43,21 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public Device addCam(String ip) {
-		Device d = new Device(ip, "Ip Camera", ip, Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
-		if(checkName(ip)) {
+		Device d = new Device(ip,"192.168.1.1","255.255.255.0","dns","dns2");
+		d.setDeviceName("IpCam");
+		d.setDeviceRemoteCmdPort(Constants.UDPPORT);
+		d.setDeviceRemoteVideoPort(Constants.TCPPORT);
+		d.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
+		if(checkName(d)) {
 			deviceList.add(d);
 			return d;
 		}
 		return null;
 	}
 
-	private boolean checkName(String ip) {
+	private boolean checkName(Device device) {
 		for(Device de:deviceList) {
-			if(ip.equalsIgnoreCase(de.getDeviceIp())) {
+			if(device.hashCode() == de.hashCode()) {
 				return false;
 			}
 		}
@@ -62,7 +66,7 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public boolean addCam(Device device) {
-		if(checkName(device.getDeviceIp())) {
+		if(checkName(device)) {
 			deviceList.add(device);
 			return true;
 		}
@@ -71,9 +75,9 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public boolean editCam(Device deviceOLd, Device deviceNew) {
-		deviceOLd.setDeviceName(deviceNew.getDeviceName());
-		deviceOLd.setDeviceIp(deviceNew.getDeviceIp());
-		deviceOLd.setDeviceGateWay(deviceNew.getDeviceGateWay());
+		//deviceOLd.setDeviceName(deviceNew.getDeviceName());
+		//deviceOLd.setDeviceIp(deviceNew.getDeviceIp());
+		//deviceOLd.setDeviceGateWay(deviceNew.getDeviceGateWay());
 		return true;
 	}
 	
