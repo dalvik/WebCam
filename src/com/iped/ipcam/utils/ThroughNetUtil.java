@@ -121,10 +121,6 @@ public class ThroughNetUtil implements Runnable {
 									int port2 = ByteUtil.bytesToUshort(port2Byte);
 									int port3 = ByteUtil.bytesToUshort(port3Byte);
 									Bundle bundle = new Bundle();
-									/*System.out.println(ipByte[0] + " " + ipByte[1] + " " +ipByte[2] + " " + ipByte[2]);
-									System.out.println(port1Byte[0] + " " + port1Byte[1]);
-									System.out.println(port2Byte[0] + " " + port2Byte[1]);
-									System.out.println(port3Byte[0] + " " + port3Byte[1]);*/
 									String ipaddress = InetAddress.getByAddress(ipByte).toString();
 									if(ipaddress.startsWith("/")) {
 										ipaddress = ipaddress.substring(1);
@@ -148,7 +144,6 @@ public class ThroughNetUtil implements Runnable {
 								if(udpSocket != null) {
 									udpSocket.close();
 								}
-								System.out.println(buf[0] + " " + buf[1] + " " + buf[2] + " " + buf[3] + " " + buf[4] + " " + buf[5] + " " + buf[6] + " " + buf[7] + " " + buf[8] + " " + buf[9] + " " + buf[10] + " " + buf[11] + " " + buf[12]);
 								Log.d(TAG,	"ThroughNetUtil get unfull package from server when quest ip and tree port " + flag);
 								handler.sendEmptyMessage(Constants.SENDGETUNFULLPACKAGEMSG);
 								flag = false;

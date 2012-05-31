@@ -60,13 +60,27 @@ public class Constants {
 	
 	public final static int CLEARFILES = 2070;
 	
-	//-------------------------------------------
+	//------------------------------------------- config
 	
 	public final static int SHOWQUERYCONFIGDLG = 2080;
 	
 	public final static int HIDEQUERYCONFIGDLG = 2090;
 	
 	public final static int QUERYCONFIGERROR = 2100;
+	
+	public final static int SETCONFIGDLG = 2101;
+	
+	public final static int SENDDATAWHENMODIFYCONFIG = 2102;
+	
+	public final static int SENDSETCONFIGSUCCESSMSG = 2103;
+	
+	public final static int SENDSETCONFIGERRORMSG = 2104;
+	
+	public final static int RETSETCONFIGDLG = 12102;
+	
+	public final static int RETSETCONFIGSUCCESS = 12103;
+	
+	public final static int RETSETCONFIGERROR = 12104;
 	
 	//---------------------------------------------
 	

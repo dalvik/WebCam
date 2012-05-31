@@ -35,10 +35,10 @@ public class WebTabWidget extends TabActivity {
 		.setIndicator(resources.getString(R.string.device_manager_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
 		
-		intent = new Intent(this, DeviceParamSets.class);
+		/*intent = new Intent(this, DeviceParamSets.class);
 		tabSpec = tabHost.newTabSpec("DEVICEPARAMSETS")
 		.setIndicator(resources.getString(R.string.device_params_sets_str)).setContent(intent);
-		tabHost.addTab(tabSpec);
+		tabHost.addTab(tabSpec);*/
 		
 		intent = new Intent(this, PlayBack.class);
 		tabSpec = tabHost.newTabSpec("PALYBACK")
@@ -50,7 +50,7 @@ public class WebTabWidget extends TabActivity {
 		.setIndicator(resources.getString(R.string.system_settings_str)).setContent(intent);
 		tabHost.addTab(tabSpec);
 		//tabHost.setCurrentTabByTag("DEVICEMANAGER");
-		tabHost.setCurrentTab(2);
+		tabHost.setCurrentTab(1);
 		TabWidget tabWidget = tabHost.getTabWidget();
 		int count = tabWidget.getChildCount();
 		for(int i = 0; i < count; i++) {

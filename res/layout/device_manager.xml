@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/lightdark"
-        android:stretchColumns="0,1,2" >
+        android:stretchColumns="0,1,2,3" >
 
         <TableRow >
 
@@ -26,6 +26,12 @@
                 android:gravity="center"
                 android:text="@string/manu_add_str" />
 
+            <Button android:id="@+id/device_manager_button"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/device_params_sets_str" />
+            
             <Button android:id="@+id/clear_all_button"
                 android:gravity="center"
                 android:layout_width="wrap_content"

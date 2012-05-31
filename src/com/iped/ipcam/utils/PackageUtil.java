@@ -81,15 +81,58 @@ public class PackageUtil {
 		byte [] tem = cmdType.getBytes();
 		byte[] receArr = new byte[Constants.COMMNICATEBUFFERSIZE];
 		DatagramSocket datagramSocket = null;
+		datagramSocket = netUtil.getPort1(); //new DatagramSocket();
+		StringBuffer sb = new StringBuffer();
+		String tmp = null;
+		DatagramPacket rece = new DatagramPacket(receArr, Constants.COMMNICATEBUFFERSIZE);
+		if(datagramSocket == null) {
+			return null;
+		}
+		boolean flag = true;
+		try {
+			datagramSocket.setSoTimeout(100);
+			while(flag) {
+				datagramSocket.receive(rece);
+			}
+		} catch (IOException e) {
+			flag = false;
+			e.printStackTrace();
+		}
+		try {
+			//netUtil.clearRecvBuffer();
+			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
+			datagramSocket.send(datagramPacket);
+			int recvLength = 0;
+			while(true) {
+				datagramSocket.receive(rece);
+				int l = rece.getLength();
+				byte[] ipByte = new byte[4];
+				System.arraycopy(receArr, 0, ipByte, 0, 4);
+				recvLength += Integer.parseInt(new String(ipByte).trim());
+				tmp = new String(receArr,4,l-4).trim();
+				sb.append(tmp);
+				Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
+				if(recvLength>1000) {
+					break;
+				}
+			}
+			return sb.toString();
+		} catch (IOException e) {
+			Log.d(TAG, "PackageUtil CMDPackage2 : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			throw new CamManagerException();
+		} 
+	}
+	
+	public static String sendPackageByIp(String cmdType, String ip, int port) throws CamManagerException {
+		byte [] tem = cmdType.getBytes();
+		byte[] receArr = new byte[Constants.COMMNICATEBUFFERSIZE];
+		DatagramSocket datagramSocket = null;
 		StringBuffer sb = new StringBuffer();
 		String tmp = null;
 		try {
-			datagramSocket = netUtil.getPort1(); //new DatagramSocket();
-			if(datagramSocket == null) {
-				return null;
-			}
+			datagramSocket = new DatagramSocket();
 			System.out.println(datagramSocket.getLocalPort() + "  " + datagramSocket.getPort());
-			netUtil.clearRecvBuffer();
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
 			datagramSocket.send(datagramPacket);
 			DatagramPacket rece = new DatagramPacket(receArr, Constants.COMMNICATEBUFFERSIZE);
@@ -111,6 +154,19 @@ public class PackageUtil {
 		} catch (IOException e) {
 			Log.d(TAG, "PackageUtil CMDPackage2 : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
 			throw new CamManagerException();
+		} 
+	}
+	
+	public static void sendPackageNoRecvByIp(String cmdType, String ip, int port) throws CamManagerException {
+		byte [] tem = cmdType.getBytes();
+		DatagramSocket datagramSocket = null;
+		try {
+			datagramSocket = new DatagramSocket();
+			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
+			datagramSocket.send(datagramPacket);
+		}catch (IOException e) {
+			Log.d(TAG, "sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			throw new CamManagerException("sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
 		} 
 	}
 	

@@ -4,9 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.iped.ipcam.exception.CamManagerException;
-import com.iped.ipcam.gui.CamVideoH264;
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
@@ -17,11 +18,12 @@ public class CamParasSetImp implements ICamParasSet {
 
 	private Thread getCamParaThread = null;
 	
+	private ThroughNetUtil netUtil = null; 
+			
 	private Map<String, String> paraMap = new LinkedHashMap<String, String>();
 	
 	@Override
-	public CamParasSetImp getCamPara(String ip, Handler handler) {
-		System.out.println("getCampara....");
+	public CamParasSetImp getCamPara(Device device, Handler handler) {
 		if(getCamParaThread != null) {
 			try {
 				getCamParaThread.join(10);
@@ -30,88 +32,64 @@ public class CamParasSetImp implements ICamParasSet {
 			}
 			getCamParaThread = null;
 		}
-		getCamParaThread = new Thread(new CamGetParas(ip, handler));
+		getCamParaThread = new Thread(new CamGetParas(device, handler));
 		getCamParaThread.start();
 		return null;
 	}
 	
+	@Override
+	public ThroughNetUtil getThroughNetUtil() {
+		return netUtil;
+	}
 	class CamGetParas implements Runnable {
 		
-		private String ip;
+		private Device device;
 		
 		private Handler handler;
 		
-		public CamGetParas(String ip, Handler handler) {
-			this.ip = ip;
+		private String TAG = "CamGetParas";
+		
+		public CamGetParas(Device device, Handler handler) {
+			this.device = device;
 			this.handler = handler;
 		}
 		
 		@Override
 		public void run() {
-			try {
 				//PackageUtil.isOnline(ip, Constants.UDPPORT);
-				ThroughNetUtil netUtil = CamVideoH264.getInstance();
-				if(netUtil == null) {
-					return ;
-				}
-				String rece = PackageUtil.CMDPackage2(netUtil,CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
-				System.out.println("recv===="+ rece);
-				if(rece != null) {
-					ParaUtil.putParaByString(rece, paraMap);
-					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				} else {
-					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-				}
-			} catch (CamManagerException e) {
-				e.printStackTrace();
-				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-				return;
-			}
-		/*	if(rece != null) {
-				ParaUtil.putParaByString(rece, paraMap);
-				handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				Set<String> s = paraMap.keySet();
-				for(String ss:s){
-					System.out.println(ss + " " + paraMap.get(ss));
-				}*/
-				/*if(info.length>4) {
-					CamConfig camConfig = new CamConfig();
-					camConfig.setVersion(info[0].trim());
-					camConfig.setInTotalSpace(info[1].trim());
-					camConfig.setOutTotalSpace(info[2].trim());
-					camConfig.setAddrType(info[3].trim());
-					camConfig.setValidRecordTime(info[4].trim());
-					System.out.println(ip + " " + Constants.UDPPORT);
-					rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
-					if(rece != null) {
-						String[] info2 = rece.split("\n");
-						for(String s:info2) {
-							System.out.println("-" + s.trim());
-						}
-						if(info2.length>8) {
-							camConfig.setFrameRate(info2[0].substring(info2[0].indexOf("=")+1));
-							camConfig.setCompression(info2[1].substring(info2[1].indexOf("=")+1));
-							camConfig.setResolution(info2[2].substring(info2[2].indexOf("=")+1));
-							camConfig.setGop(info2[3].substring(info2[3].indexOf("=")+1));
-							camConfig.setBitRate(info2[7].substring(info2[7].indexOf("=")+1));
-							Message msg = handler.obtainMessage();
-							Bundle data = new Bundle();
-							data.putParcelable("CAMPARAMCONFIG", camConfig);
-							msg.setData(data);
-							msg.what = Constants.HIDEQUERYCONFIGDLG;
-							handler.sendMessage(msg);
-						}else {
+				if(device.getDeviceNetType()) {// out 
+					Log.d(TAG, "<=== CamGetParas run method = " + device.getDeviceID());
+					netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
+					new Thread(netUtil).start();
+				} else { // int 
+					String ethIp = device.getDeviceEthIp();
+					if(ethIp != null) {
+						String rece;
+						try {
+							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, ethIp, Constants.UDPPORT);
+							System.out.println("ethIp = " + ethIp + "  recv===="+ rece);
+							ParaUtil.putParaByString(rece, paraMap);
 							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+						} catch (CamManagerException e) {
+							getConfigByWlan(device.getDeviceWlanIp());
 						}
 					} else {
-						handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+						getConfigByWlan(device.getDeviceWlanIp());
 					}
-				}else {
-					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
 				}
-			} else {
+		}
+		
+		private void getConfigByWlan(String wlan) {
+			String rece;
+			try {
+				rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, wlan, Constants.UDPPORT);
+				System.out.println("wlan = " + wlan + "  recv===="+ rece);
+				ParaUtil.putParaByString(rece, paraMap);
+			} catch (CamManagerException e) {
 				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-			}*/
+			} finally {
+				handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+			}
 		}
 	}
 

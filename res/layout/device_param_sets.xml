@@ -33,8 +33,8 @@
 	            <EditText android:id="@+id/device_param_set_name" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
-	    			android:editable="false"
 	    			android:singleLine="true"/>
+	            
 	            <!-- device id -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
@@ -239,7 +239,6 @@
 			            <EditText android:id="@+id/device_param_set_wireuse_ip_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			            
 			            <!-- getway address -->
@@ -251,7 +250,6 @@
 			            <EditText android:id="@+id/device_param_set_wireuse_gateway_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 
 			            <!-- subaddress address -->
@@ -263,7 +261,6 @@
 			            <EditText android:id="@+id/device_param_set_wireuse_subway_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			        </TableRow>
 	        
@@ -277,7 +274,6 @@
 			            <EditText android:id="@+id/device_param_set_wireuse_dns1_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			            
 			            <TextView android:layout_width="wrap_content"
@@ -288,7 +284,6 @@
 			            <EditText android:id="@+id/device_param_set_wireuse_dns2_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			        </TableRow>
 		        </TableLayout>
@@ -346,7 +341,6 @@
 			            <EditText android:id="@+id/device_param_set_wireless_ip_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			            
 			            <!-- getway address -->
@@ -358,7 +352,6 @@
 			            <EditText android:id="@+id/device_param_set_wireless_gateway_address" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 
 			            <!-- subaddress address -->
@@ -370,7 +363,6 @@
 			            <EditText android:id="@+id/device_param_set_wireless_subway_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			        </TableRow>
 	        
@@ -384,7 +376,6 @@
 			            <EditText android:id="@+id/device_param_set_wireless_dns1_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			            
 			            <TextView android:layout_width="wrap_content"
@@ -395,7 +386,6 @@
 			            <EditText android:id="@+id/device_param_set_wireless_dns2_address"
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
-			    			android:editable="false"
 			    			android:singleLine="true"/>
 			        </TableRow>
 		        </TableLayout>
@@ -552,19 +542,20 @@
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
 			               
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_rate_id" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:clickable="false"/>
+				            android:entries="@array/frame_rate_array"
+					    	android:layout_height="wrap_content"/>
 		    	          
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
 		    	          
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_size_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
+					    	android:entries="@array/monitor_frame_size"
 					    	android:clickable="false"/>
 		    	    </TableRow>
 		    	    
@@ -617,7 +608,7 @@
 		     <TableLayout  android:layout_width="fill_parent"
 			    	android:layout_height="wrap_content"
 			    	android:stretchColumns="1,3,5"
-			    	android:padding="3dip">
+			    	android:padding="6dip">
 	            
 	               <!-- sound set -->
 		           <TableRow >
@@ -652,7 +643,9 @@
 			            </RadioGroup>
 		           </TableRow>
 		           
-		            <TableRow ><!-- alarm set -->
+	                <!-- alarm set -->
+		            <TableRow >
+			         
 			         <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
@@ -683,17 +676,21 @@
 			                
 			            </RadioGroup>
 			            
-			            <TextView android:layout_width="wrap_content"
+			           
+		           </TableRow>
+			           
+		            <TableRow >
+		                  <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_other_set_mobile_alarm_offset_str"/>
-			               
+				         
 		    	         <Spinner android:id="@+id/device_params_other_set_mobile_alarm_offset_prompt_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
 					    	android:entries="@array/mobile_alarm_offset_prompt_array"
 					    	android:prompt="@string/device_params_other_set_mobile_alarm_offset_prompt_str"/>
-		    	          
+		    	         
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
@@ -754,8 +751,8 @@
 					    	android:text="@string/device_params_other_set_time_time_format_str"/>
 			         
 		               <Button
-		                   android:text="@string/device_params_other_set_system_str" 
 				            android:layout_width="wrap_content"
+		                    android:text="@string/device_params_other_set_system_str" 
 					    	android:layout_height="wrap_content"/>
 		           </TableRow>
 		           
@@ -785,18 +782,20 @@
 			    	android:stretchColumns="0,1,2"
 			    	android:padding="3dip">
 	            
-		           <TableRow ><!-- bottom button-->
-		               <Button
-		                   android:text="@string/device_params_reset_set_factory_para_str" 
+	               <!-- bottom button-->
+		           <TableRow >
+		               <Button 
+		                    android:id="@+id/device_params_set_factory_button_id"
+		                    android:text="@string/device_params_reset_set_factory_para_str" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
 		               
-		                <Button
+		                <Button android:id="@+id/device_params_set_commit_button_id"
 		                   android:text="@string/device_params_set_sure_str" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
 		                
-		                 <Button
+		                 <Button android:id="@+id/device_params_set_concle_button_id"
 		                   android:text="@string/device_params_set_cancle_str" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>

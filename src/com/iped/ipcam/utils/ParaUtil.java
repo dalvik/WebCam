@@ -29,6 +29,7 @@ public class ParaUtil {
 		for(String s:keySet) {
 			sb.append(s + "=" + paraMap.get(s) + "\n");
 		}
+		Log.d(TAG, sb.toString());
 		return sb.toString();
 	}
 }

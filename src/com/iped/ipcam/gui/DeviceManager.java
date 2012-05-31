@@ -65,7 +65,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 
 	private Button manulAddButton = null;
 
-	private Button claerCamButton = null;
+	private Button deviceParaSetButton = null;
+	
+	private Button clearCamButton = null;
 
 	private ICamManager camManager = null;
 
@@ -148,7 +150,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		setContentView(R.layout.device_manager);
 		autoSearchButton = (Button) findViewById(R.id.auto_search_button);
 		manulAddButton = (Button) findViewById(R.id.manul_add_button);
-		claerCamButton = (Button) findViewById(R.id.clear_all_button);
+		deviceParaSetButton = (Button) findViewById(R.id.device_manager_button);
+		clearCamButton = (Button) findViewById(R.id.clear_all_button);
 		camManager = CamMagFactory.getCamManagerInstance();
 		adapter = new DeviceAdapter(camManager.getCamList(), this);
 		camManager.getCamList().addAll(FileUtil.fetchDeviceFromFile(this));
@@ -159,7 +162,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		registerForContextMenu(getListView());
 		autoSearchButton.setOnClickListener(this);
 		manulAddButton.setOnClickListener(this);
-		claerCamButton.setOnClickListener(this);
+		deviceParaSetButton.setOnClickListener(this);
+		clearCamButton.setOnClickListener(this);
 	}
 
 	@Override
@@ -218,6 +222,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			break;
 		case R.id.manul_add_button:
 			addNewDevice();
+			break;
+		case R.id.device_manager_button:
+			startActivity(new Intent(this, DeviceParamSets.class));
 			break;
 		case R.id.clear_all_button:
 			camManager.clearCamList();

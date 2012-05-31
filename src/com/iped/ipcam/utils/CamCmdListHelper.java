@@ -9,6 +9,7 @@ public class CamCmdListHelper {
 	public final static String SetCmd_ResetVideo = "restart_server:0";
 	public final static String GetCmd_Config = "GetConfig:1 ";
 	public final static String SetCmd_Config = "SetConfig:1 ";
+	public final static String ReSetCmd_Config = "SetConfig:0 ";
 	public final static String GetCmd_Time = "GetTime:0";
 	public final static String GetCmd_Statue = "GetRecordStatue:0 ";
 	public final static String SetCmd_Statue = "SetRecordStatue:";
