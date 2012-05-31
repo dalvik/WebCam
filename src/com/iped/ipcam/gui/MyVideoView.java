@@ -72,7 +72,7 @@ public class MyVideoView extends View implements Runnable {
 	
 	private DataInputStream audioDis = null;
 	
-	private DatagramSocket datagramSocket = null;
+	private DatagramSocket cmdSocket = null;
 	
 	private boolean stopPlay = false;
 
@@ -116,28 +116,20 @@ public class MyVideoView extends View implements Runnable {
 			try {
 				byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Udp.getBytes();
 				ThroughNetUtil netUtil = CamVideoH264.getInstance();
-				datagramSocket = netUtil.getPort1();
-				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+				cmdSocket = netUtil.getPort1();
+				cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 				String ipAdd = device.getUnDefine1();
 				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAdd), device.getDeviceRemoteCmdPort());
-				datagramSocket.send(datagramPacket);
-				DatagramSocket port2 = netUtil.getPort2();
-				DatagramSocket port3 = netUtil.getPort3();
+				cmdSocket.send(datagramPacket);
+				DatagramSocket videoSocket = netUtil.getPort2();
+				DatagramSocket audioSocket = netUtil.getPort3();
 				System.out.println("ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteAudioPort() + " remote audio port=" +device.getDeviceRemoteVideoPort());
-				int localPort2 =  port2.getLocalPort();
-				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), port3.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
+				int localPort2 =  videoSocket.getLocalPort();
+				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), audioSocket.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
 				System.out.println("socket init result = " + result);
 				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-				/*SocketAddress socketAddress = new InetSocketAddress(CamVideoH264.currIpAddress, Constants.TCPPORT);
-			socket = new Socket();
-			socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
-			if(dis != null) {
-				dis.close();
-			}
-			dis = new DataInputStream(socket.getInputStream());
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);*/
 			}catch (IOException e) {
-				e.printStackTrace();
+				Log.d(TAG, e.getLocalizedMessage());
 				onStop();
 				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 				handler.sendEmptyMessage(Constants.CONNECTERROR);
@@ -183,11 +175,11 @@ public class MyVideoView extends View implements Runnable {
 			Socket socket = new Socket();
 			 try {
 					byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
-					datagramSocket = new DatagramSocket();
-					datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+					cmdSocket = new DatagramSocket();
+					cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					String ipAddress = device.getDeviceWlanIp();
 					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceRemoteCmdPort());
-					datagramSocket.send(datagramPacket);
+					cmdSocket.send(datagramPacket);
 					//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 					System.out.println("ready rece ....");
 					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceRemoteVideoPort());
@@ -252,7 +244,6 @@ public class MyVideoView extends View implements Runnable {
 		}
 		onStop();
 		release();
-		//Thread.currentThread().destroy();
 		System.out.println("onstop===="  + stopPlay);
 	}
 	
@@ -297,6 +288,7 @@ public class MyVideoView extends View implements Runnable {
 	public void onStop() {
 		stopPlay = true;
 		release();
+		releaseNAT();
 		flushBitmap();
 	}
 
@@ -310,9 +302,24 @@ public class MyVideoView extends View implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		if(datagramSocket != null) {
-			datagramSocket.close();
-			datagramSocket = null;
+		if(cmdSocket != null) {
+			cmdSocket.close();
+			cmdSocket = null;
+		}
+	}
+	
+	private void releaseNAT() {
+		ThroughNetUtil netUtil = CamVideoH264.getInstance();
+		if(netUtil!= null) {
+			cmdSocket = netUtil.getPort1();
+			DatagramSocket videoSocket = netUtil.getPort2();
+			if(videoSocket != null) {
+				videoSocket.close();
+			}
+			DatagramSocket audioSocket = netUtil.getPort3();
+			if(audioSocket != null) {
+				audioSocket.close();
+			}
 		}
 	}
 	
