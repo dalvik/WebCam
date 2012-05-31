@@ -129,6 +129,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					int port3 = bd.getInt("PORT3");
 					hideProgress();
 					getDeviceConfig(ip, port1, port2, port3);
+					System.out.println("==============>success" + ip + " " + port1 + " " + port2 + " " + port3);
 				}
 				break;
 			case Constants.SENDGETUNFULLPACKAGEMSG:
@@ -637,16 +638,33 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				} else {
 					showToast(R.string.device_manager_add_device_is__exist);
 				}
+				releaseNat();
 			}
+			
 		}).setNegativeButton(getString(R.string.system_settings_save_path_preview_cancle_str), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				ad.dismiss();
+				releaseNat();
 			}
 		}).create();
 		ad.show();
 	}
 	
+	public void releaseNat() {
+		DatagramSocket s1 = netUtil.getPort1();
+		if(s1 != null) {
+			s1.close();
+		}
+		DatagramSocket s2 = netUtil.getPort2();
+		if(s2 != null) {
+			s2.close();
+		}
+		DatagramSocket s3 = netUtil.getPort3();
+		if(s3 != null) {
+			s3.close();
+		}
+	}
 	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
 		DatagramSocket socket = netUtil.getPort1();
 		if(socket == null) {

@@ -79,6 +79,7 @@
     	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
     	<string name="device_params_recorde_total_time_str">可录制时间：</string>
     	
+    	<!-- 网卡设置 -->
     	<string name="device_params_network_set_str">网卡设置：</string>
     	<string name="device_params_network_intelligent_mode_str">智能选择网络</string>
     	<string name="device_params_network_wire_mode_str">有线网络</string>
@@ -103,6 +104,16 @@
     	<string name="device_params_wireless_sub_address_str">掩码地址</string>
     	<string name="device_params_wireless_set_dns1_str">DNS1</string>
     	<string name="device_params_wireless_set_dns2_str">DNS2</string>
+    	
+    	<!-- 接入点设置 -->
+    	<string name="device_params_apn_set_str">接入点设置</string>
+    	<string name="device_params_apn_set_name_str">接入点名称</string>
+    	<string name="device_params_apn_set_pwd_str">接入点密码</string>
+    	<string name="device_params_apn_set_search_wireless_str">搜索无线网络</string>
+    	<string name="device_params_apn_set_wireless_list_str">无线网络列表</string>
+    	<string name="device_params_apn_set_search_wireless_success_str">搜索无线网络完成</string>
+    	<string name="device_params_apn_set_search_wireless_error_str">搜索无线网络失败</string>
+    	
     	<!-- 录制设置 -->
     	<string name="device_params_video_record_set_str">录制设置：</string>
     	<string name="device_params_video_record_frame_rate_set_str">帧率</string>

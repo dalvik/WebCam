@@ -288,7 +288,7 @@ public class MyVideoView extends View implements Runnable {
 	public void onStop() {
 		stopPlay = true;
 		release();
-		releaseNAT();
+		//releaseNAT();
 		flushBitmap();
 	}
 

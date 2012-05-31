@@ -1,9 +1,11 @@
 package com.iped.ipcam.gui;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
@@ -13,6 +15,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -24,6 +27,7 @@ import com.iped.ipcam.engine.CamParasSetImp;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.pojo.WifiConfig;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
@@ -80,6 +84,13 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 
 	private EditText wirelessDNS2Address = null;
 
+	// 无线列表
+	private EditText apnEditText = null;
+	
+	private EditText apnPwdEditText = null;
+	
+	private Spinner wirelessSpinner = null;
+	
 	private EditText addrTypeEditText = null;
 
 	private EditText addressEditText = null;
@@ -211,6 +222,15 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			case Constants.RETSETCONFIGERROR:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_reset_config_error_str);
 				break;
+			case Constants.SENDSEARCHWIRELESSMSG:
+				ProgressUtil.showProgress(R.string.device_params_apn_set_search_wireless_str, DeviceParamSets.this);
+				break;
+			case Constants.SENDSEARCHWIRELESSSUCCESSMSG:
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_apn_set_search_wireless_success_str);
+				break;
+			case Constants.SENDSEARCHWIRELESSERRORMSG:
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_apn_set_search_wireless_error_str);
+				break;
 			default:
 				break;
 			}
@@ -258,6 +278,11 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		wirelessSubAddess = (EditText) findViewById(R.id.device_param_set_wireless_subway_address);
 		wirelessDNS1Address = (EditText) findViewById(R.id.device_param_set_wireless_dns1_address);
 		wirelessDNS2Address = (EditText) findViewById(R.id.device_param_set_wireless_dns2_address);
+		apnEditText = (EditText) findViewById(R.id.device_params_apn_set_name_id);
+		apnPwdEditText = (EditText) findViewById(R.id.device_params_apn_set_pwd_id);
+		findViewById(R.id.device_params_apn_set_search_wireles_id).setOnClickListener(this);
+		wirelessSpinner = (Spinner) findViewById(R.id.device_params_apn_set_wireless_list_id);
+		
 		//frameRateSpinner = (Spinner) findViewById(R.id.device_params_set_recorde_frame_rate_one_id);
 		recordSetOne = (RadioButton) findViewById(R.id.device_params_video_record_set_one_id);
 		recordRateOne = (Spinner) findViewById(R.id.device_params_set_recorde_frame_rate_one_id);
@@ -287,6 +312,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.device_params_apn_set_search_wireles_id:
+			handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSMSG);
+			searchWireless();
+			break;
 		case R.id.device_params_set_factory_button_id:
 			handler.sendEmptyMessage(Constants.SETCONFIGDLG);
 			handler.removeMessages(Constants.SENDDATAWHENMODIFYCONFIG);
@@ -660,16 +689,22 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		}	
 	}
 	
-	private void getConfigByWlan(String wlan) {
-		String rece;
-		try {
-			rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, wlan, Constants.UDPPORT);
-			System.out.println("wlan = " + wlan + "  recv===="+ rece);
-		} catch (CamManagerException e) {
-			handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-		} finally {
-			handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-		}
+	private void getConfigByWlan(final String wlan) {
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				String rece;
+				try {
+					rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, wlan, Constants.UDPPORT);
+					System.out.println("wlan = " + wlan + "  recv===="+ rece);
+				} catch (CamManagerException e) {
+					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+				} finally {
+					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+				}				
+			}
+		}).start();
+		
 	}
 	
 	public void sendNullData() {
@@ -688,14 +723,77 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	}
 	
 	public void resetFactory() {
-		byte[] b = CamCmdListHelper.ReSetCmd_Config.getBytes();
-		try {
-			DatagramPacket datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
-			tmpDatagramSocket.send(datagramPacket);
-			handler.sendEmptyMessage(Constants.RETSETCONFIGSUCCESS);
-		} catch (Exception e) {
-			e.printStackTrace();
-			handler.sendEmptyMessage(Constants.RETSETCONFIGERROR);
-		} 
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				byte[] b = CamCmdListHelper.ReSetCmd_Config.getBytes();
+				try {
+					DatagramPacket datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
+					tmpDatagramSocket.send(datagramPacket);
+					handler.sendEmptyMessage(Constants.RETSETCONFIGSUCCESS);
+				} catch (Exception e) {
+					e.printStackTrace();
+					handler.sendEmptyMessage(Constants.RETSETCONFIGERROR);
+				} 
+			}
+		}).start();
+		
+	}
+	
+	private void searchWireless() {
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				byte[] b = CamCmdListHelper.SetCmd_SearchWireless.getBytes();
+				byte[] recv = new byte[Constants.COMMNICATEBUFFERSIZE];
+				boolean flag = true;
+				DatagramPacket datagramPacket = null;
+				try {
+					datagramPacket = new DatagramPacket(recv, recv.length, InetAddress.getByName(ip), port1);
+					while (flag) {
+						tmpDatagramSocket.setSoTimeout(100);
+						tmpDatagramSocket.receive(datagramPacket);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					flag = false;
+				}
+				StringBuffer sb = new StringBuffer();
+				try {
+					flag = true;
+					datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
+					tmpDatagramSocket.setSoTimeout(60000);
+					tmpDatagramSocket.send(datagramPacket);
+					datagramPacket = new DatagramPacket(recv, recv.length, InetAddress.getByName(ip), port1);
+					while(flag) {
+						tmpDatagramSocket.receive(datagramPacket);
+						int recvLength = datagramPacket.getLength() - 4;
+						byte[] head = new byte[4];
+						System.arraycopy(recv, 0, head, 0, 4);
+						String headStr = new String(head);
+						if(recvLength != Integer.valueOf(headStr.replace(" ", ""))) {
+							Log.d(TAG, "recv wifi error info data packege head leng " + headStr +" recvLength = " + recvLength);
+							continue;
+						}
+						if(Constants.COMMNICATEBUFFERSIZE >recvLength) {
+							sb.append(new String(recv, 0, recvLength));
+							break;
+						}
+						sb.append(new String(recv, 4, recvLength));
+					}
+					List<WifiConfig> wifiList = ParaUtil.encapsuWifiConfig(sb.toString());
+					Log.d(TAG, "searchWireless result = " + wifiList.size());
+					handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSSUCCESSMSG);
+				} catch (Exception e) {
+					Log.d(TAG, "searchWireless = " + e.getLocalizedMessage());
+					flag = false;
+					handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSERRORMSG);
+				} finally {
+					handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
+				}
+			}
+		}).start();
+		
+		
 	}
 }

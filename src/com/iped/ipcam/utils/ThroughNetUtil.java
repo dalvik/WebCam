@@ -407,10 +407,5 @@ public class ThroughNetUtil implements Runnable {
 		this.port3 = port3;
 	}
 	
-	public void clearRecvBuffer() {
-		if(buf != null) {
-			Arrays.fill(buf, (byte)0);
-		}
-	}
 	
 }

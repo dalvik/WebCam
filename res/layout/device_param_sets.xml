@@ -389,6 +389,74 @@
 			    			android:singleLine="true"/>
 			        </TableRow>
 		        </TableLayout>
+		        
+		        <TextView android:layout_width="fill_parent"
+			    	android:layout_height="3px"
+			    	android:background="?android:attr/listDivider"/>
+		    	<!-- 接入点设置 -->
+		    	 <!-- apn  -->
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_apn_set_str"/>
+		            
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3"
+			    	android:padding="3dip">
+		    	    
+		    	    <TableRow >
+			    	    <!-- apn  -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_apn_set_name_str"/>
+			            
+			            <EditText android:id="@+id/device_params_apn_set_name_id" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			            
+			            <!-- apn pwd -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_apn_set_pwd_str"/>
+			            
+			            <EditText android:id="@+id/device_params_apn_set_pwd_id" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+		    	        
+		    	    </TableRow>
+		    	</TableLayout>
+		    	
+		    	  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					    android:layout_width="fill_parent"
+					    android:layout_height="wrap_content"
+					    android:layout_weight="1"
+					    android:orientation="horizontal" >
+		            
+		             <Button
+		                android:id="@+id/device_params_apn_set_search_wireles_id" 
+		                android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					    android:layout_weight="1"
+					    android:text="@string/device_params_apn_set_search_wireless_str"/>
+		             
+		             <TextView android:layout_width="wrap_content"
+		    			android:layout_height="wrap_content"
+		    			android:textColor="@color/white"
+		    			android:layout_weight="1"
+		    			android:gravity="left"
+		    			android:text="@string/device_params_apn_set_wireless_list_str"/>
+		              
+		    	   </LinearLayout>
+		    	   
+	    	     <Spinner android:id="@+id/device_params_apn_set_wireless_list_id" 
+			            android:layout_width="wrap_content"
+			            android:prompt="@string/device_params_apn_set_wireless_list_str"
+				    	android:layout_height="wrap_content"/>
          </LinearLayout>
          
 	      <TextView android:layout_width="fill_parent"

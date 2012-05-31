@@ -82,6 +82,12 @@ public class Constants {
 	
 	public final static int RETSETCONFIGERROR = 12104;
 	
+	public final static int SENDSEARCHWIRELESSMSG = 13104;
+	
+	public final static int SENDSEARCHWIRELESSSUCCESSMSG = 14104;
+	
+	public final static int SENDSEARCHWIRELESSERRORMSG = 15104;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;
