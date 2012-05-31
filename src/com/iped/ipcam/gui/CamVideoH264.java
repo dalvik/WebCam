@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.ThroughNetUtil;
+import com.iped.ipcam.utils.ToastUtils;
 
 /**
      H.264的功能分为两层，
@@ -150,7 +151,7 @@ public class CamVideoH264 extends Activity {
 				}
 				break;
 			case Constants.SENDGETTHREEPORTTIMOUTMSG:
-				Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
+				ToastUtils.showToast(CamVideoH264.this, R.string.connection_error);
 				hideProgressDlg();
 				break;
 			default:

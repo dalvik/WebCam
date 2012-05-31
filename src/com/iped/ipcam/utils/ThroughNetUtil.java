@@ -134,7 +134,7 @@ public class ThroughNetUtil implements Runnable {
 									msg.setData(bundle);
 									handler.sendMessage(msg);
 									flag = true; 
-									Log.d(TAG,	"ThroughNetUtil get ip and tree port from server success  " + flag);
+									Log.d(TAG,	"ThroughNetUtil get ip and tree port from server success  ip = " + ipaddress + " port1 = " + port1 + " port2 = " + port2 + " port3 = " + port3);
 									break;
 								}else {
 									flag = false;	

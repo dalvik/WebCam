@@ -80,7 +80,7 @@ public class MyVideoView extends View implements Runnable {
 	
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 1];
 	
-	private static final String TAG = "ReadStreamThread";
+	private static final String TAG = "MyVideoView";
 	
 	private Handler handler;
 	
@@ -123,7 +123,7 @@ public class MyVideoView extends View implements Runnable {
 				cmdSocket.send(datagramPacket);
 				DatagramSocket videoSocket = netUtil.getPort2();
 				DatagramSocket audioSocket = netUtil.getPort3();
-				System.out.println("ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteAudioPort() + " remote audio port=" +device.getDeviceRemoteVideoPort());
+				Log.d(TAG, "ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteVideoPort() + " remote audio port=" +device.getDeviceRemoteAudioPort());
 				int localPort2 =  videoSocket.getLocalPort();
 				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), audioSocket.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
 				System.out.println("socket init result = " + result);

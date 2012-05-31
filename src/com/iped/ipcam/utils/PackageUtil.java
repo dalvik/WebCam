@@ -46,36 +46,6 @@ public class PackageUtil {
 		return false;
 	}
 	
-	public static boolean isOnline(String ip, int port) throws CamManagerException {
-		DatagramSocket datagramSocket = null;
-		 byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-		
-		byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(5000);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			datagramSocket.receive(rece);
-			Log.d(TAG, "receive inof ");
-			return true;
-		} catch (SocketException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} catch (UnknownHostException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} catch (IOException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} finally {
-			if(datagramSocket != null) {
-				datagramSocket.close();
-				datagramSocket = null;
-			}
-		}
-	}
 	
 	public static String CMDPackage2(ThroughNetUtil netUtil,String cmdType, String ip, int port) throws CamManagerException {
 		byte [] tem = cmdType.getBytes();
