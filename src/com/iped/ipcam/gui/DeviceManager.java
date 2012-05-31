@@ -178,9 +178,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 		Device device = camManager.getDevice(info.position);
 		menu.setHeaderTitle(device.getDeviceName());
-		menu.add(0, MENU_EDIT, 1, getString(R.string.device_edit_str));
+		menu.add(0, MENU_PREVIEW, 1, getString(R.string.device_preview_str));
 		menu.add(0, MENU_DEL, 2, getString(R.string.device_del_str));
-		menu.add(0, MENU_PREVIEW, 3, getString(R.string.device_preview_str));
+		menu.add(0, MENU_EDIT, 3, getString(R.string.device_edit_str));
 	}
 
 	@Override
@@ -190,7 +190,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		Device device = camManager.getDevice(infor.position);
 		switch (item.getItemId()) {
 		case MENU_EDIT:
-			editDevice(device);
+			//editDevice(device);
 			break;
 
 		case MENU_DEL:
