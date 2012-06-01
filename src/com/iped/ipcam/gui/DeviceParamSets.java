@@ -15,7 +15,9 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -35,6 +37,7 @@ import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
+import com.iped.ipcam.utils.WirelessAdapter;
 
 public class DeviceParamSets extends Activity implements OnClickListener {
 
@@ -133,6 +136,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	
 	private int port1;
 	
+	private List<WifiConfig> wifiList = null;
+	
 	private String TAG = "DeviceParamSets";
 	
 	private Handler handler = new Handler() {
@@ -227,6 +232,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 			case Constants.SENDSEARCHWIRELESSSUCCESSMSG:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_apn_set_search_wireless_success_str);
+				initWirelessList();
 				break;
 			case Constants.SENDSEARCHWIRELESSERRORMSG:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_apn_set_search_wireless_error_str);
@@ -641,6 +647,19 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		}
 		paraMap.put("mailbox", alarmEmailEditText.getText().toString().trim());
 		paraMap.put("password", securityVisitPass.getText().toString().trim());
+		
+		WifiConfig config = wifiList.get(wirelessSpinner.getSelectedItemPosition());
+		
+		paraMap.put("inet_wlan_ssid", config.getSsid());
+		paraMap.put("inet_wlan_proto", config.getProto());
+		if("WPA-PSK".equalsIgnoreCase(config.getKey_mgmt())) {
+			paraMap.put("inet_wlan_psk", apnPwdEditText.getText().toString().trim());
+		} else {
+			paraMap.put("inet_wlan_key_mgmt", config.getKey_mgmt());
+			paraMap.put("inet_wlan_wep_key0", apnPwdEditText.getText().toString().trim());
+		}
+		paraMap.put("inet_wlan_pairwise", config.getPairwise());
+		paraMap.put("inet_wlan_group",config.getGroup());
 	}
 	
 	public void send(Map<String, String> paraMap) {
@@ -655,12 +674,14 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
 					tmpDatagramSocket.send(datagramPacket);
 					sb = new StringBuffer(new String("0996") + ws.substring(0,996));
+					System.out.println("===>" + sb.toString());
 					data = sb.toString().getBytes();
 					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
 					tmpDatagramSocket.send(datagramPacket);
 					String a = ws.substring(996);
 					int left = a.length();// l - 1000;
 					sb = new StringBuffer(new String("0" + left) + a);
+					System.out.println("===>" + sb.toString());
 					data = sb.toString().getBytes();
 					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
 					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_success_str);
@@ -776,13 +797,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							continue;
 						}
 						if(Constants.COMMNICATEBUFFERSIZE >recvLength) {
-							sb.append(new String(recv, 0, recvLength));
+							sb.append(new String(recv, 4, recvLength-4));
 							break;
 						}
-						sb.append(new String(recv, 4, recvLength));
+						sb.append(new String(recv, 4, recvLength-4));
 					}
-					List<WifiConfig> wifiList = ParaUtil.encapsuWifiConfig(sb.toString());
-					Log.d(TAG, "searchWireless result = " + wifiList.size());
+					wifiList = ParaUtil.encapsuWifiConfig(sb.toString());
 					handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSSUCCESSMSG);
 				} catch (Exception e) {
 					Log.d(TAG, "searchWireless = " + e.getLocalizedMessage());
@@ -793,7 +813,26 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				}
 			}
 		}).start();
-		
-		
+	}
+
+	private void initWirelessList() {
+		if(wifiList.size()<=0) {
+			wirelessSpinner.setClickable(false);
+		} else {
+			wirelessSpinner.setAdapter(new WirelessAdapter(wifiList, DeviceParamSets.this));
+			wirelessSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view,
+						int position, long id) {
+					WifiConfig config = wifiList.get(position);
+					apnEditText.setText(config.getSsid());
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {
+					
+				}
+			});
+		}
 	}
 }

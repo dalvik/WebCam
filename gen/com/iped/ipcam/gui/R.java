@@ -576,6 +576,9 @@ public final class R {
         public static final int webview_userLogin=0x7f080071;
         public static final int webview_user_exit=0x7f080072;
         public static final int webview_username=0x7f08006d;
+        public static final int wireless_proto=0x7f080075;
+        public static final int wireless_signal_level=0x7f080074;
+        public static final int wireless_ssid=0x7f080073;
     }
     public static final class layout {
         public static final int books_list=0x7f030000;
@@ -593,6 +596,7 @@ public final class R {
         public static final int system_settings=0x7f03000c;
         public static final int web_tab_widget=0x7f03000d;
         public static final int webview_login=0x7f03000e;
+        public static final int wireless_list_item=0x7f03000f;
     }
     public static final class string {
         public static final int app_name=0x7f050001;

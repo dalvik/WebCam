@@ -79,9 +79,7 @@ public class WifiConfig {
 
 	@Override
 	public String toString() {
-		return "WifiConfig [ssid=" + ssid + ", signal_level=" + signal_level
-				+ ", proto=" + proto + ", key_mgmt=" + key_mgmt + ", pairwise="
-				+ pairwise + ", group=" + group + "]";
+		return "ssid=" + ssid + " signal_level=" + signal_level + " proto=" + proto;
 	}
 	
 }

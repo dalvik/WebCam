@@ -43,15 +43,14 @@ public class ParaUtil {
 		for(String s:info) {
 			String[] ss = s.split("\t");
 			int l = ss.length;
-			if(l>=4){
+			if(l>5){
 				WifiConfig config = new WifiConfig();
-				config.setSsid(s.substring(ss[0].indexOf("=") + 1).trim());
-				config.setSignal_level(s.substring(ss[1].indexOf("=") + 1).trim());
-				config.setProto(s.substring(ss[2].indexOf("=") + 1).trim());
-				config.setKey_mgmt(s.substring(ss[3].indexOf("=") + 1).trim());
-				config.setPairwise(s.substring(ss[4].indexOf("=") + 1).trim());
-				config.setGroup(s.substring(ss[5].indexOf("=") + 1).trim());
-				System.out.println("wifi config = " + config);
+				config.setSsid(ss[0].substring(ss[0].indexOf("=") + 1).trim());
+				config.setSignal_level(ss[1].substring(ss[1].indexOf("=") + 1).trim());
+				config.setProto(ss[2].substring(ss[2].indexOf("=") + 1).trim());
+				config.setKey_mgmt(ss[3].substring(ss[3].indexOf("=") + 1).trim());
+				config.setPairwise(ss[4].substring(ss[4].indexOf("=") + 1).trim());
+				config.setGroup(ss[5].substring(ss[5].indexOf("=") + 1).trim());
 				list.add(config);
 			}
 		}
