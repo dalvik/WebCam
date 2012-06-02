@@ -801,7 +801,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		device.setDeviceEthDNS1(paraMap.get("inet_eth_dns1"));
 		device.setDeviceEthDNS2(paraMap.get("inet_eth_dns2"));
 		
-		
 		String wlan_ip = paraMap.get("inet_wlan_ip");
 		device.setDeviceWlanIp(wlan_ip);
 		
@@ -809,14 +808,15 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			device.setDeviceNetType(true);
 		}else {
 			boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, eht_ip, Constants.UDPPORT);
+			Log.d(TAG, "eht_ip ping test " + flag);
 			if(flag) {
-				device.setDeviceNetType(flag);
+				device.setDeviceNetType(!flag);
 			}else {
 				flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, wlan_ip, Constants.UDPPORT);
-				device.setDeviceNetType(flag);
+				Log.d(TAG, "wlan_ip ping test " + flag);
+				device.setDeviceNetType(!flag);
 			}
 		}
-		
 		device.setDeviceWlanGateWay(paraMap.get("inet_wlan_gateway"));
 		device.setDeviceWlanMask(paraMap.get("inet_wlan_mask"));
 		device.setDeviceWlanDNS1(paraMap.get("inet_wlan_dns1"));
