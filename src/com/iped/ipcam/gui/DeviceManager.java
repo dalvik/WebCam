@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -129,7 +131,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					int port3 = bd.getInt("PORT3");
 					hideProgress();
 					getDeviceConfig(ip, port1, port2, port3);
-					System.out.println("==============>success" + ip + " " + port1 + " " + port2 + " " + port3);
 				}
 				break;
 			case Constants.SENDGETUNFULLPACKAGEMSG:
@@ -468,18 +469,122 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		dlg.show();
 	}
 
-	private void updateComponentState(View addDeviceView, boolean isChecked) {
-		addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext).setEnabled(isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_addr_id).setEnabled(
-				!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id)
-				.setEnabled(!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_dns1_id)
-				.setEnabled(!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_dns2_id)
-				.setEnabled(!isChecked);
-		addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id)
-				.setEnabled(!isChecked);
+	private void updateComponentState(View addDeviceView, final boolean isChecked) {
+		EditText deviceId = (EditText) addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext);
+		EditText addrId = (EditText)addDeviceView.findViewById(R.id.device_manager_new_addr_id);
+		EditText gateWay = (EditText) addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id);
+		EditText dns1 = (EditText) addDeviceView.findViewById(R.id.device_manager_new_dns1_id);
+		EditText dns2 = (EditText) addDeviceView.findViewById(R.id.device_manager_new_dns2_id);
+		EditText mask = (EditText) addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id);
+		if(isChecked) {
+			deviceId.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return null;   
+				}
+			  }
+			});
+			
+			addrId.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			gateWay.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			dns1.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			dns2.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			mask.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+		} else {
+			deviceId.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			addrId.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return null;   
+				}
+			  }
+			});
+			
+			gateWay.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			dns1.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			dns2.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
+				}
+				}
+			});
+			
+			mask.setFilters(new InputFilter[] {new InputFilter(){
+				@Override
+				public CharSequence filter(CharSequence source, int start, int end,
+						Spanned dest, int dstart, int dend) {
+					return null;   
+				}
+			  }
+			});
+		}
 	}
 
 	private void unCloseDialog(AlertDialog dialog, int id, boolean flag) {
@@ -511,6 +616,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 
 	protected void onResume() {
 		super.onResume();
+		handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 		handler.sendMessageDelayed(
 				handler.obtainMessage(Constants.DEFAULTUSERSELECT), 50);
 	};
@@ -589,7 +695,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					ParaUtil.putParaByString(sb.toString(), paraMap);
 					Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
 					
-					device.setDeviceNetType(false);
+					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
+					
+					device.setDeviceNetType(flag);
 					device.setDeviceWlanIp(ip);
 					device.setDeviceWlanGateWay(gateWay);
 					device.setDeviceWlanMask(mask);
@@ -652,6 +760,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	}
 	
 	public void releaseNat() {
+		if(netUtil == null) {
+			return ;
+		}
+		
 		DatagramSocket s1 = netUtil.getPort1();
 		if(s1 != null) {
 			s1.close();
@@ -682,15 +794,29 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		ParaUtil.putParaByString(cmd, paraMap);
 		Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
 		
-		device.setDeviceEthIp(paraMap.get("inet_eth_ip"));
+		String eht_ip = paraMap.get("inet_eth_ip");
+		device.setDeviceEthIp(eht_ip);
 		device.setDeviceEthGateWay(paraMap.get("inet_eth_gateway"));
 		device.setDeviceEthMask(paraMap.get("inet_eth_mask"));
 		device.setDeviceEthDNS1(paraMap.get("inet_eth_dns1"));
 		device.setDeviceEthDNS2(paraMap.get("inet_eth_dns2"));
 		
-		device.setDeviceNetType(true);
 		
-		device.setDeviceWlanIp(paraMap.get("inet_wlan_ip"));
+		String wlan_ip = paraMap.get("inet_wlan_ip");
+		device.setDeviceWlanIp(wlan_ip);
+		
+		if(eht_ip.length()<0 && wlan_ip.length()<0){
+			device.setDeviceNetType(true);
+		}else {
+			boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, eht_ip, Constants.UDPPORT);
+			if(flag) {
+				device.setDeviceNetType(flag);
+			}else {
+				flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, wlan_ip, Constants.UDPPORT);
+				device.setDeviceNetType(flag);
+			}
+		}
+		
 		device.setDeviceWlanGateWay(paraMap.get("inet_wlan_gateway"));
 		device.setDeviceWlanMask(paraMap.get("inet_wlan_mask"));
 		device.setDeviceWlanDNS1(paraMap.get("inet_wlan_dns1"));

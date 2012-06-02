@@ -93,7 +93,7 @@
                 <EditText android:id="@+id/device_manager_new_device_id_edittext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="25301805"
+                    android:text="25304365"
                     android:hint="@string/device_manager_new_device_id_hint"
                     android:inputType="numberDecimal"
                     android:singleLine="true" />
@@ -159,6 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/device_manager_new_addr_default_str"
+                    android:inputType="numberDecimal"
                     android:singleLine="true" />
 
                 <TextView
@@ -170,6 +171,7 @@
                 <EditText android:id="@+id/device_manager_new_dns1_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                     android:singleLine="true" />
             </TableRow>
 
@@ -184,6 +186,7 @@
                 <EditText android:id="@+id/device_manager_new_gateway_addr_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                      android:text="@string/device_manager_new_gateway_addr_default_str"
                     android:singleLine="true" />
 
@@ -196,6 +199,7 @@
                 <EditText  android:id="@+id/device_manager_new_dns2_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                     android:singleLine="true" />
             </TableRow>
 

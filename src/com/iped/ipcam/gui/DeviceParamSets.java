@@ -16,11 +16,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -32,6 +32,7 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.WifiConfig;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
@@ -191,7 +192,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							initializeEditText(paraMap);
 						} catch (CamManagerException e) {
 							handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-							Log.d(TAG, e.getLocalizedMessage());
+							Log.d(TAG, "CamManagerException = " + e.getLocalizedMessage());
 							return;
 						}
 					}
@@ -215,10 +216,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				sendNullData();
 				break;
 			case Constants.SENDSETCONFIGSUCCESSMSG:
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_success_str);
 				DeviceParamSets.this.finish();
 				break;
 			case Constants.SENDSETCONFIGERRORMSG:
 				ProgressUtil.hideProgress();
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_error_str);
 				break;
 			case Constants.RETSETCONFIGSUCCESS:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_reset_config_success_str);
@@ -236,6 +239,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 			case Constants.SENDSEARCHWIRELESSERRORMSG:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_apn_set_search_wireless_error_str);
+				break;
+			case Constants.SENDCONFIGMSG:
+				send(paraMap);
 				break;
 			default:
 				break;
@@ -331,7 +337,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			handler.sendEmptyMessage(Constants.SETCONFIGDLG);
 			handler.removeMessages(Constants.SENDDATAWHENMODIFYCONFIG);
 			collectionData();
-			send(paraMap);					
 			break;
 		case R.id.device_params_set_concle_button_id:
 			this.finish();
@@ -360,10 +365,22 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				netWorkModeSet.check(R.id.device_param_set_network_mode_intelligent);
 			}
 		}
+		wireuseNetworkSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				if(checkedId == R.id.device_param_set_wireuse_network_mode_auto) {
+					lockWireuseCommont(false);
+				} else {
+					lockWireuseCommont(true);
+				}
+			}
+		});
 		if(paraMap.containsKey("inet_udhcpc")) {
 			String s = paraMap.get("inet_udhcpc");
 			if("1".equals(s)) {
 				wireuseNetworkSet.check(R.id.device_param_set_wireuse_network_mode_auto);
+				lockWireuseCommont(false);
 			} else {
 				wireuseNetworkSet.check(R.id.device_param_set_wireuse_network_mode_static);
 			}
@@ -373,10 +390,25 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		wireuseSubAddess.setText(paraMap.containsKey("inet_eth_mask")? paraMap.get("inet_eth_mask") : "");
 		wireuseDNS1Address.setText(paraMap.containsKey("inet_eth_dns1")? paraMap.get("inet_eth_dns1") : "");
 		wireuseDNS2Address.setText(paraMap.containsKey("inet_eth_dns2")? paraMap.get("inet_eth_dns2") : "");
+		
+		wirelessNetworkSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				if(checkedId == R.id.device_param_set_wireless_network_mode_audo) {
+					lockWirelessCommont(false);
+				} else {
+					lockWirelessCommont(true);
+				}
+				
+			}
+		});
+		
 		if(paraMap.containsKey("inet_udhcpc")) {
 			String s = paraMap.get("inet_udhcpc");
 			if("1".equals(s)) {
 				wirelessNetworkSet.check(R.id.device_param_set_wireless_network_mode_audo);
+				lockWirelessCommont(false);
 			} else {
 				wirelessNetworkSet.check(R.id.device_param_set_wireless_network_static);
 			}
@@ -505,6 +537,22 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		ProgressUtil.dismissProgress();
 	}
 
+	private void lockWireuseCommont(boolean flag) {
+		wireuseIPAddress.setEnabled(flag);
+		wireuseGeteWayAddess.setEnabled(flag);
+		wireuseSubAddess.setEnabled(flag);
+		wireuseDNS1Address.setEnabled(flag);
+		wireuseDNS2Address.setEnabled(flag);
+	}
+	
+	private void lockWirelessCommont(boolean flag) {
+		wirelessIPAddress.setEnabled(flag);
+		wirelessGeteWayAddess.setEnabled(flag);
+		wirelessSubAddess.setEnabled(flag);
+		wirelessDNS1Address.setEnabled(flag);
+		wirelessDNS2Address.setEnabled(flag);
+	}
+	
 	private void collectionData() {
 		paraMap.put("name", deviceNameEditText.getText().toString().trim());
 		switch(netWorkModeSet.getCheckedRadioButtonId()) {
@@ -648,66 +696,107 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		paraMap.put("mailbox", alarmEmailEditText.getText().toString().trim());
 		paraMap.put("password", securityVisitPass.getText().toString().trim());
 		
-		WifiConfig config = wifiList.get(wirelessSpinner.getSelectedItemPosition());
-		
-		paraMap.put("inet_wlan_ssid", config.getSsid());
-		paraMap.put("inet_wlan_proto", config.getProto());
-		if("WPA-PSK".equalsIgnoreCase(config.getKey_mgmt())) {
-			paraMap.put("inet_wlan_psk", apnPwdEditText.getText().toString().trim());
-		} else {
-			paraMap.put("inet_wlan_key_mgmt", config.getKey_mgmt());
-			paraMap.put("inet_wlan_wep_key0", apnPwdEditText.getText().toString().trim());
+		if(wifiList != null) {
+			WifiConfig config = wifiList.get(wirelessSpinner.getSelectedItemPosition());
+			paraMap.put("inet_wlan_ssid", config.getSsid());
+			paraMap.put("inet_wlan_proto", config.getProto());
+			System.out.println("=======>" + config.getKey_mgmt());
+			if("WPA-PSK".equalsIgnoreCase(config.getKey_mgmt())) {
+				paraMap.put("inet_wlan_key_mgmt", config.getKey_mgmt());
+				paraMap.put("inet_wlan_psk", apnPwdEditText.getText().toString().trim());
+			} else {
+				paraMap.put("inet_wlan_key_mgmt", config.getKey_mgmt());
+				paraMap.put("inet_wlan_wep_key0", apnPwdEditText.getText().toString().trim());
+			}
+			paraMap.put("inet_wlan_pairwise", config.getPairwise());
+			paraMap.put("inet_wlan_group",config.getGroup());
 		}
-		paraMap.put("inet_wlan_pairwise", config.getPairwise());
-		paraMap.put("inet_wlan_group",config.getGroup());
+
+		/*if(paraMap.containsKey("system_time")){
+			paraMap.remove("system_time");
+		}
+		if(paraMap.containsKey("system_time")){
+			paraMap.remove("system_time");
+		}
+		if(paraMap.containsKey("system_time")){
+			paraMap.remove("system_time");
+		}
+		if(paraMap.containsKey("system_time")){
+			paraMap.remove("system_time");
+		}*/
+		paraMap.put("system_time",DateUtil.formatTimeToDate3(System.currentTimeMillis()));
+		device.setDeviceName(deviceNameEditText.getText().toString().trim());
+		device.setDeviceEthIp(wireuseIPAddress.getText().toString().trim());
+		device.setDeviceEthGateWay(wireuseGeteWayAddess.getText().toString().trim());
+		device.setDeviceEthMask(wireuseSubAddess.getText().toString().trim());
+		device.setDeviceEthDNS1(wireuseDNS1Address.getText().toString().trim());
+		device.setDeviceEthDNS2(wireuseDNS2Address.getText().toString().trim());
+		device.setDeviceWlanIp(wirelessIPAddress.getText().toString().trim());
+		device.setDeviceWlanGateWay(wirelessGeteWayAddess.getText().toString().trim());
+		device.setDeviceWlanMask(wirelessSubAddess.getText().toString().trim());
+		device.setDeviceWlanDNS1(wirelessDNS1Address.getText().toString().trim());
+		device.setDeviceEthDNS2(wirelessDNS2Address.getText().toString().trim());
+		
+		//camManager.updateCam(device);
+		
+		handler.sendEmptyMessage(Constants.SENDCONFIGMSG);
 	}
 	
-	public void send(Map<String, String> paraMap) {
-		if(device.getDeviceNetType()) { // 利用临时保存的连接发送配置信息
-			String ws = ParaUtil.enCapsuPara(paraMap);
-			int l = ws.length();
-			if(l>1000) {
-				StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
-				byte [] data = sb.toString().getBytes();
-				DatagramPacket datagramPacket;
-				try {
-					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-					tmpDatagramSocket.send(datagramPacket);
-					sb = new StringBuffer(new String("0996") + ws.substring(0,996));
-					System.out.println("===>" + sb.toString());
-					data = sb.toString().getBytes();
-					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-					tmpDatagramSocket.send(datagramPacket);
-					String a = ws.substring(996);
-					int left = a.length();// l - 1000;
-					sb = new StringBuffer(new String("0" + left) + a);
-					System.out.println("===>" + sb.toString());
-					data = sb.toString().getBytes();
-					datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_success_str);
-				} catch (Exception e) {
-					e.printStackTrace();
-					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_error_str);
-					handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
-				} finally {
-					handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
-				}
+	public void send(final Map<String, String> paraMap) {
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				if(device.getDeviceNetType()) { // 利用临时保存的连接发送配置信息
+					String ws = ParaUtil.enCapsuPara(paraMap);
+					int l = ws.length();
+					if(l>1000) {
+						StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
+						byte [] data = sb.toString().getBytes();
+						DatagramPacket datagramPacket;
+						try {
+							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+							
+							sb = new StringBuffer(new String("0996") + ws.substring(0,996));
+							System.out.println("===>" + sb.toString());
+							data = sb.toString().getBytes();
+							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+							String a = ws.substring(996);
+							int left = a.length();// l - 1000;
+							sb = new StringBuffer(new String("0" + left) + a);
+							System.out.println("===>" + sb.toString());
+							data = sb.toString().getBytes();
+							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+							Message msg = handler.obtainMessage();
+							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
+							handler.sendMessageDelayed(msg, 500);
+						} catch (Exception e) {
+							e.printStackTrace();
+							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
+						} finally {
+							
+						}
+					}
+				} else {
+					String ethIp = device.getDeviceEthIp();
+					if(ethIp != null) {
+						String rece;
+						try {
+							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, ethIp, Constants.UDPPORT);
+							System.out.println("ethIp = " + ethIp + "  recv===="+ rece);
+							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+						} catch (CamManagerException e) {
+							getConfigByWlan(device.getDeviceWlanIp());
+						}
+					} else {
+						getConfigByWlan(device.getDeviceWlanIp());
+					}
+				}	
 			}
-		} else {
-			String ethIp = device.getDeviceEthIp();
-			if(ethIp != null) {
-				String rece;
-				try {
-					rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, ethIp, Constants.UDPPORT);
-					System.out.println("ethIp = " + ethIp + "  recv===="+ rece);
-					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				} catch (CamManagerException e) {
-					getConfigByWlan(device.getDeviceWlanIp());
-				}
-			} else {
-				getConfigByWlan(device.getDeviceWlanIp());
-			}
-		}	
+		}).start();
+		
 	}
 	
 	private void getConfigByWlan(final String wlan) {

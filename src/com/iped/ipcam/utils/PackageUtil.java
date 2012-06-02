@@ -163,6 +163,26 @@ public class PackageUtil {
 		} 
 	}
 	
+	public static boolean pingTest(String cmdType, String ip, int port) {
+		byte [] tem = cmdType.getBytes();
+		DatagramSocket datagramSocket = null;
+		try {
+			datagramSocket = new DatagramSocket();
+			datagramSocket.setSoTimeout(500);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
+			datagramSocket.send(datagramPacket);
+			datagramSocket.receive(datagramPacket);
+			return true;
+		}catch (IOException e) {
+			Log.d(TAG, "pingTest : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			return false;
+		} finally{
+			if(datagramSocket != null) {
+				datagramSocket.close();
+			}
+		}
+	}
+	
 	public static byte[] deleteZero(byte[]files) {
 		int index = 0;
 		int length = files.length;

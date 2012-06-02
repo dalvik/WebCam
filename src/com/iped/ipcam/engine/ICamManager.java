@@ -15,6 +15,8 @@ public interface ICamManager {
 	
 	public Device addCam(String ip);
 	
+	public void updateCam(Device device);
+	
 	public boolean editCam(Device deviceOld, Device deviceNew);
 	
 	public boolean delCam(int dex);

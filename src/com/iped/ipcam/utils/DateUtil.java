@@ -39,4 +39,10 @@ public class DateUtil {
 			return dateStr;
 		}
 	}
+	
+	public static String formatTimeToDate3(long time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		return sdf.format(new Date(time));
+	}
+	
 }

@@ -88,6 +88,8 @@ public class Constants {
 	
 	public final static int SENDSEARCHWIRELESSERRORMSG = 15104;
 	
+	public final static int SENDCONFIGMSG = 15204;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;

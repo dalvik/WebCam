@@ -89,6 +89,17 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
+	public void updateCam(Device device) {
+		String id = device.getDeviceID();
+		for(Device d:deviceList) {
+			if(id.equals(d.getDeviceID())) {
+				deviceList.remove(this);
+			}
+		}
+		deviceList.add(device);
+	}
+	
+	@Override
 	public boolean delCam(String name) {
 		// TODO Auto-generated method stub
 		return false;

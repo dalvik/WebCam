@@ -3,7 +3,6 @@ package com.iped.ipcam.gui;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
