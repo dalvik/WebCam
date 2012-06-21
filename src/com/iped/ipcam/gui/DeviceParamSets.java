@@ -255,13 +255,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		setContentView(R.layout.device_param_sets);
 		lookupEditText();
 		device = camManager.getSelectDevice();
-		System.out.println(device);
 		if (device == null) {
-			Toast.makeText(
-					this,
-					getResources().getString(
-							R.string.device_params_no_device_select_str),
-					Toast.LENGTH_SHORT).show();
+			ToastUtils.showToast(this, R.string.device_params_no_device_select_str);
 		} else {
 			// vodeoSearchDia(device.getDeviceIp());
 			handler.sendEmptyMessage(Constants.SHOWQUERYCONFIGDLG);

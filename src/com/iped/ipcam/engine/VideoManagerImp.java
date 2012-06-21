@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +11,7 @@ import java.util.List;
 import android.os.Handler;
 import android.util.Log;
 
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
@@ -25,7 +24,7 @@ public class VideoManagerImp implements IVideoManager {
 	
 	private List<Video> videoList = new ArrayList<Video>();
 	
-	private String deviceName;
+	private Device device;
 	
 	private Date start;
 	
@@ -44,8 +43,8 @@ public class VideoManagerImp implements IVideoManager {
 	}
 
 	@Override
-	public void videoSearchInit(String device, Date start, Date end) {
-		this.deviceName = device;
+	public void videoSearchInit(Device device, Date start, Date end) {
+		this.device = device;
 		this.start = start;
 		this.end = end;
 	}
@@ -103,23 +102,48 @@ public class VideoManagerImp implements IVideoManager {
 			byte [] tem = CamCmdListHelper.GetCmd_NetFiles.getBytes();
 			DatagramSocket datagramSocket = null;
 			//00068000:00fff5b2:20120104165801-20120104170649
+			String ip = null;
+			int port = 0;
+			if(device.getDeviceNetType()) {
+				ip = device.getUnDefine1();
+				port = device.getDeviceRemoteCmdPort();
+			}else {
+				port = Constants.UDPPORT;
+				if( device.getDeviceEthIp() != null &&  device.getDeviceEthIp().length()>0) {
+					ip = device.getDeviceEthIp();
+					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, device.getDeviceRemoteCmdPort());
+					if(!flag) {
+						ip = device.getDeviceWlanIp();
+					}
+				} else {
+					ip = device.getDeviceWlanIp();
+				}
+			}
 			try {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 				System.arraycopy(tem, 0, buffTemp, 0, tem.length);
-				System.out.println(deviceName);
-				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(deviceName), 60000);
+				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(ip), port);
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-				datagramSocket.receive(rece);
-				splitFilesInfoFromBuf(PackageUtil.deleteZero(buffTemp));
+				boolean flag = true;
+				StringBuffer sb = new StringBuffer();
+				while(flag) {
+					datagramSocket.receive(rece);
+					int l = rece.getLength();
+					if(l<Constants.COMMNICATEBUFFERSIZE) {
+						sb.append(new String(buffTemp, 0, l));
+						flag = false;
+						break;
+					}
+					sb.append(new String(buffTemp));
+				}
+				System.out.println("===>"+ sb.toString() +"<===");
+				splitFilesInfoFromBuf(PackageUtil.deleteZero(sb.toString().getBytes()));
 				updateList();
-			} catch (SocketException e) {
-				e.printStackTrace();
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+				Log.d(TAG, "VideoSearchThread " + e.getMessage());
 			} finally {
 				if(datagramSocket != null) {
 					datagramSocket.close();
@@ -128,11 +152,10 @@ public class VideoManagerImp implements IVideoManager {
 			}
 		}
 		
-		
 		//00000000:00fff094:20120104150759-20120104151643
 		public void splitFilesInfoFromBuf(byte[]files) {
 			String s = new String(files);
-			System.out.println(s);
+			//System.out.println(s);
 			String[] temp = s.split("\n");
 			for(String t:temp) {
 				analyFileFromString(t);
@@ -150,7 +173,7 @@ public class VideoManagerImp implements IVideoManager {
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
 			if((fileLength != null && fileLength.trim().length()<=0) || (end != null && end.trim().length()<=0)) {
-				Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
+				Video video = new Video(index, device.getDeviceName(), start, end, fileLength, device.getDeviceName());
 				videoList.add(video);
 				return;
 			} 
@@ -160,7 +183,7 @@ public class VideoManagerImp implements IVideoManager {
 			//int i = Integer.parseInt(index, 16);
 			//int j = Integer.parseInt(fileLength, 16);
 			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
+			Video video = new Video(index, device.getDeviceName(), start, end, fileLength, device.getDeviceName());
 			videoList.add(video);
 		}
 		

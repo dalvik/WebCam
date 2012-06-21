@@ -203,6 +203,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 			Intent intent = new Intent();
 			Bundle bundle = new Bundle();
+			bundle.putString("PLVIDEOINDEX",""); 
 			bundle.putSerializable("IPPLAY", device);
 			intent.putExtras(bundle);
 			intent.setAction(Constants.ACTION_IPPLAY);

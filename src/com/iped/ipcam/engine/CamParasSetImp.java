@@ -29,6 +29,7 @@ public class CamParasSetImp implements ICamParasSet {
 				getCamParaThread.join(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 			}
 			getCamParaThread = null;
 		}

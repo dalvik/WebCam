@@ -24,8 +24,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 
@@ -279,13 +282,30 @@ public class CamVideoH264 extends Activity {
 							msg.what = Constants.SHOWCONNDIALOG;
 							mHandler.sendMessage(msg);
 						} else {
+							String ip = null;
+							String id = bundle.getString("PLVIDEOINDEX");
+							System.out.println(id+"--->");
+							if(!"".equals(id)) {
+								if(device.getDeviceEthIp() != null && device.getDeviceEthIp().length()>0) {
+									ip = device.getDeviceEthIp();
+								} else {
+									ip = device.getDeviceWlanIp();
+								}
+								System.out.println(id+"--->" + ip);
+								try {
+									PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_PlayNetFiles + id, ip, Constants.UDPPORT);
+								} catch (CamManagerException e) {
+									e.printStackTrace();
+									Log.d(TAG, "play back in net = " + e.getMessage());
+								}
+							}
 							msg.what = Constants.SHOWCONNDIALOG;
 							mHandler.sendMessage(msg);
 							mHandler.sendEmptyMessage(Constants.CONNECTTING);
 						}
 					}
 				}
-				}
+			}
 		}
 	}
 	

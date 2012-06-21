@@ -10,6 +10,7 @@ import android.app.DatePickerDialog;
 import android.app.ListActivity;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -84,7 +85,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case Constants.VIDEOAUTOSEARCH:
-				
+				//vodeoSearchDia();
 				break;
 			case Constants.UPDATEVIDEOLIST:
 				videoAdapter.notifyDataSetChanged();
@@ -173,7 +174,15 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			handler.sendEmptyMessage(Constants.DELETEFILES);
 			break;
 		case PLAYBACK:
-			
+			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+			String videoIndex = video.getIndex();
+			Intent intent = new Intent();
+			Bundle bundle = new Bundle();
+			bundle.putString("PLVIDEOINDEX",videoIndex); 
+			bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
+			intent.putExtras(bundle);
+			intent.setAction(Constants.ACTION_IPPLAY);
+			sendBroadcast(intent);
 			break;
 		default:
 			break;
@@ -189,7 +198,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			if(device == null) {
 				Toast.makeText(this, getResources().getString(R.string.play_back_select_device_first_str), Toast.LENGTH_SHORT).show();
 			} else {
-				//vodeoSearchDia(device.getDeviceIp());
+				vodeoSearchDia(device);
 			}
 			break;
 		case R.id.play_back_clear_all:
@@ -213,7 +222,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		}
 	}
 	
-	private void vodeoSearchDia(final String device) {
+	private void vodeoSearchDia(final Device device) {
         LayoutInflater factory = LayoutInflater.from(PlayBack.this);
         myDialogView = factory.inflate(R.layout.play_back_video_search_dlg, null);
         initSearchDlg(device);
@@ -268,12 +277,20 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	}
 
 	
-	private void initSearchDlg(String device) {
+	private void initSearchDlg(Device device) {
 		calendar = Calendar.getInstance();
 		EditText videoSearchName = (EditText) myDialogView.findViewById(R.id.play_back_video_search_name);
         EditText vodeoSearchAddr = (EditText) myDialogView.findViewById(R.id.play_back_video_search_addr);
-        videoSearchName.setText(device);
-        vodeoSearchAddr.setText(device);
+        videoSearchName.setText(device.getDeviceName());
+        if(device.getDeviceNetType()) {
+        	vodeoSearchAddr.setText(device.getUnDefine1());
+        } else {
+        	if(device.getDeviceEthIp() != null && device.getDeviceEthIp().length()>0){
+        		vodeoSearchAddr.setText(device.getDeviceEthIp());
+        	}else {
+        		vodeoSearchAddr.setText(device.getDeviceWlanIp());
+        	}
+        }
         startSearchDate = (Button) myDialogView.findViewById(R.id.start_date_buttion);
         startSearchTime = (Button) myDialogView.findViewById(R.id.start_time_buttion);
         endSearchDate = (Button) myDialogView.findViewById(R.id.end_date_buttion);

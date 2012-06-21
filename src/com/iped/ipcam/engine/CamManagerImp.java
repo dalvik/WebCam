@@ -277,6 +277,7 @@ public class CamManagerImp implements ICamManager {
 					boolean res = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
 					if(res) {
 						synchronized (deviceList) {
+							System.out.println("----" + Constants.DEFAULTSEARCHIP + i);
 							addCam(Constants.DEFAULTSEARCHIP + i);
 							updateDeviceList();
 						}
