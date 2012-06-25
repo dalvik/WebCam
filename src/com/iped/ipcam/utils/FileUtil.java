@@ -139,9 +139,9 @@ public class FileUtil {
 				boolean netType = device.getDeviceNetType();
 				sb.append(device.getDeviceName() + "&" + device.getDeviceID() + "&" + device.getUnDefine1() + "&" + netType + "&");
 				if(netType){
-					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() +"\n");
+					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + device.getUnDefine2() +"\n");
 				} else {
-					sb.append(device.getDeviceWlanIp() + "&" + device.getDeviceWlanGateWay() + "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() +"\n");
+					sb.append(device.getDeviceWlanIp() + "&" + device.getDeviceWlanGateWay() + "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + device.getUnDefine2() +"\n");
 				}
 			}
 			System.out.println(sb.toString());
@@ -176,7 +176,7 @@ public class FileUtil {
 				String[] info = str.split("&");
 				int l = info.length;
 				//System.out.println("device info str=" + str + " length="  + l);
-				if(l<7) {
+				if(l<8) {
 					continue;
 				}
 				Device device = new Device();
@@ -195,6 +195,7 @@ public class FileUtil {
 				device.setDeviceRemoteCmdPort(Integer.parseInt(info[6]));
 				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));
 				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
+				device.setUnDefine2(info[9]);
 				deviceList.add(device);
 				System.out.println("get device form file "  + device);
 			}

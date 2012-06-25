@@ -46,10 +46,12 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
+import com.iped.ipcam.utils.DialogUtils;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
+import com.iped.ipcam.utils.ToastUtils;
 
 public class DeviceManager extends ListActivity implements OnClickListener {
 
@@ -227,7 +229,20 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			addNewDevice();
 			break;
 		case R.id.device_manager_button:
-			startActivity(new Intent(this, DeviceParamSets.class));
+			Device device = camManager.getSelectDevice();
+			if(device == null) {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
+				return;
+			}
+			int resu = PackageUtil.checkPwdState(device);
+			System.out.println("resu=" + resu);
+			if(resu == 0) { // unset
+				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, Constants.QUERY_CONFIG_ACTION, Constants.QUERY_CONFIG_MINITYPE);
+			} else if(resu == 1) {// pwd seted
+				DialogUtils.inputOnePasswordDialog(DeviceManager.this, Constants.QUERY_CONFIG_ACTION, Constants.QUERY_CONFIG_MINITYPE);
+			}
+			//DialogUtils.inputPasswordDialog(DeviceManager.this, Constants.QUERY_CONFIG_ACTION, Constants.QUERY_CONFIG_MINITYPE);
+			//startActivity(new Intent(this, DeviceParamSets.class));
 			break;
 		case R.id.clear_all_button:
 			camManager.clearCamList();

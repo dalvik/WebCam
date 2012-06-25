@@ -2,6 +2,7 @@
 <resources>
 
     <string name="hello">Hello World, WebCamActivity!</string>
+     <!-- 用户登录 -->
     <string name="app_name">WebCam</string>
     <string name="user_name">账号：</string>
     <string name="user_name_hint">请输入账号</string>
@@ -11,6 +12,17 @@
     <string name="user_login">登录</string>
     	<string name="username_null">用户名不能为空</string>
     <string name="user_exit">取消</string>
+    
+    <string name="login_dialog_str">User login</string>
+    <string name="input_password">Please enter your password</string>
+    <string name="repeat_input_password">Repeat Password</string>
+    <string name="password_is_null">Sorry! Password can not be empty!</string>
+    <string name="password_not_equal">Sorry! Two password the importation is inconsistent!</string>
+    <string name="password_set_ok">Password set up, remember!</string>
+    <string name="login_str">Confirm</string>
+    <string name="cancle_login_str">Cancel</string>
+    <string name="device_manager_pwd_set_error">密码设置失败</string>
+    <string name="device_manager_pwd_set_time_out">网络超时</string>
     
     <string name="default_activity_str">视频</string>
     	<string name="connection">正在为您连接，请稍等片刻</string>
@@ -66,6 +78,7 @@
     	<string name="device_gateway_str">网关：</string>
     	<string name="device_audio_port_str">Audio：</string>
     <string name="device_params_sets_str">参数设置</string>
+    	<string name="device_params_info_no_device_str">请先添加设备</string>
     	<string name="device_params_info_str">设备信息:</string>
     	<string name="device_param_inentify_str">设备ID:</string>
     	<string name="device_params_version_str">软件版本：</string>

@@ -40,7 +40,13 @@
         
         <activity android:name=".DeviceManager"/>
         
-        <activity android:name=".DeviceParamSets"/>
+        <activity android:name=".DeviceParamSets">
+        	<intent-filter>
+        	    <action android:name="android.intent.action.QUERY_CONFIG_ACTION"/>
+        	    <category android:name="android.intent.category.DEFAULT"/>
+        	    <data android:mimeType="vnd.android.webcam.type/vnd.iped.webcam"/>
+        	</intent-filter>    
+        </activity>
         
         <activity android:name=".PlayBack"/>
         

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -252,6 +254,15 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Intent intent = getIntent();
+		Uri uri = intent.getData();
+		String pwd = null;
+		if(uri != null) {
+			pwd = uri.getPath();
+			if(pwd == null || pwd.length() <= 0) {
+				DeviceParamSets.this.finish();
+			}
+		}
 		setContentView(R.layout.device_param_sets);
 		lookupEditText();
 		device = camManager.getSelectDevice();
@@ -259,6 +270,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			ToastUtils.showToast(this, R.string.device_params_no_device_select_str);
 		} else {
 			// vodeoSearchDia(device.getDeviceIp());
+			device.setUnDefine2(pwd);
+			camManager.updateCam(device);
 			handler.sendEmptyMessage(Constants.SHOWQUERYCONFIGDLG);
 		}
 	}
@@ -343,9 +356,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	}
 	
 	private void initializeEditText(Map<String, String> paraMap) {
-		deviceNameEditText.setText(paraMap.containsKey("name")? paraMap.get("name") : "");
+		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
-		versionEditText.setText(paraMap.containsKey("")? paraMap.get("") : "V12.005.13");
+		versionEditText.setText(paraMap.containsKey("cfg_v")? paraMap.get("cfg_v") : "V12.005.13");
 		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? paraMap.get("tfcard_maxsize") : "");
 		sdCardEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
 		//changeStorageMode.setText("");

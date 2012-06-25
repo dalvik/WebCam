@@ -7,7 +7,7 @@ public class CamCmdListHelper {
 	public final static String SetCmd_StartVideo_Tcp = "set_transport_type:tcp\n";
 	public final static String SetCmd_StartVideo_Udp = "set_transport_type:rtp\n";
 	public final static String SetCmd_ResetVideo = "restart_server:0";
-	public final static String GetCmd_Config = "GetConfig:1 ";
+	public final static String GetCmd_Config = "GetConfig:1:PSWD=";
 	public final static String SetCmd_Config = "SetConfig:1 ";
 	public final static String ReSetCmd_Config = "SetConfig:0 ";
 	public final static String GetCmd_Time = "GetTime:0";
@@ -19,5 +19,12 @@ public class CamCmdListHelper {
 	public final static String SetCmd_SearchWireless = "search_wifi:0 ";
 	
 	public final static String DelCmd_DeleteFiles = "DeleteFile:";
+	
+	// new cmd line
+	public final static String CheckCmd_Pwd_State = "pswd_state:";
+	
+	public final static String SetCmd_Pwd_State = "set_pswd:";
+	
+	
 	
 }

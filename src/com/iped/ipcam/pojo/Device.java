@@ -44,11 +44,11 @@ public class Device implements Serializable{
 	
 	private int deviceRemoteAudioPort;
 	
-	private boolean deviceNetType;// 内网还是外网
+	private boolean deviceNetType;// 内网还是外网   WlanIp 内网  false      EthIp 外网  true
 	
 	private String unDefine1;
 	
-	private String unDefine2;
+	private String unDefine2; // 密码
 	
 	private String unDefine3;
 

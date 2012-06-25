@@ -42,9 +42,10 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
-	public Device addCam(String ip) {
-		Device d = new Device(ip,"192.168.1.1","255.255.255.0","dns","dns2");
+	public Device addCam(String ip, String id) {
+		Device d = new Device(ip,ip.substring(0, ip.lastIndexOf(".")+1) + "1","255.255.255.0","dns","dns2");
 		d.setDeviceName("IpCam");
+		d.setDeviceID(id);
 		d.setDeviceRemoteCmdPort(Constants.UDPPORT);
 		d.setDeviceRemoteVideoPort(Constants.TCPPORT);
 		d.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
@@ -90,13 +91,12 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public void updateCam(Device device) {
-		String id = device.getDeviceID();
-		for(Device d:deviceList) {
-			if(id.equals(d.getDeviceID())) {
-				deviceList.remove(this);
-			}
+		if(selectIndex<deviceList.size()) {
+			deviceList.add(device);
+		}else {
+			deviceList.remove(selectIndex);
+			deviceList.add(device);
 		}
-		deviceList.add(device);
 	}
 	
 	@Override
@@ -222,6 +222,7 @@ public class CamManagerImp implements ICamManager {
 		
 		public void tes() {
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+			System.out.println("update=======>" + deviceList.size());
 		}
 		
 		public void dissmiss() {
@@ -274,12 +275,12 @@ public class CamManagerImp implements ICamManager {
 			for(i=index-25; i<=index; i++){
 				if(i>1 && i<255) {
 					//test(String.valueOf(i));
-					boolean res = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
-					if(res) {
+					String devId = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
+					if(devId != null) {
 						synchronized (deviceList) {
-							System.out.println("----" + Constants.DEFAULTSEARCHIP + i);
-							addCam(Constants.DEFAULTSEARCHIP + i);
+							addCam(Constants.DEFAULTSEARCHIP + i, devId);
 							updateDeviceList();
+							Log.d(TAG, Constants.DEFAULTSEARCHIP + i + "---------" +  devId);
 						}
 					}
 					try {
@@ -300,7 +301,7 @@ public class CamManagerImp implements ICamManager {
 			dismissAutoSearch();
 		}
 		
-		public void test(String ip) {
+		/*public void test(String ip) {
 			DatagramSocket datagramSocket = null;
 			try {
 				datagramSocket = new DatagramSocket();
@@ -327,7 +328,7 @@ public class CamManagerImp implements ICamManager {
 					datagramSocket = null;
 				}
 			}
-		}
+		}*/
 	}
 	
 	
