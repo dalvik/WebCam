@@ -56,7 +56,6 @@ public class PackageUtil {
 		byte[] receArr = new byte[Constants.COMMNICATEBUFFERSIZE];
 		DatagramSocket datagramSocket = null;
 		datagramSocket = netUtil.getPort1(); //new DatagramSocket();
-		StringBuffer sb = new StringBuffer();
 		String tmp = null;
 		DatagramPacket rece = new DatagramPacket(receArr, Constants.COMMNICATEBUFFERSIZE);
 		if(datagramSocket == null) {
@@ -77,6 +76,17 @@ public class PackageUtil {
 			datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
 			datagramSocket.send(datagramPacket);
+			datagramSocket.receive(rece);
+			int l = rece.getLength();
+			if(l<=10) {
+				return new String(receArr, 0, l);
+			}
+			byte[] ipByte = new byte[4];
+			System.arraycopy(receArr, 0, ipByte, 0, 4);
+			tmp = new String(receArr,4,l-4).trim();
+			Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
+			return tmp;
+			/*
 			int recvLength = 0;
 			while(true) {
 				datagramSocket.receive(rece);
@@ -92,8 +102,9 @@ public class PackageUtil {
 				}
 			}
 			return sb.toString();
+			*/
 		} catch (IOException e) {
-			Log.d(TAG, "PackageUtil CMDPackage2 : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "PackageUtil CMDPackage2 : " + ip + " " + e.getLocalizedMessage());
 			throw new CamManagerException();
 		} 
 	}
@@ -120,7 +131,7 @@ public class PackageUtil {
 			Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
 			return tmp;
 		} catch (IOException e) {
-			Log.d(TAG, "PackageUtil CMDPackage2 : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "PackageUtil CMDPackage2 : " + ip + " " + e.getLocalizedMessage());
 			throw new CamManagerException();
 		} 
 	}
@@ -134,9 +145,14 @@ public class PackageUtil {
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
 			datagramSocket.send(datagramPacket);
 		}catch (IOException e) {
-			Log.d(TAG, "sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-			throw new CamManagerException("sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-		} 
+			Log.d(TAG, "sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getMessage());
+			throw new CamManagerException("sendPackageNoRecvByIp : " + ip + " " + e.getMessage());
+		} finally {
+			if(datagramSocket != null) {
+				datagramSocket.close();
+				datagramSocket = null;
+			}
+		}
 	}
 	
 	public static void sendPackageNoRecv(String cmdType, String ip, int port) {
@@ -154,11 +170,11 @@ public class PackageUtil {
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
 			datagramSocket.send(datagramPacket);
 		} catch (SocketException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
 		} catch (UnknownHostException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
 		} catch (IOException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
 		} 
 	}
 	
@@ -173,7 +189,7 @@ public class PackageUtil {
 			datagramSocket.receive(datagramPacket);
 			return true;
 		}catch (IOException e) {
-			Log.d(TAG, "pingTest : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "pingTest : " + ip + " " + e.getLocalizedMessage());
 			return false;
 		} finally{
 			if(datagramSocket != null) {
@@ -203,10 +219,18 @@ public class PackageUtil {
 		byte [] tem = CamCmdListHelper.CheckCmd_Pwd_State.getBytes();
 		DatagramSocket datagramSocket = null;
 		boolean netType = device.getDeviceNetType();
-		String ip = device.getDeviceWlanIp();
-		int port = device.getDeviceRemoteCmdPort();
+		String ip = null;
+		int port = device.getDeviceLocalCmdPort();
 		if(netType){
+			ip = device.getUnDefine1();
+			port = device.getDeviceRemoteCmdPort();
+		}else {
+			port = device.getDeviceLocalCmdPort();
 			ip = device.getDeviceEthIp();
+			/*boolean flag = pingTest(CamCmdListHelper.SetCmd_Config, ip, port);
+			if(!flag) {
+				ip = device.getDeviceWlanIp();
+			}*/
 		}
 		Log.d(TAG, "check pwd state : netType = " + netType+ " ip = " + ip + " port=" + port);
 		try {
@@ -227,7 +251,7 @@ public class PackageUtil {
 				return -1; // unknown
 			}
 		}catch (IOException e) {
-			Log.d(TAG, "checkPwdState : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "checkPwdState : " + ip + " "+ port + " " + e.getMessage());
 		} 
 		return -2; // time out
 	}
@@ -236,10 +260,13 @@ public class PackageUtil {
 		byte [] tem = common.getBytes();
 		DatagramSocket datagramSocket = null;
 		boolean netType = device.getDeviceNetType();
-		String ip = device.getDeviceWlanIp();
+		String ip = null;
 		int port = device.getDeviceRemoteCmdPort();
 		if(netType){
+			ip = device.getUnDefine1();
+		} else {
 			ip = device.getDeviceEthIp();
+			port = device.getDeviceLocalCmdPort();
 		}
 		Log.d(TAG, "set Pwd state : netType = " + netType+ " ip = " + ip + " port=" + port);
 		try {
@@ -260,7 +287,7 @@ public class PackageUtil {
 				return -1; // unknown
 			}
 		}catch (IOException e) {
-			Log.d(TAG, "sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "sendPackageNoRecvByIp : " + ip + " " + e.getLocalizedMessage());
 		} 
 		return -2; // time out
 		

@@ -43,13 +43,12 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public Device addCam(String ip, String id) {
-		Device d = new Device(ip,ip.substring(0, ip.lastIndexOf(".")+1) + "1","255.255.255.0","dns","dns2");
+		Device d = new Device();
 		d.setDeviceName("IpCam");
 		d.setDeviceID(id);
-		d.setDeviceRemoteCmdPort(Constants.UDPPORT);
-		d.setDeviceRemoteVideoPort(Constants.TCPPORT);
-		d.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
-		System.out.println(d);
+		d.setDeviceEthIp(ip);
+		d.setDeviceEthGateWay((ip.substring(0, ip.lastIndexOf(".")+1) + "1"));
+		d.setDeviceEthMask("255.255.255.0");
 		if(checkName(d)) {
 			deviceList.add(d);
 			return d;
@@ -276,7 +275,7 @@ public class CamManagerImp implements ICamManager {
 			for(i=index-25; i<=index; i++){
 				if(i>1 && i<255) {
 					//test(String.valueOf(i));
-					String devId = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
+					String devId = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.LOCALCMDPORT);
 					if(devId != null) {
 						synchronized (deviceList) {
 							addCam(Constants.DEFAULTSEARCHIP + i, devId);

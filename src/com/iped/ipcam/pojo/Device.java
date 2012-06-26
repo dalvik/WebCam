@@ -2,19 +2,21 @@ package com.iped.ipcam.pojo;
 
 import java.io.Serializable;
 
+import com.iped.ipcam.utils.Constants;
+
 public class Device implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
-	private String deviceName;
+	private String deviceName;// 设备名称
 	
-	private String deviceID;
+	private String deviceID;//设备ID
 	
-	private String diviceVersion;
+	private String diviceVersion;//设备版本
 	
-	private String deviceEthIp;
+	private String deviceEthIp;//有线IP，此时仅用有线IP
 	
-	private String deviceEthGateWay;
+	private String deviceEthGateWay;//
 	
 	private String deviceEthMask;
 	
@@ -22,7 +24,7 @@ public class Device implements Serializable{
 	
 	private String deviceEthDNS2;
 	
-	private String deviceWlanIp;
+	private String deviceWlanIp;//无线IP
 	
 	private String deviceWlanGateWay;
 	
@@ -32,21 +34,21 @@ public class Device implements Serializable{
 	
 	private String deviceWlanDNS2;
 	
-	private int deviceLocalCmdPort;
+	private int deviceLocalCmdPort = Constants.LOCALCMDPORT;//内网命令端口
 	
-	private int deviceLocalVideoPort;
+	private int deviceLocalVideoPort = Constants.LOCALVIDEOPORT ;//内网视频端口
 	
-	private int deviceLocalAudioPort;
+	private int deviceLocalAudioPort = Constants.LOCALAUDIOPORT;//内网音频端口
 	
-	private int deviceRemoteCmdPort;
+	private int deviceRemoteCmdPort;//外网命令端口
 	
-	private int deviceRemoteVideoPort;
+	private int deviceRemoteVideoPort;//外网视频端口
 	
-	private int deviceRemoteAudioPort;
+	private int deviceRemoteAudioPort;//外网音频端口
 	
 	private boolean deviceNetType;// 内网还是外网   WlanIp 内网  false      EthIp 外网  true
 	
-	private String unDefine1;
+	private String unDefine1;//外网IP
 	
 	private String unDefine2; // 密码
 	
@@ -246,13 +248,13 @@ public class Device implements Serializable{
 		this.deviceEthDNS2 = deviceEthDNS2;
 	}
 
-	public String getDeviceWlanIp() {
+	/*public String getDeviceWlanIp() {
 		return deviceWlanIp;
-	}
+	}*/
 
-	public void setDeviceWlanIp(String deviceWlanIp) {
+	/*public void setDeviceWlanIp(String deviceWlanIp) {
 		this.deviceWlanIp = deviceWlanIp;
-	}
+	}*/
 
 	public String getDeviceWlanGateWay() {
 		return deviceWlanGateWay;

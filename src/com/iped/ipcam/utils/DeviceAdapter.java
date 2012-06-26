@@ -3,6 +3,7 @@ package com.iped.ipcam.utils;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ public class DeviceAdapter extends BaseAdapter {
 
 	private Context context;
 	
+	private Resources res;
+	
 	private List<Device> deviceList = null;
 	
 	private LayoutInflater inflater = null;
@@ -27,6 +30,7 @@ public class DeviceAdapter extends BaseAdapter {
 		this.deviceList = deviceList;
 		this.context = context;
 		inflater = LayoutInflater.from(context);
+		res = context.getResources();
 	}
 	
 	@Override
@@ -56,6 +60,7 @@ public class DeviceAdapter extends BaseAdapter {
 			viewHolder.selectDevice = (RadioButton) convertView.findViewById(R.id.device_select_id);
 			viewHolder.name = (TextView) convertView.findViewById(R.id.device_name);
 			viewHolder.type = (TextView) convertView.findViewById(R.id.device_type);
+			viewHolder.id = (TextView) convertView.findViewById(R.id.device_id);
 			viewHolder.ip = (TextView) convertView.findViewById(R.id.device_ip_address);
 			viewHolder.tcp = (TextView) convertView.findViewById(R.id.device_tcp_port);
 			viewHolder.udp = (TextView) convertView.findViewById(R.id.device_udp_port);
@@ -71,17 +76,22 @@ public class DeviceAdapter extends BaseAdapter {
 			viewHolder.selectDevice.setChecked(false);
 		}
 		if(device.getDeviceNetType()) {
-			viewHolder.type.setText(context.getResources().getText(R.string.device_manager_add_net_type_wlan_str));
-			viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceEthIp());
-			viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
+			viewHolder.type.setText(res.getText(R.string.device_manager_add_net_type_wlan_str));
+			viewHolder.ip.setText(res.getText(R.string.device_ip_str) + device.getUnDefine1());
+			viewHolder.gateWay.setText(res.getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
+			viewHolder.id.setText("ID:" + device.getDeviceID());
+			viewHolder.tcp.setText(res.getText(R.string.device_cmd_port_str) + "" + device.getDeviceRemoteCmdPort());
+			viewHolder.udp.setText(res.getText(R.string.device_diveo_port_str) + "" + device.getDeviceRemoteVideoPort());
+			viewHolder.cmd.setText(res.getText(R.string.device_audio_port_str) + "" + device.getDeviceRemoteAudioPort());
 		} else {
-			viewHolder.type.setText(context.getResources().getText(R.string.device_manager_add_net_type_eth_str));
-			viewHolder.ip.setText(context.getResources().getText(R.string.device_ip_str) + device.getDeviceWlanIp());
-			viewHolder.gateWay.setText(context.getResources().getText(R.string.device_gateway_str) + device.getDeviceWlanGateWay());
+			viewHolder.type.setText(res.getText(R.string.device_manager_add_net_type_eth_str));
+			viewHolder.ip.setText(res.getText(R.string.device_ip_str) + device.getDeviceEthIp());
+			viewHolder.gateWay.setText(res.getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
+			viewHolder.id.setText("ID:" + device.getDeviceID());
+			viewHolder.tcp.setText(res.getText(R.string.device_cmd_port_str) + "" + device.getDeviceLocalCmdPort());
+			viewHolder.udp.setText(res.getText(R.string.device_diveo_port_str) + "" + device.getDeviceLocalVideoPort());
+			viewHolder.cmd.setText(res.getText(R.string.device_audio_port_str) + "" + device.getDeviceLocalAudioPort());
 		}
-		viewHolder.tcp.setText(context.getResources().getText(R.string.device_cmd_port_str) + "" + device.getDeviceRemoteCmdPort());
-		viewHolder.udp.setText(context.getResources().getText(R.string.device_diveo_port_str) + "" + device.getDeviceRemoteVideoPort());
-		viewHolder.cmd.setText(context.getResources().getText(R.string.device_audio_port_str) + "" + device.getDeviceRemoteAudioPort());
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
@@ -101,6 +111,8 @@ public class DeviceAdapter extends BaseAdapter {
 		public TextView ip;
 
 		public TextView gateWay;
+		
+		public TextView id;
 		
 		public TextView tcp;
 		

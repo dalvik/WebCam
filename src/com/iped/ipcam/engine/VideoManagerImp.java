@@ -108,16 +108,8 @@ public class VideoManagerImp implements IVideoManager {
 				ip = device.getUnDefine1();
 				port = device.getDeviceRemoteCmdPort();
 			}else {
-				port = Constants.UDPPORT;
-				if( device.getDeviceEthIp() != null &&  device.getDeviceEthIp().length()>0) {
-					ip = device.getDeviceEthIp();
-					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, device.getDeviceRemoteCmdPort());
-					if(!flag) {
-						ip = device.getDeviceWlanIp();
-					}
-				} else {
-					ip = device.getDeviceWlanIp();
-				}
+				port = device.getDeviceLocalCmdPort();
+				ip = device.getDeviceEthIp();
 			}
 			try {
 				datagramSocket = new DatagramSocket();
@@ -223,7 +215,7 @@ public class VideoManagerImp implements IVideoManager {
 			try {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.UDPPORT);
+				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.LOCALCMDPORT);
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(tem, tem.length);
 				datagramSocket.receive(rece);

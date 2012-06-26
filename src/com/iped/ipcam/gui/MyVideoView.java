@@ -123,7 +123,7 @@ public class MyVideoView extends View implements Runnable {
 				cmdSocket.send(datagramPacket);
 				DatagramSocket videoSocket = netUtil.getPort2();
 				DatagramSocket audioSocket = netUtil.getPort3();
-				Log.d(TAG, "ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteVideoPort() + " remote audio port=" +device.getDeviceRemoteAudioPort());
+				Log.d(TAG, "out ready rece ...." + " " + ipAdd + " " + device.getDeviceRemoteCmdPort() + " remote video Port=" + device.getDeviceRemoteVideoPort() + " remote audio port=" +device.getDeviceRemoteAudioPort());
 				int localPort2 =  videoSocket.getLocalPort();
 				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), audioSocket.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
 				System.out.println("socket init result = " + result);
@@ -178,12 +178,12 @@ public class MyVideoView extends View implements Runnable {
 					byte [] tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp+device.getUnDefine2() + "\0").getBytes();
 					cmdSocket = new DatagramSocket();
 					cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-					String ipAddress = device.getDeviceWlanIp();
-					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceRemoteCmdPort());
+					String ipAddress = device.getDeviceEthIp();
+					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceLocalCmdPort());
 					cmdSocket.send(datagramPacket);
 					//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-					System.out.println("ready rece ....");
-					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceRemoteVideoPort());
+					System.out.println("in ready rece ....");
+					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceLocalVideoPort());
 					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
 					if(videoDis != null) {
 						videoDis.close();
@@ -384,7 +384,7 @@ public class MyVideoView extends View implements Runnable {
 				}
 			} else {
 				Socket socket = new Socket();
-				SocketAddress socketAddress = new InetSocketAddress(device.getDeviceWlanIp(), device.getDeviceRemoteAudioPort());
+				SocketAddress socketAddress = new InetSocketAddress(device.getDeviceEthIp(), device.getDeviceLocalAudioPort());
 				try {
 					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
 					if(audioDis != null) {

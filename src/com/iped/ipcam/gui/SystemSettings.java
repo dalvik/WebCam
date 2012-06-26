@@ -91,9 +91,9 @@ public class SystemSettings extends Activity implements android.view.View.OnClic
 		if(device != null) {
 			deviceName.setText(device.getDeviceName());
 			if(device.getDeviceNetType()) {//Õ‚Õ¯
-				devicdIP.setText(device.getDeviceEthIp());
+				devicdIP.setText(device.getUnDefine1());
 			}else {
-				devicdIP.setText(device.getDeviceWlanIp());
+				devicdIP.setText(device.getDeviceEthIp());
 			}
 		}
 	}

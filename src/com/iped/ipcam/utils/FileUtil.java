@@ -140,9 +140,9 @@ public class FileUtil {
 				boolean netType = device.getDeviceNetType();
 				sb.append(device.getDeviceName() + "&" + device.getDeviceID() + "&" + device.getUnDefine1() + "&" + netType + "&");
 				if(netType){
-					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + device.getUnDefine2() +"\n");
+					sb.append(device.getUnDefine1() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + unDefine2 +"\n");
 				} else {
-					sb.append(device.getDeviceWlanIp() + "&" + device.getDeviceWlanGateWay() + "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + device.getUnDefine2() +"\n");
+					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay() + "&" + device.getDeviceLocalCmdPort() + "&" + device.getDeviceLocalVideoPort() + "&" + device.getDeviceLocalAudioPort() + "&" + unDefine2 +"\n");
 				}
 			}
 			System.out.println(sb.toString());
@@ -190,8 +190,8 @@ public class FileUtil {
 					device.setDeviceEthGateWay(info[5]);
 				}else {
 					device.setDeviceNetType(false);
-					device.setDeviceWlanIp(info[4]);
-					device.setDeviceWlanGateWay(info[5]);
+					device.setDeviceEthIp(info[4]);
+					device.setDeviceEthGateWay(info[5]);
 				}
 				device.setDeviceRemoteCmdPort(Integer.parseInt(info[6]));
 				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));

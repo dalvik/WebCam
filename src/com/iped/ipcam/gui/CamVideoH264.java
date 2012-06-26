@@ -286,14 +286,10 @@ public class CamVideoH264 extends Activity {
 							String id = bundle.getString("PLVIDEOINDEX");
 							System.out.println(id+"--->");
 							if(!"".equals(id)) {
-								if(device.getDeviceEthIp() != null && device.getDeviceEthIp().length()>0) {
-									ip = device.getDeviceEthIp();
-								} else {
-									ip = device.getDeviceWlanIp();
-								}
+								ip = device.getDeviceEthIp();
 								System.out.println(id+"--->" + ip);
 								try {
-									PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_PlayNetFiles + id, ip, Constants.UDPPORT);
+									PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_PlayNetFiles + id, ip, Constants.LOCALCMDPORT);
 								} catch (CamManagerException e) {
 									e.printStackTrace();
 									Log.d(TAG, "play back in net = " + e.getMessage());

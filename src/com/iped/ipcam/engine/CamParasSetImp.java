@@ -67,7 +67,7 @@ public class CamParasSetImp implements ICamParasSet {
 					if(ethIp != null) {
 						String rece;
 						try {
-							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", ethIp, Constants.UDPPORT);
+							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", ethIp, Constants.LOCALCMDPORT);
 							if("PSWD_NOT_SET".equals(rece)) {
 								Log.d(TAG, "CamParasSetImp PSWD_not set");
 							} else if("PSWD_FAIL".equals(rece)) {
@@ -77,10 +77,10 @@ public class CamParasSetImp implements ICamParasSet {
 							}
 							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
 						} catch (CamManagerException e) {
-							getConfigByWlan(device.getDeviceWlanIp());
+							getConfigByWlan(device.getDeviceEthIp());
 						}
 					} else {
-						getConfigByWlan(device.getDeviceWlanIp());
+						getConfigByWlan(device.getDeviceEthIp());
 					}
 				}
 		}
@@ -88,7 +88,7 @@ public class CamParasSetImp implements ICamParasSet {
 		private void getConfigByWlan(String wlan) {
 			String rece;
 			try {
-				rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", wlan, Constants.UDPPORT);
+				rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", wlan, Constants.LOCALCMDPORT);
 				Log.d(TAG, "getConfigByWlan wlan = " + wlan + "  recv===="+ rece);
 				if("PSWD_NOT_SET".equals(rece)) {
 					Log.d(TAG, "CamParasSetImp getConfigByWlan PSWD_not set");

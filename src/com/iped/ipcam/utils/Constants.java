@@ -21,11 +21,11 @@ public class Constants {
 	
 	public final static int MAXVALUE = 255;
 	
-	public final static int TCPPORT = 1234;
+	public final static int LOCALVIDEOPORT = 1234;
 	
-	public final static int UDPPORT = 60000;
+	public final static int LOCALCMDPORT = 60000;
 	
-	public final static int AUDIOPORT = 5000;
+	public final static int LOCALAUDIOPORT = 5000;
 	
 	public final static String DEFAULTSEARCHIP = "192.168.1.";
 	
@@ -103,6 +103,9 @@ public class Constants {
 	public final static int SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG = 16010;
 	
 	public final static int SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG = 16011;
+	
+	//through net and get config msg
+	public final static int SEND_GET_CONFIG_MSG = 17000;
 	
 	//---------------------------------------------
 	

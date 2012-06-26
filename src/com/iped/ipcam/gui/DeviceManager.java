@@ -88,6 +88,18 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	
 	private ThroughNetUtil netUtil = null;
 	
+	private String ip;
+	
+	private int port1;
+	
+	private int port2;
+	
+	private int port3;
+	
+	private String deviceName = "";
+	
+	private String pwd;
+	
 	private static final String TAG = "DeviceManager";
 
 	private Handler handler = new Handler() {
@@ -128,10 +140,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			case Constants.SENDGETTHREEPORTMSG:
 				Bundle bd = message.getData();
 				if(bd != null) {
-					String ip = bd.getString("IPADDRESS");
-					int port1 = bd.getInt("PORT1");
-					int port2 = bd.getInt("PORT2");
-					int port3 = bd.getInt("PORT3");
+					ip = bd.getString("IPADDRESS");
+					port1 = bd.getInt("PORT1");
+					port2 = bd.getInt("PORT2");
+					port3 = bd.getInt("PORT3");
 					hideProgress();
 					getDeviceConfig(ip, port1, port2, port3);
 				}
@@ -145,16 +157,16 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				break;
 			case Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG:
 			case Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG:
-				String name = (String) message.obj;
+				pwd = (String) message.obj;
 				Intent intent = new Intent(Constants.QUERY_CONFIG_ACTION);
-            	intent.setDataAndType(Uri.parse(name), Constants.QUERY_CONFIG_MINITYPE);
-            	Log.d(TAG, "======¡·+" + name);
+            	intent.setDataAndType(Uri.parse(pwd), Constants.QUERY_CONFIG_MINITYPE);
+            	Log.d(TAG, "======>" + pwd);
             	startActivity(intent);
 				break;
 			case Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG:
 			case Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG:
 				Device device = camManager.getSelectDevice();
-				String pwd = (String) message.obj;
+				pwd = (String) message.obj;
 				device.setUnDefine2(pwd);
 				camManager.updateCam(device);
 				WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
@@ -165,6 +177,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				intent2.putExtras(bundle2);
 				intent2.setAction(Constants.ACTION_IPPLAY);
 				sendBroadcast(intent2);
+				break;
+			case Constants.SEND_GET_CONFIG_MSG:
+				String pwd2 = (String) message.obj;
+				queryDeviceConfig(pwd2);
 				break;
 			default:
 				break;
@@ -241,7 +257,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				sendBroadcast(intent2);
 			} else {
 				int resu = PackageUtil.checkPwdState(device);
-				Log.d(TAG, "checkPwdState result = " + resu);
+				Log.d(TAG, "device manager onContextItemSelected checkPwdState result = " + resu);
 				if(resu == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG);
 				} else if(resu == 1) {// pwd seted
@@ -271,20 +287,24 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		case R.id.device_manager_button:
 			Device device = camManager.getSelectDevice();
 			if(device == null) {
+				Log.d(TAG, "device = " + device);
 				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
 				return;
 			}
-			int result = PackageUtil.checkPwdState(device);
-			Log.d(TAG, "checkPwdState result = " + result);
-			if(result == 0) { // unset
-				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
-			} else if(result == 1) {// pwd seted
-				DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG);
+			if(device.getDeviceNetType()) {
+				//netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
+				//new Thread(netUtil).start();
 			}else {
-				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
-			}/**/
-			//DialogUtils.inputPasswordDialog(DeviceManager.this, Constants.QUERY_CONFIG_ACTION, Constants.QUERY_CONFIG_MINITYPE);
-			//startActivity(new Intent(this, DeviceParamSets.class));
+				int result = PackageUtil.checkPwdState(device);
+				Log.d(TAG, "device_manager_button checkPwdState result = " + result);
+				if(result == 0) { // unset
+					DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
+				} else if(result == 1) {// pwd seted
+					DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG);
+				}else {
+					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
+				}
+			}
 			break;
 		case R.id.clear_all_button:
 			camManager.clearCamList();
@@ -294,33 +314,6 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 	}
 
-
-	public void test() {
-		byte[] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-		DatagramSocket datagramSocket = null;
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length,
-					InetAddress.getByName("192.168.1." + 141),
-					Constants.UDPPORT);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(tem, tem.length);
-			datagramSocket.receive(rece);
-			Log.d(TAG, "receive inof   9090909090 ");
-		} catch (SocketException e) {
-			Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-		} catch (UnknownHostException e) {
-			Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-		} catch (IOException e) {
-			Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-		} finally {
-			if (datagramSocket != null) {
-				datagramSocket.close();
-				datagramSocket = null;
-			}
-		}
-	}
 
 	private void showProgress() {
 		progressDialog = new ProgressDialog(DeviceManager.this);
@@ -462,6 +455,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
+								EditText ed = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
+								deviceName = ed.getText().toString();
 								unCloseDialog(dlg, -1, false);
 								String newDiviceName = ((EditText) addDeviceView
 										.findViewById(R.id.device_manager_add_name_id))
@@ -732,7 +727,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				try {
 					datagramSocket = new DatagramSocket();
 					datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.UDPPORT);
+					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.LOCALCMDPORT);
 					datagramSocket.send(datagramPacket);
 					DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 					int recvLength = 0;
@@ -754,18 +749,18 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					ParaUtil.putParaByString(sb.toString(), paraMap);
 					Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
 					
-					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
+					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, Constants.LOCALCMDPORT);
 					
 					device.setDeviceNetType(flag);
-					device.setDeviceWlanIp(ip);
-					device.setDeviceWlanGateWay(gateWay);
-					device.setDeviceWlanMask(mask);
-					device.setDeviceWlanDNS1(dns1);
-					device.setDeviceWlanDNS2(dns2);
+					device.setDeviceEthIp(ip);
+					device.setDeviceEthGateWay(gateWay);
+					device.setDeviceEthMask(mask);
+					device.setDeviceEthDNS1(dns1);
+					device.setDeviceEthDNS2(dns2);
 					
-					device.setDeviceRemoteCmdPort(Constants.UDPPORT);
-					device.setDeviceRemoteVideoPort(Constants.TCPPORT);
-					device.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
+					device.setDeviceRemoteCmdPort(Constants.LOCALCMDPORT);
+					device.setDeviceRemoteVideoPort(Constants.LOCALVIDEOPORT);
+					device.setDeviceRemoteAudioPort(Constants.LOCALAUDIOPORT);
 					Bundle bundle = new Bundle();
 					Message msg = handler.obtainMessage();
 					bundle.putSerializable("NEW_DEVICE", device);
@@ -836,14 +831,29 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			s3.close();
 		}
 	}
+	
 	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
-		DatagramSocket socket = netUtil.getPort1();
-		if(socket == null) {
-			return;
+		Device tempDevice = new Device();
+		tempDevice.setDeviceNetType(true);
+		tempDevice.setDeviceRemoteCmdPort(port1);
+		tempDevice.setUnDefine1(ip);
+		int result = PackageUtil.checkPwdState(tempDevice);
+		Log.d(TAG, "DeviceManager getDeviceConfig checkPwdState result = " + result);
+		if(result == 0) { // unset
+			DialogUtils.inputTwoPasswordDialog(DeviceManager.this, tempDevice, handler, Constants.SEND_GET_CONFIG_MSG);
+		} else if(result == 1) {// pwd seted
+			DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
+		}else {
+			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 		}
+	}
+
+	public void queryDeviceConfig(String pwd) {
+		//TODO
 		String cmd = null;
 		try {
-			cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config, ip, port1);
+			cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
+			//System.out.println("cmd=" + cmd);
 		} catch (CamManagerException e) {
 			Log.d(TAG, e.getLocalizedMessage());
 			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
@@ -851,36 +861,37 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 		Map<String,String> paraMap = new LinkedHashMap<String,String>();
 		ParaUtil.putParaByString(cmd, paraMap);
-		Device device = new Device(paraMap.get("name"), paraMap.get("cam_id"));
-		
+		Device device = new Device();
+		device.setDeviceName(deviceName);
+		device.setDeviceID(paraMap.get("cam_id"));
 		String eht_ip = paraMap.get("e_ip");
 		device.setDeviceEthIp(eht_ip);
 		device.setDeviceEthGateWay(paraMap.get("e_gw"));
 		device.setDeviceEthMask(paraMap.get("e_mask"));
 		device.setDeviceEthDNS1(paraMap.get("e_dns1"));
 		device.setDeviceEthDNS2(paraMap.get("e_dns2"));
-		
 		String wlan_ip = paraMap.get("w_ip");
-		device.setDeviceWlanIp(wlan_ip);
 		
-		if(eht_ip.length()<0 && wlan_ip.length()<0){
+		/*if(eht_ip.length()<0 && wlan_ip.length()<0){
 			device.setDeviceNetType(true);
 		}else {
-			boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, eht_ip, Constants.UDPPORT);
+			boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, eht_ip, Constants.LOCALCMDPORT);
 			Log.d(TAG, "eht_ip ping test " + flag);
 			if(flag) {
 				device.setDeviceNetType(!flag);
 			}else {
-				flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, wlan_ip, Constants.UDPPORT);
+				flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, wlan_ip, Constants.LOCALCMDPORT);
 				Log.d(TAG, "wlan_ip ping test " + flag);
 				device.setDeviceNetType(!flag);
 			}
-		}
-		device.setDeviceWlanGateWay(paraMap.get("w_gw"));
-		device.setDeviceWlanMask(paraMap.get("w_mask"));
-		device.setDeviceWlanDNS1(paraMap.get("w_dns1"));
-		device.setDeviceWlanDNS2(paraMap.get("w_dns2"));
+		}*/
+		//device.setDeviceWlanGateWay(paraMap.get("w_gw"));
+		//device.setDeviceWlanMask(paraMap.get("w_mask"));
+		//device.setDeviceWlanDNS1(paraMap.get("w_dns1"));
+		//device.setDeviceWlanDNS2(paraMap.get("w_dns2"));
 		device.setUnDefine1(ip);
+		device.setUnDefine2(pwd);
+		device.setDeviceNetType(true);
 		device.setDeviceRemoteCmdPort(port1);
 		device.setDeviceRemoteVideoPort(port2);
 		device.setDeviceRemoteAudioPort(port3);

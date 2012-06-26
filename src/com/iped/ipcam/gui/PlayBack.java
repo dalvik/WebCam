@@ -285,11 +285,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
         if(device.getDeviceNetType()) {
         	vodeoSearchAddr.setText(device.getUnDefine1());
         } else {
-        	if(device.getDeviceEthIp() != null && device.getDeviceEthIp().length()>0){
-        		vodeoSearchAddr.setText(device.getDeviceEthIp());
-        	}else {
-        		vodeoSearchAddr.setText(device.getDeviceWlanIp());
-        	}
+        	vodeoSearchAddr.setText(device.getDeviceEthIp());
         }
         startSearchDate = (Button) myDialogView.findViewById(R.id.start_date_buttion);
         startSearchTime = (Button) myDialogView.findViewById(R.id.start_time_buttion);

@@ -63,6 +63,14 @@
 			android:orientation="horizontal" 
 			android:layout_weight="1">
 			
+	        <TextView android:id="@+id/device_id"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" 
+			    android:singleLine="true"
+				android:textSize="10dip"
+				android:textColor="#FFFFFFFF"/>
+	        
 			<TextView android:id="@+id/device_tcp_port"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
