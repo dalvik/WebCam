@@ -100,6 +100,7 @@ public class DialogUtils {
         new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
             	 try {
+            		 handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
             		 dismissDialog(dialog, dlg);
              	} catch  (Exception e) {
              		Log.v(TAG, e.getMessage());
@@ -161,6 +162,7 @@ public class DialogUtils {
         new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
             	 try {
+            		 handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
             		 dismissDialog(dialog, dlg);
              	} catch  (Exception e) {
              		Log.v(TAG, e.getMessage());

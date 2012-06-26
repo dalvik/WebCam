@@ -44,6 +44,7 @@ import com.iped.ipcam.pojo.WifiConfig;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.DialogUtils;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
@@ -165,19 +166,25 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				camParasSet.getCamPara(device, this);
 				break;
 			case Constants.HIDEQUERYCONFIGDLG:
-				paraMap = camParasSet.getParaMap();
-				initializeEditText(paraMap);
-				/*
-				 * Set<String> s = paraMap.keySet(); for(String ss:s){
-				 * System.out.println(ss + " " + paraMap.get(ss)); }
-				 */
-				ProgressUtil.hideProgress();
-				/*
-				 * Bundle data = msg.getData(); CamConfig camConfig =
-				 * data.getParcelable("CAMPARAMCONFIG");
-				 * System.out.println(camConfig); if(camConfig != null) {
-				 * //initializeEditText(camConfig); }
-				 */
+				int w = msg.arg1;
+				if(w == -1 || w == -2) {
+					ToastUtils.showToast(DeviceParamSets.this, R.string.device_manager_pwd_set_err);
+					DeviceParamSets.this.finish();
+				} else {
+					paraMap = camParasSet.getParaMap();
+					initializeEditText(paraMap);
+					/*
+					 * Set<String> s = paraMap.keySet(); for(String ss:s){
+					 * System.out.println(ss + " " + paraMap.get(ss)); }
+					 */
+					ProgressUtil.hideProgress();
+					/*
+					 * Bundle data = msg.getData(); CamConfig camConfig =
+					 * data.getParcelable("CAMPARAMCONFIG");
+					 * System.out.println(camConfig); if(camConfig != null) {
+					 * //initializeEditText(camConfig); }
+					 */
+				}
 				break;
 			case Constants.QUERYCONFIGERROR:
 				ProgressUtil.hideProgress();
@@ -192,6 +199,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				ThroughNetUtil netUtil = camParasSet.getThroughNetUtil();
 				tmpDatagramSocket = netUtil.getPort1();
 				handler.sendEmptyMessage(Constants.SENDDATAWHENMODIFYCONFIG);
+				ProgressUtil.hideProgress();
 				if(netUtil != null) {
 					Bundle bd = msg.getData();
 					if(bd != null) {
@@ -201,10 +209,17 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 						//int port3 = bd.getInt("PORT3");
 						String cmd = null;
 						try {
-							cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
-							paraMap = new LinkedHashMap<String,String>();
-							ParaUtil.putParaByString(cmd, paraMap);
-							initializeEditText(paraMap);
+							device.setUnDefine1(ip);
+							device.setDeviceRemoteCmdPort(port1);
+							int checkPwd = PackageUtil.checkPwd(device);
+							if(checkPwd == 1) {
+								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
+								paraMap = new LinkedHashMap<String,String>();
+								ParaUtil.putParaByString(cmd, paraMap);
+								initializeEditText(paraMap);
+							} else {
+								DialogUtils.inputOnePasswordDialog(DeviceParamSets.this, handler, Constants.SEND_REQUERY_CONFIG_PWD_ERROR);
+							}
 						} catch (CamManagerException e) {
 							handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 							Log.d(TAG, "CamManagerException = " + e.getLocalizedMessage());
@@ -212,7 +227,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 						}
 					}
 				}
-				ProgressUtil.hideProgress();
 				break;
 			case Constants.SENDGETUNFULLPACKAGEMSG:
 				//showToast(R.string.device_manager_find_device_id_error);
@@ -258,6 +272,28 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			case Constants.SENDCONFIGMSG:
 				send(paraMap);
 				break;
+			case Constants.SEND_REQUERY_CONFIG_PWD_ERROR:
+				String pwd = (String) msg.obj;
+				String cmd = "";
+				netUtil = camParasSet.getThroughNetUtil();
+				try {
+					device.setUnDefine2(pwd);
+					int checkPwd = PackageUtil.checkPwd(device);
+					if(checkPwd == 1) {
+						camManager.updateCam(device);
+						cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
+						paraMap = new LinkedHashMap<String,String>();
+						ParaUtil.putParaByString(cmd, paraMap);
+						initializeEditText(paraMap);
+					} else {
+						ToastUtils.showToast(DeviceParamSets.this, R.string.device_manager_pwd_set_err);
+						DeviceParamSets.this.finish();
+					}
+				} catch (CamManagerException e) {
+					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+					Log.d(TAG, "CamManagerException = " + e.getLocalizedMessage());
+					return;
+				}
 			default:
 				break;
 			}

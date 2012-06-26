@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.iped.ipcam.exception.CamManagerException;
@@ -67,14 +68,20 @@ public class CamParasSetImp implements ICamParasSet {
 						String rece;
 						try {
 							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", ethIp, Constants.LOCALCMDPORT);
+							int rs = 1;
 							if("PSWD_NOT_SET".equals(rece)) {
+								rs = -1;
 								Log.d(TAG, "CamParasSetImp PSWD_not set");
 							} else if("PSWD_FAIL".equals(rece)) {
+								rs = -2;
 								Log.d(TAG, "CamParasSetImp PSWD_FAIL");
 							} else {
 								ParaUtil.putParaByString(rece, paraMap);
 							}
-							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+							Message msg = handler.obtainMessage();
+							msg.what = Constants.HIDEQUERYCONFIGDLG;
+							msg.arg1 = rs; 
+							handler.sendMessage(msg);
 						} catch (CamManagerException e) {
 							getConfigByWlan(device.getDeviceEthIp());
 						}

@@ -244,6 +244,15 @@ public class PackageUtil {
 			String receStr = new String(buffTemp, 0, receLength);
 			Log.d(TAG, "checkPwdState recv //////////////" + receStr);
 			if("PSWD_SET".equals(receStr)) {
+				datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
+				datagramSocket.send(datagramPacket);
+				rece = new DatagramPacket(buffTemp, buffTemp.length);
+				datagramSocket.receive(rece);
+				receLength = rece.getLength();
+				receStr = new String(buffTemp, 0, receLength);
+				if("PSWD_FAIL".equals(receStr)) {
+					return 2;// pwd error
+				}
 				return 1; // had set
 			} else if("PSWD_NOT_SET".equals(receStr)) {
 				return 0; // not set 
@@ -254,6 +263,40 @@ public class PackageUtil {
 			Log.d(TAG, "checkPwdState : " + ip + " "+ port + " " + e.getMessage());
 		} 
 		return -2; // time out
+	}
+	
+	public static int checkPwd(Device device) {
+		byte [] tem = (CamCmdListHelper.CheckCmd_PWD + device.getUnDefine2() + "\0").getBytes();
+		DatagramSocket datagramSocket = null;
+		boolean netType = device.getDeviceNetType();
+		String ip = null;
+		int port = device.getDeviceLocalCmdPort();
+		if(netType){
+			ip = device.getUnDefine1();
+			port = device.getDeviceRemoteCmdPort();
+		}else {
+			ip = device.getDeviceEthIp();
+		}
+		Log.d(TAG, "checkPwd : netType = " + netType+ " ip = " + ip + " port=" + port);
+		try {
+			datagramSocket = new DatagramSocket();
+			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
+			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
+			datagramSocket.send(datagramPacket);
+			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+			datagramSocket.receive(rece);
+			int receLength = rece.getLength();
+			String receStr = new String(buffTemp, 0, receLength);
+			Log.d(TAG, "checkPwd  recv //////////////" + receStr);
+			if("PSWD_OK".equals(receStr)) {
+				return 1; // PSWD_OK
+			} else {
+				return -1; // PSWD_FALL
+			}
+		}catch (IOException e) {
+			Log.d(TAG, "checkPwd : " + ip + " "+ port + " " + e.getMessage());
+		} 
+		return -2;
 	}
 	
 	public static int setPwd(Device device, String common) {

@@ -107,6 +107,8 @@ public class Constants {
 	//through net and get config msg
 	public final static int SEND_GET_CONFIG_MSG = 17000;
 	
+	public final static int SEND_REQUERY_CONFIG_PWD_ERROR = 17001;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;

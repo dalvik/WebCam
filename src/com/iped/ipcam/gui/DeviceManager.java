@@ -172,15 +172,20 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				Device device = camManager.getSelectDevice();
 				pwd = (String) message.obj;
 				device.setUnDefine2(pwd);
-				camManager.updateCam(device);
-				WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-				Intent intent2 = new Intent();
-				Bundle bundle2 = new Bundle();
-				bundle2.putString("PLVIDEOINDEX",""); 
-				bundle2.putSerializable("IPPLAY", device);
-				intent2.putExtras(bundle2);
-				intent2.setAction(Constants.ACTION_IPPLAY);
-				sendBroadcast(intent2);
+				int checkPwd = PackageUtil.checkPwd(device);
+				if(checkPwd == 1) {
+					camManager.updateCam(device);
+					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+					Intent intent2 = new Intent();
+					Bundle bundle2 = new Bundle();
+					bundle2.putString("PLVIDEOINDEX",""); 
+					bundle2.putSerializable("IPPLAY", device);
+					intent2.putExtras(bundle2);
+					intent2.setAction(Constants.ACTION_IPPLAY);
+					sendBroadcast(intent2);
+				} else {
+					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+				}
 				break;
 			case Constants.SEND_GET_CONFIG_MSG:
 				String pwd2 = (String) message.obj;
@@ -251,22 +256,38 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				return super.onContextItemSelected(item);
 			}
 			if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
-				WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-				Intent intent2 = new Intent();
-				Bundle bundle2 = new Bundle();
-				bundle2.putString("PLVIDEOINDEX",""); 
-				bundle2.putSerializable("IPPLAY", device);
-				intent2.putExtras(bundle2);
-				intent2.setAction(Constants.ACTION_IPPLAY);
-				sendBroadcast(intent2);
+				int checkPwd = PackageUtil.checkPwd(device);
+				if(checkPwd == 1) {
+					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+					Intent intent2 = new Intent();
+					Bundle bundle2 = new Bundle();
+					bundle2.putString("PLVIDEOINDEX",""); 
+					bundle2.putSerializable("IPPLAY", device);
+					intent2.putExtras(bundle2);
+					intent2.setAction(Constants.ACTION_IPPLAY);
+					sendBroadcast(intent2);
+				} else {
+					//ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+					DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				}
 			} else {
 				int resu = PackageUtil.checkPwdState(device);
 				Log.d(TAG, "device manager onContextItemSelected checkPwdState result = " + resu);
 				if(resu == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG);
 				} else if(resu == 1) {// pwd seted
+					int checkPwd = PackageUtil.checkPwd(device);
+					if(checkPwd == 1) {
+						Message message = handler.obtainMessage();
+	                	message.obj  = device.getUnDefine2();
+	                	message.what = Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG;
+					} else {
+						DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+					}
+				} else if(resu == 2){
+					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
 					DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
-				}else {
+				} else {
 					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 				}
 			}
@@ -310,6 +331,17 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				if(result == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
 				} else if(result == 1) {// pwd seted
+					int checkPwd = PackageUtil.checkPwd(device);
+					if(checkPwd == 1) {
+						Message message = handler.obtainMessage();
+	                	message.obj  = device.getUnDefine2();
+	                	message.what = Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG;
+	                	handler.sendMessage(message);
+					} else {
+						DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG);
+					}
+				}else if(result == 2){
+					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
 					DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG);
 				}else {
 					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
@@ -875,6 +907,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			} else {
 				DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
 			}
+		} else if(result == 2){
+			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+			DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
 		}else {
 			oper = false;
 			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);

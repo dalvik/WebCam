@@ -23,7 +23,11 @@ public class CamCmdListHelper {
 	// new cmd line
 	public final static String CheckCmd_Pwd_State = "pswd_state:";
 	
+	public final static String CheckCmd_PWD = "check_pswd:PSWD=";
+	
 	public final static String SetCmd_Pwd_State = "set_pswd:";
+	
+	
 	
 	
 	
