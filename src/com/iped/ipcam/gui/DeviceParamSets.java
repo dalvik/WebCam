@@ -201,7 +201,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 						//int port3 = bd.getInt("PORT3");
 						String cmd = null;
 						try {
-							cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config, ip, port1);
+							cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
 							paraMap = new LinkedHashMap<String,String>();
 							ParaUtil.putParaByString(cmd, paraMap);
 							initializeEditText(paraMap);
@@ -805,10 +805,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				if(device.getDeviceNetType()) { // 如果是外网，需要穿网，此时利用临时保存的连接发送配置信息
 					String ws = ParaUtil.enCapsuPara(paraMap);
 					int l = ws.length();
+					StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
+					DatagramPacket datagramPacket;
+					byte [] data = sb.toString().getBytes();
 					if(l>1000) {
-						StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
-						byte [] data = sb.toString().getBytes();
-						DatagramPacket datagramPacket;
 						try {
 							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
 							tmpDatagramSocket.send(datagramPacket);
@@ -832,7 +832,24 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							e.printStackTrace();
 							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 						} finally {
-							
+							Message msg = handler.obtainMessage();
+							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
+							handler.sendMessageDelayed(msg, 500);
+						}
+					} else {
+						try {
+							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+							data = ("0" + ws.length() + ws).getBytes();
+							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+						} catch (Exception e) {
+							e.printStackTrace();
+							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
+						}finally {
+							Message msg = handler.obtainMessage();
+							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
+							handler.sendMessageDelayed(msg, 500);
 						}
 					}
 				} else {
@@ -871,16 +888,30 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							e.printStackTrace();
 							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 						} finally {
-							
+							Message msg = handler.obtainMessage();
+							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
+							handler.sendMessageDelayed(msg, 500);
 						}
 					}else {
+						DatagramSocket datagramSocket = null;
 						try {
-							PackageUtil.sendPackageNoRecvByIp(sb.toString(), ethIp, device.getDeviceLocalCmdPort());
-							PackageUtil.sendPackageNoRecvByIp("0" + l + ws, ethIp, device.getDeviceLocalCmdPort());
-						} catch (CamManagerException e) {
+							datagramSocket = new DatagramSocket();
+							//PackageUtil.sendPackageNoRecvByIp(sb.toString(), ethIp, device.getDeviceLocalCmdPort());
+							//PackageUtil.sendPackageNoRecvByIp("0" + l + ws, ethIp, device.getDeviceLocalCmdPort());
+							data = sb.toString().getBytes();
+							DatagramPacket datagramPacket2 = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
+							datagramSocket.send(datagramPacket2);
+							data = ("0" + l + ws).getBytes();
+							datagramPacket2 = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
+							datagramSocket.send(datagramPacket2);
+						} catch (Exception e) {
 							e.printStackTrace();
 							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 						}finally {
+							if(datagramSocket != null) {
+								datagramSocket.close();
+								datagramSocket = null;
+							}
 							Message msg = handler.obtainMessage();
 							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
 							handler.sendMessageDelayed(msg, 500);

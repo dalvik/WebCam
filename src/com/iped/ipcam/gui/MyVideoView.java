@@ -16,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -84,22 +85,22 @@ public class MyVideoView extends View implements Runnable {
 	
 	private Handler handler;
 	
-	private Context context;
-	
 	private Device device;
+
+	private Rect rect = null;
 	
 	public MyVideoView(Context context) {
 		super(context);
-		this.context = context;
 	}
 	
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		this.context = context;
+		rect = new Rect();
 	}
 
-	void init(Handler handler) {
+	void init(Handler handler,int w, int h) {
 		this.handler = handler;
+		rect = new Rect(0, 0, w, h-20);
 	}
 	
 	
@@ -107,7 +108,7 @@ public class MyVideoView extends View implements Runnable {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		if(video != null) {
-			canvas.drawBitmap(video, 0, 0, null);
+			canvas.drawBitmap(video, null, rect, null);
 		}
 	}
 	

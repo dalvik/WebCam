@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -190,7 +191,7 @@ public class CamVideoH264 extends Activity {
         ipPlayReceiver = new IpPlayReceiver();
         registerReceiver(ipPlayReceiver, new IntentFilter(Constants.ACTION_IPPLAY));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
-        myVideoView.init(mHandler);
+        myVideoView.init(mHandler,screenWidth, screenHeight);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         
         LayoutInflater factory = LayoutInflater.from(this);
@@ -213,6 +214,17 @@ public class CamVideoH264 extends Activity {
 			leftUpButton.measure(0, 0);
 			rightControlPanel.updateControlView(leftUpButton.getMeasuredWidth() * 3);
 		}
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
+        myVideoView.init(mHandler,screenWidth, screenHeight);
+        System.out.println(screenHeight);
 	}
 	
 	@Override

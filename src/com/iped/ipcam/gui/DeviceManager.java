@@ -297,7 +297,11 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 			}
 			if(device.getDeviceNetType()) {
 				oper = true;
-				startActivity(new Intent(DeviceManager.this, DeviceParamSets.class));
+				Message message = handler.obtainMessage();
+            	message.obj  = device.getUnDefine2();
+            	message.what = Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG;
+            	handler.sendMessage(message);
+				//startActivity(new Intent(DeviceManager.this, DeviceParamSets.class));
 				/*netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
 				new Thread(netUtil).start();*/
 			}else {

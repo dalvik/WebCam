@@ -96,7 +96,7 @@ public class CamManagerImp implements ICamManager {
 		}else {
 		}*/
 		deviceList.remove(selectIndex);
-		deviceList.add(device);
+		deviceList.add(selectIndex,device);
 	}
 	
 	@Override
@@ -165,6 +165,7 @@ public class CamManagerImp implements ICamManager {
 	@Override
 	public void clearCamList() {
 		deviceList.clear();
+		selectIndex = 0;
 	}
 	
 	public List<Device> getDeviceList() {
