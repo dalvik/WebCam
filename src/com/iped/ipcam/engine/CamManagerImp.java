@@ -91,12 +91,12 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public void updateCam(Device device) {
-		if(selectIndex<deviceList.size()) {
+		/*if(selectIndex<deviceList.size()) {
 			deviceList.add(device);
 		}else {
-			deviceList.remove(selectIndex);
-			deviceList.add(device);
-		}
+		}*/
+		deviceList.remove(selectIndex);
+		deviceList.add(device);
 	}
 	
 	@Override

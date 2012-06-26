@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.xml.sax.DTDHandler;
+
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -99,6 +101,8 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 	private String deviceName = "";
 	
 	private String pwd;
+	
+	private boolean oper = false; // add device set para true
 	
 	private static final String TAG = "DeviceManager";
 
@@ -292,8 +296,10 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 				return;
 			}
 			if(device.getDeviceNetType()) {
-				//netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
-				//new Thread(netUtil).start();
+				oper = true;
+				startActivity(new Intent(DeviceManager.this, DeviceParamSets.class));
+				/*netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
+				new Thread(netUtil).start();*/
 			}else {
 				int result = PackageUtil.checkPwdState(device);
 				Log.d(TAG, "device_manager_button checkPwdState result = " + result);
@@ -840,10 +846,33 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		int result = PackageUtil.checkPwdState(tempDevice);
 		Log.d(TAG, "DeviceManager getDeviceConfig checkPwdState result = " + result);
 		if(result == 0) { // unset
-			DialogUtils.inputTwoPasswordDialog(DeviceManager.this, tempDevice, handler, Constants.SEND_GET_CONFIG_MSG);
+			if(oper)  {
+				oper = false;
+				Device tDevice = camManager.getSelectDevice();
+				tDevice.setDeviceRemoteCmdPort(port1);
+				tDevice.setDeviceRemoteVideoPort(port2);
+				tDevice.setDeviceRemoteAudioPort(port3);
+				tDevice.setUnDefine1(ip);
+				camManager.updateCam(tDevice);
+				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, tempDevice, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
+			}else {
+				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, tempDevice, handler, Constants.SEND_GET_CONFIG_MSG);
+			}
 		} else if(result == 1) {// pwd seted
-			DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
+			if(oper) {
+				oper = false;
+				Device tDevice = camManager.getSelectDevice();
+				tDevice.setDeviceRemoteCmdPort(port1);
+				tDevice.setDeviceRemoteVideoPort(port2);
+				tDevice.setDeviceRemoteAudioPort(port3);
+				tDevice.setUnDefine1(ip);
+				camManager.updateCam(tDevice);
+				DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
+			} else {
+				DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
+			}
 		}else {
+			oper = false;
 			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 		}
 	}

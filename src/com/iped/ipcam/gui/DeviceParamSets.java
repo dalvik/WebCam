@@ -580,8 +580,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	
 		alarmEmailEditText.setText(paraMap.containsKey("mailbox")? paraMap.get("mailbox") : "");
 		securityVisitPass.setText(paraMap.containsKey("pswd")? paraMap.get("pswd") : "");
-		dateSetButton.setText((paraMap.get("system_time").length()>0)?DateUtil.formatTimeStrToTimeStr2(paraMap.get("system_time")):DateUtil.formatTimeStrToTimeStr2(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
-		timeSetButton.setText((paraMap.get("system_time").length()>0)?DateUtil.formatTimeStrToTimeStr3(paraMap.get("system_time")):DateUtil.formatTimeStrToTimeStr3(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
+		String systemTime = paraMap.get("system_time");
+		dateSetButton.setText((systemTime != null && systemTime.length()>0)? DateUtil.formatTimeStrToTimeStr2(systemTime):DateUtil.formatTimeStrToTimeStr2(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
+		timeSetButton.setText((systemTime != null && systemTime.length()>0)? DateUtil.formatTimeStrToTimeStr3(systemTime):DateUtil.formatTimeStrToTimeStr3(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
 		
 	}
 

@@ -57,7 +57,6 @@ public class CamParasSetImp implements ICamParasSet {
 		
 		@Override
 		public void run() {
-				//PackageUtil.isOnline(ip, Constants.UDPPORT);
 				if(device.getDeviceNetType()) {// out 
 					Log.d(TAG, "<=== CamGetParas run method = " + device.getDeviceID());
 					netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
