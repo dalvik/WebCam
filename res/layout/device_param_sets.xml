@@ -791,15 +791,15 @@
 
 		           </TableRow>
 		           
-		            <TableRow ><!-- time set -->
-			         
+		            <TableRow >
+		            <!-- time set -->
 			         <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"
 				    	android:text="@string/device_params_other_set_time_str"/>
 			         
-		               <EditText android:id="@+id/device_params_other_set_security_id" 
+		               <Button android:id="@+id/device_params_other_set_date_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
 		               
@@ -809,7 +809,8 @@
 					    	android:textSize="20dip"
 					    	android:text="@string/device_params_other_set_time_date_format_str"/>
 		                
-			           <EditText android:id="@+id/device_params_other_set_security_id" 
+			         
+			           <Button android:id="@+id/device_params_other_set_time_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
 		               
@@ -818,16 +819,16 @@
 					    	android:textColor="@color/white"
 					    	android:textSize="20dip"
 					    	android:text="@string/device_params_other_set_time_time_format_str"/>
-			         
+		               
 		               <Button
 				            android:layout_width="wrap_content"
 		                    android:text="@string/device_params_other_set_system_str" 
 					    	android:layout_height="wrap_content"/>
 		           </TableRow>
 		           
-		           <TableRow ><!-- security_visit_password set -->
-			         
-			         <TextView android:layout_width="fill_parent"
+		           <TableRow >
+		              <!-- security_visit_password set -->
+			          <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"

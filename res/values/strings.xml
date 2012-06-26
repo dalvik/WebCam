@@ -23,6 +23,7 @@
     <string name="cancle_login_str">Cancel</string>
     <string name="device_manager_pwd_set_error">密码设置失败</string>
     <string name="device_manager_pwd_set_time_out">网络超时</string>
+    <string name="device_manager_time_out_or_device_off_line">网络超时或设备离线</string>
     
     <string name="default_activity_str">视频</string>
     	<string name="connection">正在为您连接，请稍等片刻</string>

@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +35,7 @@ public class DialogUtils {
 		.create().show();
 	}
 	
-	public static void inputTwoPasswordDialog(final Context context,final Device device, final String action, final String miniType) {
+	public static void inputTwoPasswordDialog(final Context context,final Device device, final Handler handler, final int msgType) {
 		LayoutInflater factory = LayoutInflater.from(context);
         final View MyDialogView = factory.inflate(R.layout.layout_login_dialog, null);
         dlg = new AlertDialog.Builder(context).setTitle(context.getResources().getString(R.string.login_dialog_str))
@@ -75,10 +77,10 @@ public class DialogUtils {
                       	}
                 	} else if(result == 1) {
                 		 try {
-     	                	Intent intent = new Intent(action);
-     	                	// intent.putExtra("", true); if user not set password, so should 
-     	                	intent.setDataAndType(Uri.parse(name), miniType);
-     	                	context.startActivity(intent);
+                			Message message = handler.obtainMessage();
+     	                	message.obj  = name;
+     	                	message.what = msgType;
+     	                	handler.sendMessage(message);
                      	    dismissDialog(dialog, dlg);
                      	    ToastUtils.showToast(context, R.string.password_set_ok);
                      	} catch  (Exception e) {
@@ -124,7 +126,7 @@ public class DialogUtils {
  	    dialog.dismiss();
 	}
 	
-	public static void inputOnePasswordDialog(final Context context,final String action, final String miniType) {
+	public static void inputOnePasswordDialog(final Context context,final Handler handler, final int msgType) {
 		LayoutInflater factory = LayoutInflater.from(context);
         final View MyDialogView = factory.inflate(R.layout.layout_login2_dialog, null);
         dlg = new AlertDialog.Builder(context).setTitle(context.getResources().getString(R.string.login_dialog_str))
@@ -144,11 +146,12 @@ public class DialogUtils {
                 	}
                   } else {
 	                try {
-	                	Intent intent = new Intent(action);
-	                	intent.setDataAndType(Uri.parse(name), miniType);
-	                	context.startActivity(intent);
+	                	Message message = handler.obtainMessage();
+	                	message.obj  = name;
+	                	message.what = msgType;
+	                	handler.sendMessage(message);
 	                	dismissDialog(dialog, dlg);
-                	    ToastUtils.showToast(context, R.string.password_set_ok);
+                	    //ToastUtils.showToast(context, R.string.password_set_ok);
                 	} catch  (Exception e) {
                 		Log.v(TAG, e.getMessage());
                 	}
@@ -167,7 +170,6 @@ public class DialogUtils {
         })
         .create();
         dlg.show();
-		
 	}
 	
 	

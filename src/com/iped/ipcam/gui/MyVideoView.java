@@ -112,9 +112,9 @@ public class MyVideoView extends View implements Runnable {
 	}
 	
 	public void run() {
-		if(device.getDeviceNetType()) {
+		if(device.getDeviceNetType()) { // out
 			try {
-				byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Udp.getBytes();
+				byte [] tem = (CamCmdListHelper.SetCmd_StartVideo_Udp+ device.getUnDefine2() + "\0").getBytes();
 				ThroughNetUtil netUtil = CamVideoH264.getInstance();
 				cmdSocket = netUtil.getPort1();
 				cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
@@ -129,7 +129,7 @@ public class MyVideoView extends View implements Runnable {
 				System.out.println("socket init result = " + result);
 				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			}catch (IOException e) {
-				Log.d(TAG, e.getLocalizedMessage());
+				Log.d(TAG, "IOException " + e.getMessage());
 				onStop();
 				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 				handler.sendEmptyMessage(Constants.CONNECTERROR);
@@ -171,10 +171,11 @@ public class MyVideoView extends View implements Runnable {
 				}
 			}
 			
-		}else {
+		}else {// in
 			Socket socket = new Socket();
+			System.out.println("----------" + device.getUnDefine2());
 			 try {
-					byte [] tem = CamCmdListHelper.SetCmd_StartVideo_Tcp.getBytes();
+					byte [] tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp+device.getUnDefine2() + "\0").getBytes();
 					cmdSocket = new DatagramSocket();
 					cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					String ipAddress = device.getDeviceWlanIp();
@@ -191,6 +192,7 @@ public class MyVideoView extends View implements Runnable {
 					handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 					System.out.println("dis=" + videoDis);
 				}catch (IOException e) {
+					Log.d(TAG, "IOException " + e.getMessage());
 					releaseTcpSocket(videoDis, socket);
 					onStop();
 					handler.sendEmptyMessage(Constants.HIDECONNDIALOG);

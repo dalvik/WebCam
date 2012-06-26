@@ -49,6 +49,7 @@ public class CamManagerImp implements ICamManager {
 		d.setDeviceRemoteCmdPort(Constants.UDPPORT);
 		d.setDeviceRemoteVideoPort(Constants.TCPPORT);
 		d.setDeviceRemoteAudioPort(Constants.AUDIOPORT);
+		System.out.println(d);
 		if(checkName(d)) {
 			deviceList.add(d);
 			return d;

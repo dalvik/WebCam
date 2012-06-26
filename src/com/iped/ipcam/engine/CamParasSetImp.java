@@ -68,11 +68,10 @@ public class CamParasSetImp implements ICamParasSet {
 						String rece;
 						try {
 							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", ethIp, Constants.UDPPORT);
-							System.out.println("ethIp = " + ethIp + "  recv===="+ rece);
 							if("PSWD_NOT_SET".equals(rece)) {
-								System.out.println("PSWD_not set");
+								Log.d(TAG, "CamParasSetImp PSWD_not set");
 							} else if("PSWD_FAIL".equals(rece)) {
-								System.out.println("PSWD_FAIL");
+								Log.d(TAG, "CamParasSetImp PSWD_FAIL");
 							} else {
 								ParaUtil.putParaByString(rece, paraMap);
 							}
@@ -90,11 +89,11 @@ public class CamParasSetImp implements ICamParasSet {
 			String rece;
 			try {
 				rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", wlan, Constants.UDPPORT);
-				System.out.println("wlan = " + wlan + "  recv===="+ rece);
+				Log.d(TAG, "getConfigByWlan wlan = " + wlan + "  recv===="+ rece);
 				if("PSWD_NOT_SET".equals(rece)) {
-					System.out.println("PSWD_not set");
+					Log.d(TAG, "CamParasSetImp getConfigByWlan PSWD_not set");
 				} else if("PSWD_FAIL".equals(rece)) {
-					System.out.println("PSWD_FAIL");
+					Log.d(TAG, "CamParasSetImp getConfigByWlan PSWD_FAIL");
 				} else {
 					ParaUtil.putParaByString(rece, paraMap);
 				}

@@ -129,6 +129,7 @@ public class PackageUtil {
 		byte [] tem = cmdType.getBytes();
 		DatagramSocket datagramSocket = null;
 		try {
+			System.out.println(cmdType + " " + ip + " " + port);
 			datagramSocket = new DatagramSocket();
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(ip), port);
 			datagramSocket.send(datagramPacket);
@@ -226,7 +227,7 @@ public class PackageUtil {
 				return -1; // unknown
 			}
 		}catch (IOException e) {
-			Log.d(TAG, "sendPackageNoRecvByIp : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
+			Log.d(TAG, "checkPwdState : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
 		} 
 		return -2; // time out
 	}

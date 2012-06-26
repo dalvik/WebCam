@@ -4,8 +4,8 @@ public class CamCmdListHelper {
 
 	public final static String QueryCmd_Online = "get_firmware_info:0";
 	public final static String QueryCmd_Video = "get_transport_type:1";
-	public final static String SetCmd_StartVideo_Tcp = "set_transport_type:tcp\n";
-	public final static String SetCmd_StartVideo_Udp = "set_transport_type:rtp\n";
+	public final static String SetCmd_StartVideo_Tcp = "set_transport_type:tcp:PSWD=";
+	public final static String SetCmd_StartVideo_Udp = "set_transport_type:rtp:PSWD=";
 	public final static String SetCmd_ResetVideo = "restart_server:0";
 	public final static String GetCmd_Config = "GetConfig:1:PSWD=";
 	public final static String SetCmd_Config = "SetConfig:1 ";

@@ -136,6 +136,7 @@ public class FileUtil {
 			file.createNewFile();
 			StringBuffer sb = new StringBuffer();
 			for(Device device:deviceList) {
+				String unDefine2 = (device.getUnDefine2() == null || device.getUnDefine2().length()<=0)?"null":device.getUnDefine2();
 				boolean netType = device.getDeviceNetType();
 				sb.append(device.getDeviceName() + "&" + device.getDeviceID() + "&" + device.getUnDefine1() + "&" + netType + "&");
 				if(netType){
@@ -195,7 +196,7 @@ public class FileUtil {
 				device.setDeviceRemoteCmdPort(Integer.parseInt(info[6]));
 				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));
 				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
-				device.setUnDefine2(info[9]);
+				device.setUnDefine2(info[9].equals("null")?null:info[9]);
 				deviceList.add(device);
 				System.out.println("get device form file "  + device);
 			}

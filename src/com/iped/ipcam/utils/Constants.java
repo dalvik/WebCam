@@ -94,6 +94,16 @@ public class Constants {
 	
 	public final static String QUERY_CONFIG_MINITYPE = "vnd.android.webcam.type/vnd.iped.webcam";
 	
+	//show two input field
+	public final static int SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG = 16000;
+	
+	public final static int SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG = 16001;
+	
+	// show one input field
+	public final static int SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG = 16010;
+	
+	public final static int SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG = 16011;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;
@@ -116,9 +126,9 @@ public class Constants {
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 	
-	public final static int BINDLOCALPORT2 = 60001;
+	public final static int BINDLOCALPORT2 = 60002;
 	
-	public final static int BINDLOCALPORT3 = 60001;
+	public final static int BINDLOCALPORT3 = 60003;
 	
 	
 	
