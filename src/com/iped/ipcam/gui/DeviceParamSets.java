@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.SocketException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -30,9 +30,9 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TimePicker;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
@@ -45,12 +45,15 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DialogUtils;
+import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.WirelessAdapter;
+
+import dalvik.system.TemporaryDirectory;
 
 public class DeviceParamSets extends Activity implements OnClickListener {
 
@@ -144,6 +147,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	private Button dateSetButton = null;
 	
 	private Button timeSetButton = null;
+	
+	private Button updateSystemTime = null;
 	
 	private Map<String, String> paraMap = null; 
 	
@@ -250,7 +255,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 			case Constants.SENDSETCONFIGERRORMSG:
 				ProgressUtil.hideProgress();
-				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_error_str);
+				//ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_error_str);
 				break;
 			case Constants.RETSETCONFIGSUCCESS:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_reset_config_success_str);
@@ -372,8 +377,11 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		
 		dateSetButton = (Button) findViewById(R.id.device_params_other_set_date_id);
 		timeSetButton = (Button) findViewById(R.id.device_params_other_set_time_id);
+		updateSystemTime = (Button) findViewById(R.id.device_params_other_set_system_time_id);
+		
 		dateSetButton.setOnClickListener(this);
 		timeSetButton.setOnClickListener(this);
+		updateSystemTime.setOnClickListener(this);
 		findViewById(R.id.device_params_set_factory_button_id).setOnClickListener(this);
 		findViewById(R.id.device_params_set_commit_button_id).setOnClickListener(this);
 		findViewById(R.id.device_params_set_concle_button_id).setOnClickListener(this);
@@ -428,6 +436,20 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				}
 			}, calendar2.get(Calendar.HOUR_OF_DAY), calendar2.get(Calendar.MINUTE), true).show();
 			break;
+		case R.id.device_params_other_set_system_time_id:
+			if(device.getDeviceNetType()) {
+				PackageUtil.sendPackageNoRecv(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", ip, port1);
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
+			} else {
+				try {
+					PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", device.getDeviceEthIp(), device.getDeviceLocalCmdPort());
+					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
+				} catch (CamManagerException e) {
+					e.printStackTrace();
+					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_error_str);
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -437,10 +459,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	private void initializeEditText(Map<String, String> paraMap) {
 		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
-		versionEditText.setText(paraMap.containsKey("cfg_v")? paraMap.get("cfg_v") : "V12.005.13");
-		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? paraMap.get("tfcard_maxsize") : "");
+		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : "V12.005.13");
+		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize"))) : "");
 		sdCardEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
-		//changeStorageMode.setText("");
+		//changeStorageMode.setc;
 		//valueableRecordeTimeEd.setText("");
 		if(paraMap.containsKey("net_mode")){
 			String s = paraMap.get("net_mode");
@@ -452,6 +474,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				netWorkModeSet.check(R.id.device_param_set_network_mode_intelligent);
 			}
 		}
+		// wire use net set
 		wireuseNetworkSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
 			@Override
@@ -478,6 +501,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		wireuseDNS1Address.setText(paraMap.containsKey("e_dns1")? paraMap.get("e_dns1") : "");
 		wireuseDNS2Address.setText(paraMap.containsKey("e_dns2")? paraMap.get("e_dns2") : "");
 		
+		// wire less net set
 		wirelessNetworkSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
 			@Override
@@ -491,8 +515,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			}
 		});
 		
-		if(paraMap.containsKey("inet_udhcpc")) {
-			String s = paraMap.get("inet_udhcpc");
+		if(paraMap.containsKey("udhcpc")) {
+			String s = paraMap.get("udhcpc");
 			if("1".equals(s)) {
 				wirelessNetworkSet.check(R.id.device_param_set_wireless_network_mode_audo);
 				lockWirelessCommont(false);
@@ -619,7 +643,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		String systemTime = paraMap.get("system_time");
 		dateSetButton.setText((systemTime != null && systemTime.length()>0)? DateUtil.formatTimeStrToTimeStr2(systemTime):DateUtil.formatTimeStrToTimeStr2(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
 		timeSetButton.setText((systemTime != null && systemTime.length()>0)? DateUtil.formatTimeStrToTimeStr3(systemTime):DateUtil.formatTimeStrToTimeStr3(DateUtil.formatTimeToDate3(System.currentTimeMillis())));
-		
 	}
 
 	@Override
@@ -816,18 +839,18 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		if(paraMap.containsKey("system_time")){
 			paraMap.remove("system_time");
 		}*/
-		paraMap.put("system_time",dateSetButton.getText().toString().replace("-", "") + timeSetButton.getText().toString().replace(":", ""));
+		paraMap.put("system_time",dateSetButton.getText().toString().replaceAll("-", "") + timeSetButton.getText().toString().replaceAll(":", ""));
 		device.setDeviceName(deviceNameEditText.getText().toString().trim());
-		device.setDeviceEthIp(wireuseIPAddress.getText().toString().trim());
-		device.setDeviceEthGateWay(wireuseGeteWayAddess.getText().toString().trim());
-		device.setDeviceEthMask(wireuseSubAddess.getText().toString().trim());
+		//device.setDeviceEthIp(wireuseIPAddress.getText().toString().trim());
+		//device.setDeviceEthGateWay(wireuseGeteWayAddess.getText().toString().trim());
+		//device.setDeviceEthMask(wireuseSubAddess.getText().toString().trim());
 		device.setDeviceEthDNS1(wireuseDNS1Address.getText().toString().trim());
 		device.setDeviceEthDNS2(wireuseDNS2Address.getText().toString().trim());
 		//device.setDeviceWlanIp(wirelessIPAddress.getText().toString().trim());
-		device.setDeviceWlanGateWay(wirelessGeteWayAddess.getText().toString().trim());
-		device.setDeviceWlanMask(wirelessSubAddess.getText().toString().trim());
-		device.setDeviceWlanDNS1(wirelessDNS1Address.getText().toString().trim());
-		device.setDeviceEthDNS2(wirelessDNS2Address.getText().toString().trim());
+		//device.setDeviceWlanGateWay(wirelessGeteWayAddess.getText().toString().trim());
+		//device.setDeviceWlanMask(wirelessSubAddess.getText().toString().trim());
+		//device.setDeviceWlanDNS1(wirelessDNS1Address.getText().toString().trim());
+		//device.setDeviceEthDNS2(wirelessDNS2Address.getText().toString().trim());
 		
 		//camManager.updateCam(device);
 		
@@ -1028,10 +1051,23 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
+				
 				byte[] b = CamCmdListHelper.SetCmd_SearchWireless.getBytes();
 				byte[] recv = new byte[Constants.COMMNICATEBUFFERSIZE];
 				boolean flag = true;
 				DatagramPacket datagramPacket = null;
+				if(!device.getDeviceNetType()){
+					if(tmpDatagramSocket == null) {
+						try {
+							tmpDatagramSocket = new DatagramSocket();
+							ip  = device.getDeviceEthIp();
+							port1 = device.getDeviceLocalCmdPort();
+						} catch (SocketException e) {
+							return;
+						}
+					}
+				}
+				System.out.println(ip + " " + port1);
 				try {
 					datagramPacket = new DatagramPacket(recv, recv.length, InetAddress.getByName(ip), port1);
 					while (flag) {

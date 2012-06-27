@@ -109,6 +109,7 @@
 	                <RadioButton android:layout_width="wrap_content"
 	    				android:layout_height="wrap_content"
 	    				android:layout_weight="1"
+	    				android:checked="true"
 	    				android:text="@string/device_params_recorde_type_inside_str"/>
 	                
 	                <RadioButton android:layout_width="wrap_content"
@@ -820,7 +821,7 @@
 					    	android:textSize="20dip"
 					    	android:text="@string/device_params_other_set_time_time_format_str"/>
 		               
-		               <Button
+		               <Button android:id="@+id/device_params_other_set_system_time_id"
 				            android:layout_width="wrap_content"
 		                    android:text="@string/device_params_other_set_system_str" 
 					    	android:layout_height="wrap_content"/>

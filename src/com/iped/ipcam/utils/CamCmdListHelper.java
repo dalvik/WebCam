@@ -27,6 +27,7 @@ public class CamCmdListHelper {
 	
 	public final static String SetCmd_Pwd_State = "set_pswd:";
 	
+	public final static String SetCmd_Set_Time = "SetTime:";
 	
 	
 	

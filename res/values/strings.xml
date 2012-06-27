@@ -160,6 +160,8 @@
     	<string name="device_params_other_set_time_date_format_str">年/月/日</string>
     	<string name="device_params_other_set_time_time_format_str">时/分/秒</string>
     	<string name="device_params_other_set_system_str">同步系统时间</string>
+    		<string name="device_params_other_set_system_success_str">同步系统时间成功</string>
+    		<string name="device_params_other_set_system_error_str">同步系统时间失败</string>
     	<string name="device_params_other_set_security_visit_password_str">访问密码设置</string>
     	<string name="device_params_reset_set_factory_para_str">恢复出厂设置</string>
     	<string name="device_params_set_sure_str">确认</string>

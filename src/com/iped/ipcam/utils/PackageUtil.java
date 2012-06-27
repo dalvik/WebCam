@@ -131,7 +131,7 @@ public class PackageUtil {
 			Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
 			return tmp;
 		} catch (IOException e) {
-			Log.d(TAG, "PackageUtil CMDPackage2 : " + ip + " " + e.getLocalizedMessage());
+			Log.d(TAG, "PackageUtil CMDPackage2 : " + ip + " " + e.getMessage());
 			throw new CamManagerException();
 		} 
 	}
@@ -170,11 +170,11 @@ public class PackageUtil {
 			DatagramPacket datagramPacket = new DatagramPacket(tem, cmdType.length(), InetAddress.getByName(CamVideoH264.currIpAddress), CamVideoH264.port1);
 			datagramSocket.send(datagramPacket);
 		} catch (SocketException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
 		} catch (UnknownHostException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
 		} catch (IOException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getLocalizedMessage());
+			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
 		} 
 	}
 	
@@ -189,7 +189,7 @@ public class PackageUtil {
 			datagramSocket.receive(datagramPacket);
 			return true;
 		}catch (IOException e) {
-			Log.d(TAG, "pingTest : " + ip + " " + e.getLocalizedMessage());
+			Log.d(TAG, "pingTest : " + ip + " " + e.getMessage());
 			return false;
 		} finally{
 			if(datagramSocket != null) {
@@ -284,7 +284,7 @@ public class PackageUtil {
 				return -1; // PSWD_FALL
 			}
 		}catch (IOException e) {
-			Log.d(TAG, "checkPwd : " + ip + " "+ port + " password=" + pwd + " "  + e.getMessage());
+			Log.d(TAG, "checkPwd : " + ip + " "+ port + " password=" + pwd + " "  + e.toString());
 		} 
 		return -2;
 	}
