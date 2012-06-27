@@ -109,6 +109,13 @@ public class Constants {
 	
 	public final static int SEND_REQUERY_CONFIG_PWD_ERROR = 17001;
 	
+	// add new device by ip
+	public final static int SEND_ADD_NEW_DEVICE_BY_IP_MSG = 18000;
+	
+	public final static int SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG = 18001;
+	
+	public final static int SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG = 18002;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;

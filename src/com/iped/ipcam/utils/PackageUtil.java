@@ -244,21 +244,10 @@ public class PackageUtil {
 			String receStr = new String(buffTemp, 0, receLength);
 			Log.d(TAG, "checkPwdState recv //////////////" + receStr);
 			if("PSWD_SET".equals(receStr)) {
-				datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
-				datagramSocket.send(datagramPacket);
-				rece = new DatagramPacket(buffTemp, buffTemp.length);
-				datagramSocket.receive(rece);
-				receLength = rece.getLength();
-				receStr = new String(buffTemp, 0, receLength);
-				if("PSWD_FAIL".equals(receStr)) {
-					return 2;// pwd error
-				}
 				return 1; // had set
 			} else if("PSWD_NOT_SET".equals(receStr)) {
 				return 0; // not set 
-			} else {
-				return -1; // unknown
-			}
+			} 
 		}catch (IOException e) {
 			Log.d(TAG, "checkPwdState : " + ip + " "+ port + " " + e.getMessage());
 		} 
@@ -266,7 +255,8 @@ public class PackageUtil {
 	}
 	
 	public static int checkPwd(Device device) {
-		byte [] tem = (CamCmdListHelper.CheckCmd_PWD + device.getUnDefine2() + "\0").getBytes();
+		String pwd = device.getUnDefine2();
+		byte [] tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0").getBytes();
 		DatagramSocket datagramSocket = null;
 		boolean netType = device.getDeviceNetType();
 		String ip = null;
@@ -277,7 +267,7 @@ public class PackageUtil {
 		}else {
 			ip = device.getDeviceEthIp();
 		}
-		Log.d(TAG, "checkPwd : netType = " + netType+ " ip = " + ip + " port=" + port);
+		Log.d(TAG, "checkPwd : netType = " + netType+ " ip = " + ip + " port=" + port + " password=" + pwd);
 		try {
 			datagramSocket = new DatagramSocket();
 			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
@@ -294,7 +284,7 @@ public class PackageUtil {
 				return -1; // PSWD_FALL
 			}
 		}catch (IOException e) {
-			Log.d(TAG, "checkPwd : " + ip + " "+ port + " " + e.getMessage());
+			Log.d(TAG, "checkPwd : " + ip + " "+ port + " password=" + pwd + " "  + e.getMessage());
 		} 
 		return -2;
 	}
@@ -311,7 +301,7 @@ public class PackageUtil {
 			ip = device.getDeviceEthIp();
 			port = device.getDeviceLocalCmdPort();
 		}
-		Log.d(TAG, "set Pwd state : netType = " + netType+ " ip = " + ip + " port=" + port);
+		Log.d(TAG, "set Pwd state : netType = " + netType+ " ip = " + ip + " port=" + port + " common=" + common);
 		try {
 			datagramSocket = new DatagramSocket();
 			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);

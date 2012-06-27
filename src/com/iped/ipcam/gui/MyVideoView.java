@@ -16,6 +16,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -79,7 +81,7 @@ public class MyVideoView extends View implements Runnable {
 
 	private int result = -1;
 	
-	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 1];
+	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * (1+1/2)];
 	
 	private static final String TAG = "MyVideoView";
 	
@@ -89,6 +91,14 @@ public class MyVideoView extends View implements Runnable {
 
 	private Rect rect = null;
 	
+	private int frameCount;
+	
+	private String frameCountTemp = "";
+	
+	private String deviceId = "";
+	
+	private Paint textPaint ;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -96,6 +106,8 @@ public class MyVideoView extends View implements Runnable {
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		rect = new Rect();
+		textPaint = new Paint(Color.RED);
+		textPaint.setTextSize(20);
 	}
 
 	void init(Handler handler,int w, int h) {
@@ -110,9 +122,11 @@ public class MyVideoView extends View implements Runnable {
 		if(video != null) {
 			canvas.drawBitmap(video, null, rect, null);
 		}
+		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 20, textPaint);
 	}
 	
 	public void run() {
+		deviceId = device.getDeviceID();
 		if(device.getDeviceNetType()) { // out
 			try {
 				byte [] tem = (CamCmdListHelper.SetCmd_StartVideo_Udp+ device.getUnDefine2() + "\0").getBytes();
@@ -136,9 +150,10 @@ public class MyVideoView extends View implements Runnable {
 				handler.sendEmptyMessage(Constants.CONNECTERROR);
 				return ;
 			}
-			long start = System.currentTimeMillis();
-			int i = 0;
+			//startTime = System.currentTimeMillis();
 			//byte[] buf = new byte[1024];
+			handler.removeCallbacks(calculateFrameTask);
+			handler.post(calculateFrameTask);
 			new Thread(new RecvAudio()).start();
 			while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
 				readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
@@ -153,11 +168,11 @@ public class MyVideoView extends View implements Runnable {
 						looperFlag = false;
 						if(nalSizeTemp == -2) {
 							if(nalBufUsedLength>0) {
-								i++;
-								if(i%50 ==0) {
+								frameCount++;
+								/*if(i%50 ==0) {
 									long end = System.currentTimeMillis() / 1000 - start / 1000;
 									System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
-								}
+								}*/
 								copyPixl();
 							}
 							nalBuf[0] = -1;
@@ -174,7 +189,6 @@ public class MyVideoView extends View implements Runnable {
 			
 		}else {// in
 			Socket socket = new Socket();
-			System.out.println("----------" + device.getUnDefine2());
 			 try {
 					byte [] tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp+device.getUnDefine2() + "\0").getBytes();
 					cmdSocket = new DatagramSocket();
@@ -183,8 +197,8 @@ public class MyVideoView extends View implements Runnable {
 					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceLocalCmdPort());
 					cmdSocket.send(datagramPacket);
 					//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-					System.out.println("in ready rece ....");
 					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceLocalVideoPort());
+					System.out.println("in ready rece ...." + ipAddress);
 					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
 					if(videoDis != null) {
 						videoDis.close();
@@ -200,9 +214,10 @@ public class MyVideoView extends View implements Runnable {
 					handler.sendEmptyMessage(Constants.CONNECTERROR);
 					return ;
 				}
-			 
-			    long start = System.currentTimeMillis();
-				int i = 0;
+			 	handler.removeCallbacks(calculateFrameTask);
+			 	handler.post(calculateFrameTask);
+			   // long start = System.currentTimeMillis();
+				//int i = 0;
 				//byte[] buf = new byte[1024];
 				new Thread(new RecvAudio()).start();
 				while (!Thread.currentThread().isInterrupted() && !stopPlay) {
@@ -226,11 +241,11 @@ public class MyVideoView extends View implements Runnable {
 							looperFlag = false;
 							if(nalSizeTemp == -2) {
 								if(nalBufUsedLength>0) {
-									i++;
-									if(i%50 ==0) {
+									frameCount++;
+									/*if(i%50 ==0) {
 										long end = System.currentTimeMillis() / 1000 - start / 1000;
 										System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
-									}
+									}*/
 									copyPixl();
 								}
 								nalBuf[0] = -1;
@@ -309,6 +324,7 @@ public class MyVideoView extends View implements Runnable {
 			cmdSocket.close();
 			cmdSocket = null;
 		}
+		handler.removeCallbacks(calculateFrameTask);
 	}
 	
 	private void releaseNAT() {
@@ -353,6 +369,11 @@ public class MyVideoView extends View implements Runnable {
 		public void run() {
 			int init = UdtTools.initAmrDecoder();
 			System.out.println("amr deocder init " + init);
+			if(m_out_trk != null) {
+				m_out_trk.stop();
+				m_out_trk.release();
+				m_out_trk = null;
+			}
 			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(8000,
                     AudioFormat.CHANNEL_CONFIGURATION_MONO,
                     AudioFormat.ENCODING_PCM_16BIT);
@@ -414,7 +435,7 @@ public class MyVideoView extends View implements Runnable {
 						stopPlay = true;
 						break;
 					}
-					int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
+					UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
 					//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
 					//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 					//System.out.println("audio size = " + size + "  "+ returnSize);
@@ -453,10 +474,18 @@ public class MyVideoView extends View implements Runnable {
 		this.device = device;
 	}
 	
-	/*
-	
-	 
-	 */
-	
+	private Runnable calculateFrameTask = new Runnable() {
+		
+		@Override
+		public void run() {
+			if(frameCount<10) {
+				frameCountTemp = " " + frameCount;
+			} else {
+				frameCountTemp = "" + frameCount;
+			}
+			frameCount=0;
+			handler.postDelayed(calculateFrameTask, 1000);
+		}
+	};
 	
 }
