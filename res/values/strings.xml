@@ -13,6 +13,17 @@
     	<string name="username_null">用户名不能为空</string>
     <string name="user_exit">取消</string>
     
+    <!-- modify password  -->
+    <string name="password_modify_security_botton_str">更改访问密码</string>
+    <string name="password_modify_title_str">密码修改</string>
+    <string name="password_modify_str">修改</string>
+    <string name="old_input_password">旧密码</string>
+    <string name="old_input_password_error">与旧密码不符</string>
+    <string name="new_input_password">新密码</string>
+    <string name="repeat_new_input_password">确认新密码</string>
+     <string name="password_modify_success_str">密码修改成功</string>
+     <string name="password_modify_error_str">密码修改失败</string>
+    
     <string name="login_dialog_str">User login</string>
     <string name="input_password">Please enter your password</string>
     <string name="repeat_input_password">Repeat Password</string>

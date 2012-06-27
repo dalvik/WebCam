@@ -829,6 +829,11 @@
 		           
 		           <TableRow >
 		              <!-- security_visit_password set -->
+		              <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
+		                 android:layout_width="wrap_content"
+				    	 android:layout_height="wrap_content"
+				    	 android:text="@string/password_modify_security_botton_str"/>
+		              <!-- 
 			          <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
@@ -838,7 +843,7 @@
 		               <EditText android:id="@+id/device_params_other_set_security_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"/>
-
+ 					-->
 		           </TableRow>
 		     </TableLayout>
 		    	

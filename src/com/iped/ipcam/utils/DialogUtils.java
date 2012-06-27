@@ -1,13 +1,14 @@
 package com.iped.ipcam.utils;
 
 import java.lang.reflect.Field;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -101,6 +102,131 @@ public class DialogUtils {
             public void onClick(DialogInterface dialog, int whichButton) {
             	 try {
             		 handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
+            		 dismissDialog(dialog, dlg);
+             	} catch  (Exception e) {
+             		Log.v(TAG, e.getMessage());
+             	}
+            	
+            }
+        })
+        .create();
+        dlg.show();
+		
+	}
+	public static void inputThreadPasswordDialog(final Context context,final Device device, final Handler handler, final int msgType, final DatagramSocket tmpDatagramSocket, final String ip, final int port1) {
+		LayoutInflater factory = LayoutInflater.from(context);
+        final View MyDialogView = factory.inflate(R.layout.layout_modify_pwd_dialog, null);
+        dlg = new AlertDialog.Builder(context).setTitle(context.getResources().getString(R.string.password_modify_title_str))
+        .setView(MyDialogView)
+        .setPositiveButton(context.getResources().getString(R.string.password_modify_str),
+        new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	  final EditText oldPassword = (EditText) MyDialogView.findViewById(R.id.firstPassword);
+            	  final EditText newPassword = (EditText) MyDialogView.findViewById(R.id.secondPassword);
+            	  final EditText repeadNewPassword = (EditText) MyDialogView.findViewById(R.id.thirdPassword);
+            	  String oldPwd = oldPassword.getText().toString().trim();
+                  String newPwd1 = newPassword.getText().toString().trim();
+                  String newPwd2 = repeadNewPassword.getText().toString().trim();
+                  if(oldPwd== null || oldPwd.length()<=0){
+                	  AnimUtil.animEff(context, oldPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(context, R.string.password_is_null);
+                	  try {
+                  		keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+                  } 
+                  if(!oldPwd.equalsIgnoreCase(device.getUnDefine2())) {
+                	  AnimUtil.animEff(context, oldPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(context, R.string.old_input_password_error);
+                	  try {
+                  		keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+            	  }
+                  if( newPwd1 == null || newPwd1.length()<=0 ){
+                	  AnimUtil.animEff(context, newPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(context, R.string.password_is_null);
+                	  try {
+                  		keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+                  }
+                  if(newPwd2 == null ||  newPwd2.length()<=0) {
+                	  ToastUtils.showToast(context, R.string.password_is_null);
+                	  ToastUtils.showToast(context, R.string.password_is_null);
+	                  try {
+	                		keepDialog(dialog, dlg);
+	                	} catch  (Exception e) {
+	                		Log.v(TAG, e.getMessage());
+	                	}
+	                	return;
+                  } 
+                  if(!newPwd1.equalsIgnoreCase(newPwd2)) {
+                	  ToastUtils.showToast(context, R.string.password_not_equal);
+                      try {
+                    		keepDialog(dialog, dlg);
+                    	} catch  (Exception e) {
+                    		Log.v(TAG, e.getMessage());
+                    	}
+                 } else {
+                	 String common = CamCmdListHelper.SetCmd_Pwd_State + "PSWD=" + oldPwd + ":PSWD=" + newPwd1 + "\0";
+                	 if(device.getDeviceNetType()) {
+                		DatagramPacket datagramPacket;
+                		byte[] b = new byte[100];
+						try {
+							datagramPacket = new DatagramPacket(common.getBytes(), common.getBytes().length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.send(datagramPacket);
+							DatagramPacket recvPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
+							tmpDatagramSocket.receive(recvPacket);
+							int l = recvPacket.getLength();
+							String rece = new String(b,0,l);
+							if("PSWD_OK".equalsIgnoreCase(rece)) {
+								ToastUtils.showToast(context, R.string.password_modify_success_str);
+	                			Message message = handler.obtainMessage();
+	     	                	message.obj  = newPwd1;
+	     	                	message.what = msgType;
+	     	                	handler.sendMessage(message);
+							}else {
+								 ToastUtils.showToast(context, R.string.password_modify_error_str);
+							}
+						} catch (Exception e) {
+							 ToastUtils.showToast(context, R.string.device_manager_pwd_set_time_out);
+						}finally {
+							try {
+								dismissDialog(dialog, dlg);
+		                  	} catch  (Exception e) {
+		                  		Log.v(TAG, e.getMessage());
+		                  	}
+						}
+                	 } else {
+                		 int result = PackageUtil.setPwd(device, common);
+                		 if(result == 1) {
+                			ToastUtils.showToast(context, R.string.password_modify_success_str);
+                			Message message = handler.obtainMessage();
+     	                	message.obj  = newPwd1;
+     	                	message.what = msgType;
+     	                	handler.sendMessage(message);
+                		 } else {
+                			 ToastUtils.showToast(context, R.string.password_modify_error_str);
+                		 }
+                	 }
+                	try {
+                		dismissDialog(dialog, dlg);
+                  	} catch  (Exception e) {
+                  		Log.v(TAG, e.getMessage());
+                  	}
+                 }
+            }
+        }).setNegativeButton(context.getResources().getString(R.string.cancle_login_str), 
+        new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	 try {
             		 dismissDialog(dialog, dlg);
              	} catch  (Exception e) {
              		Log.v(TAG, e.getMessage());

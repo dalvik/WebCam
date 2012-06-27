@@ -150,6 +150,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	
 	private Button updateSystemTime = null;
 	
+	private Button modifySecurityPwdButton = null;
+	
 	private Map<String, String> paraMap = null; 
 	
 	private DatagramSocket tmpDatagramSocket = null;
@@ -299,6 +301,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 					Log.d(TAG, "CamManagerException = " + e.getLocalizedMessage());
 					return;
 				}
+				break;
+			case Constants.SEND_UPDATE_NEW_PASSWORD_MSG:
+				String newPwd = (String) msg.obj;
+				device.setUnDefine2(newPwd);
+				camManager.updateCam(device);
+				break;
 			default:
 				break;
 			}
@@ -378,10 +386,11 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		dateSetButton = (Button) findViewById(R.id.device_params_other_set_date_id);
 		timeSetButton = (Button) findViewById(R.id.device_params_other_set_time_id);
 		updateSystemTime = (Button) findViewById(R.id.device_params_other_set_system_time_id);
-		
+		modifySecurityPwdButton = (Button) findViewById(R.id.device_params_other_modify_security_pwd_id);
 		dateSetButton.setOnClickListener(this);
 		timeSetButton.setOnClickListener(this);
 		updateSystemTime.setOnClickListener(this);
+		modifySecurityPwdButton.setOnClickListener(this);
 		findViewById(R.id.device_params_set_factory_button_id).setOnClickListener(this);
 		findViewById(R.id.device_params_set_commit_button_id).setOnClickListener(this);
 		findViewById(R.id.device_params_set_concle_button_id).setOnClickListener(this);
@@ -449,6 +458,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_error_str);
 				}
 			}
+			break;
+		case R.id.device_params_other_modify_security_pwd_id:
+			DialogUtils.inputThreadPasswordDialog(DeviceParamSets.this, device, handler, Constants.SEND_UPDATE_NEW_PASSWORD_MSG,tmpDatagramSocket,ip,port1);
 			break;
 		default:
 			break;

@@ -16,8 +16,6 @@ import com.iped.ipcam.pojo.Device;
 
 public class DeviceAdapter extends BaseAdapter {
 
-	private Context context;
-	
 	private Resources res;
 	
 	private List<Device> deviceList = null;
@@ -28,7 +26,6 @@ public class DeviceAdapter extends BaseAdapter {
 	
 	public DeviceAdapter(List<Device> deviceList, Context context) {
 		this.deviceList = deviceList;
-		this.context = context;
 		inflater = LayoutInflater.from(context);
 		res = context.getResources();
 	}
@@ -77,12 +74,12 @@ public class DeviceAdapter extends BaseAdapter {
 		}
 		if(device.getDeviceNetType()) {
 			viewHolder.type.setText(res.getText(R.string.device_manager_add_net_type_wlan_str));
-			viewHolder.ip.setText(res.getText(R.string.device_ip_str) + device.getUnDefine1());
-			viewHolder.gateWay.setText(res.getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
+			//viewHolder.ip.setText(res.getText(R.string.device_ip_str) + device.getUnDefine1());
+			//viewHolder.gateWay.setText(res.getText(R.string.device_gateway_str) + device.getDeviceEthGateWay());
 			viewHolder.id.setText("ID:" + device.getDeviceID());
-			viewHolder.tcp.setText(res.getText(R.string.device_cmd_port_str) + "" + device.getDeviceRemoteCmdPort());
-			viewHolder.udp.setText(res.getText(R.string.device_diveo_port_str) + "" + device.getDeviceRemoteVideoPort());
-			viewHolder.cmd.setText(res.getText(R.string.device_audio_port_str) + "" + device.getDeviceRemoteAudioPort());
+			//viewHolder.tcp.setText(res.getText(R.string.device_cmd_port_str) + "" + device.getDeviceRemoteCmdPort());
+			//viewHolder.udp.setText(res.getText(R.string.device_diveo_port_str) + "" + device.getDeviceRemoteVideoPort());
+			//viewHolder.cmd.setText(res.getText(R.string.device_audio_port_str) + "" + device.getDeviceRemoteAudioPort());
 		} else {
 			viewHolder.type.setText(res.getText(R.string.device_manager_add_net_type_eth_str));
 			viewHolder.ip.setText(res.getText(R.string.device_ip_str) + device.getDeviceEthIp());

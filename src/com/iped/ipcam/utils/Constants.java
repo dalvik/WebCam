@@ -116,6 +116,9 @@ public class Constants {
 	
 	public final static int SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG = 18002;
 	
+	//update new pasword
+	public final static int SEND_UPDATE_NEW_PASSWORD_MSG = 19000;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;
