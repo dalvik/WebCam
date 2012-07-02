@@ -1,5 +1,12 @@
 package com.iped.ipcam.gui;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+
 import android.app.ActivityManager;
 import android.app.TabActivity;
 import android.content.Intent;
@@ -66,6 +73,44 @@ public class WebTabWidget extends TabActivity {
 		}).start();
 		UdtTools.recvFile("192.168.1.101", "5000", "/mnt/sdcard/test.amr", "/mnt/sdcard/abcdeeee.amr");
 		*/
+		/* final String SetCmd_StartVideo_Tcp = "set_transport_type:tcp:PSWD=q"+ "\0";
+		
+		 final String ip = "192.168.1.107";
+		 
+		new Thread() {
+			public void run() {
+				for(;;) {
+					Socket socket = new Socket();
+					byte [] data = SetCmd_StartVideo_Tcp.getBytes();
+					DatagramSocket cmdSocket;
+					try {
+						cmdSocket = new DatagramSocket();
+						cmdSocket.setSoTimeout(1000);
+						DatagramPacket datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), 60000);
+						cmdSocket.send(datagramPacket);
+						//byte[] b = new byte[100];
+						//DatagramPacket dp = new DatagramPacket(b, b.length);
+						//cmdSocket.receive(dp);
+						//int l = dp.getLength();
+						//System.out.println("rece =====> " + new String(b,0,l));
+						//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
+						SocketAddress socketAddress = new InetSocketAddress(ip, 1234);
+						socket.setSoTimeout(10000);
+						socket.connect(socketAddress);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} finally {
+						try {
+							Thread.sleep(16000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}.start();*/
 	}
 	
 	@Override

@@ -272,9 +272,11 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 					intent2.putExtras(bundle2);
 					intent2.setAction(Constants.ACTION_IPPLAY);
 					sendBroadcast(intent2);
-				} else {
+				} else if(checkPwd == -1) {
 					//ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
 					DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				} else {
+					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 				}
 			} else {
 				//TODO
@@ -887,6 +889,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 	}
 	
+	//TODO
 	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
 		Device tempDevice = new Device();
 		tempDevice.setDeviceNetType(true);
@@ -916,7 +919,14 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		String cmd = null;
 		try {
 			cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
-			//System.out.println("cmd=" + cmd);
+			if(cmd == null)  {
+				return;
+			}
+			if("PSWD_FAIL".equals(cmd)) {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+				return;
+			}
+			System.out.println("cmd=" + cmd);
 		} catch (CamManagerException e) {
 			Log.d(TAG, e.getLocalizedMessage());
 			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
@@ -970,6 +980,9 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		String cmd = null;
 		try {
 			cmd = PackageUtil.CMDPackage(CamCmdListHelper.GetCmd_Config + deviceTmp.getUnDefine2() + "\0", deviceTmp.getDeviceEthIp(), deviceTmp.getDeviceLocalCmdPort());
+			if(cmd == null) {
+				return;
+			}
 			//System.out.println("cmd=" + cmd);
 		} catch (Exception e) {
 			Log.d(TAG, e.getLocalizedMessage());

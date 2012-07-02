@@ -20,6 +20,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -48,7 +49,7 @@ import com.iped.ipcam.utils.ToastUtils;
  * @author Administrator
  *
  */
-public class CamVideoH264 extends Activity {
+public class CamVideoH264 extends Activity implements OnClickListener {
 	
 	private boolean flag = true;
 
@@ -196,6 +197,7 @@ public class CamVideoH264 extends Activity {
         
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
+        registerListener(view);
 		rightControlPanel = new ControlPanel(this, myVideoView,  230, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
@@ -206,6 +208,77 @@ public class CamVideoH264 extends Activity {
 	    }
 	}
 
+	private void registerListener(View view) {
+		view.findViewById(R.id.left_up).setOnClickListener(this);
+		view.findViewById(R.id.mid_up).setOnClickListener(this);
+		view.findViewById(R.id.right_up).setOnClickListener(this);
+		view.findViewById(R.id.left).setOnClickListener(this);
+		view.findViewById(R.id.mid).setOnClickListener(this);
+		view.findViewById(R.id.right).setOnClickListener(this);
+		view.findViewById(R.id.left_down).setOnClickListener(this);
+		view.findViewById(R.id.mid_down).setOnClickListener(this);
+		view.findViewById(R.id.right_down).setOnClickListener(this);
+		view.findViewById(R.id.minus_zoom).setOnClickListener(this);
+		view.findViewById(R.id.add_zoom).setOnClickListener(this);
+		view.findViewById(R.id.minus_foucs).setOnClickListener(this);
+		view.findViewById(R.id.add_foucs).setOnClickListener(this);
+		view.findViewById(R.id.minus_apertrue).setOnClickListener(this);
+		view.findViewById(R.id.add_apertrue).setOnClickListener(this);
+	}
+	
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()) {
+		case R.id.left_up:
+			ToastUtils.showToast(CamVideoH264.this, R.string.app_name);
+			break;
+		case R.id.mid_up:
+			
+			break;
+		case R.id.right_up:
+
+			break;
+		case R.id.left:
+			
+			break;
+		case R.id.mid:
+
+			break;
+		case R.id.right:
+			
+			break;
+		case R.id.left_down:
+
+			break;
+		case R.id.mid_down:
+			
+			break;
+		case R.id.right_down:
+
+			break;
+		case R.id.minus_zoom:
+			
+			break;
+		case R.id.add_zoom:
+
+			break;
+		case R.id.minus_foucs:
+			
+			break;
+		case R.id.add_foucs:
+
+			break;
+		case R.id.minus_apertrue:
+			
+			break;
+		case R.id.add_apertrue:
+
+			break;
+			default:
+			break;
+		}
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -232,6 +305,7 @@ public class CamVideoH264 extends Activity {
 		super.onStop();
 	}
 
+	
 	@Override
     protected void onDestroy() {
     	super.onDestroy();

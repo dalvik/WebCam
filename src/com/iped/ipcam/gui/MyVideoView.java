@@ -47,7 +47,7 @@ public class MyVideoView extends View implements Runnable {
 	
 	//private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 	
-	private Bitmap video = Bitmap.createBitmap(600, 800, Config.RGB_565);
+	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
 	
 	byte[] pixel = new byte[NALBUFLENGTH];
 	
@@ -158,7 +158,7 @@ public class MyVideoView extends View implements Runnable {
 			while (!Thread.currentThread().isInterrupted() && result>0 && !stopPlay) {
 				readLengthFromSocket = UdtTools.recvVideoData(socketBuf, SOCKETBUFLENGTH);
 				if (readLengthFromSocket <= 0) { // 读取完成
-					System.out.println("read over break....");
+					System.out.println("video read over break....");
 					break;
 				}
 				sockBufferUsedLength = 0;
@@ -169,10 +169,6 @@ public class MyVideoView extends View implements Runnable {
 						if(nalSizeTemp == -2) {
 							if(nalBufUsedLength>0) {
 								frameCount++;
-								/*if(i%50 ==0) {
-									long end = System.currentTimeMillis() / 1000 - start / 1000;
-									System.out.println("pic index=" + i +" use time" + end +  " rate:" + i/(end)+ " p/s");
-								}*/
 								copyPixl();
 							}
 							nalBuf[0] = -1;
@@ -194,12 +190,19 @@ public class MyVideoView extends View implements Runnable {
 					cmdSocket = new DatagramSocket();
 					cmdSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					String ipAddress = device.getDeviceEthIp();
+					System.out.println(new String(tem));
 					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ipAddress), device.getDeviceLocalCmdPort());
 					cmdSocket.send(datagramPacket);
+					//byte[] b = new byte[100];
+					//DatagramPacket dp = new DatagramPacket(b, b.length);
+					//cmdSocket.receive(dp);
+					//int l = dp.getLength();
+					//System.out.println("rece =====> " + new String(b,0,l));
 					//DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
 					SocketAddress socketAddress = new InetSocketAddress(ipAddress, device.getDeviceLocalVideoPort());
-					System.out.println("in ready rece ...." + ipAddress);
-					socket.connect(socketAddress, Constants.VIDEOSEARCHTIMEOUT);
+					socket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
+					System.out.println("in ready rece ...." + ipAddress + " " + device.getDeviceLocalVideoPort());
+					socket.connect(socketAddress);
 					if(videoDis != null) {
 						videoDis.close();
 					}
@@ -226,7 +229,7 @@ public class MyVideoView extends View implements Runnable {
 					} catch (IOException e) {
 						e.printStackTrace();
 						releaseTcpSocket(videoDis, socket);
-						System.out.println("read exception break....");
+						System.out.println("read exception break...." + e.getMessage());
 						break;
 					}
 					if (readLengthFromSocket <= 0) { // 读取完成
