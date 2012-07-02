@@ -3,6 +3,7 @@ package com.iped.ipcam.gui;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -22,10 +23,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.iped.ipcam.engine.CamMagFactory;
+import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
@@ -33,6 +39,7 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
+import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
 
 /**
      H.264的功能分为两层，
@@ -86,6 +93,14 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	private Device device = null;
 	
 	private static ThroughNetUtil netUtil = null;
+	
+	private ListView listView = null;
+	
+	private VideoPreviewDeviceAdapter previewDeviceAdapter = null;
+	
+	private ICamManager camManager = null;
+	
+	private List<Device> list;
 	
 	private String TAG = "CamVideoH264";
 	
@@ -179,6 +194,7 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 		thread.start();
 	}
 	
+	private View v = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -197,10 +213,19 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
+        v = view;
+        listView = (ListView)view.findViewById(R.id.video_preview_list);
         registerListener(view);
+        System.out.println("view.getMeasuredWidth()=" + view.getMeasuredWidth());
 		rightControlPanel = new ControlPanel(this, myVideoView,  220, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
+		camManager = CamMagFactory.getCamManagerInstance();
+		list = camManager.getCamList();
+		System.out.println("camManager.getCamList()=" + camManager.getCamList().size());
+		previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, this);
+		listView.setAdapter(previewDeviceAdapter);
+		listView.setOnItemClickListener(itemClickListener);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {
@@ -225,6 +250,18 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 		view.findViewById(R.id.minus_apertrue).setOnClickListener(this);
 		view.findViewById(R.id.add_apertrue).setOnClickListener(this);
 	}
+	
+	private OnItemClickListener itemClickListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int index,
+				long arg3) {
+			listView.requestFocusFromTouch();
+			listView.setSelection(index);
+			camManager.setSelectInde(index);
+			previewDeviceAdapter.notifyDataSetChanged();	
+		}
+	};
 	
 	@Override
 	public void onClick(View v) {
@@ -282,6 +319,9 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		 System.out.println("view.getMeasuredWidth() vvvvvvvv =" + v.getMeasuredWidth());
+		list = camManager.getCamList();
+		previewDeviceAdapter.notifyDataSetChanged();
 		leftUpButton = (Button) findViewById(R.id.left_up);
 		if(leftUpButton != null) {
 			leftUpButton.measure(0, 0);

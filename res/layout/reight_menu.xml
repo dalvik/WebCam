@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@color/darkgray">
     
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</ScrollView>
+ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/darkgray"
+    android:scrollbars="horizontal"
     android:orientation="vertical" >
 
     <TableLayout
         android:id="@+id/user_input"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="wrap_content">
 
         <TableRow >
             <Button android:id="@+id/left_up" 
@@ -143,5 +148,13 @@
                 android:text="+"/>
         </TableRow>
     </TableLayout>
-</RelativeLayout>
-</ScrollView>
+    
+    <ListView android:id="@+id/video_preview_list"
+        android:layout_below="@+id/user_input"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/darkgray"
+        android:scrollbars="horizontal"
+        android:cacheColorHint="@color/darkgray"/>
+</LinearLayout>
+    

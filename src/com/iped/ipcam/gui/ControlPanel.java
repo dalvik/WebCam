@@ -1,15 +1,12 @@
 package com.iped.ipcam.gui;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 
 public class ControlPanel extends LinearLayout implements OnClickListener{
 
@@ -31,6 +28,7 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	
 	private LinearLayout panelContainer;
 	
+	
 	public ControlPanel(Context context, View videoView, int width, int height) {
 		super(context);
 		// 改变ControlPanel附近组件的属性
@@ -46,10 +44,12 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		this.setOrientation(LinearLayout.HORIZONTAL);
 		
 		buttonHandle = new Button(context);
-		buttonHandle.setText("c");
+		//buttonHandle.setBackgroundResource(R.drawable.left);
+		buttonHandle.setText("<");
 		LayoutParams textParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
 		textParams.gravity  = Gravity.CENTER_VERTICAL|Gravity.CENTER;
 		buttonHandle.setLayoutParams(textParams);
+		buttonHandle.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER);
 		buttonHandle.setOnClickListener(this);
 		this.addView(buttonHandle);
 		panelContainer = new LinearLayout(context);
@@ -63,8 +63,10 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		LayoutParams lp = (LayoutParams)ControlPanel.this.getLayoutParams();
 		if(lp.rightMargin<0) {// close status
 			new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
+			buttonHandle.setText(">");
 		} else { //open status
 			new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
+			buttonHandle.setText("<");
 		}
 	}
 

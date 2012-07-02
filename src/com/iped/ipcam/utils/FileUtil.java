@@ -215,7 +215,7 @@ public class FileUtil {
 				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
 				device.setUnDefine2(info[9].equals("null")?null:info[9]);
 				deviceList.add(device);
-				System.out.println("get device form file "  + device);
+				//System.out.println("get device form file "  + device);
 			}
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());
