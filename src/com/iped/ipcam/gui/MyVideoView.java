@@ -25,7 +25,7 @@ import android.media.AudioTrack;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
+import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
@@ -33,7 +33,7 @@ import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.ThroughNetUtil;
 
-public class MyVideoView extends View implements Runnable {
+public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int NALBUFLENGTH = 320*480 * 2 ; //600*800*2
 	
@@ -98,10 +98,15 @@ public class MyVideoView extends View implements Runnable {
 	private String deviceId = "";
 	
 	private Paint textPaint ;
+
+	private int temWidth;
+	
+	private int temHeigth;
 	
 	public MyVideoView(Context context) {
 		super(context);
 	}
+	
 	
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -112,7 +117,7 @@ public class MyVideoView extends View implements Runnable {
 
 	void init(Handler handler,int w, int h) {
 		this.handler = handler;
-		rect = new Rect(0, 0, w, h-20);
+		rect = new Rect(0, 0, getWidth(), getHeight()-10);
 	}
 	
 	
@@ -120,6 +125,10 @@ public class MyVideoView extends View implements Runnable {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		if(video != null) {
+			if(temWidth != getWidth()) {
+				temWidth = getWidth();
+				rect = new Rect(0, 0, getWidth(), getHeight()-10);
+			}
 			canvas.drawBitmap(video, null, rect, null);
 		}
 		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 20, textPaint);
@@ -473,6 +482,7 @@ public class MyVideoView extends View implements Runnable {
 			}
 		}
 	}
+	
 	public void setDevice(Device device) {
 		this.device = device;
 	}

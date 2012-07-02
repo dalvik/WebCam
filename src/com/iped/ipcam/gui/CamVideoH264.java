@@ -198,7 +198,7 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
         registerListener(view);
-		rightControlPanel = new ControlPanel(this, myVideoView,  230, LayoutParams.FILL_PARENT);
+		rightControlPanel = new ControlPanel(this, myVideoView,  220, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -297,7 +297,6 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
         myVideoView.init(mHandler,screenWidth, screenHeight);
-        System.out.println(screenHeight);
 	}
 	
 	@Override

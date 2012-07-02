@@ -11,24 +11,27 @@
 
     <TableLayout
         android:id="@+id/user_input"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
         <TableRow >
             <Button android:id="@+id/left_up" 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/transport"/>
+                android:text="左上"
+                android:visibility="invisible"/>
             
             <Button android:id="@+id/mid_up" 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="中上"/>
+                android:textSize="12dp"
+                android:text="↑"/>
             
             <Button android:id="@+id/right_up" 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/transport"/>
+                android:text="右上"
+                android:visibility="invisible"/>
         </TableRow>
 
 
@@ -37,19 +40,22 @@
                 android:id="@+id/left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="左"/>
+                android:textSize="12dp"
+                android:text="←"/>
             
             <Button 
                 android:id="@+id/mid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/transport"/>
+                android:text="中"
+                android:visibility="invisible"/>
             
             <Button 
                 android:id="@+id/right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="右"/>
+                android:textSize="12dp"
+                android:text="→"/>
         </TableRow>
         
         <TableRow >
@@ -57,19 +63,22 @@
                 android:id="@+id/left_down"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/transport"/>
+                android:text="左下"
+                android:visibility="invisible"/>
             
             <Button 
                 android:id="@+id/mid_down"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="中下"/>
+                android:text="↓"
+                android:textSize="12dp"/>
             
             <Button 
                 android:id="@+id/right_down"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/transport"/>
+                android:text="右下"
+                android:visibility="invisible"/>
         </TableRow>
         <TableRow >
         </TableRow>
@@ -84,6 +93,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@color/black"
+                android:textSize="12dp"
                 android:text="变倍"/>
             
             <Button 
@@ -103,6 +113,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@color/black"
+                android:textSize="12dp"
                 android:text="聚焦"/>
             
             <Button 
@@ -122,6 +133,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@color/black"
+                android:textSize="12dp"
                 android:text="光圈"/>
             
             <Button 
