@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,6 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
@@ -69,8 +71,6 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	private int screenHeight = 0;
 	
 	private IpPlayReceiver ipPlayReceiver = null;
-	
-	private Button leftUpButton = null;
 	
 	private ControlPanel rightControlPanel = null;
 	
@@ -194,8 +194,6 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 		thread.start();
 	}
 	
-	private View v = null;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -213,16 +211,17 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
-        v = view;
         listView = (ListView)view.findViewById(R.id.video_preview_list);
         registerListener(view);
-        System.out.println("view.getMeasuredWidth()=" + view.getMeasuredWidth());
-		rightControlPanel = new ControlPanel(this, myVideoView,  220, LayoutParams.FILL_PARENT);
+        int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
+        int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
+        view.measure(w, h);
+        int width =view.getMeasuredWidth();
+		rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
 		camManager = CamMagFactory.getCamManagerInstance();
 		list = camManager.getCamList();
-		System.out.println("camManager.getCamList()=" + camManager.getCamList().size());
 		previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, this);
 		listView.setAdapter(previewDeviceAdapter);
 		listView.setOnItemClickListener(itemClickListener);
@@ -319,14 +318,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		 System.out.println("view.getMeasuredWidth() vvvvvvvv =" + v.getMeasuredWidth());
 		list = camManager.getCamList();
 		previewDeviceAdapter.notifyDataSetChanged();
-		leftUpButton = (Button) findViewById(R.id.left_up);
-		if(leftUpButton != null) {
-			leftUpButton.measure(0, 0);
-			rightControlPanel.updateControlView(leftUpButton.getMeasuredWidth() * 3);
-		}
 	}
 	
 	@Override

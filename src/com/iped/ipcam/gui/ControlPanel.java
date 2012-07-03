@@ -13,10 +13,10 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	private LayoutParams lp = null;
 	
 	/** Handle的宽度，与Panel等高 */
-	private final static int HANDLE_WIDTH = 30;
+	public final static int HANDLE_WIDTH = 30;
 	
 	/** 每次自动展开/收缩的范围 */
-	private final static int MOVE_WIDTH = 20;
+	private final static int MOVE_WIDTH = 10;
 	
 	private int nRightMargin = 0;
 	
@@ -44,10 +44,8 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		this.setOrientation(LinearLayout.HORIZONTAL);
 		
 		buttonHandle = new Button(context);
-		//buttonHandle.setBackgroundResource(R.drawable.left);
 		buttonHandle.setText("<");
 		LayoutParams textParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
-		textParams.gravity  = Gravity.CENTER_VERTICAL|Gravity.CENTER;
 		buttonHandle.setLayoutParams(textParams);
 		buttonHandle.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER);
 		buttonHandle.setOnClickListener(this);
