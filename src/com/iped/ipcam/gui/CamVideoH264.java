@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,13 +22,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
@@ -38,10 +35,12 @@ import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DialogUtils;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
+
 
 /**
      H.264的功能分为两层，
@@ -60,8 +59,6 @@ import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
  */
 public class CamVideoH264 extends Activity implements OnClickListener {
 	
-	private boolean flag = true;
-
 	//private VideoView videoView = null;
 	
 	private MyVideoView myVideoView = null;
@@ -173,6 +170,26 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 				ToastUtils.showToast(CamVideoH264.this, R.string.connection_error);
 				hideProgressDlg();
 				break;
+			case Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG:
+			case Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG:
+				Device device = camManager.getSelectDevice();
+				String pwd = (String) msg.obj;
+				device.setUnDefine2(pwd);
+				int checkPwd = PackageUtil.checkPwd(device);
+				if(checkPwd == 1) {
+					camManager.updateCam(device);
+					Intent intent2 = new Intent();
+					Bundle bundle2 = new Bundle();
+					bundle2.putString("PLVIDEOINDEX",""); 
+					bundle2.putSerializable("IPPLAY", device);
+					intent2.putExtras(bundle2);
+					intent2.setAction(Constants.ACTION_IPPLAY);
+					sendBroadcast(intent2);
+				} else {
+					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
+				}
+				break;
+				
 			default:
 				break;
 			}
@@ -216,7 +233,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
         int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
         view.measure(w, h);
-        int width =view.getMeasuredWidth();
+        int width =view.getMeasuredWidth(); //
+        //int height = view.getMeasuredHeight();
 		rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
 		rightControlPanel.fillPanelContainer(view);
@@ -258,7 +276,51 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 			listView.requestFocusFromTouch();
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
-			previewDeviceAdapter.notifyDataSetChanged();	
+			Device device = previewDeviceAdapter.getItem(index);
+			if(device == null) {
+				System.out.println("device = " + device);
+				ToastUtils.showToast(CamVideoH264.this, R.string.device_params_info_no_device_str);
+				return ;
+			}
+			if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
+				int checkPwd = PackageUtil.checkPwd(device);
+				Log.d(TAG, "MENU_PREVIEW checkpwd = " + checkPwd);
+				if(checkPwd == 1) {
+					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+					Intent intent2 = new Intent();
+					Bundle bundle2 = new Bundle();
+					bundle2.putString("PLVIDEOINDEX",""); 
+					bundle2.putSerializable("IPPLAY", device);
+					intent2.putExtras(bundle2);
+					intent2.setAction(Constants.ACTION_IPPLAY);
+					sendBroadcast(intent2);
+				} else if(checkPwd == -1) {
+					//ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+					DialogUtils.inputOnePasswordDialog(CamVideoH264.this, mHandler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				} else {
+					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
+				}
+			}else {
+				int resu = PackageUtil.checkPwdState(device);
+				Log.d(TAG, "device manager onContextItemSelected checkPwdState result = " + resu);
+				if(resu == 0) { // unset
+					DialogUtils.inputTwoPasswordDialog(CamVideoH264.this, device, mHandler, Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG);
+				} else if(resu == 1) {// pwd seted
+					int checkPwd = PackageUtil.checkPwd(device);
+					if(checkPwd == 1) {
+						Message message = mHandler.obtainMessage();
+	                	message.obj  = device.getUnDefine2();
+	                	message.what = Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG;
+					} else {
+						DialogUtils.inputOnePasswordDialog(CamVideoH264.this, mHandler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+					}
+				} else if(resu == 2){
+					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
+					//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				} else {
+					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
+				}
+			}
 		}
 	};
 	
@@ -319,6 +381,7 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	protected void onResume() {
 		super.onResume();
 		list = camManager.getCamList();
+		ToastUtils.setListViewHeightBasedOnChildren(listView);
 		previewDeviceAdapter.notifyDataSetChanged();
 	}
 	
@@ -402,10 +465,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 						} else {
 							String ip = null;
 							String id = bundle.getString("PLVIDEOINDEX");
-							System.out.println(id+"--->");
 							if(!"".equals(id)) {
 								ip = device.getDeviceEthIp();
-								System.out.println(id+"--->" + ip);
 								try {
 									PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_PlayNetFiles + id, ip, Constants.LOCALCMDPORT);
 								} catch (CamManagerException e) {

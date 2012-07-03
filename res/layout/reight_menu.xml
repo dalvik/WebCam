@@ -1,192 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@color/darkgray"
-    android:orientation="vertical" >
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@color/darkgray"
-    android:orientation="vertical" >
-
-    <TableLayout
-        android:id="@+id/user_input"
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="fill_parent" 
+        android:fillViewport="true">
 
-        <TableRow >
-            <Button android:id="@+id/left_up" 
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_left_up"
-                android:visibility="invisible"/>
-            
-            <Button android:id="@+id/mid_up" 
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textSize="12dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_mid_up"/>
-            
-            <Button android:id="@+id/right_up" 
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_right_up"
-                android:visibility="invisible"/>
-        </TableRow>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/darkgray"
+    android:orientation="vertical" >
 
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scroll_view_id"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
 
-        <TableRow >
-            <Button 
-                android:id="@+id/left"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_left"/>
-            
-            <Button 
-                android:id="@+id/mid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_mid"/>
-            
-            <Button 
-                android:id="@+id/right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_right"/>
-        </TableRow>
-        
-        <TableRow >
-            <Button 
-                android:id="@+id/left_down"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_left_down"
-                android:visibility="invisible"/>
-            
-            <Button 
-                android:id="@+id/mid_down"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_left_mid"
-                android:textSize="12dp"/>
-            
-            <Button 
-                android:id="@+id/right_down"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_right_down"
-                android:visibility="invisible"/>
-        </TableRow>
-        <TableRow >
-            <Button 
-                android:id="@+id/minus_zoom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_minus_zoom"/>
-            
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:textSize="12dp"
-                android:text="@string/video_preview_minus_zoom_str"/>
-            
-            <Button 
-                android:id="@+id/add_zoom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_add_zoom"/>
-        </TableRow>
-        <TableRow >
-            <Button 
-                android:id="@+id/minus_foucs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_minus_foucs"/>
-            
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="12dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_minus_foucs_str"/>
-            
-            <Button 
-                android:id="@+id/add_foucs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_add_foucs"/>
-        </TableRow>
-        <TableRow >
-            <Button 
-                android:id="@+id/minus_apertrue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_minus_apertrue"/>
-            
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textSize="12dp"
-                android:text="@string/video_preview_minus_apertrue_str"/>
-            
-            <Button 
-                android:id="@+id/add_apertrue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@string/video_preview_add_apertrue"/>
-        </TableRow>
-    </TableLayout>
-    
-    <ListView android:id="@+id/video_preview_list"
-        android:layout_below="@+id/user_input"
+        <TableLayout
+            android:id="@+id/user_input"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/left_up"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_left_up"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/mid_up"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_mid_up"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/right_up"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_right_up"
+                    android:visibility="invisible" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_left"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/mid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_mid"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_right"
+                    android:textSize="12dp" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/left_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_left_down"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/mid_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_left_mid"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/right_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_right_down"
+                    android:visibility="invisible" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/minus_zoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_zoom" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_zoom_str"
+                    android:textColor="@color/black"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/add_zoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_add_zoom" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/minus_foucs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_foucs" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_foucs_str"
+                    android:textColor="@color/black"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/add_foucs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_add_foucs" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/minus_apertrue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_apertrue" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_minus_apertrue_str"
+                    android:textColor="@color/black"
+                    android:textSize="12dp" />
+
+                <Button
+                    android:id="@+id/add_apertrue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/video_preview_add_apertrue" />
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
+
+    <ListView
+        android:id="@+id/video_preview_list"
+        android:layout_width="fill_parent"
+        android:layout_height="100dip"
+        android:layout_below="@+id/scroll_view_id"
         android:layout_alignParentBottom="true"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
         android:background="@color/darkgray"
-        android:cacheColorHint="@color/darkgray"/>
-    
-    <!-- 
+        android:smoothScrollbar="true"
+        android:cacheColorHint="@color/darkgray" />
+    <!--
     <TextView android:id="@id/android:empty"  
         android:layout_width="fill_parent"  
         android:layout_height="fill_parent"  
@@ -194,8 +215,8 @@
   	    android:layout_alignParentBottom="true"
         android:textColor="@color/yellow"
         android:gravity="center"
-        android:text="@string/video_preview_list_null"/>  
-      -->         
- </RelativeLayout>
-</LinearLayout>
-    
+        android:text="@string/video_preview_list_null"/>  
+    -->
+
+</RelativeLayout>
+</ScrollView>
