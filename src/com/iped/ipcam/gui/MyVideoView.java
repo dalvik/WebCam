@@ -115,14 +115,15 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		rect = new Rect();
 		textPaint = new Paint(Color.RED);
-		textPaint.setTextSize(20);
 		m.setScale(-1,1);
+		rect = new Rect(0, 0, getWidth(), getHeight()-10);
 	}
 
 	void init(Handler handler,int w, int h) {
 		this.handler = handler;
+		textPaint = new Paint(Color.RED);
+		m.setScale(-1,1);
 		rect = new Rect(0, 0, getWidth(), getHeight()-10);
 	}
 	
@@ -136,9 +137,8 @@ public class MyVideoView extends ImageView implements Runnable {
 				rect = new Rect(0, 0, getWidth(), getHeight()-10);
 			}
 			canvas.drawBitmap(video, null, rect, null);
-			//canvas.drawBitmap(video, m, textPaint); 
 		}
-		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 20, textPaint);
+		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
 	}
 	
 	public void run() {
@@ -285,11 +285,18 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 	
 	public void copyPixl() {
-		video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-		if(video != null) {
-			if(reverseFlag) {
-				video = Bitmap.createBitmap(video, 0, 0, video.getWidth(), video.getHeight(), m, true); 
+		
+		if(reverseFlag) {
+			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
+			if(tmp != null) {
+				video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(), tmp.getHeight(), m, true); 
+				postInvalidate();
+				if(!tmp.isRecycled()) {
+					tmp.recycle();
+				}
 			}
+		}else {
+			video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			postInvalidate();
 		}
 	}
