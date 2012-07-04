@@ -201,7 +201,7 @@
     <ListView
         android:id="@+id/video_preview_list"
         android:layout_width="fill_parent"
-        android:layout_height="100dip"
+        android:layout_height="fill_parent"
         android:layout_below="@+id/scroll_view_id"
         android:layout_alignParentBottom="true"
         android:background="@color/darkgray"

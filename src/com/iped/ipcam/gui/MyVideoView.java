@@ -17,6 +17,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioFormat;
@@ -103,6 +104,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int temHeigth;
 	
+	private Matrix m=new Matrix();
+	
+	private boolean reverseFlag = false;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -113,6 +118,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		rect = new Rect();
 		textPaint = new Paint(Color.RED);
 		textPaint.setTextSize(20);
+		m.setScale(-1,1);
 	}
 
 	void init(Handler handler,int w, int h) {
@@ -130,6 +136,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				rect = new Rect(0, 0, getWidth(), getHeight()-10);
 			}
 			canvas.drawBitmap(video, null, rect, null);
+			//canvas.drawBitmap(video, m, textPaint); 
 		}
 		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 20, textPaint);
 	}
@@ -280,6 +287,9 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void copyPixl() {
 		video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 		if(video != null) {
+			if(reverseFlag) {
+				video = Bitmap.createBitmap(video, 0, 0, video.getWidth(), video.getHeight(), m, true); 
+			}
 			postInvalidate();
 		}
 	}
@@ -366,6 +376,15 @@ public class MyVideoView extends ImageView implements Runnable {
 		return stopPlay;
 	}
 	
+	public boolean isReverseFlag() {
+		return reverseFlag;
+	}
+
+	public void setReverseFlag(boolean reverseFlag) {
+		this.reverseFlag = reverseFlag;
+	}
+
+
 	class RecvAudio implements Runnable {
 		
 		private int num = 0;

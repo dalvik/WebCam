@@ -340,7 +340,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 			
 			break;
 		case R.id.mid:
-
+			//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_mid);
+			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
 			break;
 		case R.id.right:
 			
