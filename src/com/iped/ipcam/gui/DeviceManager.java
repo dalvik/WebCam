@@ -28,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -49,7 +50,7 @@ import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 
-public class DeviceManager extends ListActivity implements OnClickListener {
+public class DeviceManager extends ListActivity implements OnClickListener, OnItemLongClickListener {
 
 	private ListView listView = null;
 
@@ -217,6 +218,7 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		listView = getListView();
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(itemClickListener);
+		listView.setOnItemLongClickListener(this);
 		registerForContextMenu(getListView());
 		autoSearchButton.setOnClickListener(this);
 		manulAddButton.setOnClickListener(this);
@@ -410,6 +412,19 @@ public class DeviceManager extends ListActivity implements OnClickListener {
 		}
 	};
 
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		System.out.println("position=" + position);
+		listView.requestFocusFromTouch();
+		lastSelected = position;
+		listView.setSelection(position);
+		camManager.setSelectInde(position);
+		adapter.setChecked(position);
+		adapter.notifyDataSetChanged();	
+		return false;
+	}
+	
 	private void editDevice(final Device device) {
 		final View addDeviceView = initAddNewDeviceView();
 		final EditText newDeviceNameEditText = (EditText) addDeviceView
