@@ -32,6 +32,7 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Common;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
@@ -138,7 +139,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 			canvas.drawBitmap(video, null, rect, null);
 		}
-		canvas.drawText(deviceId + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+		canvas.drawText(deviceId + "  "  + DateUtil.formatTimeToDate5(System.currentTimeMillis()) + "  " + frameCountTemp + " p/s" , 20, 25, textPaint);
 	}
 	
 	public void run() {
@@ -523,6 +524,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				frameCountTemp = "" + frameCount;
 			}
 			frameCount=0;
+			invalidate();
 			handler.postDelayed(calculateFrameTask, 1000);
 		}
 	};

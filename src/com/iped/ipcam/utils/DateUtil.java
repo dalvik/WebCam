@@ -50,6 +50,12 @@ public class DateUtil {
 		return sdf.format(new Date(time));
 	}
 	
+	public static String formatTimeToDate5(long time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return sdf.format(new Date(time));
+	}
+	
+	
 	public static Date formatTimeToDate5(String dateStr) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date date = null;
