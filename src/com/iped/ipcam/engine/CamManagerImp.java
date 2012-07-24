@@ -34,6 +34,8 @@ public class CamManagerImp implements ICamManager {
 	
 	private int  count = 1;
 	
+	private boolean stopFlag = false;
+	
 	private String TAG = "CamManagerImp";
 	
 	public CamManagerImp() {
@@ -177,7 +179,7 @@ public class CamManagerImp implements ICamManager {
 	}
 
 	public void startThread(Handler handler) {
-		stopThread();
+		//stopThread();
 		queryThread = new QueryCamThread(handler);
 		queryThread.setDaemon(true);
 		queryThread.start();
@@ -185,6 +187,7 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public void stopThread() {
+		stopFlag = true;
 		if(queryThread != null && queryThread.isAlive()) {
 			try {
 				queryThread.join(100);
@@ -200,7 +203,7 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	private void updateDeviceList() {
-		queryThread.tes();
+		queryThread.update();
 	}
 	
 	public void dismissAutoSearch() {
@@ -221,9 +224,11 @@ public class CamManagerImp implements ICamManager {
 			this.handler = handler;
 		}
 		
-		public void tes() {
-			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-			System.out.println("update=======>" + deviceList.size());
+		public void update() {
+			if(!stopFlag) {
+				handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+				System.out.println("update=======>" + deviceList.size());
+			}
 		}
 		
 		public void dissmiss() {
@@ -274,30 +279,32 @@ public class CamManagerImp implements ICamManager {
 		public void run() {
 			int i = 0;
 			for(i=index-25; i<=index; i++){
-				if(i>1 && i<255) {
-					//test(String.valueOf(i));
-					String devId = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.LOCALCMDPORT);
-					if(devId != null) {
-						synchronized (deviceList) {
-							addCam(Constants.DEFAULTSEARCHIP + i, devId);
-							updateDeviceList();
-							Log.d(TAG, Constants.DEFAULTSEARCHIP + i + "---------" +  devId);
+					if(i>1 && i<255) {
+						if(!stopFlag) {
+						//test(String.valueOf(i));
+						String devId = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.LOCALCMDPORT);
+						if(devId != null) {
+							synchronized (deviceList) {
+								addCam(Constants.DEFAULTSEARCHIP + i, devId);
+								updateDeviceList();
+								Log.d(TAG, Constants.DEFAULTSEARCHIP + i + "---------" +  devId  + " stopflag=" + stopFlag);
+							}
 						}
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					  }
 					}
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					synchronized (deviceList) {
+						count++;	
 					}
-				}
-				synchronized (deviceList) {
-			      count++;	
-				}
-				//System.out.println(count + " " + i + " " + count/26);
-				if(temp<count/26) {
-					temp = count/26;
-					updateProgress(temp);
-				}
+					//System.out.println(count + " " + i + " " + count/26);
+					if(temp<count/26) {
+						temp = count/26;
+						updateProgress(temp);
+					}
 			}
 			dismissAutoSearch();
 		}

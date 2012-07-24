@@ -113,10 +113,11 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				break;
 			case Constants.HIDETEAUTOSEARCH:
 				hideProgress();
+				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				break;
 			case Constants.UPDATEDEVICELIST:
-				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				adapter.notifyDataSetChanged();
+				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				break;
 			case Constants.DEFAULTUSERSELECT:
 				listView.requestFocusFromTouch();
@@ -370,13 +371,19 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 
 	private void showProgress() {
+		if(progressDialog != null) {
+			hideProgress();
+		}
 		progressDialog = new ProgressDialog(DeviceManager.this);
 		progressDialog.setTitle(getResources().getString(
 				R.string.auto_search_tips_str));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		progressDialog.setCancelable(false);
-		progressDialog.setProgress(1);
+		//progressDialog.setCancelable(false);
 		progressDialog.show();
+		Message msg = handler.obtainMessage();
+		msg.arg1 = 1;
+		msg.what = Constants.UPDATEAUTOSEARCH;
+		handler.sendMessageDelayed(msg, 500);
 	}
 
 	public void hideProgress() {
@@ -392,8 +399,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			hideProgress();
 			camManager.stopThread();
+			hideProgress();
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -415,7 +422,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view,
 			int position, long id) {
-		System.out.println("position=" + position);
 		listView.requestFocusFromTouch();
 		lastSelected = position;
 		listView.setSelection(position);
@@ -493,7 +499,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	@Override
 	protected void onDestroy() {
-		FileUtil.persistentDevice(this,camManager.getCamList());
 		super.onDestroy();
 	}
 	
