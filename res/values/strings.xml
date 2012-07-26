@@ -99,6 +99,10 @@
     		<string name="device_manager_add_query_title_str">设备查询</string>
     		<string name="device_manager_add_query_message_str">请稍后</string>
     	<string name="clear_all_str">全部清除</string>	
+    		<string name="clear_all_device_title_str">清空设备列表</string>
+    		<string name="clear_all_device_message_str">确定清空设备列表吗</string>
+    		<string name="clear_all_device_ok_str">确定</string>
+    		<string name="clear_all_device_cancle_str">取消</string>
     	<string name="device_edit_str">取消</string>	
     	<string name="device_del_str">删除</string>	
     	<string name="device_preview_str">预览</string>	

@@ -73,14 +73,19 @@
             </TableRow>
         </TableLayout>
 
- 		
+ 		<LinearLayout
+		       xmlns:android="http://schemas.android.com/apk/res/android"
+		       android:id="@+id/device_id_param_layout"
+		       android:layout_width="fill_parent"
+		       android:layout_height="wrap_content"
+		       android:orientation="vertical" >
+            
          <TableLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:padding="3dip"
             android:stretchColumns="1,3" >
 
-             
             <TableRow >
 
                 <TextView
@@ -116,6 +121,15 @@
             android:layout_height="3dp"
             android:background="?android:attr/listDivider" />
 
+ 		</LinearLayout>
+ 		
+        <LinearLayout
+		       xmlns:android="http://schemas.android.com/apk/res/android"
+		       android:id="@+id/subnet_param_layout"
+		       android:layout_width="fill_parent"
+		       android:layout_height="wrap_content"
+		       android:orientation="vertical" >
+         
         <TableLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -229,6 +243,7 @@
             android:layout_width="fill_parent"
             android:layout_height="3px"
             android:background="?android:attr/listDivider" />
+       </LinearLayout>
 <!-- -->
 <!-- 
         <TextView
