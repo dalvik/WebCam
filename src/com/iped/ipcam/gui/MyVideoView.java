@@ -291,6 +291,9 @@ public class MyVideoView extends ImageView implements Runnable {
 			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			if(tmp != null) {
 				video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(), tmp.getHeight(), m, true); 
+				//Matrix m1 = new Matrix();
+				m.setRotate(180); 
+				//video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(), tmp.getHeight(), m1, true); 
 				postInvalidate();
 				if(!tmp.isRecycled()) {
 					tmp.recycle();
