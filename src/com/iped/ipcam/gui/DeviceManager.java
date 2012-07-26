@@ -1,7 +1,9 @@
 package com.iped.ipcam.gui;
 
 import java.lang.reflect.Field;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,6 +35,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -40,6 +43,7 @@ import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
@@ -360,10 +364,27 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 				}
 			}
+			
 			break;
 		case R.id.clear_all_button:
-			camManager.clearCamList();
-			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+			if(camManager.getCamList().size()>0) {
+				new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.clear_all_device_title_str))
+				.setMessage(getResources().getString(R.string.clear_all_device_message_str))
+				.setPositiveButton(getResources().getString(R.string.clear_all_device_ok_str),
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						camManager.clearCamList();
+						handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+					}
+				}).setNegativeButton(getResources().getString(R.string.clear_all_device_cancle_str), 
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						
+					}
+				})
+				.create().show();
+			}
+	        
 		default:
 			break;
 		}
@@ -596,7 +617,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	}
 
 	private void updateComponentState(View addDeviceView, final boolean isChecked) {
-		EditText deviceId = (EditText) addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext);
+		LinearLayout paramSubnetLayout = (LinearLayout) addDeviceView.findViewById(R.id.subnet_param_layout);
+		LinearLayout deviceIdLayout = (LinearLayout) addDeviceView.findViewById(R.id.device_id_param_layout);
+		if(isChecked) {
+			paramSubnetLayout.setVisibility(View.GONE);
+			deviceIdLayout.setVisibility(View.VISIBLE);
+		} else {
+			paramSubnetLayout.setVisibility(View.VISIBLE);
+			deviceIdLayout.setVisibility(View.GONE);
+		}
+		/*EditText deviceId = (EditText) addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext);
 		EditText addrId = (EditText)addDeviceView.findViewById(R.id.device_manager_new_addr_id);
 		EditText gateWay = (EditText) addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id);
 		EditText dns1 = (EditText) addDeviceView.findViewById(R.id.device_manager_new_dns1_id);
@@ -710,7 +740,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				}
 			  }
 			});
-		}
+		}*/
 	}
 
 	private void unCloseDialog(AlertDialog dialog, int id, boolean flag) {
