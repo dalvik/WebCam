@@ -69,6 +69,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	
 	private IpPlayReceiver ipPlayReceiver = null;
 	
+	private UpdeviceListReceiver updeviceListReceiver = null;
+	
 	private ControlPanel rightControlPanel = null;
 	
 	private Thread thread = null;
@@ -222,6 +224,8 @@ public class CamVideoH264 extends Activity implements OnClickListener {
         setContentView(R.layout.pre_videoview);
         ipPlayReceiver = new IpPlayReceiver();
         registerReceiver(ipPlayReceiver, new IntentFilter(Constants.ACTION_IPPLAY));
+        updeviceListReceiver = new UpdeviceListReceiver(); 
+        registerReceiver(updeviceListReceiver, new IntentFilter(Constants.SEND_DEVICE_LIST_UPDATE_ACTION));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler,screenWidth, screenHeight);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
@@ -240,9 +244,9 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 		rightControlPanel.fillPanelContainer(view);
 		camManager = CamMagFactory.getCamManagerInstance();
 		list = camManager.getCamList();
+		listView.setOnItemClickListener(itemClickListener);
 		previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, this);
 		listView.setAdapter(previewDeviceAdapter);
-		listView.setOnItemClickListener(itemClickListener);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {
@@ -381,9 +385,6 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		list = camManager.getCamList();
-		ToastUtils.setListViewHeightBasedOnChildren(listView);
-		previewDeviceAdapter.notifyDataSetChanged();
 	}
 	
 	@Override
@@ -410,6 +411,10 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 		if(ipPlayReceiver != null) {
 			unregisterReceiver(ipPlayReceiver);
 		}
+		if(updeviceListReceiver != null) {
+			unregisterReceiver(updeviceListReceiver);
+		}
+		
 		if(thread != null && !thread.isAlive()) {
 			try {
 				thread.join(100);
@@ -444,6 +449,19 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 			m_Dialog.dismiss();
 		}
 	}
+	
+	private class UpdeviceListReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(Constants.SEND_DEVICE_LIST_UPDATE_ACTION.equals(intent.getAction())) {
+				previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, CamVideoH264.this);
+				listView.setAdapter(previewDeviceAdapter);
+				ToastUtils.setListViewHeightBasedOnChildren(listView);
+			}
+			
+		}	
+		
+	};
 	
 	private class IpPlayReceiver extends BroadcastReceiver {
 

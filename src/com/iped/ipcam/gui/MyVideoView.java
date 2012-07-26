@@ -103,7 +103,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private int temWidth;
 	
-	private int temHeigth;
+	//private int temHeigth;
 	
 	private Matrix m=new Matrix();
 	

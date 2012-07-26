@@ -138,6 +138,11 @@ public class Constants {
 	
 	public final static int SENDGETUNFULLPACKAGEMSG = 4700;
 	
+	//设备列表更新通知
+	public final static String SEND_DEVICE_LIST_UPDATE_ACTION = "android.intent.action.UPDATE_DEVICES_ACTION";
+	
+	public final static int SEND_UPDATE_DEVICE_LIST_MSG = 5000;
+	
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 	

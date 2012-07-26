@@ -1,9 +1,7 @@
 package com.iped.ipcam.gui;
 
 import java.lang.reflect.Field;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,8 +14,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -43,7 +39,6 @@ import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
@@ -122,6 +117,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			case Constants.UPDATEDEVICELIST:
 				adapter.notifyDataSetChanged();
 				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
+				handler.sendEmptyMessageDelayed(Constants.SEND_UPDATE_DEVICE_LIST_MSG, 200);
 				break;
 			case Constants.DEFAULTUSERSELECT:
 				listView.requestFocusFromTouch();
@@ -201,6 +197,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				break;
 			case Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG:
 				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, deviceTmp, handler, Constants.SEND_ADD_NEW_DEVICE_BY_IP_MSG);
+				break;
+			case Constants.SEND_UPDATE_DEVICE_LIST_MSG:
+				sendBroadcast(new Intent(Constants.SEND_DEVICE_LIST_UPDATE_ACTION));
 				break;
 			default:
 				break;
