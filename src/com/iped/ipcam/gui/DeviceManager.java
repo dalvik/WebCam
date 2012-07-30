@@ -171,6 +171,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				int checkPwd = PackageUtil.checkPwd(device);
 				if(checkPwd == 1) {
 					camManager.updateCam(device);
+					FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 					Intent intent2 = new Intent();
 					Bundle bundle2 = new Bundle();
@@ -190,6 +191,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			case Constants.SEND_ADD_NEW_DEVICE_BY_IP_MSG:
 				String pass = (String) message.obj;
 				deviceTmp.setUnDefine2(pass);
+				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				queryDeiceConfigByIp();
 				break;
 			case Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG:
@@ -625,121 +627,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			paramSubnetLayout.setVisibility(View.VISIBLE);
 			deviceIdLayout.setVisibility(View.GONE);
 		}
-		/*EditText deviceId = (EditText) addDeviceView.findViewById(R.id.device_manager_new_device_id_edittext);
-		EditText addrId = (EditText)addDeviceView.findViewById(R.id.device_manager_new_addr_id);
-		EditText gateWay = (EditText) addDeviceView.findViewById(R.id.device_manager_new_gateway_addr_id);
-		EditText dns1 = (EditText) addDeviceView.findViewById(R.id.device_manager_new_dns1_id);
-		EditText dns2 = (EditText) addDeviceView.findViewById(R.id.device_manager_new_dns2_id);
-		EditText mask = (EditText) addDeviceView.findViewById(R.id.device_manager_new_sub_net_addr_id);
-		if(isChecked) {
-			deviceId.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return null;   
-				}
-			  }
-			});
-			
-			addrId.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			gateWay.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			dns1.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			dns2.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			mask.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-		} else {
-			deviceId.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			addrId.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return null;   
-				}
-			  }
-			});
-			
-			gateWay.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			dns1.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			dns2.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return source.length() < 1 ? dest.subSequence(dstart, dend) : "";   
-				}
-				}
-			});
-			
-			mask.setFilters(new InputFilter[] {new InputFilter(){
-				@Override
-				public CharSequence filter(CharSequence source, int start, int end,
-						Spanned dest, int dstart, int dend) {
-					return null;   
-				}
-			  }
-			});
-		}*/
 	}
 
 	private void unCloseDialog(AlertDialog dialog, int id, boolean flag) {
