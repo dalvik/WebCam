@@ -325,4 +325,33 @@ public class PackageUtil {
 		return -2; // time out
 		
 	}
+
+	public static boolean sendPTZCommond(DatagramSocket socket, ThroughNetUtil netUtil, Device device, int commId) {
+		byte[] ptzCommonName = CamCmdListHelper.SetCmdPTZ.getBytes();//name
+		int ptzCommonNameLength = ptzCommonName.length;
+		byte[] common = CamCmdListHelper.ptzMap.get(commId);//comm
+		int commLength = common.length;
+		byte[] ptzCommonByte  = new byte[ptzCommonNameLength + commLength + 2];
+		byte check = 0;
+		for(int i=1;i<commLength;i++) {
+			check ^= common[i];
+		}
+		ptzCommonByte[ptzCommonByte.length - 2] = check;
+		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0, ptzCommonNameLength);
+		System.arraycopy(common, 0, ptzCommonByte, ptzCommonNameLength, commLength);
+		if(device.getDeviceNetType())  {//out
+			
+		} else { //in
+			try {
+				DatagramPacket datagramPacket = new DatagramPacket(ptzCommonByte, ptzCommonByte.length, InetAddress.getByName(device.getDeviceEthIp()), device.getDeviceLocalCmdPort());
+				System.out.println(new String(ptzCommonByte));
+				socket.send(datagramPacket);
+				return true;
+			} catch (Exception e) {
+				Log.d(TAG, e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
 }

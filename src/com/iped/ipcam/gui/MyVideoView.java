@@ -79,7 +79,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private DatagramSocket cmdSocket = null;
 	
-	private boolean stopPlay = false;
+	private boolean stopPlay = true;
 
 	private int result = -1;
 	
@@ -160,6 +160,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				result = UdtTools.initSocket(ipAdd, localPort2, device.getDeviceRemoteVideoPort(), audioSocket.getLocalPort(), device.getDeviceRemoteAudioPort(), RECEAUDIOBUFFERSIZE,RECEAUDIOBUFFERSIZE);
 				System.out.println("socket init result = " + result);
 				handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+				stopPlay = false;
 			}catch (IOException e) {
 				Log.d(TAG, "IOException " + e.getMessage());
 				onStop();
@@ -226,6 +227,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					videoDis = new DataInputStream(socket.getInputStream());
 					handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 					System.out.println("dis=" + videoDis);
+					stopPlay = false;
 				}catch (IOException e) {
 					Log.d(TAG, "IOException " + e.getMessage());
 					releaseTcpSocket(videoDis, socket);
@@ -343,6 +345,10 @@ public class MyVideoView extends ImageView implements Runnable {
 		flushBitmap();
 	}
 
+	public boolean isStop() {
+		return stopPlay;
+	}
+	
 	private void release() {
 		UdtTools.release();
 		if(fis != null) {
@@ -394,6 +400,12 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void setReverseFlag(boolean reverseFlag) {
 		this.reverseFlag = reverseFlag;
 	}
+
+
+	public DatagramSocket getCmdSocket() {
+		return cmdSocket;
+	}
+
 
 
 	class RecvAudio implements Runnable {

@@ -1,5 +1,8 @@
 package com.iped.ipcam.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CamCmdListHelper {
 
 	public final static String QueryCmd_Online = "get_firmware_info:0";
@@ -29,7 +32,18 @@ public class CamCmdListHelper {
 	
 	public final static String SetCmd_Set_Time = "SetTime:";
 	
+	public final static String SetCmdPTZ = "Rs485Cmd:";
 	
+	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();
 	
+	//public static byte[] ptzHeader = new byte[]{0x8,(byte) 0xa0,0x0};
+	
+	static {
+		ptzMap.put(WinTaiCmd.PTZ_CMD_UP.ordinal(), new byte[]{0x8,(byte) 0xa0,0x0,0x00,0x08,0x00,0x30,(byte) 0xaf});
+		ptzMap.put(WinTaiCmd.PTZ_CMD_DOWN.ordinal(), new byte[]{0x8,(byte) 0xa0,0x0,0x00,0x10,0x00,0x30,(byte) 0xaf});
+		ptzMap.put(WinTaiCmd.PTZ_CMD_LEFT.ordinal(), new byte[]{0x8,(byte) 0xa0,0x0,0x00,0x04,0x30,0x00,(byte) 0xaf});
+		ptzMap.put(WinTaiCmd.PTZ_CMD_RIGHT.ordinal(), new byte[]{0x8,(byte) 0xa0,0x0,0x00,0x02,0x30,0x00,(byte) 0xaf});
+		ptzMap.put(WinTaiCmd.PTZ_CMD_STOP.ordinal(), new byte[]{0x8,(byte) 0xa0,0x0, 0x00,0x00,0x00,0x00,(byte) 0xaf});
+	}
 	
 }

@@ -20,10 +20,14 @@ import android.os.PowerManager.WakeLock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -40,6 +44,7 @@ import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
+import com.iped.ipcam.utils.WinTaiCmd;
 
 
 /**
@@ -57,7 +62,7 @@ import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
  * @author Administrator
  *
  */
-public class CamVideoH264 extends Activity implements OnClickListener {
+public class CamVideoH264 extends Activity implements OnClickListener, OnFocusChangeListener, OnTouchListener {
 	
 	//private VideoView videoView = null;
 	
@@ -255,15 +260,28 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	}
 
 	private void registerListener(View view) {
-		view.findViewById(R.id.left_up).setOnClickListener(this);
-		view.findViewById(R.id.mid_up).setOnClickListener(this);
-		view.findViewById(R.id.right_up).setOnClickListener(this);
-		view.findViewById(R.id.left).setOnClickListener(this);
+		Button up = (Button) view.findViewById(R.id.mid_up); 
+		//up.setOnFocusChangeListener(this);
+		//up.setOnClickListener(this);
+		up.setOnTouchListener(this);
+		
+		Button down = (Button) view.findViewById(R.id.mid_down);
+		//down.setOnClickListener(this);
+		//down.setOnFocusChangeListener(this);
+		down.setOnTouchListener(this);
+		
+		Button left = (Button) view.findViewById(R.id.left);
+		//left.setOnClickListener(this);
+		//left.setOnFocusChangeListener(this);
+		left.setOnTouchListener(this);
+		
+		Button right = (Button) view.findViewById(R.id.right);
+		//right.setOnClickListener(this);
+		//right.setOnFocusChangeListener(this);
+		right.setOnTouchListener(this);
+		
 		view.findViewById(R.id.mid).setOnClickListener(this);
-		view.findViewById(R.id.right).setOnClickListener(this);
-		view.findViewById(R.id.left_down).setOnClickListener(this);
-		view.findViewById(R.id.mid_down).setOnClickListener(this);
-		view.findViewById(R.id.right_down).setOnClickListener(this);
+		
 		view.findViewById(R.id.minus_zoom).setOnClickListener(this);
 		view.findViewById(R.id.add_zoom).setOnClickListener(this);
 		view.findViewById(R.id.minus_foucs).setOnClickListener(this);
@@ -330,30 +348,82 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 	
 	@Override
 	public void onClick(View v) {
+		//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_mid);
+		myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
+		//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+		
+	}
+	
+
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		System.out.println("hasFocus" + hasFocus);
+		switch (v.getId()) {
+		case R.id.mid_up:
+		case R.id.left:
+		case R.id.right:
+		case R.id.mid_down:
+			if(!hasFocus) {
+				if(!myVideoView.isStop()) {
+					//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		System.out.println("is stop = " + myVideoView.isStop());
+		if(myVideoView.isStop()) {
+			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
+			return false;
+		}
 		switch(v.getId()) {
 		case R.id.left_up:
-			ToastUtils.showToast(CamVideoH264.this, R.string.app_name);
 			break;
 		case R.id.mid_up:
-			
+			if(event.getAction() == MotionEvent.ACTION_DOWN) {
+				System.out.println("down");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_UP.ordinal());
+			} else if(event.getAction() == MotionEvent.ACTION_UP) {
+				System.out.println("up");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+			}
 			break;
 		case R.id.right_up:
 
 			break;
 		case R.id.left:
-			
-			break;
-		case R.id.mid:
-			//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_mid);
-			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
+			if(event.getAction() == MotionEvent.ACTION_DOWN) {
+				System.out.println("down");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+			} else if(event.getAction() == MotionEvent.ACTION_UP) {
+				System.out.println("up");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+			}
 			break;
 		case R.id.right:
-			
+			if(event.getAction() == MotionEvent.ACTION_DOWN) {
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
+			} else if(event.getAction() == MotionEvent.ACTION_UP) {
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+			}
 			break;
 		case R.id.left_down:
 
 			break;
 		case R.id.mid_down:
+			if(event.getAction() == MotionEvent.ACTION_DOWN) {
+				System.out.println("down");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_DOWN.ordinal());
+			} else if(event.getAction() == MotionEvent.ACTION_UP) {
+				System.out.println("up");
+				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+			}
 			
 			break;
 		case R.id.right_down:
@@ -380,6 +450,7 @@ public class CamVideoH264 extends Activity implements OnClickListener {
 			default:
 			break;
 		}
+		return false;
 	}
 	
 	@Override
