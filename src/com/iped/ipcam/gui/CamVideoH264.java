@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
@@ -203,7 +204,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
 				}
 				break;
-				
+			case Constants.SEND_UPDATE_BCV_INFO_MSG:
+				Bundle bcvInfo = msg.getData();
+				if(bcvInfo != null) {
+					BCVInfo info = (BCVInfo) bcvInfo.get("UPDATEBCV");
+					brightnessProgerss.setProgress(info.getBrightness());
+					contrastProgressbar.setProgress(info.getContrast());
+					volumeProgressbar.setProgress(info.getVolume());
+				}
+				break;
 			default:
 				break;
 			}

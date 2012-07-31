@@ -119,6 +119,9 @@ public class Constants {
 	//update new pasword
 	public final static int SEND_UPDATE_NEW_PASSWORD_MSG = 19000;
 	
+	//update bcv info
+	public final static int SEND_UPDATE_BCV_INFO_MSG = 19500;
+	
 	//---------------------------------------------
 	
 	public final static int SHOWPREVIEWDIRDLG = 2110;
