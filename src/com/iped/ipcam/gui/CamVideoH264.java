@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
@@ -62,7 +63,7 @@ import com.iped.ipcam.utils.WinTaiCmd;
  * @author Administrator
  *
  */
-public class CamVideoH264 extends Activity implements OnClickListener, OnFocusChangeListener, OnTouchListener {
+public class CamVideoH264 extends Activity implements OnClickListener, OnTouchListener {
 	
 	//private VideoView videoView = null;
 	
@@ -105,6 +106,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnFocusCh
 	private ICamManager camManager = null;
 	
 	private List<Device> list;
+	
+	private ProgressBar brightnessProgerss;
+	
+	private ProgressBar contrastProgressbar;
+	
+	private ProgressBar volumeProgressbar;
 	
 	private String TAG = "CamVideoH264";
 	
@@ -281,13 +288,25 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnFocusCh
 		right.setOnTouchListener(this);
 		
 		view.findViewById(R.id.mid).setOnClickListener(this);
+		/**/
+		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
+		buttonMinusZoom.setOnClickListener(this);
+		brightnessProgerss = (ProgressBar) view.findViewById(R.id.brightness_progressbar);
+		Button buttonAddZoom = (Button) view.findViewById(R.id.add_zoom); 
+		buttonAddZoom.setOnClickListener(this);
+		Button buttonMinusFocus = (Button) view.findViewById(R.id.minus_foucs); 
+		buttonMinusFocus.setOnClickListener(this);
+		contrastProgressbar = (ProgressBar) view.findViewById(R.id.contrast_progressbar);
 		
-		view.findViewById(R.id.minus_zoom).setOnClickListener(this);
-		view.findViewById(R.id.add_zoom).setOnClickListener(this);
-		view.findViewById(R.id.minus_foucs).setOnClickListener(this);
-		view.findViewById(R.id.add_foucs).setOnClickListener(this);
-		view.findViewById(R.id.minus_apertrue).setOnClickListener(this);
-		view.findViewById(R.id.add_apertrue).setOnClickListener(this);
+		Button buttonAddFocus = (Button) view.findViewById(R.id.add_foucs); 
+		buttonAddFocus.setOnClickListener(this);
+		Button buttonMinusApertrue = (Button) view.findViewById(R.id.minus_apertrue); 
+		buttonMinusApertrue.setOnClickListener(this);
+		
+		volumeProgressbar = (ProgressBar) view.findViewById(R.id.volume_progressbar);
+		
+		Button buttonAddApertrue = (Button) view.findViewById(R.id.add_apertrue); 
+		buttonAddApertrue.setOnClickListener(this);
 	}
 	
 	private OnItemClickListener itemClickListener = new OnItemClickListener() {
@@ -348,31 +367,72 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnFocusCh
 	
 	@Override
 	public void onClick(View v) {
-		//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_mid);
-		myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
+		if(myVideoView.isStop()) {
+			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
+			return ;
+		}
 		//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
-		
-	}
-	
-
-	@Override
-	public void onFocusChange(View v, boolean hasFocus) {
-		System.out.println("hasFocus" + hasFocus);
-		switch (v.getId()) {
-		case R.id.mid_up:
-		case R.id.left:
-		case R.id.right:
-		case R.id.mid_down:
-			if(!hasFocus) {
-				if(!myVideoView.isStop()) {
-					//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
-				}
-			}
+		switch(v.getId()) {
+		case R.id.mid:
+			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
 			break;
-
+		case R.id.minus_zoom:
+			int value2 = brightnessProgerss.getProgress();
+			value2 -= 10;
+			if(value2 <=0) {
+				value2 = 0;
+			}
+			brightnessProgerss.setProgress(value2);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
+			break;
+		case R.id.add_zoom:
+			int value = brightnessProgerss.getProgress();
+			value += 10;
+			if(value >=100) {
+				value = 100;
+			}
+			brightnessProgerss.setProgress(value);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Brightness, value+"");
+			break;
+		case R.id.minus_foucs:
+			int value3 = contrastProgressbar.getProgress();
+			value3 -= 10;
+			if(value3 <=0) {
+				value3 = 0;
+			}
+			contrastProgressbar.setProgress(value3);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
+			break;
+		case R.id.add_foucs:
+			int value4 = contrastProgressbar.getProgress();
+			value4 += 10;
+			if(value4 >=100) {
+				value4 = 100;
+			}
+			contrastProgressbar.setProgress(value4);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
+			break;
+		case R.id.minus_apertrue:
+			int value5 = volumeProgressbar.getProgress();
+			value5 -= 10;
+			if(value5 <=0) {
+				value5 = 0;
+			}
+			volumeProgressbar.setProgress(value5);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Volume, value5+"");
+			break;
+		case R.id.add_apertrue:
+			int value6 = volumeProgressbar.getProgress();
+			value6 += 10;
+			if(value6 >=100) {
+				value6 = 100;
+			}
+			volumeProgressbar.setProgress(value6);
+			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Volume, value6+"");
+			break;
 		default:
 			break;
-		}
+		}/**/
 	}
 	
 	@Override
@@ -427,24 +487,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnFocusCh
 			
 			break;
 		case R.id.right_down:
-
-			break;
-		case R.id.minus_zoom:
-			
-			break;
-		case R.id.add_zoom:
-
-			break;
-		case R.id.minus_foucs:
-			
-			break;
-		case R.id.add_foucs:
-
-			break;
-		case R.id.minus_apertrue:
-			
-			break;
-		case R.id.add_apertrue:
 
 			break;
 			default:

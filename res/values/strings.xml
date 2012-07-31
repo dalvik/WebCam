@@ -13,6 +13,12 @@
     	<string name="username_null">用户名不能为空</string>
     <string name="user_exit">取消</string>
     
+    <!-- 用户退出 -->
+    <string name="user_exit_title">退出确认</string>
+    <string name="user_exit_message">您确定退出吗</string>
+    <string name="user_exit_sure">退出</string>
+    <string name="user_exit_cancle">取消</string> 
+    
     <!-- modify password  -->
     <string name="password_modify_security_botton_str">更改访问密码</string>
     <string name="password_modify_title_str">密码修改</string>

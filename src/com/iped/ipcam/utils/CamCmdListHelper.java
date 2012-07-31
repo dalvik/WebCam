@@ -20,6 +20,10 @@ public class CamCmdListHelper {
 	public final static String GetCmd_NetFiles = "GetNandRecordFile:";
 	public final static String SetCmd_PlayNetFiles = "ReplayRecord:";
 	public final static String SetCmd_SearchWireless = "search_wifi:0 ";
+	public final static String SetCmdPTZ = "Rs485Cmd:";
+	public final static String SetCmp_Set_Brightness = "set_brightness:";
+	public final static String SetCmp_Set_Contrast = "set_contrast:";
+	public final static String SetCmp_Set_Volume = "set_volume:";
 	
 	public final static String DelCmd_DeleteFiles = "DeleteFile:";
 	
@@ -32,7 +36,6 @@ public class CamCmdListHelper {
 	
 	public final static String SetCmd_Set_Time = "SetTime:";
 	
-	public final static String SetCmdPTZ = "Rs485Cmd:";
 	
 	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();
 	
