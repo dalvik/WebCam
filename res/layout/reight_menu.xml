@@ -121,7 +121,7 @@
                         android:gravity="center"
                         android:text="@string/video_preview_minus_zoom" />
 
-                    <ProgressBar
+                    <com.iped.ipcam.gui.BCVControlProgressBar
                         android:id="@+id/brightness_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_gravity="center"

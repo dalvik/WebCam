@@ -41,7 +41,7 @@ public class WebTabWidget extends TabActivity {
 				.setIndicator(resources.getString(R.string.device_manager_str))
 				.setContent(intent);
 		tabHost.addTab(tabSpec);
-
+UdtTools.startSearch();
 		/*
 		 * intent = new Intent(this, DeviceParamSets.class); tabSpec =
 		 * tabHost.newTabSpec("DEVICEPARAMSETS")
@@ -63,7 +63,7 @@ public class WebTabWidget extends TabActivity {
 				.setContent(intent);
 		tabHost.addTab(tabSpec);
 		// tabHost.setCurrentTabByTag("DEVICEMANAGER");
-		tabHost.setCurrentTab(0);
+		tabHost.setCurrentTab(1);
 		TabWidget tabWidget = tabHost.getTabWidget();
 		int count = tabWidget.getChildCount();
 		for (int i = 0; i < count; i++) {
