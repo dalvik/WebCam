@@ -41,7 +41,6 @@ public class WebTabWidget extends TabActivity {
 				.setIndicator(resources.getString(R.string.device_manager_str))
 				.setContent(intent);
 		tabHost.addTab(tabSpec);
-UdtTools.startSearch();
 		/*
 		 * intent = new Intent(this, DeviceParamSets.class); tabSpec =
 		 * tabHost.newTabSpec("DEVICEPARAMSETS")

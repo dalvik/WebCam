@@ -14,6 +14,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
@@ -39,8 +40,6 @@ public class CamManagerImp implements ICamManager {
 	private String TAG = "CamManagerImp";
 	
 	public CamManagerImp() {
-		//Device d = new Device("11111", "Ip Camera", "192.168.1.127", Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
-		//deviceList.add(d);
 	}
 	
 	@Override
@@ -48,9 +47,9 @@ public class CamManagerImp implements ICamManager {
 		Device d = new Device();
 		d.setDeviceName("IpCam");
 		d.setDeviceID(id);
-		d.setDeviceEthIp(ip);
+		/*d.setDeviceEthIp(ip);
 		d.setDeviceEthGateWay((ip.substring(0, ip.lastIndexOf(".")+1) + "1"));
-		d.setDeviceEthMask("255.255.255.0");
+		d.setDeviceEthMask("255.255.255.0");*/
 		if(checkName(d)) {
 			deviceList.add(d);
 			return d;
@@ -78,9 +77,6 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public boolean editCam(Device deviceOLd, Device deviceNew) {
-		//deviceOLd.setDeviceName(deviceNew.getDeviceName());
-		//deviceOLd.setDeviceIp(deviceNew.getDeviceIp());
-		//deviceOLd.setDeviceGateWay(deviceNew.getDeviceGateWay());
 		return true;
 	}
 	
@@ -93,17 +89,12 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public void updateCam(Device device) {
-		/*if(selectIndex<deviceList.size()) {
-			deviceList.add(device);
-		}else {
-		}*/
 		deviceList.remove(selectIndex);
 		deviceList.add(selectIndex,device);
 	}
 	
 	@Override
 	public boolean delCam(String name) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
@@ -122,7 +113,6 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public Device getDeviceByName(String name) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -188,6 +178,7 @@ public class CamManagerImp implements ICamManager {
 	@Override
 	public void stopThread() {
 		stopFlag = true;
+		UdtTools.stopSearch();
 		if(queryThread != null && queryThread.isAlive()) {
 			try {
 				queryThread.join(100);
@@ -232,7 +223,7 @@ public class CamManagerImp implements ICamManager {
 		}
 		
 		public void dissmiss() {
-			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 			/*Message message = handler.obtainMessage();
 			message.what = Constants.UPDATEAUTOSEARCH;
 			message.arg1 = i; //int)(i*per);
@@ -252,13 +243,45 @@ public class CamManagerImp implements ICamManager {
 		
 		@Override
 		public void run() {
-			for(i=1; i<=10; i++) {
+			handler.postDelayed(fetchWebCamIdTask, 50);
+			UdtTools.startSearch();
+			stopFlag = true;
+			/*for(i=1; i<=10; i++) {
 				new Thread(new QueryOnline(i*26)).start();
 				try {
 					Thread.sleep(300);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+			}*/
+		}
+		
+		private Runnable fetchWebCamIdTask = new Runnable() {
+			
+			@Override
+			public void run() {
+				if(stopFlag) {
+					stopSearch();
+					dismissAutoSearch();
+				}else {
+					String id = UdtTools.fetchCamId();
+					if(id != null) {
+						Log.d(TAG, "cam id = " + id);
+						addCam(id, id);
+						updateDeviceList();
+					}
+					handler.postDelayed(fetchWebCamIdTask, 10);
+				}
+			}
+		};
+		
+		private void stopSearch() {
+			handler.removeCallbacks(fetchWebCamIdTask);
+			String id = UdtTools.fetchCamId();
+			while(id != null) {
+				Log.d(TAG, "cam id = " + id);
+				addCam(id, id);
+				updateDeviceList();
 			}
 		}
 	}

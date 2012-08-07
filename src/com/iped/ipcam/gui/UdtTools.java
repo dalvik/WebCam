@@ -23,7 +23,12 @@ public class UdtTools {
 	
 	public static native void exitAmrDecoder();
 	
+	// change throughnet type
 	
+	public static native int startSearch();
 	
+	public static native void stopSearch();
+	
+	public static native String fetchCamId();
 	
 }
