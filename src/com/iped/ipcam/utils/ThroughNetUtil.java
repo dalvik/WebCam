@@ -198,8 +198,8 @@ public class ThroughNetUtil implements Runnable {
 		try {
 			port1 = new DatagramSocket(); //Constants.BINDLOCALPORT1
 			datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-					InetAddress.getByName(Common.SERVER_IP),
-					Common.INTERACTIVE_PORT);
+					InetAddress.getByName(Command.SERVER_IP),
+					Command.INTERACTIVE_PORT);
 			port1.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 			port1.send(datagramPacket);
 			Log.d(TAG,	"send port 1 success");
@@ -219,8 +219,8 @@ public class ThroughNetUtil implements Runnable {
 				try {
 					port2 = new DatagramSocket(); //Constants.BINDLOCALPORT2
 					datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-							InetAddress.getByName(Common.SERVER_IP),
-							Common.INTERACTIVE_PORT);
+							InetAddress.getByName(Command.SERVER_IP),
+							Command.INTERACTIVE_PORT);
 					port2.setReuseAddress(true);
 					port2.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 					port2.send(datagramPacket);
@@ -240,8 +240,8 @@ public class ThroughNetUtil implements Runnable {
 							port3 = new DatagramSocket(); //Constants.BINDLOCALPORT3
 							port3.setReuseAddress(true);
 							datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-									InetAddress.getByName(Common.SERVER_IP),
-									Common.INTERACTIVE_PORT);
+									InetAddress.getByName(Command.SERVER_IP),
+									Command.INTERACTIVE_PORT);
 							port3.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
 							port3.send(datagramPacket);
 							Log.d(TAG,	"send port 3 success");
@@ -298,8 +298,8 @@ public class ThroughNetUtil implements Runnable {
 		DatagramPacket datagramPacket;
 		try {
 			datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-					InetAddress.getByName(Common.SERVER_IP),
-					Common.INTERACTIVE_PORT);
+					InetAddress.getByName(Command.SERVER_IP),
+					Command.INTERACTIVE_PORT);
 			udpSocket.send(datagramPacket);
 		} catch (Exception e) {
 			Log.d(TAG,
@@ -352,8 +352,8 @@ public class ThroughNetUtil implements Runnable {
 		DatagramPacket datagramPacket;
 		try {
 			datagramPacket = new DatagramPacket(sendData, l1 + l2 + l3,
-					InetAddress.getByName(Common.SERVER_IP),
-					Common.CLIENT_WATCH_PORT);
+					InetAddress.getByName(Command.SERVER_IP),
+					Command.CLIENT_WATCH_PORT);
 			udpSocket.send(datagramPacket);
 		} catch (Exception e) {
 			Log.d(TAG, "ThroughNetUtil request connect camera id fail! "

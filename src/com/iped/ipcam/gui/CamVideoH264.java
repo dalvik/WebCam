@@ -189,7 +189,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Device device = camManager.getSelectDevice();
 				String pwd = (String) msg.obj;
 				device.setUnDefine2(pwd);
-				int checkPwd = PackageUtil.checkPwd(device);
+				int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 				if(checkPwd == 1) {
 					camManager.updateCam(device);
 					Intent intent2 = new Intent();
@@ -332,7 +332,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				return ;
 			}
 			if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
-				int checkPwd = PackageUtil.checkPwd(device);
+				int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 				Log.d(TAG, "MENU_PREVIEW checkpwd = " + checkPwd);
 				if(checkPwd == 1) {
 					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
@@ -350,12 +350,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
 				}
 			}else {
-				int resu = PackageUtil.checkPwdState(device);
+				int resu = PackageUtil.checkPwdState();
 				Log.d(TAG, "device manager onContextItemSelected checkPwdState result = " + resu);
 				if(resu == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(CamVideoH264.this, device, mHandler, Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG);
 				} else if(resu == 1) {// pwd seted
-					int checkPwd = PackageUtil.checkPwd(device);
+					int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 					if(checkPwd == 1) {
 						Message message = mHandler.obtainMessage();
 	                	message.obj  = device.getUnDefine2();

@@ -31,4 +31,11 @@ public class UdtTools {
 	
 	public static native String fetchCamId();
 	
+	public static native int monitorSocket(String camId);
+	
+	public static native int initialSocket(String random);
+	
+	public static native int sendCmdMsg(String cmd, int cmdLength);
+	
+	public static native int recvCmdMsg(byte[] buf, int bufLength);
 }

@@ -1,7 +1,10 @@
 package com.iped.ipcam.utils;
 
+import com.iped.ipcam.gui.UdtTools;
 
-public class Common {
+
+
+public class Command {
 
 	public final static int CAMERA_WATCH_PORT = 4000;
 	
@@ -23,4 +26,7 @@ public class Common {
 	
 	public final static byte CHANEL = 1;
 	
+	public static int sendCmd(String cmdName, int cmdNameLength){
+		return UdtTools.sendCmdMsg(cmdName, cmdNameLength);
+	}
 }

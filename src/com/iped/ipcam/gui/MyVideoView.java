@@ -33,7 +33,7 @@ import android.widget.ImageView;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
-import com.iped.ipcam.utils.Common;
+import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
@@ -44,7 +44,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int SOCKETBUFLENGTH = 342000;
 	
-	private final static int RECEAUDIOBUFFERSIZE = 1024 * Common.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 	
 	private final static int SERVERSENDBUFFERSIZE = 1024;
 	
@@ -430,7 +430,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		private int num = 0;
 		private AudioTrack m_out_trk = null; 
-		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Common.CHANEL * 10;
+		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Command.CHANEL * 10;
 		byte[] pcmArr = new byte[pcmBufferLength];
 				
 		public RecvAudio() {
@@ -467,7 +467,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							stopPlay = true;
 							break;
 						}
-						int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
+						int decoderLength = UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Command.CHANEL);
 						//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
 						//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 						//System.out.println("audio size = " + size + "  "+ returnSize);
@@ -507,7 +507,7 @@ public class MyVideoView extends ImageView implements Runnable {
 						stopPlay = true;
 						break;
 					}
-					UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Common.CHANEL);
+					UdtTools.amrDecoder(audioBuffer, recvDataLength , pcmArr, 0, Command.CHANEL);
 					//System.out.println("recvDataLength=" + recvDataLength + " decoderLength=" + decoderLength);
 					//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 					//System.out.println("audio size = " + size + "  "+ returnSize);

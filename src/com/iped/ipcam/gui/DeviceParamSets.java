@@ -218,7 +218,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 						try {
 							device.setUnDefine1(ip);
 							device.setDeviceRemoteCmdPort(port1);
-							int checkPwd = PackageUtil.checkPwd(device);
+							int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 							if(checkPwd == 1) {
 								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
 								paraMap = new LinkedHashMap<String,String>();
@@ -285,7 +285,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				netUtil = camParasSet.getThroughNetUtil();
 				try {
 					device.setUnDefine2(pwd);
-					int checkPwd = PackageUtil.checkPwd(device);
+					int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 					if(checkPwd == 1) {
 						camManager.updateCam(device);
 						cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);

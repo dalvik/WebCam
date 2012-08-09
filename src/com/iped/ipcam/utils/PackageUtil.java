@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 
 import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.gui.CamVideoH264;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 
 import android.util.Log;
@@ -230,84 +231,49 @@ public class PackageUtil {
 		return temp;
 	}
 
-	public static int checkPwdState(Device device) {
-		byte[] tem = CamCmdListHelper.CheckCmd_Pwd_State.getBytes();
-		DatagramSocket datagramSocket = null;
-		boolean netType = device.getDeviceNetType();
-		String ip = null;
-		int port = device.getDeviceLocalCmdPort();
-		if (netType) {
-			ip = device.getUnDefine1();
-			port = device.getDeviceRemoteCmdPort();
-		} else {
-			port = device.getDeviceLocalCmdPort();
-			ip = device.getDeviceEthIp();
-			/*
-			 * boolean flag = pingTest(CamCmdListHelper.SetCmd_Config, ip,
-			 * port); if(!flag) { ip = device.getDeviceWlanIp(); }
-			 */
+	public static int checkPwdState() {
+		String tem = CamCmdListHelper.CheckCmd_Pwd_State;
+		int res = UdtTools.sendCmdMsg(tem, tem.length());
+		Log.d(TAG, "checkPwdState = " + res);
+		if(res <=0) {
+			return -2; // time out
 		}
-		Log.d(TAG, "check pwd state : netType = " + netType + " ip = " + ip
-				+ " port=" + port);
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length,
-					InetAddress.getByName(ip), port);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			datagramSocket.receive(rece);
-			int receLength = rece.getLength();
-			String receStr = new String(buffTemp, 0, receLength);
-			Log.d(TAG, "checkPwdState recv //////////////" + receStr);
-			if ("PSWD_SET".equals(receStr)) {
-				return 1; // had set
-			} else if ("PSWD_NOT_SET".equals(receStr)) {
-				return 0; // not set
-			}
-		} catch (IOException e) {
-			Log.d(TAG,
-					"checkPwdState : " + ip + " " + port + " " + e.getMessage());
+		int bufLength = 100;
+		byte[] recvBuf = new byte[bufLength];
+		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
+		if(recvLength<=0) {
+			return -2; // time out
+		}
+		String recvStr = new String(recvBuf,0, recvLength);
+		Log.d(TAG, "### checkPwdState " + recvStr);
+		if ("PSWD_SET".equals(recvStr)) {
+			return 1; // had set
+		} else if ("PSWD_NOT_SET".equals(recvStr)) {
+			return 0; // not set
 		}
 		return -2; // time out
 	}
 
-	public static int checkPwd(Device device) {
-		String pwd = device.getUnDefine2();
-		byte[] tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0").getBytes();
-		DatagramSocket datagramSocket = null;
-		boolean netType = device.getDeviceNetType();
-		String ip = null;
-		int port = device.getDeviceLocalCmdPort();
-		if (netType) {
-			ip = device.getUnDefine1();
-			port = device.getDeviceRemoteCmdPort();
+	public static int checkPwd(String  pwd) {
+		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0");
+		int res = UdtTools.sendCmdMsg(tem, tem.length());
+		Log.d(TAG, "checkPwd = " + res);
+		if(res <=0) {
+			return -2;
+		}
+		int bufLength = 100;
+		byte[] recvBuf = new byte[bufLength];
+		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
+		if(recvLength<=0) {
+			return -2; // time out
+		}
+		String recvStr = new String(recvBuf,0, recvLength);
+		Log.d(TAG, "### checkPwd " + recvStr);
+		if ("PSWD_OK".equals(recvStr)) {
+			return 1; // PSWD_OK
 		} else {
-			ip = device.getDeviceEthIp();
+			return -1; // PSWD_FALL
 		}
-		Log.d(TAG, "checkPwd : netType = " + netType + " ip = " + ip + " port="
-				+ port + " password=" + pwd);
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length,
-					InetAddress.getByName(ip), port);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			datagramSocket.receive(rece);
-			int receLength = rece.getLength();
-			String receStr = new String(buffTemp, 0, receLength);
-			Log.d(TAG, "checkPwd  recv //////////////" + receStr);
-			if ("PSWD_OK".equals(receStr)) {
-				return 1; // PSWD_OK
-			} else {
-				return -1; // PSWD_FALL
-			}
-		} catch (IOException e) {
-			Log.d(TAG, "checkPwd : " + ip + " " + port + " password=" + pwd
-					+ " " + e.toString());
-		}
-		return -2;
 	}
 
 	public static int setPwd(Device device, String common) {
