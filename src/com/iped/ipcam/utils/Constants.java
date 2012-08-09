@@ -144,6 +144,15 @@ public class Constants {
 
 	public final static int SEND_UPDATE_DEVICE_LIST_MSG = 5000;
 
+	public final static int WEB_CAM_CONNECT_INIT_MSG = 5050;
+	
+	//用户密码校验
+	public final static int WEB_CAM_CHECK_PWD_STATE_MSG = 5100;
+	
+	public final static int WEB_CAM_CHECK_PWD_MSG = 5150;
+	
+	public final static int WEB_CAM_THROUGH_NET_MSG = 5200;
+	
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 

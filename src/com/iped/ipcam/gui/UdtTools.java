@@ -38,4 +38,8 @@ public class UdtTools {
 	public static native int sendCmdMsg(String cmd, int cmdLength);
 	
 	public static native int recvCmdMsg(byte[] buf, int bufLength);
+	
+	public static native int recvVideoMsg(byte[] buf, int bufLength);
+	
+	public static native int recvAudioMsg(int smalBuffLength, byte[] buf, int bufLength);
 }

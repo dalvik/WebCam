@@ -235,17 +235,18 @@ public class PackageUtil {
 		String tem = CamCmdListHelper.CheckCmd_Pwd_State;
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		Log.d(TAG, "checkPwdState = " + res);
-		if(res <=0) {
+		if(res <0) {
 			return -2; // time out
 		}
 		int bufLength = 100;
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
-		if(recvLength<=0) {
+		Log.d(TAG, "### check pwd state length " + recvLength);
+		if(recvLength<0) {
 			return -2; // time out
 		}
 		String recvStr = new String(recvBuf,0, recvLength);
-		Log.d(TAG, "### checkPwdState " + recvStr);
+		Log.d(TAG, "### check pwd state info " + recvStr);
 		if ("PSWD_SET".equals(recvStr)) {
 			return 1; // had set
 		} else if ("PSWD_NOT_SET".equals(recvStr)) {
@@ -258,13 +259,14 @@ public class PackageUtil {
 		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0");
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		Log.d(TAG, "checkPwd = " + res);
-		if(res <=0) {
+		if(res < 0) {
 			return -2;
 		}
 		int bufLength = 100;
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
-		if(recvLength<=0) {
+		Log.d(TAG, "### check pwd recv length " + recvLength);
+		if(recvLength<0) {
 			return -2; // time out
 		}
 		String recvStr = new String(recvBuf,0, recvLength);
@@ -331,44 +333,15 @@ public class PackageUtil {
 		ptzCommonByte[ptzCommonByte.length - 2] = check;
 		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0,
 				ptzCommonNameLength);
-		System.arraycopy(common, 0, ptzCommonByte, ptzCommonNameLength,
-				commLength);
-		if (device.getDeviceNetType()) {// out
-
-		} else { // in
-			try {
-				DatagramPacket datagramPacket = new DatagramPacket(
-						ptzCommonByte, ptzCommonByte.length,
-						InetAddress.getByName(device.getDeviceEthIp()),
-						device.getDeviceLocalCmdPort());
-				socket.send(datagramPacket);
-				Log.d(TAG, "#### sendPTZCommond " + new String(ptzCommonByte));
-				return true;
-			} catch (Exception e) {
-				Log.d(TAG, e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-		}
+		System.arraycopy(common, 0, ptzCommonByte, ptzCommonNameLength, commLength);
+		UdtTools.sendCmdMsg(new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
+		Log.d(TAG, "#### sendPTZCommond " + new String(ptzCommonByte));
 		return false;
 	}
 
 	public static void setBCV(DatagramSocket socket, ThroughNetUtil netUtil,
 			Device device, String comm, String value) {
-		byte[] BCVCommon = (comm + value +"\0").getBytes();
-		if (device.getDeviceNetType()) {// out
-
-		} else { // in
-			try {
-				DatagramPacket datagramPacket = new DatagramPacket(
-						BCVCommon, BCVCommon.length,
-						InetAddress.getByName(device.getDeviceEthIp()),
-						device.getDeviceLocalCmdPort());
-				socket.send(datagramPacket);
-				Log.d(TAG, "#### sendPTZCommond " + new String(BCVCommon) + " set value = " + value);
-			} catch (Exception e) {
-				Log.d(TAG, e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-		}
+		String BCVCommon = (comm + value +"\0");
+		UdtTools.sendCmdMsg(BCVCommon, BCVCommon.length());
 	}
 }
