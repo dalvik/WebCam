@@ -322,7 +322,7 @@
         <string name="webcam_error_code_bind_error">端口绑定失败</string>
         
         <string name="webcam_connect_init_error">系统初始化连接失败</string>
-        
+        <string name="webcam_check_pwd_dialog_str">正在校验，请稍后。。。</string>
     <string name="version">12.05.20</string>
     <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>
 </resources>

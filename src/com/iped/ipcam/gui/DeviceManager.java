@@ -1,7 +1,6 @@
 package com.iped.ipcam.gui;
 
 import java.lang.reflect.Field;
-import java.net.DatagramSocket;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -101,21 +100,23 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private Device device;
 	
+	private ProgressDialog m_Dialog = null;
+	
 	private static final String TAG = "DeviceManager";
 
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message message) {
 			switch (message.what) {
-			case Constants.UPDATEAUTOSEARCH:
+			/*case Constants.UPDATEAUTOSEARCH:
 				int value = message.arg1;
 				progressDialog.setProgress(message.arg1);
 				if (value >= 100) {
-					hideProgress();
+					dismissProgress();
 				}
-				break;
+				break;*/
 			case Constants.HIDETEAUTOSEARCH:
-				hideProgress();
+				dismissProgress();
 				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				break;
 			case Constants.UPDATEDEVICELIST:
@@ -147,7 +148,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					port1 = bd.getInt("PORT1");
 					port2 = bd.getInt("PORT2");
 					port3 = bd.getInt("PORT3");
-					hideProgress();
+					dismissProgress();
 					getDeviceConfig(ip, port1, port2, port3);
 				}
 				break;
@@ -226,6 +227,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			case Constants.WEB_CAM_CHECK_PWD_STATE_MSG:
 				int resu = PackageUtil.checkPwdState();
 				Log.d(TAG, "device manager checkPwdState result = " + resu);
+				handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				if(resu == 0) { // unset
 					handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
 					//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
@@ -249,6 +252,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				String pwd = (String) message.obj;
 				int checkPwd = PackageUtil.checkPwd(pwd);
 				Log.d(TAG, "checkPwd result = " + checkPwd);
+				handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				if(checkPwd == 1) {
 					device.setUnDefine2(pwd);
 					camManager.updateCam(device);
@@ -270,14 +275,23 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				}
 				break;
 			case Constants.WEB_CAM_THROUGH_NET_MSG:
-				int test = UdtTools.sendCmdMsg("\0", 1);
-				if(test<=0) {
-					int result = UdtTools.monitorSocket(device.getDeviceID());
-					Log.d(TAG, "monitor result = " + result);
-					analyseResult(result, device);
-				}else {
-					handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
-				}
+				
+				new Thread(
+						new Runnable() {
+							@Override
+							public void run() {
+								int result = UdtTools.monitorSocket(device.getDeviceID());
+								Log.d(TAG, "monitor result = " + result);
+								analyseResult(result, device);
+							}
+						}
+				).start();
+				break;
+			case Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG:
+				showProgressDlg();
+				break;
+			case Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG:
+				hideProgressDlg();
 				break;
 			default:
 				break;
@@ -339,11 +353,17 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 			break;
 		case MENU_PREVIEW:
-			device = camManager.getSelectDevice();
-			if(device == null) {
+			Device d = camManager.getSelectDevice();
+			if(d == null) {
 				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
 				return super.onContextItemSelected(item);
 			}
+			if(!d.equals(device)) {
+				this.device = d;
+			}else {
+				return super.onContextItemSelected(item);
+			}
+			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG, 2000);
 			handler.sendEmptyMessage(Constants.WEB_CAM_THROUGH_NET_MSG);
 			break;
 		default:
@@ -369,16 +389,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
 				return;
 			}
-			if(device.getDeviceNetType()) {
+/*			if(device.getDeviceNetType()) {
 				Message message = handler.obtainMessage();
             	message.obj  = device.getUnDefine2();
             	message.what = Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG;
             	handler.sendMessage(message);
 				//startActivity(new Intent(DeviceManager.this, DeviceParamSets.class));
-				/*netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
-				new Thread(netUtil).start();*/
+				netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
+				new Thread(netUtil).start();
 			}else {
-				int result = PackageUtil.checkPwdState();
+*/				int result = PackageUtil.checkPwdState();
 				Log.d(TAG, "device_manager_button checkPwdState result = " + result);
 				if(result == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG);
@@ -400,7 +420,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				}else {
 					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 				}
-			}
 			
 			break;
 		case R.id.clear_all_button:
@@ -456,21 +475,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private void showProgress() {
 		if(progressDialog != null) {
-			hideProgress();
+			dismissProgress();
 		}
 		progressDialog = new ProgressDialog(DeviceManager.this);
-		progressDialog.setTitle(getResources().getString(
-				R.string.auto_search_tips_str));
+		progressDialog.setTitle(getResources().getString(R.string.auto_search_tips_str));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		//progressDialog.setCancelable(false);
 		progressDialog.show();
-		Message msg = handler.obtainMessage();
-		msg.arg1 = 1;
-		msg.what = Constants.UPDATEAUTOSEARCH;
-		handler.sendMessageDelayed(msg, 500);
 	}
 
-	public void hideProgress() {
+	public void dismissProgress() {
 		if (progressDialog != null && progressDialog.isShowing()) {
 			progressDialog.dismiss();
 		}
@@ -482,9 +496,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && progressDialog != null && progressDialog.isShowing()) {
+			dismissProgress();
 			camManager.stopThread();
-			hideProgress();
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -801,8 +815,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		ad.show();
 	}
 	
-
-	
 	//TODO
 	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
 		Device tempDevice = new Device();
@@ -857,25 +869,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		device.setDeviceEthMask(paraMap.get("e_mask"));
 		device.setDeviceEthDNS1(paraMap.get("e_dns1"));
 		device.setDeviceEthDNS2(paraMap.get("e_dns2"));
-		String wlan_ip = paraMap.get("w_ip");
 		
-		/*if(eht_ip.length()<0 && wlan_ip.length()<0){
-			device.setDeviceNetType(true);
-		}else {
-			boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, eht_ip, Constants.LOCALCMDPORT);
-			Log.d(TAG, "eht_ip ping test " + flag);
-			if(flag) {
-				device.setDeviceNetType(!flag);
-			}else {
-				flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, wlan_ip, Constants.LOCALCMDPORT);
-				Log.d(TAG, "wlan_ip ping test " + flag);
-				device.setDeviceNetType(!flag);
-			}
-		}*/
-		//device.setDeviceWlanGateWay(paraMap.get("w_gw"));
-		//device.setDeviceWlanMask(paraMap.get("w_mask"));
-		//device.setDeviceWlanDNS1(paraMap.get("w_dns1"));
-		//device.setDeviceWlanDNS2(paraMap.get("w_dns2"));
 		device.setUnDefine1(ip);
 		device.setUnDefine2(pwd);
 		device.setDeviceNetType(true);
@@ -924,4 +918,34 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			handler.sendMessage(msg);
 		}
 	}
+	
+	private void showProgressDlg() {
+		if(m_Dialog == null && !m_Dialog.isShowing()) {
+			m_Dialog = new ProgressDialog(DeviceManager.this);
+			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			m_Dialog.setCancelable(false);
+			m_Dialog.setMessage(getResources().getText(R.string.webcam_check_pwd_dialog_str));
+		}
+		m_Dialog.show();
+	}
+	
+	private void hideProgressDlg() {
+		if(m_Dialog != null && m_Dialog.isShowing()) {
+			m_Dialog.hide();
+		}
+	}
+	
+	private void dismissProgressDlg() {
+		if(m_Dialog != null) {
+			m_Dialog.dismiss();
+		}
+	}
+
+	private Runnable checkPwdRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			
+		}
+	};
 }

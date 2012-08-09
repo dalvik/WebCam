@@ -92,6 +92,7 @@ public class WebTabWidget extends TabActivity {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
+									UdtTools.close();
 									onDestroy();
 								}
 							})

@@ -1,14 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
@@ -27,7 +18,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.BCVInfo;
@@ -36,7 +26,6 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
-import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -66,8 +55,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	byte[] socketBuf = new byte[SOCKETBUFLENGTH];
 
-	FileInputStream fis = null;
-
 	int readLengthFromSocket = 0;
 
 	int sockBufferUsedLength;
@@ -75,12 +62,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	boolean firstStartFlag = true;
 
 	boolean looperFlag = false;
-
-	private DataInputStream videoDis = null;
-
-	private DataInputStream audioDis = null;
-
-	private DatagramSocket cmdSocket = null;
 
 	private boolean stopPlay = true;
 
@@ -154,7 +135,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			onStop();
+			//onStop();
 			return;
 		}
 		int bufLength = 10;
@@ -162,7 +143,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		res = UdtTools.recvCmdMsg(b, bufLength);
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			onStop();
+			//onStop();
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -215,7 +196,6 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 		}
 		onStop();
-		release();
 		System.out.println("onstop====" + stopPlay);
 	}
 
@@ -276,7 +256,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void onStop() {
 		stopPlay = true;
 		release();
-		// releaseNAT();
 		flushBitmap();
 	}
 
@@ -285,20 +264,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	private void release() {
-		// UdtTools.release();
-		if (fis != null) {
-			try {
-				fis.close();
-				Log.d("CamVideoH264", "over......."
-						+ Thread.currentThread().isInterrupted());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (cmdSocket != null) {
-			cmdSocket.close();
-			cmdSocket = null;
-		}
+		//UdtTools.close();
 		handler.removeCallbacks(calculateFrameTask);
 	}
 
@@ -321,10 +287,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void setReverseFlag(boolean reverseFlag) {
 		this.reverseFlag = reverseFlag;
-	}
-
-	public DatagramSocket getCmdSocket() {
-		return cmdSocket;
 	}
 
 	class RecvAudio implements Runnable {

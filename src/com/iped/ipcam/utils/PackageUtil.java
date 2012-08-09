@@ -319,8 +319,7 @@ public class PackageUtil {
 
 	}
 
-	public static boolean sendPTZCommond(DatagramSocket socket,
-			ThroughNetUtil netUtil, Device device, int commId) {
+	public static boolean sendPTZCommond(int commId) {
 		byte[] ptzCommonName = CamCmdListHelper.SetCmdPTZ.getBytes();// name
 		int ptzCommonNameLength = ptzCommonName.length;
 		byte[] common = CamCmdListHelper.ptzMap.get(commId);// comm
@@ -334,13 +333,13 @@ public class PackageUtil {
 		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0,
 				ptzCommonNameLength);
 		System.arraycopy(common, 0, ptzCommonByte, ptzCommonNameLength, commLength);
-		UdtTools.sendCmdMsg(new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
-		Log.d(TAG, "#### sendPTZCommond " + new String(ptzCommonByte));
+		int res = UdtTools.sendPTZMsg(ptzCommonByte);
+		//UdtTools.sendCmdMsg(new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
+		Log.d(TAG, "#### sendPTZCommond res = " + res + "  " + ptzCommonByte.length+ " " + new String(ptzCommonByte));
 		return false;
 	}
 
-	public static void setBCV(DatagramSocket socket, ThroughNetUtil netUtil,
-			Device device, String comm, String value) {
+	public static void setBCV(String comm, String value) {
 		String BCVCommon = (comm + value +"\0");
 		UdtTools.sendCmdMsg(BCVCommon, BCVCommon.length());
 	}

@@ -14,7 +14,7 @@ public class UdtTools {
 	public static native int initSocket(String remoteIp, int localVideoPort, int remoteVideoPort, int localAudioPort, int remoteAudioPort, int videoBufferLength, int audioBufferLength);
 	public static native int recvVideoData(byte[] buf, int bufferLength);
 	public static native int recvAudioData(int serverSendAudioBufferLength, byte[] clientRecvBuffer, int clientRecvBufferLength);
-	public static native int release();
+	//public static native int release();
 	
 	// decode amr to pcm
 	public static native int initAmrDecoder();
@@ -42,4 +42,9 @@ public class UdtTools {
 	public static native int recvVideoMsg(byte[] buf, int bufLength);
 	
 	public static native int recvAudioMsg(int smalBuffLength, byte[] buf, int bufLength);
+	
+	public static native int sendPTZMsg(byte[] comm);
+	
+	public static native int close();
+	
 }

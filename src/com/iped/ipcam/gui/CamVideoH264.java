@@ -219,7 +219,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	};
 	
 	private void startThread() {
-		myVideoView.onStop();
 		myVideoView.setDevice(device);
 		if(thread != null && thread.isAlive()) {
 			try {
@@ -391,7 +390,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value2 = 0;
 			}
 			brightnessProgerss.setProgress(value2);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
 			break;
 		case R.id.add_zoom:
 			int value = brightnessProgerss.getProgress();
@@ -400,7 +399,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value = 100;
 			}
 			brightnessProgerss.setProgress(value);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Brightness, value+"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Brightness, value+"");
 			break;
 		case R.id.minus_foucs:
 			int value3 = contrastProgressbar.getProgress();
@@ -409,7 +408,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value3 = 0;
 			}
 			contrastProgressbar.setProgress(value3);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
 			break;
 		case R.id.add_foucs:
 			int value4 = contrastProgressbar.getProgress();
@@ -418,7 +417,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value4 = 100;
 			}
 			contrastProgressbar.setProgress(value4);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
 			break;
 		case R.id.minus_apertrue:
 			int value5 = volumeProgressbar.getProgress();
@@ -427,7 +426,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value5 = 0;
 			}
 			volumeProgressbar.setProgress(value5);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Volume, value5+"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value5+"");
 			break;
 		case R.id.add_apertrue:
 			int value6 = volumeProgressbar.getProgress();
@@ -436,7 +435,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value6 = 100;
 			}
 			volumeProgressbar.setProgress(value6);
-			PackageUtil.setBCV(myVideoView.getCmdSocket(), netUtil, device, CamCmdListHelper.SetCmp_Set_Volume, value6+"");
+			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value6+"");
 			break;
 		default:
 			break;
@@ -456,10 +455,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		case R.id.mid_up:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				System.out.println("down");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_UP.ordinal());
+				PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_UP.ordinal());
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
 				System.out.println("up");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			break;
 		case R.id.right_up:
@@ -468,17 +467,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		case R.id.left:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				System.out.println("down");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_LEFT.ordinal());
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
 				System.out.println("up");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			break;
 		case R.id.right:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
+				PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			break;
 		case R.id.left_down:
@@ -487,10 +486,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		case R.id.mid_down:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				System.out.println("down");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_DOWN.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_DOWN.ordinal());
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
 				System.out.println("up");
-				PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			
 			break;
@@ -527,6 +526,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
     protected void onDestroy() {
     	super.onDestroy();
+    	Log.d(TAG, "close---==== onDestroy");
     	myVideoView.onStop();
 		dismissProgressDlg();
 		if(ipPlayReceiver != null) {
