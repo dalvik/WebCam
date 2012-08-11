@@ -7,20 +7,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
-import com.iped.ipcam.utils.ThroughNetUtil;
 
 public class CamParasSetImp implements ICamParasSet {
 
 	private Thread getCamParaThread = null;
 	
-	private ThroughNetUtil netUtil = null; 
-			
 	private Map<String, String> paraMap = new LinkedHashMap<String, String>();
 	
 	@Override
@@ -39,10 +35,6 @@ public class CamParasSetImp implements ICamParasSet {
 		return null;
 	}
 	
-	@Override
-	public ThroughNetUtil getThroughNetUtil() {
-		return netUtil;
-	}
 	class CamGetParas implements Runnable {
 		
 		private Device device;
@@ -58,57 +50,41 @@ public class CamParasSetImp implements ICamParasSet {
 		
 		@Override
 		public void run() {
-				if(device.getDeviceNetType()) {// out 
-					Log.d(TAG, "<=== CamGetParas run method = " + device.getDeviceID());
-					netUtil = new ThroughNetUtil(handler,true,Integer.parseInt(device.getDeviceID(),16));
-					new Thread(netUtil).start();
-				} else { // int 
-					String ethIp = device.getDeviceEthIp();
-					if(ethIp != null) {
-						String rece;
-						try {
-							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", ethIp, Constants.LOCALCMDPORT);
-							int rs = 1;
-							if("PSWD_NOT_SET".equals(rece)) {
-								rs = -1;
-								Log.d(TAG, "CamParasSetImp PSWD_not set");
-							} else if("PSWD_FAIL".equals(rece)) {
-								rs = -2;
-								Log.d(TAG, "CamParasSetImp PSWD_FAIL");
-							} else {
-								ParaUtil.putParaByString(rece, paraMap);
-							}
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.HIDEQUERYCONFIGDLG;
-							msg.arg1 = rs; 
-							handler.sendMessage(msg);
-						} catch (CamManagerException e) {
-							getConfigByWlan(device.getDeviceEthIp());
-						}
-					} else {
-						getConfigByWlan(device.getDeviceEthIp());
-					}
+			   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0";
+			   int res = UdtTools.sendCmdMsg(cmdStr, cmdStr.length());
+			   Log.d(TAG, "### get web cam config result = " + res);
+			   if(res < 0) {
+					//return -2;
+				   handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+				   return;
 				}
+				int bufLength = 1500;
+				byte[] recvBuf = new byte[bufLength];
+				int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
+				Log.d(TAG, "### check pwd recv length " + recvLength);
+				if(recvLength<0) {
+					//return -2; // time out
+					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+					return;
+				}
+				String recvConfigStr = new String(recvBuf,0, recvLength);
+				Log.d(TAG, "### recvConfigStr " + recvConfigStr);
+				int rs = 0;
+				if("PSWD_NOT_SET".equals(recvConfigStr)) {
+					rs = -1;
+					Log.d(TAG, "CamParasSetImp PSWD_not set");
+				} else if("PSWD_FAIL".equals(recvConfigStr)) {
+					rs = -2;
+					Log.d(TAG, "CamParasSetImp PSWD_FAIL");
+				} else {
+					ParaUtil.putParaByString(recvConfigStr, paraMap);
+				}
+				Message msg = handler.obtainMessage();
+				msg.what = Constants.HIDEQUERYCONFIGDLG;
+				msg.arg1 = rs; 
+				handler.sendMessage(msg);
 		}
 		
-		private void getConfigByWlan(String wlan) {
-			String rece;
-			try {
-				rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0", wlan, Constants.LOCALCMDPORT);
-				Log.d(TAG, "getConfigByWlan wlan = " + wlan + "  recv===="+ rece);
-				if("PSWD_NOT_SET".equals(rece)) {
-					Log.d(TAG, "CamParasSetImp getConfigByWlan PSWD_not set");
-				} else if("PSWD_FAIL".equals(rece)) {
-					Log.d(TAG, "CamParasSetImp getConfigByWlan PSWD_FAIL");
-				} else {
-					ParaUtil.putParaByString(rece, paraMap);
-				}
-			} catch (CamManagerException e) {
-				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-			} finally {
-				handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-			}
-		}
 	}
 
 	public Map<String, String> getParaMap() {

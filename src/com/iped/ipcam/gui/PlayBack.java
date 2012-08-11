@@ -181,8 +181,8 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			bundle.putString("PLVIDEOINDEX",videoIndex); 
 			bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
 			intent.putExtras(bundle);
-			intent.setAction(Constants.ACTION_IPPLAY);
-			sendBroadcast(intent);
+			//intent.setAction(Constants.ACTION_IPPLAY);
+			//sendBroadcast(intent);
 			break;
 		default:
 			break;

@@ -167,32 +167,6 @@ public class PackageUtil {
 		}
 	}
 
-	public static void sendPackageNoRecv(String cmdType, String ip, int port) {
-		byte[] tem = cmdType.getBytes();
-		DatagramSocket datagramSocket = null;
-		ThroughNetUtil netUtil = CamVideoH264.getInstance();
-		if (netUtil == null) {
-			return;
-		}
-		try {
-			datagramSocket = netUtil.getPort1(); // new DatagramSocket();
-			if (datagramSocket == null) {
-				return;
-			}
-			DatagramPacket datagramPacket = new DatagramPacket(tem,
-					cmdType.length(),
-					InetAddress.getByName(CamVideoH264.currIpAddress),
-					CamVideoH264.port1);
-			datagramSocket.send(datagramPacket);
-		} catch (SocketException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
-		} catch (UnknownHostException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
-		} catch (IOException e) {
-			Log.d(TAG, "CamManagerImp isoffline : " + ip + " " + e.getMessage());
-		}
-	}
-
 	public static boolean pingTest(String cmdType, String ip, int port) {
 		byte[] tem = cmdType.getBytes();
 		DatagramSocket datagramSocket = null;

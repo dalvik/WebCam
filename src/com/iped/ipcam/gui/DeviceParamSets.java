@@ -13,6 +13,7 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -45,15 +46,15 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DialogUtils;
+import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
+import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.WirelessAdapter;
-
-import dalvik.system.TemporaryDirectory;
 
 public class DeviceParamSets extends Activity implements OnClickListener {
 
@@ -164,6 +165,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	
 	private String TAG = "DeviceParamSets";
 	
+	private ProgressDialog m_Dialog = null;
+	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -180,30 +183,16 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				} else {
 					paraMap = camParasSet.getParaMap();
 					initializeEditText(paraMap);
-					/*
-					 * Set<String> s = paraMap.keySet(); for(String ss:s){
-					 * System.out.println(ss + " " + paraMap.get(ss)); }
-					 */
 					ProgressUtil.hideProgress();
-					/*
-					 * Bundle data = msg.getData(); CamConfig camConfig =
-					 * data.getParcelable("CAMPARAMCONFIG");
-					 * System.out.println(camConfig); if(camConfig != null) {
-					 * //initializeEditText(camConfig); }
-					 */
 				}
 				break;
 			case Constants.QUERYCONFIGERROR:
 				ProgressUtil.hideProgress();
-				Toast.makeText(
-						DeviceParamSets.this,
-						getResources().getString(
-								R.string.device_params_request_error_str),
-						Toast.LENGTH_SHORT).show();
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_request_error_str);
 				DeviceParamSets.this.finish();
 				break;
 			case Constants.SENDGETTHREEPORTMSG:
-				ThroughNetUtil netUtil = camParasSet.getThroughNetUtil();
+				ThroughNetUtil netUtil = null;
 				tmpDatagramSocket = netUtil.getPort1();
 				handler.sendEmptyMessage(Constants.SENDDATAWHENMODIFYCONFIG);
 				ProgressUtil.hideProgress();
@@ -282,13 +271,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			case Constants.SEND_REQUERY_CONFIG_PWD_ERROR:
 				String pwd = (String) msg.obj;
 				String cmd = "";
-				netUtil = camParasSet.getThroughNetUtil();
 				try {
 					device.setUnDefine2(pwd);
 					int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
 					if(checkPwd == 1) {
 						camManager.updateCam(device);
-						cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
+						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
 						paraMap = new LinkedHashMap<String,String>();
 						ParaUtil.putParaByString(cmd, paraMap);
 						initializeEditText(paraMap);
@@ -316,33 +304,14 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Intent intent = getIntent();
-		Uri uri = intent.getData();
-		String pwd = null;
-		if(uri != null) {
-			pwd = uri.getPath();
-			if(pwd == null || pwd.length() <= 0) {
-				DeviceParamSets.this.finish();
-			}
-		}
 		setContentView(R.layout.device_param_sets);
 		lookupEditText();
 		device = camManager.getSelectDevice();
 		Log.d(TAG, "device = " + device);
-		if (device == null) {
-			ToastUtils.showToast(this, R.string.device_params_no_device_select_str);
-			DeviceParamSets.this.finish();
-		} else {
-			// vodeoSearchDia(device.getDeviceIp());
-			device.setUnDefine2(pwd);
-			camManager.updateCam(device);
-			Log.d(TAG, "user set pwd = " + pwd);
-			handler.sendEmptyMessage(Constants.SHOWQUERYCONFIGDLG);
-		}
+		handler.sendEmptyMessage(Constants.SHOWQUERYCONFIGDLG);
 	}
 
 	private void lookupEditText() {
-		
 		deviceNameEditText = (EditText) findViewById(R.id.device_param_set_name);
 		deviceIdEditText = (EditText) findViewById(R.id.device_param_set_inentify);
 		versionEditText = (EditText) findViewById(R.id.device_param_set_version);
@@ -447,7 +416,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			break;
 		case R.id.device_params_other_set_system_time_id:
 			if(device.getDeviceNetType()) {
-				PackageUtil.sendPackageNoRecv(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", ip, port1);
+				//PackageUtil.sendPackageNoRecv(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", ip, port1);
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
 			} else {
 				try {
@@ -1154,4 +1123,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		}
 		return s;
 	}
+	
+	
 }

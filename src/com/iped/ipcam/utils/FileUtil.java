@@ -162,7 +162,7 @@ public class FileUtil {
 					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay() + "&" + device.getDeviceLocalCmdPort() + "&" + device.getDeviceLocalVideoPort() + "&" + device.getDeviceLocalAudioPort() + "&" + unDefine2 +"\n");
 				}
 			}
-			System.out.println(sb.toString());
+			//System.out.println(sb.toString());
 			fos = new FileOutputStream(file);
 			fos.write(sb.toString().getBytes());
 			fos.flush();

@@ -9,6 +9,4 @@ public interface ICamParasSet {
 
 	public CamParasSetImp getCamPara(Device device, Handler handler);
 	
-	public ThroughNetUtil getThroughNetUtil();
-	
 }

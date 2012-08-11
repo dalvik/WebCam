@@ -47,4 +47,8 @@ public class UdtTools {
 	
 	public static native int close();
 	
+	public static native int startUp();
+	
+	public static native int cleanUp();
+	
 }

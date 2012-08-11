@@ -39,8 +39,6 @@ public class Constants {
 
 	public final static String VIDEOPREVIEW = "VIDEOPREVIEW";
 
-	public final static String ACTION_IPPLAY = "iped.intent.action.IPPLAY";
-
 	public final static int SHOWCONNDIALOG = 2017;
 
 	public final static int HIDECONNDIALOG = 2018;
@@ -89,10 +87,6 @@ public class Constants {
 
 	public final static int SENDCONFIGMSG = 15204;
 
-	public final static String QUERY_CONFIG_ACTION = "android.intent.action.QUERY_CONFIG_ACTION";
-
-	public final static String QUERY_CONFIG_MINITYPE = "vnd.android.webcam.type/vnd.iped.webcam";
-
 	// show two input field
 	public final static int SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG = 16000;
 
@@ -138,9 +132,6 @@ public class Constants {
 	public final static int SENDGETTHREEPORTTIMOUTMSG = 4600;
 
 	public final static int SENDGETUNFULLPACKAGEMSG = 4700;
-
-	// 设备列表更新通知
-	public final static String SEND_DEVICE_LIST_UPDATE_ACTION = "android.intent.action.UPDATE_DEVICES_ACTION";
 
 	public final static int SEND_UPDATE_DEVICE_LIST_MSG = 5000;
 

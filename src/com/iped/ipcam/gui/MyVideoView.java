@@ -256,7 +256,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void onStop() {
 		stopPlay = true;
 		release();
-		flushBitmap();
+		//flushBitmap();
 	}
 
 	public boolean isStop() {
