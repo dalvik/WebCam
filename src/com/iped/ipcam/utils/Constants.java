@@ -31,7 +31,7 @@ public class Constants {
 
 	public final static String DEFAULTWAY = "192.168.1.1";
 
-	public final static int COMMNICATEBUFFERSIZE = 1024;
+	public final static int COMMNICATEBUFFERSIZE = 1024 * 3 / 2;
 
 	public final static int DEVICESEARCHTIMEOUT = 1000;
 

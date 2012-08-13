@@ -904,65 +904,31 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
-				
-				byte[] b = CamCmdListHelper.SetCmd_SearchWireless.getBytes();
+				String command = CamCmdListHelper.SetCmd_SearchWireless;
 				byte[] recv = new byte[Constants.COMMNICATEBUFFERSIZE];
-				boolean flag = true;
-				DatagramPacket datagramPacket = null;
-				if(!device.getDeviceNetType()){
-					if(tmpDatagramSocket == null) {
-						try {
-							tmpDatagramSocket = new DatagramSocket();
-							ip  = device.getDeviceEthIp();
-							port1 = device.getDeviceLocalCmdPort();
-						} catch (SocketException e) {
-							return;
+				String id = device.getDeviceID();
+				int res = UdtTools.sendCmdMsgById(id, command, command.length());
+				if( res >0) {
+					int re = UdtTools.recvCmdMsgById(id, recv, recv.length);
+					System.out.println("res2 = " + re);
+					if(re > 0) {
+						String length = new String(recv, 0, 4).trim();
+						int l = re - 4;
+						if(length.equals(Integer.toString(l))) {
+							String wifiInfo = new String(recv,4, l);
+							System.out.println("s = "  + length.trim()  + " " + wifiInfo.trim());
+							wifiList = ParaUtil.encapsuWifiConfig(wifiInfo);
+							handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSSUCCESSMSG);
+						}else{
+							handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSERRORMSG);
 						}
+					}else {
+						handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSERRORMSG);
 					}
-				}
-				System.out.println(ip + " " + port1);
-				try {
-					datagramPacket = new DatagramPacket(recv, recv.length, InetAddress.getByName(ip), port1);
-					while (flag) {
-						tmpDatagramSocket.setSoTimeout(100);
-						tmpDatagramSocket.receive(datagramPacket);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-					flag = false;
-				}
-				StringBuffer sb = new StringBuffer();
-				try {
-					flag = true;
-					datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
-					tmpDatagramSocket.setSoTimeout(60000);
-					tmpDatagramSocket.send(datagramPacket);
-					datagramPacket = new DatagramPacket(recv, recv.length, InetAddress.getByName(ip), port1);
-					while(flag) {
-						tmpDatagramSocket.receive(datagramPacket);
-						int recvLength = datagramPacket.getLength() - 4;
-						byte[] head = new byte[4];
-						System.arraycopy(recv, 0, head, 0, 4);
-						String headStr = new String(head);
-						if(recvLength != Integer.valueOf(headStr.replace(" ", ""))) {
-							Log.d(TAG, "recv wifi error info data packege head leng " + headStr +" recvLength = " + recvLength);
-							continue;
-						}
-						if(Constants.COMMNICATEBUFFERSIZE >recvLength) {
-							sb.append(new String(recv, 4, recvLength-4));
-							break;
-						}
-						sb.append(new String(recv, 4, recvLength-4));
-					}
-					wifiList = ParaUtil.encapsuWifiConfig(sb.toString());
-					handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSSUCCESSMSG);
-				} catch (Exception e) {
-					Log.d(TAG, "searchWireless = " + e.getLocalizedMessage());
-					flag = false;
+				} else {
 					handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSERRORMSG);
-				} finally {
-					handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 				}
+				handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 			}
 		}).start();
 	}
