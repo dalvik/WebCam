@@ -1,9 +1,7 @@
 package com.iped.ipcam.utils;
 
 import java.lang.reflect.Field;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.iped.ipcam.gui.R;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 
 public class DialogUtils {
@@ -176,34 +175,36 @@ public class DialogUtils {
                     	}
                  } else {
                 	 String common = CamCmdListHelper.SetCmd_Pwd_State + "PSWD=" + oldPwd + ":PSWD=" + newPwd1 + "\0";
-                	 if(device.getDeviceNetType()) {
+                	 String id = device.getDeviceID();
+                	 int res =  UdtTools.sendCmdMsgById(id, common, common.length());
+                	 if(res > 0 ) {
+                		 byte[] b = new byte[100];
+                		 int r = UdtTools.recvCmdMsgById(id, b, 100);
+                		 if(r > 0) {
+                			 String rece = new String(b,0,r);
+                			 if("PSWD_OK".equalsIgnoreCase(rece)) {
+ 								ToastUtils.showToast(context, R.string.password_modify_success_str);
+ 	                			Message message = handler.obtainMessage();
+ 	     	                	message.obj  = newPwd1;
+ 	     	                	message.what = msgType;
+ 	     	                	handler.sendMessage(message);
+ 							}else {
+ 								 ToastUtils.showToast(context, R.string.password_modify_error_str);
+ 							}
+                		 }else{
+                			 ToastUtils.showToast(context, R.string.password_modify_error_str);
+                		 }
+                	 } else {
+                		 ToastUtils.showToast(context, R.string.password_modify_error_str);
+                	 }
+                	 
+                	 try {
+							dismissDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+                	/* if(device.getDeviceNetType()) {
                 		DatagramPacket datagramPacket;
-                		byte[] b = new byte[100];
-						try {
-							datagramPacket = new DatagramPacket(common.getBytes(), common.getBytes().length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-							DatagramPacket recvPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.receive(recvPacket);
-							int l = recvPacket.getLength();
-							String rece = new String(b,0,l);
-							if("PSWD_OK".equalsIgnoreCase(rece)) {
-								ToastUtils.showToast(context, R.string.password_modify_success_str);
-	                			Message message = handler.obtainMessage();
-	     	                	message.obj  = newPwd1;
-	     	                	message.what = msgType;
-	     	                	handler.sendMessage(message);
-							}else {
-								 ToastUtils.showToast(context, R.string.password_modify_error_str);
-							}
-						} catch (Exception e) {
-							 ToastUtils.showToast(context, R.string.device_manager_pwd_set_time_out);
-						}finally {
-							try {
-								dismissDialog(dialog, dlg);
-		                  	} catch  (Exception e) {
-		                  		Log.v(TAG, e.getMessage());
-		                  	}
-						}
                 	 } else {
                 		 int result = PackageUtil.setPwd(device, common);
                 		 if(result == 1) {
@@ -220,7 +221,7 @@ public class DialogUtils {
                 		dismissDialog(dialog, dlg);
                   	} catch  (Exception e) {
                   		Log.v(TAG, e.getMessage());
-                  	}
+                  	}*/
                  }
             }
         }).setNegativeButton(context.getResources().getString(R.string.cancle_login_str), 

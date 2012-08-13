@@ -1,10 +1,6 @@
 package com.iped.ipcam.gui;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -411,17 +407,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			}, calendar2.get(Calendar.HOUR_OF_DAY), calendar2.get(Calendar.MINUTE), true).show();
 			break;
 		case R.id.device_params_other_set_system_time_id:
-			if(device.getDeviceNetType()) {
-				//PackageUtil.sendPackageNoRecv(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", ip, port1);
+			String command = CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0";
+			int res = UdtTools.sendCmdMsgById(device.getDeviceID(), command, command.length());
+			if(res>0) {
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
-			} else {
-				try {
-					PackageUtil.sendPackageNoRecvByIp(CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0", device.getDeviceEthIp(), device.getDeviceLocalCmdPort());
-					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
-				} catch (CamManagerException e) {
-					e.printStackTrace();
-					ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_error_str);
-				}
+			}else {
+				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_error_str);
 			}
 			break;
 		case R.id.device_params_other_modify_security_pwd_id:
