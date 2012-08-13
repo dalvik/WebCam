@@ -83,8 +83,10 @@
     		<string name="device_manager_new_device_id_not_number">设备ID号必须为数字</string>
     		<string name="device_manager_find_device_id_error">查询设备ID失败</string>
     		<string name="device_manager_find_device_id_not_online">设备不在线</string>
-    		<string name="device_manager_add_device_is__exist">设备已经存在</string>
+    		<string name="device_manager_add_device_is_exist">设备已经存在</string>
     		<string name="device_manager_new_device_title">添加新设备</string>
+    		<string name="device_manager_new_device_add_fail_str">添加新设备失败</string>
+    		<string name="device_manager_new_device_add_success_str">添加新设备成功</string>
     		<string name="device_manager_new_device_message">确认添加新设备</string>
     		<string name="device_manager_new_device_subnet_parameter_id">局域网参数</string>
     		<string name="device_manager_new_dns1_str">DNS1 </string>
@@ -103,8 +105,8 @@
     		<string name="device_manager_add_same_ip_str">设备地址冲突</string>
     		<string name="device_manager_add_net_type_eth_str">内网</string>
     		<string name="device_manager_add_net_type_wlan_str">外网</string>
-    		<string name="device_manager_add_query_title_str">设备查询</string>
-    		<string name="device_manager_add_query_message_str">请稍后</string>
+    		<string name="device_manager_add_query_title_str">设备添加</string>
+    		<string name="device_manager_add_query_message_str">正在添加设备请稍后</string>
     	<string name="clear_all_str">全部清除</string>	
     		<string name="clear_all_device_title_str">清空设备列表</string>
     		<string name="clear_all_device_message_str">确定清空设备列表吗</string>

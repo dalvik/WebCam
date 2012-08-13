@@ -13,11 +13,9 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -46,12 +44,10 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DialogUtils;
-import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.ProgressUtil;
-import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ThroughNetUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.WirelessAdapter;
@@ -207,7 +203,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 						try {
 							device.setUnDefine1(ip);
 							device.setDeviceRemoteCmdPort(port1);
-							int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
+							int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 							if(checkPwd == 1) {
 								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
 								paraMap = new LinkedHashMap<String,String>();
@@ -238,7 +234,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				ProgressUtil.showProgress(R.string.device_params_set_config_str, DeviceParamSets.this);
 				break;
 			case Constants.SENDDATAWHENMODIFYCONFIG:
-				handler.postDelayed(sendNullDataTask, 0);
 				break;
 			case Constants.SENDSETCONFIGSUCCESSMSG:
 				//ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_set_config_success_str);
@@ -254,6 +249,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 			case Constants.RETSETCONFIGERROR:
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_reset_config_error_str);
+				handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
 				break;
 			case Constants.SENDSEARCHWIRELESSMSG:
 				ProgressUtil.showProgress(R.string.device_params_apn_set_search_wireless_str, DeviceParamSets.this);
@@ -273,7 +269,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				String cmd = "";
 				try {
 					device.setUnDefine2(pwd);
-					int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
+					int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 					if(checkPwd == 1) {
 						camManager.updateCam(device);
 						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
@@ -630,7 +626,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		ProgressUtil.dismissProgress();
-		handler.removeCallbacks(sendNullDataTask);
+		UdtTools.close();
 	}
 
 	private void lockWireuseCommont(boolean flag) {
@@ -790,7 +786,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 		}
 		paraMap.put("mailbox", alarmEmailEditText.getText().toString().trim());
-		paraMap.put("password", securityVisitPass.getText().toString().trim());
+		//paraMap.put("password", securityVisitPass.getText().toString().trim());
 		
 		if(wifiList != null) {
 			WifiConfig config = wifiList.get(wirelessSpinner.getSelectedItemPosition());
@@ -842,134 +838,29 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
-				if(device.getDeviceNetType()) { // 如果是外网，需要穿网，此时利用临时保存的连接发送配置信息
-					String ws = ParaUtil.enCapsuPara(paraMap);
-					int l = ws.length();
-					StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
-					DatagramPacket datagramPacket;
-					byte [] data = sb.toString().getBytes();
+				String ws = ParaUtil.enCapsuPara(paraMap);
+				int l = ws.length();
+				StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
+				int res = UdtTools.sendCmdMsgById(device.getDeviceID(), sb.toString(), sb.length());
+				if(res>0) {
+					sb.delete(0, sb.length());
 					if(l>1000) {
-						try {
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-							
-							sb = new StringBuffer(new String("0996") + ws.substring(0,996));
-							System.out.println("===>" + sb.toString());
-							data = sb.toString().getBytes();
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-							String a = ws.substring(996);
-							int left = a.length();// l - 1000;
-							sb = new StringBuffer(new String("0" + left) + a);
-							System.out.println("===>" + sb.toString());
-							data = sb.toString().getBytes();
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						} catch (Exception e) {
-							e.printStackTrace();
-							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
-						} finally {
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						}
+						sb.append(l);
 					} else {
-						try {
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-							data = ("0" + ws.length() + ws).getBytes();
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port1);
-							tmpDatagramSocket.send(datagramPacket);
-						} catch (Exception e) {
-							e.printStackTrace();
-							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
-						}finally {
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						}
+						sb.append("0" + l);
 					}
-				} else {
-					String ethIp = "";
-					if(device.getDeviceNetType()) {
-						ethIp = device.getUnDefine1();
+					sb.append(ws);
+					res = UdtTools.sendCmdMsgById(device.getDeviceID(), sb.toString(), sb.length());
+					if(res > 0) {
+						Message msg = handler.obtainMessage();
+						msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
+						handler.sendMessageDelayed(msg, 500);
 					} else {
-						ethIp = device.getDeviceEthIp();
-						/*boolean flag = PackageUtil.pingTest(CamCmdListHelper.SetCmd_Config, ethIp, device.getDeviceRemoteCmdPort());
-						if(!flag) {
-							ethIp = device.getDeviceWlanIp();			
-						}*/
+						handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
 					}
-					String ws = ParaUtil.enCapsuPara(paraMap);
-					int l = ws.length();
-					StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);
-					byte [] data = sb.toString().getBytes();
-					DatagramPacket datagramPacket;
-					if(l>1000) {
-						try {
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
-							sb = new StringBuffer(new String("0996") + ws.substring(0,996));
-							System.out.println("===>" + sb.toString());
-							data = sb.toString().getBytes();
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
-							String a = ws.substring(996);
-							int left = a.length();// l - 1000;
-							sb = new StringBuffer(new String("0" + left) + a);
-							System.out.println("===>" + sb.toString());
-							data = sb.toString().getBytes();
-							datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						} catch (Exception e) {
-							e.printStackTrace();
-							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
-						} finally {
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						}
-					}else {
-						DatagramSocket datagramSocket = null;
-						try {
-							datagramSocket = new DatagramSocket();
-							//PackageUtil.sendPackageNoRecvByIp(sb.toString(), ethIp, device.getDeviceLocalCmdPort());
-							//PackageUtil.sendPackageNoRecvByIp("0" + l + ws, ethIp, device.getDeviceLocalCmdPort());
-							data = sb.toString().getBytes();
-							DatagramPacket datagramPacket2 = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
-							datagramSocket.send(datagramPacket2);
-							data = ("0" + l + ws).getBytes();
-							datagramPacket2 = new DatagramPacket(data, data.length, InetAddress.getByName(ethIp), device.getDeviceLocalCmdPort());
-							datagramSocket.send(datagramPacket2);
-						} catch (Exception e) {
-							e.printStackTrace();
-							handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
-						}finally {
-							if(datagramSocket != null) {
-								datagramSocket.close();
-								datagramSocket = null;
-							}
-							Message msg = handler.obtainMessage();
-							msg.what = Constants.SENDSETCONFIGSUCCESSMSG;
-							handler.sendMessageDelayed(msg, 500);
-						}
-					}
-					
-						/*String rece;
-						try {
-							rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, ethIp, Constants.UDPPORT);
-							System.out.println("ethIp = " + ethIp + "  recv===="+ rece);
-							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-						} catch (CamManagerException e) {
-							getConfigByWlan(device.getDeviceWlanIp());
-						}
-					} else {
-						getConfigByWlan(device.getDeviceWlanIp());
-					}*/
-				}	
+				}else {
+					handler.sendEmptyMessage(Constants.SENDSETCONFIGERRORMSG);
+				}
 			}
 		}).start();
 		
@@ -993,36 +884,17 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		
 	}
 	
-	private Runnable sendNullDataTask = new Runnable() {
-		@Override
-		public void run() {
-			int l = 2;
-			byte[] b = new byte[l];
-			try {
-				DatagramPacket datagramPacket = new DatagramPacket(b, l, InetAddress.getByName(ip), port1);
-				tmpDatagramSocket.send(datagramPacket);
-				System.out.println("tmpDatagramSocket=" + tmpDatagramSocket);
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				handler.postDelayed(sendNullDataTask,10000);
-			}
-		}
-	};
-	
 	public void resetFactory() {
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
-				byte[] b = CamCmdListHelper.ReSetCmd_Config.getBytes();
-				try {
-					DatagramPacket datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port1);
-					tmpDatagramSocket.send(datagramPacket);
+				String command = CamCmdListHelper.ReSetCmd_Config;
+				int res = UdtTools.sendCmdMsgById(device.getDeviceID(), command, command.length());
+				if(res >0) {
 					handler.sendEmptyMessage(Constants.RETSETCONFIGSUCCESS);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} else {
 					handler.sendEmptyMessage(Constants.RETSETCONFIGERROR);
-				} 
+				}
 			}
 		}).start();
 		

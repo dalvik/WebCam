@@ -7,12 +7,11 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import android.util.Log;
+
 import com.iped.ipcam.exception.CamManagerException;
-import com.iped.ipcam.gui.CamVideoH264;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
-
-import android.util.Log;
 
 public class PackageUtil {
 
@@ -205,16 +204,16 @@ public class PackageUtil {
 		return temp;
 	}
 
-	public static int checkPwdState() {
+	public static int checkPwdState(String id) {
 		String tem = CamCmdListHelper.CheckCmd_Pwd_State;
-		int res = UdtTools.sendCmdMsg(tem, tem.length());
+		int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 		Log.d(TAG, "checkPwdState = " + res);
 		if(res <0) {
 			return -2; // time out
 		}
 		int bufLength = 100;
 		byte[] recvBuf = new byte[bufLength];
-		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
+		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
 		Log.d(TAG, "### check pwd state length " + recvLength);
 		if(recvLength<0) {
 			return -2; // time out
@@ -229,16 +228,16 @@ public class PackageUtil {
 		return -2; // time out
 	}
 
-	public static int checkPwd(String  pwd) {
+	public static int checkPwd(String id, String  pwd) {
 		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0");
-		int res = UdtTools.sendCmdMsg(tem, tem.length());
+		int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 		Log.d(TAG, "checkPwd = " + res);
 		if(res < 0) {
 			return -2;
 		}
 		int bufLength = 100;
 		byte[] recvBuf = new byte[bufLength];
-		int recvLength = UdtTools.recvCmdMsg(recvBuf, bufLength);
+		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
 		Log.d(TAG, "### check pwd recv length " + recvLength);
 		if(recvLength<0) {
 			return -2; // time out
@@ -253,44 +252,28 @@ public class PackageUtil {
 	}
 
 	public static int setPwd(Device device, String common) {
-		byte[] tem = common.getBytes();
-		DatagramSocket datagramSocket = null;
-		boolean netType = device.getDeviceNetType();
-		String ip = null;
-		int port = device.getDeviceRemoteCmdPort();
-		if (netType) {
-			ip = device.getUnDefine1();
+		String id = device.getDeviceID();
+		int res = UdtTools.sendCmdMsgById(id,common, common.length());
+		Log.d(TAG, "setPwd = " + res);
+		if(res <0) {
+			return -2; // time out
+		}
+		int bufLength = 100;
+		byte[] recvBuf = new byte[bufLength];
+		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
+		Log.d(TAG, "### check set pwd recv length " + recvLength);
+		if(recvLength<0) {
+			return -2; // time out
+		}
+		String recvStr = new String(recvBuf,0, recvLength);
+		Log.d(TAG, "### check set pwd recv info " + recvStr);
+		if ("PSWD_OK".equals(recvStr)) {
+			return 1; // set success
+		} else if ("PSWD_FAIL".equals(recvStr)) {
+			return 0; // set error
 		} else {
-			ip = device.getDeviceEthIp();
-			port = device.getDeviceLocalCmdPort();
+			return -1; // unknown
 		}
-		Log.d(TAG, "set Pwd state : netType = " + netType + " ip = " + ip
-				+ " port=" + port + " common=" + common);
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length,
-					InetAddress.getByName(ip), port);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			datagramSocket.receive(rece);
-			int receLength = rece.getLength();
-			String receStr = new String(buffTemp, 0, receLength);
-			Log.d(TAG, "set Pwd state recv //////////////" + receStr);
-			if ("PSWD_OK".equals(receStr)) {
-				return 1; // set success
-			} else if ("PSWD_FAIL".equals(receStr)) {
-				return 0; // set error
-			} else {
-				return -1; // unknown
-			}
-		} catch (IOException e) {
-			Log.d(TAG,
-					"sendPackageNoRecvByIp : " + ip + " "
-							+ e.getLocalizedMessage());
-		}
-		return -2; // time out
-
 	}
 
 	public static boolean sendPTZCommond(int commId) {
@@ -313,8 +296,8 @@ public class PackageUtil {
 		return false;
 	}
 
-	public static void setBCV(String comm, String value) {
+	public static void setBCV(String id, String comm, String value) {
 		String BCVCommon = (comm + value +"\0");
-		UdtTools.sendCmdMsg(BCVCommon, BCVCommon.length());
+		UdtTools.sendCmdMsgById(id, BCVCommon, BCVCommon.length());
 	}
 }

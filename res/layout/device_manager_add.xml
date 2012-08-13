@@ -47,7 +47,7 @@
 	           android:layout_height="3dp"
 	           android:background="?android:attr/listDivider" />
             
-            <TableRow >
+            <TableRow android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -91,8 +91,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/device_manager_new_device_id"
-                    android:textColor="@color/black" />
+                    android:text="@string/device_manager_new_device_id" />
 
                 <!--  android:hint="@string/device_manager_add_hint_str" -->
                 <EditText android:id="@+id/device_manager_new_device_id_edittext"
@@ -128,6 +127,7 @@
 		       android:id="@+id/subnet_param_layout"
 		       android:layout_width="fill_parent"
 		       android:layout_height="wrap_content"
+		       android:visibility="gone"
 		       android:orientation="vertical" >
          
         <TableLayout

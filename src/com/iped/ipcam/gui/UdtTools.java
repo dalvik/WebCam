@@ -33,11 +33,15 @@ public class UdtTools {
 	
 	public static native int monitorSocket(String camId);
 	
-	public static native int initialSocket(String random);
+	public static native int monitorCmdSocket(String camId, String random);
 	
-	public static native int sendCmdMsg(String cmd, int cmdLength);
+	public static native int checkCmdSocketEnable(String camId);
 	
-	public static native int recvCmdMsg(byte[] buf, int bufLength);
+	public static native int initialSocket(String camId, String random);
+	
+	public static native int sendCmdMsgById(String camId, String cmd, int cmdLength);
+	
+	public static native int recvCmdMsgById(String camId, byte[] buf, int bufLength);
 	
 	public static native int recvVideoMsg(byte[] buf, int bufLength);
 	
@@ -46,6 +50,8 @@ public class UdtTools {
 	public static native int sendPTZMsg(byte[] comm);
 	
 	public static native int close();
+	
+	public static native int exit();
 	
 	public static native int startUp();
 	

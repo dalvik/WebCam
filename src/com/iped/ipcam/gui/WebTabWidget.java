@@ -113,7 +113,7 @@ public class WebTabWidget extends TabActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		UdtTools.close();
+		UdtTools.exit();
 		UdtTools.cleanUp();
 		ICamManager camManager = CamMagFactory.getCamManagerInstance();
 		camManager.clearCamList();

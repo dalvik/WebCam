@@ -26,7 +26,4 @@ public class Command {
 	
 	public final static byte CHANEL = 1;
 	
-	public static int sendCmd(String cmdName, int cmdNameLength){
-		return UdtTools.sendCmdMsg(cmdName, cmdNameLength);
-	}
 }

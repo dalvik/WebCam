@@ -130,9 +130,8 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void run() {
 		deviceId = device.getDeviceID();
-		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp
-				+ device.getUnDefine2() + "\0");
-		int res = UdtTools.sendCmdMsg(tem, tem.length());
+		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
+		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			//onStop();
@@ -140,7 +139,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		int bufLength = 10;
 		byte[] b = new byte[bufLength];
-		res = UdtTools.recvCmdMsg(b, bufLength);
+		res = UdtTools.recvCmdMsgById(deviceId,b, bufLength);
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			//onStop();

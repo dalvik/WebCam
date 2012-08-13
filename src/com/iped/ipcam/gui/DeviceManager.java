@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -98,6 +99,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	private ProgressDialog m_Dialog = null;
 	
 	private String password = "";
+
+	//private MonitorSocketThread monitorSocketThread = null;
 	
 	private static final String TAG = "DeviceManager";
 
@@ -105,13 +108,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		@Override
 		public void handleMessage(Message message) {
 			switch (message.what) {
-			/*case Constants.UPDATEAUTOSEARCH:
-				int value = message.arg1;
-				progressDialog.setProgress(message.arg1);
-				if (value >= 100) {
-					dismissProgress();
-				}
-				break;*/
 			case Constants.HIDETEAUTOSEARCH:
 				dismissProgress();
 				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
@@ -138,17 +134,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					}
 				}
 				break;
-			case Constants.SENDGETTHREEPORTMSG:
-				Bundle bd = message.getData();
-				if(bd != null) {
-					ip = bd.getString("IPADDRESS");
-					port1 = bd.getInt("PORT1");
-					port2 = bd.getInt("PORT2");
-					port3 = bd.getInt("PORT3");
-					dismissProgress();
-					getDeviceConfig(ip, port1, port2, port3);
-				}
-				break;
 			case Constants.SENDGETUNFULLPACKAGEMSG:
 				showToast(R.string.device_manager_find_device_id_error);
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
@@ -158,6 +143,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 				break;
 			case Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG:
+				//TODO
+				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
+				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, camManager.getSelectDevice(), handler, Constants.WEB_CAM_CHECK_PWD_MSG);
+				break;
 			case Constants.SEND_SHOW_TWO_PWD_FIELD_CONFIG_MSG:
 				pwd = (String) message.obj;
 				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
@@ -188,15 +177,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
 				}
 				break;*/
-			case Constants.SEND_GET_CONFIG_MSG:
-				String pwd2 = (String) message.obj;
-				queryDeviceConfig(pwd2);
-				break;
 			case Constants.SEND_ADD_NEW_DEVICE_BY_IP_MSG:
 				String pass = (String) message.obj;
 				deviceTmp.setUnDefine2(pass);
 				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
-				queryDeiceConfigByIp();
 				break;
 			case Constants.SEND_UPDATE_DEVICE_LIST_MSG:
 				sendBroadcast(new Intent(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
@@ -204,7 +188,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
 				String random = RandomUtil.generalRandom();
 				Log.d(TAG, "random = " + random);
-				int initRes = UdtTools.initialSocket(random);
+				int initRes = UdtTools.initialSocket(device.getDeviceID(),random);
 				if(initRes<0) {
 					Log.d(TAG, "initialSocket init error!");
 					ToastUtils.showToast(DeviceManager.this, R.string.webcam_connect_init_error);
@@ -213,7 +197,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				}
 				break;
 			case Constants.WEB_CAM_CHECK_PWD_STATE_MSG:
-				int resu = PackageUtil.checkPwdState();
+				int resu = PackageUtil.checkPwdState(device.getDeviceID());
 				Log.d(TAG, "device manager checkPwdState result = " + resu);
 				handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -253,6 +237,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				password = (String) message.obj;
 				handler.removeCallbacks(checkPwdRunnable);
 				handler.post(checkPwdRunnable);
+				//new CheckPwdThread().start();
 				break;
 			
 			default:
@@ -355,16 +340,19 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			addNewDevice();
 			break;
 		case R.id.device_manager_button:
-			Device device = camManager.getSelectDevice();
+			device = camManager.getSelectDevice();
 			if(device == null) {
 				Log.d(TAG, "device = " + device);
 				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
 				return;
 			}
 			handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			handler.removeCallbacks(monitorSocketTask);
-			handler.postDelayed(monitorSocketTask, 100);
-			
+			HandlerThread handlerThread = new HandlerThread("test");
+			handlerThread.start();
+			Handler myHandler = new Handler(handlerThread.getLooper());
+			myHandler.post(monitorSocketTask);
+			//handler.removeCallbacks(monitorSocketTask);
+			//handler.postDelayed(monitorSocketTask, 100);
 			break;
 		case R.id.clear_all_button:
 			if(camManager.getCamList().size()>0) {
@@ -457,6 +445,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		final View addDeviceView = initAddNewDeviceView();
 		final CheckBox serchConfig = (CheckBox) addDeviceView
 				.findViewById(R.id.device_manager_search_device_checkbox);
+		serchConfig.setChecked(true);
 		updateComponentState(addDeviceView, serchConfig.isChecked());
 		serchConfig
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -593,7 +582,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	};
 
 	private void showToast(int id) {
-		Toast.makeText(this, getText(id), Toast.LENGTH_SHORT).show();
+		ToastUtils.showToast(this, id);
 	}
 	
 	private class QueryCamera implements Runnable {
@@ -624,75 +613,40 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 		@Override
 		public void run() {
-			if (flag) {// 根据用户ID添加设备
-			} else {//根据IP地址添加设备
-				//检查密码设置状态
-				//TODO
-				deviceTmp = new Device();
-				deviceTmp.setDeviceName(name);
-				deviceTmp.setDeviceNetType(false);
-				deviceTmp.setDeviceEthIp(ip);
-				deviceTmp.setDeviceEthGateWay(gateWay);
-				deviceTmp.setDeviceEthMask(mask);
-				deviceTmp.setDeviceEthDNS1(dns1);
-				deviceTmp.setDeviceEthDNS2(dns2);
-				int resu = PackageUtil.checkPwdState();
-				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
-				if(resu == 1) { // 密码已设置
-					handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
-				} else if(resu == 0) { // 密码未设置
-					handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
-				} else { // 其他
+				int res = UdtTools.checkCmdSocketEnable(ip);
+				if (res>0) {
+					deviceTmp = new Device();
+					deviceTmp.setDeviceName(name);
+					deviceTmp.setDeviceID(ip);
+					Bundle bundle2 = new Bundle();
 					Message msg = handler.obtainMessage();
-					msg.arg1 = R.string.device_manager_find_device_id_not_online;
-					msg.what = Constants.SHOWTOASTMSG;
+					bundle2.putSerializable("NEW_DEVICE", deviceTmp);
+					msg.setData(bundle2);
+					msg.what = Constants.SHOWRESULTDIALOG;
 					handler.sendMessage(msg);
+				}else {
+					String random = RandomUtil.generalRandom();
+					Log.d(TAG, "random = " + random);
+					int result = UdtTools.monitorCmdSocket(ip, random);
+					Log.d(TAG, "monitor result = " + result);
+					if(result>0) {
+						deviceTmp = new Device();
+						deviceTmp.setDeviceName(name);
+						deviceTmp.setDeviceID(ip);
+						Bundle bundle2 = new Bundle();
+						Message msg = handler.obtainMessage();
+						bundle2.putSerializable("NEW_DEVICE", deviceTmp);
+						msg.setData(bundle2);
+						msg.what = Constants.SHOWRESULTDIALOG;
+						handler.sendMessage(msg);
+					}else {
+						Message msg = handler.obtainMessage();
+						msg.arg1 = R.string.device_manager_new_device_add_fail_str;
+						msg.what = Constants.SHOWTOASTMSG;
+						handler.sendMessage(msg);
+					}
 				}
-				/*DatagramSocket datagramSocket = null;
-				byte [] tem = CamCmdListHelper.GetCmd_Config.getBytes();
-				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-				StringBuffer sb = new StringBuffer();
-				String tmp = null;*/
-				//try {
-					/*datagramSocket = new DatagramSocket();
-					datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-					DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.LOCALCMDPORT);
-					datagramSocket.send(datagramPacket);
-					DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-					int recvLength = 0;
-					while(true) {
-						datagramSocket.receive(rece);
-						int l = rece.getLength();
-						byte[] ipByte = new byte[4];
-						System.arraycopy(buffTemp, 0, ipByte, 0, 4);
-						recvLength += Integer.parseInt(new String(ipByte).trim());
-						tmp = new String(buffTemp,4,l-4).trim();
-						sb.append(tmp);
-						Log.d(TAG, "Receive inof //////////////"  + l + " " + tmp);
-						if(recvLength>1000) {
-							break;
-						}
-					}
-					
-					Map<String,String> paraMap = new LinkedHashMap<String,String>();
-					ParaUtil.putParaByString(sb.toString(), paraMap);
-					int resu = PackageUtil.checkPwdState(device);
-					boolean flag = PackageUtil.pingTest(CamCmdListHelper.GetCmd_Config, ip, Constants.LOCALCMDPORT);
-					*/
-				/*} catch (IOException e) {
-					Message msg = handler.obtainMessage();
-					msg.arg1 = R.string.device_manager_find_device_id_not_online;
-					msg.what = Constants.SHOWTOASTMSG;
-					handler.sendMessage(msg);
-					Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-				} finally {
-					if(datagramSocket != null) {
-						datagramSocket.close();
-						datagramSocket = null;
-					}
-					handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
-				}*/
-			}
+				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 		}
 	}
 
@@ -708,12 +662,15 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			public void onClick(DialogInterface dialog, int which) {
 				if(camManager.addCam(device)) {
 					handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+					Message msg = handler.obtainMessage();
+					msg.arg1 = R.string.device_manager_new_device_add_success_str;
+					msg.what = Constants.SHOWTOASTMSG;
+					handler.sendMessage(msg);
 					unCloseDialog(dlg, -1, true); 
 				} else {
-					showToast(R.string.device_manager_add_device_is__exist);
+					showToast(R.string.device_manager_add_device_is_exist);
 				}
 			}
-			
 		}).setNegativeButton(getString(R.string.system_settings_save_path_preview_cancle_str), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -723,124 +680,30 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		ad.show();
 	}
 	
-	//TODO
-	public void getDeviceConfig(String ip, int port1, int port2, int port3) {
-		Device tempDevice = new Device();
-		tempDevice.setDeviceNetType(true);
-		tempDevice.setDeviceRemoteCmdPort(port1);
-		tempDevice.setUnDefine1(ip);
-		int result = PackageUtil.checkPwdState();
-		Log.d(TAG, "DeviceManager getDeviceConfig checkPwdState result = " + result);
-		if(result == 0) { // unset
-			DialogUtils.inputTwoPasswordDialog(DeviceManager.this, tempDevice, handler, Constants.SEND_GET_CONFIG_MSG);
-		} else if(result == 1) {// pwd seted
-			/*int checkPwd = PackageUtil.checkPwd(tempDevice);
-			if(checkPwd == 1) {
-			} else {
-				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
-			}*/
-			DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
-		} else if(result == 2){
-			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
-			DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_GET_CONFIG_MSG);
-		}else {
-			ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
-		}
-	}
-
-	public void queryDeviceConfig(String pwd) {
-		//TODO
-		String cmd = null;
-		/*try {
-			cmd = PackageUtil.CMDPackage2( CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
-			if(cmd == null)  {
-				return;
-			}
-			if("PSWD_FAIL".equals(cmd)) {
-				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
-				return;
-			}
-			System.out.println("cmd=" + cmd);
-		} catch (CamManagerException e) {
-			Log.d(TAG, e.getLocalizedMessage());
-			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
-			return;
-		}*/
-		Map<String,String> paraMap = new LinkedHashMap<String,String>();
-		ParaUtil.putParaByString(cmd, paraMap);
-		Device device = new Device();
-		device.setDeviceName(deviceName);
-		device.setDeviceID(paraMap.get("cam_id"));
-		String eht_ip = paraMap.get("e_ip");
-		device.setDeviceEthIp(eht_ip);
-		device.setDeviceEthGateWay(paraMap.get("e_gw"));
-		device.setDeviceEthMask(paraMap.get("e_mask"));
-		device.setDeviceEthDNS1(paraMap.get("e_dns1"));
-		device.setDeviceEthDNS2(paraMap.get("e_dns2"));
-		
-		device.setUnDefine1(ip);
-		device.setUnDefine2(pwd);
-		device.setDeviceNetType(true);
-		device.setDeviceRemoteCmdPort(port1);
-		device.setDeviceRemoteVideoPort(port2);
-		device.setDeviceRemoteAudioPort(port3);
-		Message msg = handler.obtainMessage();
-		Bundle bundle = new Bundle();
-		bundle.putSerializable("NEW_DEVICE", device);
-		msg.setData(bundle);
-		msg.what = Constants.SHOWRESULTDIALOG;
-		handler.sendMessage(msg);
-	}
-
-	public void queryDeiceConfigByIp() {
-		String cmd = null;
-		try {
-			cmd = PackageUtil.CMDPackage(CamCmdListHelper.GetCmd_Config + deviceTmp.getUnDefine2() + "\0", deviceTmp.getDeviceEthIp(), deviceTmp.getDeviceLocalCmdPort());
-			if(cmd == null) {
-				return;
-			}
-			//System.out.println("cmd=" + cmd);
-		} catch (Exception e) {
-			Log.d(TAG, e.getLocalizedMessage());
-			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
-			return;
-		}
-		System.out.println("queryDeiceConfigByIp config =" + cmd);
-		if("PSWD_FAIL".equals(cmd)) {
-			Message msg = handler.obtainMessage();
-			msg.arg1 = R.string.device_manager_pwd_set_err;
-			msg.what = Constants.SHOWTOASTMSG;
-			handler.sendMessage(msg);
-		} else {
-			Map<String,String> paraMap = new LinkedHashMap<String,String>();
-			ParaUtil.putParaByString(cmd, paraMap);
-			deviceTmp.setDeviceName(deviceName);
-			deviceTmp.setDeviceID(paraMap.get("cam_id"));
-			deviceTmp.setDeviceEthDNS1(paraMap.get("e_dns1"));
-			deviceTmp.setDeviceEthDNS2(paraMap.get("e_dns2"));
-			Bundle bundle2 = new Bundle();
-			Message msg = handler.obtainMessage();
-			bundle2.putSerializable("NEW_DEVICE", deviceTmp);
-			msg.setData(bundle2);
-			msg.what = Constants.SHOWRESULTDIALOG;
-			handler.sendMessage(msg);
-		}
-	}
-	
-
 	private Runnable monitorSocketTask = new Runnable() {
 		@Override
 		public void run() {
 			//UdtTools.close();
-			device = camManager.getSelectDevice();
-			int result = UdtTools.monitorSocket(device.getDeviceID());
-			System.out.println("result = " + result);
-			Log.d(TAG, "monitor result = " + result);
-			if(result<0) {
+			String id = device.getDeviceID();
+			int res = UdtTools.checkCmdSocketEnable(id);
+			if(res>0) {
 				handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
+				intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
+				startActivity(intent);
+			}else {
+				String random = RandomUtil.generalRandom();
+				Log.d(TAG, "random = " + random);
+				int result = UdtTools.monitorCmdSocket(id, random);
+				System.out.println("result = " + result);
+				Log.d(TAG, "monitor result = " + result);
+				if(result<0) {
+					handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+					handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+				}
+				analyseResult(result, device);
 			}
-			analyseResult(result, device);
 		}
 	};
 	
@@ -868,25 +731,148 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			break;
 		}
 		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
-		String random = RandomUtil.generalRandom();
-		Log.d(TAG, "random = " + random);
-		int initRes = UdtTools.initialSocket(random);
-		if(initRes<0) {
-			Log.d(TAG, "initialSocket init error!");
-			ToastUtils.showToast(DeviceManager.this, R.string.webcam_connect_init_error);
-		}else {
-			// exec checkpwd runnable and show wait dialog
-			handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			handler.removeCallbacks(checkPwdStateRunnable);
-			handler.post(checkPwdStateRunnable);
+		// exec checkpwd runnable and show wait dialog
+		handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+		HandlerThread handlerThread = new HandlerThread("test1");
+		handlerThread.start();
+		Handler mHandler = new Handler(handlerThread.getLooper());
+		mHandler.post(checkPwdStateRunnable);
+		//handler.removeCallbacks(checkPwdStateRunnable);
+		//handler.post(checkPwdStateRunnable);
+		//new CheckPwdStateThread().start();
+	}
+	
+	private void analyseResult2(int result, Device device) {
+		switch (result) {
+		case ErrorCode.STUN_ERR_INTERNAL:
+			ToastUtils.showToast(this, R.string.webcam_error_code_internel);
+			return;
+		case ErrorCode.STUN_ERR_SERVER:
+			ToastUtils.showToast(this, R.string.webcam_error_code_server_not_reached);
+			return;
+		case ErrorCode.STUN_ERR_TIMEOUT:
+			ToastUtils.showToast(this, R.string.webcam_error_code_timeout);
+			return;
+		case ErrorCode.STUN_ERR_INVALIDID:
+			ToastUtils.showToast(this, R.string.webcam_error_code_unlegal);
+			return;
+		case ErrorCode.STUN_ERR_CONNECT:
+			ToastUtils.showToast(this, R.string.webcam_error_code_connect_error);
+			return;
+		case ErrorCode.STUN_ERR_BIND:
+			ToastUtils.showToast(this, R.string.webcam_error_code_bind_error);
+			return;
+		default:
+			break;
 		}
+		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
+		// exec checkpwd runnable and show wait dialog
+		handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+		HandlerThread handlerThread = new HandlerThread("test1");
+		handlerThread.start();
+		Handler mHandler = new Handler(handlerThread.getLooper());
+		mHandler.post(checkPwdStateRunnable);
+		//handler.removeCallbacks(checkPwdStateRunnable);
+		//handler.post(checkPwdStateRunnable);
+		//new CheckPwdStateThread().start();
 	}
 	
 	private Runnable checkPwdStateRunnable = new Runnable() {
 
 		@Override
 		public void run() {
-			int resu = PackageUtil.checkPwdState();
+			int resu = PackageUtil.checkPwdState(device.getDeviceID());
+			Log.d(TAG, "device manager checkPwdState result = " + resu);
+			if(resu == 0) { // unset
+				handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
+				//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+			} else if(resu == 1) {// pwd seted
+				if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
+					Message mesg = handler.obtainMessage();
+					mesg.obj  = device.getUnDefine2();
+					mesg.what = Constants.WEB_CAM_CHECK_PWD_MSG;
+					handler.sendMessage(mesg);
+				}else {
+					handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
+				}
+			} else if(resu == 2){
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+			} else {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
+			}
+			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		}
+	};
+	
+	
+	private Runnable checkPwdRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),password);
+			Log.d(TAG, "checkPwd result = " + checkPwd);
+			if(checkPwd == 1) {
+				device.setUnDefine2(password);
+				camManager.updateCam(device);
+				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
+				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
+				intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
+				startActivity(intent);
+			} else if(checkPwd == -1) {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
+			} else {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
+			}
+			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		}
+	};
+	
+	private void showProgressDlg(int textId) {
+		if(m_Dialog == null) {
+			m_Dialog = new ProgressDialog(DeviceManager.this);
+			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			m_Dialog.setCancelable(false);
+			m_Dialog.setMessage(getResources().getText(textId));
+		}
+		m_Dialog.show();
+	}
+	
+	private void hideProgressDlg() {
+		if(m_Dialog != null && m_Dialog.isShowing()) {
+			m_Dialog.hide();
+		}
+	}
+
+	private class MonitorSocketThread extends Thread {
+		
+		private String id;
+		
+		public MonitorSocketThread(String id) {
+			this.id = id;
+		}
+		
+		@Override
+		public void run() {
+			super.run();
+			
+		}
+	}
+/*	
+	private class CheckPwdStateThread extends Thread {
+		
+		public CheckPwdStateThread() {
+			
+		}
+		
+		@Override
+		public void run() {
+			super.run();
+			int resu = PackageUtil.checkPwdState(device.getDeviceID());
 			Log.d(TAG, "device manager checkPwdState result = " + resu);
 			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -910,13 +896,19 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 			}
 		}
-	};
+		
+	}
 	
-	private Runnable checkPwdRunnable = new Runnable() {
-
+	private class CheckPwdThread extends Thread {
+		
+		public CheckPwdThread() {
+			
+		}
+		
 		@Override
 		public void run() {
-			int checkPwd = PackageUtil.checkPwd(password);
+			super.run();
+			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),password);
 			Log.d(TAG, "checkPwd result = " + checkPwd);
 			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -935,22 +927,5 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 			}
 		}
-	};
-	
-	private void showProgressDlg(int textId) {
-		if(m_Dialog == null) {
-			m_Dialog = new ProgressDialog(DeviceManager.this);
-			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			m_Dialog.setCancelable(false);
-			m_Dialog.setMessage(getResources().getText(textId));
-		}
-		m_Dialog.show();
-	}
-	
-	private void hideProgressDlg() {
-		if(m_Dialog != null && m_Dialog.isShowing()) {
-			m_Dialog.hide();
-		}
-	}
-
+	}*/
 }

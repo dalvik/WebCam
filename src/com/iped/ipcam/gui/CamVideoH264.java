@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -142,7 +143,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Device device = camManager.getSelectDevice();
 				String pwd = (String) msg.obj;
 				device.setUnDefine2(pwd);
-				int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
+				int checkPwd = PackageUtil.checkPwd(device.getDeviceID(), device.getUnDefine2());
 				if(checkPwd == 1) {
 					camManager.updateCam(device);
 					Intent intent2 = new Intent();
@@ -186,8 +187,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case Constants.WEB_CAM_CHECK_PWD_MSG:
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				newPwd = (String) msg.obj;
-				mHandler.removeCallbacks(checkPwdRunnable);
-				mHandler.post(checkPwdRunnable);
+				HandlerThread handlerThread = new HandlerThread("test5");
+				handlerThread.start();
+				Handler handler = new Handler();
+				handler.post(checkPwdRunnable);
+				//mHandler.removeCallbacks(checkPwdRunnable);
+				//mHandler.post(checkPwdRunnable);
+				//new CheckPwdThread().start();
 				break;
 			default:
 				break;
@@ -209,7 +215,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		thread.start();
 	}
 	
-	private void stopThread() {
+	private void stopPlayThread() {
 		if(!myVideoView.isStop()) {
 			myVideoView.onStop();
 		}
@@ -324,7 +330,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				return ;
 			}
 			if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
-				int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
+				int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 				Log.d(TAG, "MENU_PREVIEW checkpwd = " + checkPwd);
 				if(checkPwd == 1) {
 					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
@@ -342,12 +348,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
 				}
 			}else {
-				int resu = PackageUtil.checkPwdState();
+				int resu = PackageUtil.checkPwdState(device.getDeviceID());
 				Log.d(TAG, "device manager onContextItemSelected checkPwdState result = " + resu);
 				if(resu == 0) { // unset
 					DialogUtils.inputTwoPasswordDialog(CamVideoH264.this, device, mHandler, Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG);
 				} else if(resu == 1) {// pwd seted
-					int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
+					int checkPwd = PackageUtil.checkPwd(device.getDeviceID(), device.getUnDefine2());
 					if(checkPwd == 1) {
 						Message message = mHandler.obtainMessage();
 	                	message.obj  = device.getUnDefine2();
@@ -383,7 +389,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value2 = 0;
 			}
 			brightnessProgerss.setProgress(value2);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
+			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
 			break;
 		case R.id.add_zoom:
 			int value = brightnessProgerss.getProgress();
@@ -392,7 +398,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value = 100;
 			}
 			brightnessProgerss.setProgress(value);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Brightness, value+"");
+			PackageUtil.setBCV(device.getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"");
 			break;
 		case R.id.minus_foucs:
 			int value3 = contrastProgressbar.getProgress();
@@ -401,7 +407,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value3 = 0;
 			}
 			contrastProgressbar.setProgress(value3);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
+			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
 			break;
 		case R.id.add_foucs:
 			int value4 = contrastProgressbar.getProgress();
@@ -410,7 +416,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value4 = 100;
 			}
 			contrastProgressbar.setProgress(value4);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
+			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
 			break;
 		case R.id.minus_apertrue:
 			int value5 = volumeProgressbar.getProgress();
@@ -419,7 +425,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value5 = 0;
 			}
 			volumeProgressbar.setProgress(value5);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value5+"");
+			//PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value5+"");
 			break;
 		case R.id.add_apertrue:
 			int value6 = volumeProgressbar.getProgress();
@@ -428,7 +434,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value6 = 100;
 			}
 			volumeProgressbar.setProgress(value6);
-			PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value6+"");
+			//PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value6+"");
 			break;
 		default:
 			break;
@@ -582,8 +588,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(WebCamActions.ACTION_IPPLAY.equals(intent.getAction())) {
-				mHandler.removeCallbacks(monitorSocketTask);
-				mHandler.postDelayed(monitorSocketTask, 10);
+				HandlerThread handlerThread = new HandlerThread("test2");
+				handlerThread.start();
+				Handler myHandler = new Handler(handlerThread.getLooper());
+				myHandler.post(monitorSocketTask);
+				//mHandler.removeCallbacks(monitorSocketTask);
+				//mHandler.postDelayed(monitorSocketTask, 10);
+				//new MonitorSocketThread().start();
 			}
 		/*	if(intent != null) {
 				Bundle bundle = intent.getExtras();
@@ -605,7 +616,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private Runnable monitorSocketTask = new Runnable() {
 		@Override
 		public void run() {
-			stopThread();
+			stopPlayThread();
 			device = camManager.getSelectDevice();
 			int result = UdtTools.monitorSocket(device.getDeviceID());
 			System.out.println("result = " + result);
@@ -644,15 +655,20 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
 		String random = RandomUtil.generalRandom();
 		Log.d(TAG, "random = " + random);
-		int initRes = UdtTools.initialSocket(random);
+		int initRes = UdtTools.initialSocket(device.getDeviceID(),random);
 		if(initRes<0) {
 			Log.d(TAG, "initialSocket init error!");
 			ToastUtils.showToast(CamVideoH264.this, R.string.webcam_connect_init_error);
 		}else {
 			// exec checkpwd runnable and show wait dialog
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			mHandler.removeCallbacks(checkPwdStateRunnable);
-			mHandler.post(checkPwdStateRunnable);
+			HandlerThread handlerThread = new HandlerThread("test3");
+			handlerThread.start();
+			Handler handler = new Handler(handlerThread.getLooper());
+			handler.post(checkPwdStateRunnable);
+			//mHandler.removeCallbacks(checkPwdStateRunnable);
+			//mHandler.post(checkPwdStateRunnable);
+			//new CheckPwdStateThread().start();
 		}
 	}
 	
@@ -660,7 +676,82 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 		@Override
 		public void run() {
-			int resu = PackageUtil.checkPwdState();
+			int resu = PackageUtil.checkPwdState(device.getDeviceID());
+			Log.d(TAG, "device manager checkPwdState result = " + resu);
+			if(resu == 0) { // unset
+				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
+				//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+			} else if(resu == 1) {// pwd seted
+				device = camManager.getSelectDevice();
+				if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
+					Message mesg = mHandler.obtainMessage();
+					mesg.obj  = device.getUnDefine2();
+					mesg.what = Constants.WEB_CAM_CHECK_PWD_MSG;
+					mHandler.sendMessage(mesg);
+				}else {
+					mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
+				}
+			} else if(resu == 2){
+				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
+				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+			} else {
+				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
+			}
+			mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		}
+	};
+	
+	private Runnable checkPwdRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),newPwd);
+			Log.d(TAG, "checkPwd result = " + checkPwd);
+			if(checkPwd == 1) {
+				device.setUnDefine2(newPwd);
+				camManager.updateCam(device);
+				FileUtil.persistentDevice(CamVideoH264.this,camManager.getCamList());
+				mHandler.sendEmptyMessage(Constants.CONNECTTING);
+			} else if(checkPwd == -1) {
+				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
+				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
+				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
+			} else {
+				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
+			}
+			mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		}
+	};
+
+	
+	/*private class MonitorSocketThread extends Thread {
+		
+		
+		@Override
+		public void run() {
+			super.run();
+			//stopPlayThread();
+			device = camManager.getSelectDevice();
+			int result = UdtTools.monitorSocket(device.getDeviceID());
+			System.out.println("result = " + result);
+			Log.d(TAG, "monitor result = " + result);
+			if(result<0) {
+				mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			}
+			analyseResult(result, device);
+		}
+		
+	}*/
+	
+	/*private class CheckPwdStateThread extends Thread {
+		
+		@Override
+		public void run() {
+			super.run();
+			int resu = PackageUtil.checkPwdState(device.getDeviceID());
 			Log.d(TAG, "device manager checkPwdState result = " + resu);
 			mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -684,13 +775,16 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
 			}
 		}
-	};
+		
+	}*/
 	
-	private Runnable checkPwdRunnable = new Runnable() {
-
+	/*private class CheckPwdThread extends Thread {
+		
 		@Override
 		public void run() {
-			int checkPwd = PackageUtil.checkPwd(newPwd);
+			super.run();
+			
+			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),newPwd);
 			Log.d(TAG, "checkPwd result = " + checkPwd);
 			mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -707,6 +801,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
 			}
 		}
-	};
+	}
+	*/
 }
 
