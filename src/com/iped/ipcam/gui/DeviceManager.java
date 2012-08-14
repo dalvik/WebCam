@@ -143,7 +143,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 				break;
 			case Constants.SEND_SHOW_ONE_PWD_FIELD_CONFIG_MSG:
-				//TODO
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, camManager.getSelectDevice(), handler, Constants.WEB_CAM_CHECK_PWD_MSG);
 				break;

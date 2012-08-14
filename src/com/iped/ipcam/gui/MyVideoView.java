@@ -79,7 +79,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private int frameCount;
 
-	private String frameCountTemp = "";
+	private int frameCountTemp;
 
 	private String deviceId = "";
 
@@ -93,6 +93,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private boolean reverseFlag = false;
 
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -157,7 +158,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		handler.removeCallbacks(calculateFrameTask);
 		handler.post(calculateFrameTask);
 		// TODO
-		///new Thread(new RecvAudio()).start();
+		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			try {
 				readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
@@ -255,7 +256,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void onStop() {
 		stopPlay = true;
 		release();
-		//flushBitmap();
+		flushBitmap();
+		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, 45000);
 	}
 
 	public boolean isStop() {
@@ -263,7 +265,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	private void release() {
-		//UdtTools.close();
+		UdtTools.exit();
 		handler.removeCallbacks(calculateFrameTask);
 	}
 
@@ -321,11 +323,11 @@ public class MyVideoView extends ImageView implements Runnable {
 				int recvDataLength = -1;
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				System.out.println(recvDataLength + "----------------------");
-				//UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
+				//System.out.println(recvDataLength + "----------------------" + audioBuffer[1] + " " + audioBuffer[2]);
+				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				// System.out.println("recvDataLength=" + recvDataLength +
 				// " decoderLength=" + decoderLength);
-				// m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
+				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 				// System.out.println("audio size = " + size + "  "+
 				// returnSize);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
@@ -348,13 +350,11 @@ public class MyVideoView extends ImageView implements Runnable {
 
 		@Override
 		public void run() {
-			if (frameCount < 10) {
-				frameCountTemp = " " + frameCount;
-			} else {
-				frameCountTemp = "" + frameCount;
+			frameCountTemp = frameCount;
+			if(frameCountTemp<=3) {
+				invalidate();
 			}
 			frameCount = 0;
-			invalidate();
 			handler.postDelayed(calculateFrameTask, 1000);
 		}
 	};
