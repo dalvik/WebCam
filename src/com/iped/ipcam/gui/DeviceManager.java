@@ -1,8 +1,6 @@
 package com.iped.ipcam.gui;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -38,14 +36,12 @@ import android.widget.Toast;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
 import com.iped.ipcam.utils.DialogUtils;
 import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PackageUtil;
-import com.iped.ipcam.utils.ParaUtil;
 import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.WebCamActions;
@@ -613,6 +609,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		@Override
 		public void run() {
 				int res = UdtTools.checkCmdSocketEnable(ip);
+				System.out.println("res=" + res);
 				if (res>0) {
 					deviceTmp = new Device();
 					deviceTmp.setDeviceName(name);

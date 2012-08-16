@@ -222,7 +222,6 @@ public class CamManagerImp implements ICamManager {
 				}else {
 					if(searchCounter++>=3) {
 						stopFlag = true;
-						System.out.println(searchCounter);
 					}
 				}
 				if(stopFlag) {

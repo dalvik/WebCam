@@ -279,17 +279,16 @@ public class PackageUtil {
 	public static boolean sendPTZCommond(int commId) {
 		byte[] ptzCommonName = CamCmdListHelper.SetCmdPTZ.getBytes();// name
 		int ptzCommonNameLength = ptzCommonName.length;
-		byte[] common = CamCmdListHelper.ptzMap.get(commId);// comm
-		int commLength = common.length;
+		byte[] direction = CamCmdListHelper.ptzMap.get(commId);// comm
+		int commLength = direction.length;
 		byte[] ptzCommonByte = new byte[ptzCommonNameLength + commLength + 2];
 		byte check = 0;
 		for (int i = 1; i < commLength; i++) {
-			check ^= common[i];
+			check ^= direction[i];
 		}
 		ptzCommonByte[ptzCommonByte.length - 2] = check;
-		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0,
-				ptzCommonNameLength);
-		System.arraycopy(common, 0, ptzCommonByte, ptzCommonNameLength, commLength);
+		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0, ptzCommonNameLength);
+		System.arraycopy(direction, 0, ptzCommonByte, ptzCommonNameLength, commLength);
 		int res = UdtTools.sendPTZMsg(ptzCommonByte);
 		//UdtTools.sendCmdMsg(new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
 		Log.d(TAG, "#### sendPTZCommond res = " + res + "  " + ptzCommonByte.length+ " " + new String(ptzCommonByte));

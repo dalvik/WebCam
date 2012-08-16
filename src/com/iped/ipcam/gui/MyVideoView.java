@@ -29,6 +29,8 @@ import com.iped.ipcam.utils.DateUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
 
+	private final static int DELAY_RECONNECT = 1000 * 60 * 5;
+	
 	private final static int NALBUFLENGTH = 320 * 480 * 2; // 600*800*2
 
 	private final static int SOCKETBUFLENGTH = 342000;
@@ -134,7 +136,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
 		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			//onStop();
 			return;
 		}
@@ -142,7 +145,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsgById(deviceId,b, bufLength);
 		if (res < 0) {
-			handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			//onStop();
 			return;
 		}
@@ -153,12 +157,12 @@ public class MyVideoView extends ImageView implements Runnable {
 		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
 		m.setData(bundle);
 		handler.sendMessage(m);
-		handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
+		//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 		stopPlay = false;
 		handler.removeCallbacks(calculateFrameTask);
 		handler.post(calculateFrameTask);
-		// TODO
-		new Thread(new RecvAudio()).start();
+		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		//new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			try {
 				readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
@@ -255,9 +259,9 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void onStop() {
 		stopPlay = true;
+		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 		release();
 		flushBitmap();
-		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, 45000);
 	}
 
 	public boolean isStop() {
@@ -265,8 +269,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	private void release() {
-		UdtTools.exit();
 		handler.removeCallbacks(calculateFrameTask);
+		UdtTools.exit();
 	}
 
 	private void flushBitmap() {
