@@ -428,8 +428,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
 		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : "V12.005.13");
-		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize"))) : "");
-		sdCardEditText.setText(paraMap.containsKey("")? paraMap.get("") : "");
+		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize")) * 1024 * 1024) : "");
+		sdCardEditText.setText(paraMap.containsKey("sdcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("sdcard_maxsize")) * 1024 * 1024) : "");
 		//changeStorageMode.setc;
 		//valueableRecordeTimeEd.setText("");
 		if(paraMap.containsKey("net_mode")){
