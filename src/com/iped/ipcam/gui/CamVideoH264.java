@@ -198,11 +198,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				//new CheckPwdThread().start();
 				break;
 			case Constants.WEB_CAM_RECONNECT_MSG:
-				HandlerThread handlerThread2 = new HandlerThread("test2");
-				handlerThread2.start();
-				Handler myHandler = new Handler(handlerThread2.getLooper());
-				myHandler.removeCallbacks(monitorSocketTask);
-				myHandler.post(monitorSocketTask);
+				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+				new AsynMonitorSocketTask().execute(0);
 				break;
 			default:
 				break;
@@ -327,11 +324,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			camManager.setSelectInde(index);
 			myVideoView.onStop();
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			HandlerThread handlerThread = new HandlerThread("test2");
-			handlerThread.start();
-			Handler myHandler = new Handler(handlerThread.getLooper());
-			myHandler.removeCallbacks(monitorSocketTask);
-			myHandler.postDelayed(monitorSocketTask,1000);
+			new AsynMonitorSocketTask().execute(0);
 		}
 	};
 	
@@ -572,23 +565,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		
 	}
 	
-	private Runnable monitorSocketTask = new Runnable() {
-		@Override
-		public void run() {
-			stopPlayThread();
-			device = camManager.getSelectDevice();
-			int result = UdtTools.monitorSocket(device.getDeviceID());
-			Log.d(TAG, "monitor result = " + result);
-			if(result<0) {
-				mHandler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			}else {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			}
-			//analyseResult(result, device);
-		}
-	};
-
 	private void analyseResult(int result, Device device) {
 		switch (result) {
 		case ErrorCode.STUN_ERR_INTERNAL:
@@ -631,39 +607,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	}
 	
-	private Runnable checkPwdStateRunnable = new Runnable() {
-
-		@Override
-		public void run() {
-			int resu = PackageUtil.checkPwdState(device.getDeviceID());
-			Log.d(TAG, "device manager checkPwdState result = " + resu);
-			if(resu == 0) { // unset
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
-				//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
-			} else if(resu == 1) {// pwd seted
-				device = camManager.getSelectDevice();
-				if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
-					Message mesg = mHandler.obtainMessage();
-					mesg.obj  = device.getUnDefine2();
-					mesg.what = Constants.WEB_CAM_CHECK_PWD_MSG;
-					mHandler.sendMessage(mesg);
-				}else {
-					mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-					mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
-				}
-			} else if(resu == 2){
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
-				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
-			} else {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
-			}
-
-		}
-	};
-	
 	private void checkPwdState() {
 		int resu = PackageUtil.checkPwdState(device.getDeviceID());
 		Log.d(TAG, "device manager checkPwdState result = " + resu);
@@ -696,29 +639,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		msg.arg1 = errorStrId;
 		mHandler.sendMessage(msg);
 	}
-	
-	private Runnable checkPwdRunnable = new Runnable() {
-
-		@Override
-		public void run() {
-			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),newPwd);
-			Log.d(TAG, "checkPwd result = " + checkPwd);
-			if(checkPwd == 1) {
-				device.setUnDefine2(newPwd);
-				camManager.updateCam(device);
-				FileUtil.persistentDevice(CamVideoH264.this,camManager.getCamList());
-				mHandler.sendEmptyMessage(Constants.CONNECTTING);
-			} else if(checkPwd == -1) {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
-				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
-				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
-			} else {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_time_out_or_device_off_line);
-			}
-		}
-	};
 	
 	private class AsynCheckPwdTask extends AsyncTask<Integer, Integer, Void> {
 		@Override
