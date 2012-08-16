@@ -66,6 +66,9 @@
     	<string name="video_preview_minus_apertrue">﹣</string>
     	<string name="video_preview_minus_apertrue_str">光圈</string>
     	<string name="video_preview_add_apertrue">﹢</string>
+    	<string name="video_preview_brightness">亮度</string>
+    	<string name="video_preview_contrast">透明度</string>
+    	<string name="video_preview_volume">音量</string>
     <string name="device_manager_str">设备管理</string>
     	<string name="auto_serch_str">自动搜索</string>
     	<string name="auto_search_tips_str">正在为您搜索，请稍等</string>	

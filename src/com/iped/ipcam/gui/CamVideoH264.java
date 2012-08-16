@@ -12,7 +12,6 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -29,7 +28,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -105,11 +103,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private List<Device> list;
 	
-	private ProgressBar brightnessProgerss;
+	private BCVControlProgressBar brightnessProgerss;
 	
-	private ProgressBar contrastProgressbar;
+	private BCVControlProgressBar contrastProgressbar;
 	
-	private ProgressBar volumeProgressbar;
+	private BCVControlProgressBar volumeProgressbar;
 	
 	private String newPwd = "";
 	
@@ -296,19 +294,24 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
-		brightnessProgerss = (ProgressBar) view.findViewById(R.id.brightness_progressbar);
+		brightnessProgerss = (BCVControlProgressBar) view.findViewById(R.id.brightness_progressbar);
+		brightnessProgerss.init(getText(R.string.video_preview_brightness).toString());
+		brightnessProgerss.setProgress(0);
 		Button buttonAddZoom = (Button) view.findViewById(R.id.add_zoom); 
 		buttonAddZoom.setOnClickListener(this);
 		Button buttonMinusFocus = (Button) view.findViewById(R.id.minus_foucs); 
 		buttonMinusFocus.setOnClickListener(this);
-		contrastProgressbar = (ProgressBar) view.findViewById(R.id.contrast_progressbar);
-		
+		contrastProgressbar = (BCVControlProgressBar) view.findViewById(R.id.contrast_progressbar);
+		contrastProgressbar.init(getText(R.string.video_preview_contrast).toString());
+		contrastProgressbar.setProgress(0);
 		Button buttonAddFocus = (Button) view.findViewById(R.id.add_foucs); 
 		buttonAddFocus.setOnClickListener(this);
 		Button buttonMinusApertrue = (Button) view.findViewById(R.id.minus_apertrue); 
 		buttonMinusApertrue.setOnClickListener(this);
 		
-		volumeProgressbar = (ProgressBar) view.findViewById(R.id.volume_progressbar);
+		volumeProgressbar = (BCVControlProgressBar) view.findViewById(R.id.volume_progressbar);
+		volumeProgressbar.init(getText(R.string.video_preview_volume).toString());
+		volumeProgressbar.setProgress(0);
 		
 		Button buttonAddApertrue = (Button) view.findViewById(R.id.add_apertrue); 
 		buttonAddApertrue.setOnClickListener(this);
