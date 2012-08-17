@@ -47,14 +47,14 @@ public class WebTabWidget extends TabActivity {
 		 * .setIndicator(resources.getString
 		 * (R.string.device_params_sets_str)).setContent(intent);
 		 * tabHost.addTab(tabSpec);
-		 */
+		 
 
 		intent = new Intent(this, PlayBack.class);
 		tabSpec = tabHost.newTabSpec("PALYBACK")
 				.setIndicator(resources.getString(R.string.play_back_str))
 				.setContent(intent);
 		tabHost.addTab(tabSpec);
-
+		*/
 		intent = new Intent(this, SystemSettings.class);
 		tabSpec = tabHost
 				.newTabSpec("SYSTEMSETTINGS")

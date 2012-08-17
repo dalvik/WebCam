@@ -39,13 +39,13 @@ public class WebCam extends Activity implements OnClickListener{
         boolean flag = settings.getBoolean("KEEP_USER_INFO", false);
         keepPwd.setChecked(flag);
         if(flag) {
-        	userName.setText(settings.getString("USERNAME", ""));
+        	userName.setText(settings.getString("USERNAME", "admin"));
         	password.setText(settings.getString("PASSWORD", ""));
         }
         loginButton.setOnClickListener(this);
         userExit.setOnClickListener(this);
-        Intent intent = new Intent(WebCam.this, WebTabWidget.class);
-       // Intent intent = new Intent(WebCam.this, CamVideoH264.class);
+        //Intent intent = new Intent(WebCam.this, WebTabWidget.class);
+        //Intent intent = new Intent(WebCam.this, CamVideoH264.class);
 		//startActivity(intent);
 		//WebCam.this.finish();
     }
@@ -66,12 +66,12 @@ public class WebCam extends Activity implements OnClickListener{
 				Toast.makeText(WebCam.this, getResources().getString(R.string.username_null), Toast.LENGTH_SHORT).show();
 				return;
 			}
-			System.out.println("username=" + username);
-			System.out.println("pwd=" + pwd);
+			//System.out.println("username=" + username + "  pwd=" + pwd);
 			if(!settings.getString("USERNAME", "admin").equals(username)) {
 				Toast.makeText(WebCam.this, getResources().getString(R.string.user_or_password_is_not_correct_str), Toast.LENGTH_SHORT).show();
 				return;
 			}
+			//System.out.println(settings.getString("PASSWORD", "admin") + " "  + pwd);
 			if(!settings.getString("PASSWORD", "admin").equals(pwd)) {
 				Toast.makeText(WebCam.this, getResources().getString(R.string.user_or_password_is_not_correct_str), Toast.LENGTH_SHORT).show();
 				return;

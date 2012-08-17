@@ -290,7 +290,7 @@ public class PackageUtil {
 		System.arraycopy(ptzCommonName, 0, ptzCommonByte, 0, ptzCommonNameLength);
 		System.arraycopy(direction, 0, ptzCommonByte, ptzCommonNameLength, commLength);
 		int res = UdtTools.sendPTZMsg(ptzCommonByte);
-		//UdtTools.sendCmdMsg(new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
+		//int res = UdtTools.sendCmdMsgById(id, new String(ptzCommonByte,0,ptzCommonNameLength + commLength + 2), ptzCommonByte.length);
 		Log.d(TAG, "#### sendPTZCommond res = " + res + "  " + ptzCommonByte.length+ " " + new String(ptzCommonByte));
 		return false;
 	}

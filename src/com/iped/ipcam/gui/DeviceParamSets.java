@@ -421,7 +421,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		default:
 			break;
 		}
-		
 	}
 	
 	private void initializeEditText(Map<String, String> paraMap) {
@@ -430,7 +429,13 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : "V12.005.13");
 		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize")) * 1024 * 1024) : "");
 		sdCardEditText.setText(paraMap.containsKey("sdcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("sdcard_maxsize")) * 1024 * 1024) : "");
-		//changeStorageMode.setc;
+		changeStorageMode.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				changeStorageMode.check(checkedId);
+			}
+		});
 		//valueableRecordeTimeEd.setText("");
 		if(paraMap.containsKey("net_mode")){
 			String s = paraMap.get("net_mode");

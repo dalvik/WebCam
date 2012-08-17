@@ -74,10 +74,6 @@ public class CamManagerImp implements ICamManager {
 	@Override
 	public boolean delCam(int index) {
 		deviceList.remove(index);
-		int size = deviceList.size();
-		if(selectIndex>size) {
-			selectIndex = size;
-		}
 		return false;
 	}
 	
@@ -122,8 +118,8 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public void clearCamList() {
-		deviceList.clear();
 		selectIndex = 0;
+		deviceList.clear();
 	}
 	
 	public List<Device> getDeviceList() {

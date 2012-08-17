@@ -54,7 +54,7 @@ public class VideoPreviewDeviceAdapter extends BaseAdapter {
 		if(convertView == null) {
 			convertView = inflater.inflate(R.layout.device_preview_list_item, null);
 			//viewHolder.selectDevice = (RadioButton) convertView.findViewById(R.id.device_select_id);
-			viewHolder.name = (TextView) convertView.findViewById(R.id.video_preview_device_name);
+			//viewHolder.name = (TextView) convertView.findViewById(R.id.video_preview_device_name);
 			//viewHolder.type = (TextView) convertView.findViewById(R.id.device_type);
 			viewHolder.id = (TextView) convertView.findViewById(R.id.video_preview_device_id);
 			//viewHolder.ip = (TextView) convertView.findViewById(R.id.device_ip_address);
@@ -65,7 +65,7 @@ public class VideoPreviewDeviceAdapter extends BaseAdapter {
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		viewHolder.name.setText(device.getDeviceName());
+		//viewHolder.name.setText(device.getDeviceName());
 		viewHolder.id.setText("ID:" + device.getDeviceID());
 		//if(position == checkedIndex) {
 		//	viewHolder.selectDevice.setChecked(true);

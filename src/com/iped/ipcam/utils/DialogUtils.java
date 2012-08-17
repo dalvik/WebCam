@@ -240,7 +240,7 @@ public class DialogUtils {
 		
 	}
 	
-	private static void keepDialog(DialogInterface dialog, Dialog dlg) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	public static void keepDialog(DialogInterface dialog, Dialog dlg) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 		Field field  =  dlg.getClass() .getSuperclass().getDeclaredField("mShowing");
   	    field.setAccessible( true );
   	    field.set(dialog, false);

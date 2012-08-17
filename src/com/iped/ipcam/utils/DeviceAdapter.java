@@ -55,7 +55,7 @@ public class DeviceAdapter extends BaseAdapter {
 		if(convertView == null) {
 			convertView = inflater.inflate(R.layout.device_list_item, null);
 			viewHolder.selectDevice = (RadioButton) convertView.findViewById(R.id.device_select_id);
-			viewHolder.name = (TextView) convertView.findViewById(R.id.device_name);
+			//viewHolder.name = (TextView) convertView.findViewById(R.id.device_name);
 			viewHolder.id = (TextView) convertView.findViewById(R.id.device_id_code);
 			/*viewHolder.type = (TextView) convertView.findViewById(R.id.device_type);
 			viewHolder.id = (TextView) convertView.findViewById(R.id.device_id);
@@ -72,7 +72,8 @@ public class DeviceAdapter extends BaseAdapter {
 		}else {
 			viewHolder.selectDevice.setChecked(false);
 		}
-		viewHolder.name.setText(device.getDeviceName());
+		
+		//viewHolder.name.setText(device.getDeviceName());
 		viewHolder.id.setText("ID:" + device.getDeviceID());
 		/*if(device.getDeviceNetType()) {
 			viewHolder.type.setText(res.getText(R.string.device_manager_add_net_type_wlan_str));

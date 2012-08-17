@@ -404,7 +404,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		System.out.println("is stop = " + myVideoView.isStop());
+		Log.d(TAG, "is stop = " + myVideoView.isStop());
 		if(myVideoView.isStop()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
 			return false;

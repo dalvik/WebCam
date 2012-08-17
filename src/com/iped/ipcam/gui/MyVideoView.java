@@ -259,7 +259,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void onStop() {
 		stopPlay = true;
-		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+		//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 		release();
 		flushBitmap();
 	}
