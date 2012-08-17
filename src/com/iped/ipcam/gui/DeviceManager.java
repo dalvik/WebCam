@@ -7,6 +7,7 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.widget.Toast;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
 import com.iped.ipcam.utils.DialogUtils;
@@ -76,14 +78,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	private int lastSelected = 0;
 
-	private String ip;
-	
-	private int port1;
-	
-	private int port2;
-	
-	private int port3;
-	
 	private String deviceName = "";
 	
 	private String pwd;
@@ -293,30 +287,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			break;
 
 		case MENU_DEL:
-			camManager.delCam(infor.position);
+			int seletIndex = infor.position;
+			if (seletIndex>0) {
+				adapter.setChecked(seletIndex-1);
+			}
+			camManager.delCam(seletIndex);
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 			break;
 		case MENU_PREVIEW:
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-			/*Intent intent2 = new Intent();
-			Bundle bundle2 = new Bundle();
-			bundle2.putSerializable("IPPLAY", device);
-			intent2.putExtras(bundle2);
-			intent2.setAction(WebCamActions.ACTION_IPPLAY);*/
 			sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
-			/*Device d = camManager.getSelectDevice();
-			if(d == null) {
-				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
-				return super.onContextItemSelected(item);
-			}
-			if(!d.equals(device)) {
-				this.device = d;
-			}
-			sendBroadcast(new Intent(WebCamActions.WEB_CAM_CLOSE_CONN_ACTION));
-			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG, 1000);
-			handler.removeCallbacks(monitorSocketTask);
-			handler.postDelayed(monitorSocketTask, 100);*/
-			//handler.sendEmptyMessage(Constants.WEB_CAM_THROUGH_NET_MSG);
 			break;
 		default:
 			break;
@@ -357,6 +337,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						camManager.clearCamList();
+						adapter.setChecked(0);
 						handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 					}
 				}).setNegativeButton(getResources().getString(R.string.clear_all_device_cancle_str), 
@@ -683,7 +664,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			String id = device.getDeviceID();
 			int res = UdtTools.checkCmdSocketEnable(id);
 			if(res>0) {
-				handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
 				intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
@@ -692,12 +672,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				String random = RandomUtil.generalRandom();
 				Log.d(TAG, "random = " + random);
 				int result = UdtTools.monitorCmdSocket(id, random);
-				System.out.println("result = " + result);
 				Log.d(TAG, "monitor result = " + result);
-				if(result<0) {
-					handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-					handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				}
 				analyseResult(result, device);
 			}
 		}
@@ -707,35 +682,35 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		switch (result) {
 		case ErrorCode.STUN_ERR_INTERNAL:
 			ToastUtils.showToast(this, R.string.webcam_error_code_internel);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_SERVER:
 			ToastUtils.showToast(this, R.string.webcam_error_code_server_not_reached);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_TIMEOUT:
 			ToastUtils.showToast(this, R.string.webcam_error_code_timeout);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_INVALIDID:
 			ToastUtils.showToast(this, R.string.webcam_error_code_unlegal);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_CONNECT:
 			ToastUtils.showToast(this, R.string.webcam_error_code_connect_error);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_BIND:
 			ToastUtils.showToast(this, R.string.webcam_error_code_bind_error);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		default:
 			break;
 		}
-		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
-		// exec checkpwd runnable and show wait dialog
-		handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 		HandlerThread handlerThread = new HandlerThread("test1");
 		handlerThread.start();
 		Handler mHandler = new Handler(handlerThread.getLooper());
 		mHandler.post(checkPwdStateRunnable);
-		//handler.removeCallbacks(checkPwdStateRunnable);
-		//handler.post(checkPwdStateRunnable);
-		//new CheckPwdStateThread().start();
 	}
 	
 	private Runnable checkPwdStateRunnable = new Runnable() {
@@ -745,6 +720,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			int resu = PackageUtil.checkPwdState(device.getDeviceID());
 			Log.d(TAG, "device manager checkPwdState result = " + resu);
 			if(resu == 0) { // unset
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
 				//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, device, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
 			} else if(resu == 1) {// pwd seted
@@ -755,15 +731,15 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					handler.sendMessage(mesg);
 				}else {
 					handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
+					handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				}
 			} else if(resu == 2){
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
-				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
 			} else {
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 			}
-			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		}
 	};
 	
@@ -781,15 +757,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
 				intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
 				startActivity(intent);
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			} else if(checkPwd == -1) {
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				//DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG);
 				handler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
 			} else {
+				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_time_out_or_device_off_line);
 			}
-			handler.removeMessages(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		}
 	};
 	
@@ -800,13 +777,119 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			m_Dialog.setCancelable(false);
 			m_Dialog.setMessage(getResources().getText(textId));
 		}
-		m_Dialog.show();
+		if(!m_Dialog.isShowing()) {
+			m_Dialog.show();
+		}
 	}
 	
 	private void hideProgressDlg() {
 		if(m_Dialog != null && m_Dialog.isShowing()) {
-			m_Dialog.hide();
+			m_Dialog.dismiss();
 		}
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.list_options_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.change_login_pwd:
+			changeLoginPwd();
+			break;
+			default:
+				break;
+		}
+		return super.onMenuItemSelected(featureId, item);
+	}
+	
+	private void changeLoginPwd() {
+		final SharedPreferences settings = getSharedPreferences(WebCam.class.getName(), 0);
+		LayoutInflater factory = LayoutInflater.from(this);
+        final View MyDialogView = factory.inflate(R.layout.layout_modify_pwd_dialog, null);
+        dlg = new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.password_modify_title_str))
+        .setView(MyDialogView)
+        .setPositiveButton(getResources().getString(R.string.password_modify_str),
+        new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	  final EditText oldPassword = (EditText) MyDialogView.findViewById(R.id.firstPassword);
+            	  final EditText newPassword = (EditText) MyDialogView.findViewById(R.id.secondPassword);
+            	  final EditText repeadNewPassword = (EditText) MyDialogView.findViewById(R.id.thirdPassword);
+            	  String oldPwd = oldPassword.getText().toString().trim();
+                  String newPwd1 = newPassword.getText().toString().trim();
+                  String newPwd2 = repeadNewPassword.getText().toString().trim();
+                  if(oldPwd== null || oldPwd.length()<=0){
+                	  AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+                	  try {
+                  		DialogUtils.keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+                  } 
+                  if(!oldPwd.equalsIgnoreCase(settings.getString("PASSWORD", "admin"))) {
+                	  AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(DeviceManager.this, R.string.old_input_password_error);
+                	  try {
+                		  DialogUtils.keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+            	  }
+                  if( newPwd1 == null || newPwd1.length()<=0 ){
+                	  AnimUtil.animEff(DeviceManager.this, newPassword, R.anim.shake_anim);
+                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+                	  try {
+                		  DialogUtils.keepDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+	                	return;
+                  }
+                  if(newPwd2 == null ||  newPwd2.length()<=0) {
+                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+	                  try {
+	                	  DialogUtils.keepDialog(dialog, dlg);
+	                	} catch  (Exception e) {
+	                		Log.v(TAG, e.getMessage());
+	                	}
+	                	return;
+                  } 
+                  if(!newPwd1.equalsIgnoreCase(newPwd2)) {
+                	  ToastUtils.showToast(DeviceManager.this, R.string.password_not_equal);
+                      try {
+                    	  DialogUtils.keepDialog(dialog, dlg);
+                    	} catch  (Exception e) {
+                    		Log.v(TAG, e.getMessage());
+                    	}
+                 } else {
+                	 settings.edit().putString("PASSWORD", newPwd1).commit();
+                	 ToastUtils.showToast(DeviceManager.this, R.string.password_modify_success_str);
+                	 try {
+                		 DialogUtils.dismissDialog(dialog, dlg);
+	                  	} catch  (Exception e) {
+	                  		Log.v(TAG, e.getMessage());
+	                  	}
+                 }
+            }
+        }).setNegativeButton(getResources().getString(R.string.cancle_login_str), 
+        new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	 try {
+            		 DialogUtils.dismissDialog(dialog, dlg);
+             	} catch  (Exception e) {
+             		Log.v(TAG, e.getMessage());
+             	}
+            	
+            }
+        })
+        .create();
+        dlg.show();
+	}
 }
