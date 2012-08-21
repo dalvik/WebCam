@@ -152,8 +152,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
 			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			Log.d(TAG, "sendCmdMsgById result = " + res);
 			onStop();
 			return;
@@ -162,6 +162,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsgById(deviceId,b, bufLength);
 		if (res < 0) {
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 			onStop();
 			//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
@@ -281,7 +282,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	public void onStop() {
-		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		stopPlay = true;
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
@@ -295,7 +295,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private void release() {
 		handler.removeCallbacks(calculateFrameTask);
-		UdtTools.exit();
+		//UdtTools.exit();
 	}
 
 	private void flushBitmap() {

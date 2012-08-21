@@ -93,7 +93,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	public static int port3 = -1;
 	
-	private Device device = null;
+	//private Device device = null;
 	
 	private ListView listView = null;
 	
@@ -320,7 +320,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			listView.requestFocusFromTouch();
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
-			myVideoView.onStop();
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 			new AsynMonitorSocketTask().execute(0);
 		}
@@ -345,7 +344,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value2 = 0;
 			}
 			brightnessProgerss.setProgress(value2);
-			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
+			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
 			break;
 		case R.id.add_zoom:
 			int value = brightnessProgerss.getProgress();
@@ -354,7 +353,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value = 100;
 			}
 			brightnessProgerss.setProgress(value);
-			PackageUtil.setBCV(device.getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"");
+			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"");
 			break;
 		case R.id.minus_foucs:
 			int value3 = contrastProgressbar.getProgress();
@@ -363,7 +362,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value3 = 0;
 			}
 			contrastProgressbar.setProgress(value3);
-			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
+			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
 			break;
 		case R.id.add_foucs:
 			int value4 = contrastProgressbar.getProgress();
@@ -372,7 +371,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				value4 = 100;
 			}
 			contrastProgressbar.setProgress(value4);
-			PackageUtil.setBCV(device.getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
+			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
 			break;
 		case R.id.minus_apertrue:
 			int value5 = volumeProgressbar.getProgress();
@@ -532,7 +531,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		}
 		if(m_Dialog != null) {
-			m_Dialog.setMessage(getResources().getString(textId, device.getDeviceID()));
+			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
 			if(!m_Dialog.isShowing()) {
 				m_Dialog.show();
 			}
@@ -580,7 +579,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		protected Void doInBackground(Integer... params) {
 			stopPlayThread();
-			device = camManager.getSelectDevice();
+			Device device = camManager.getSelectDevice();
 			int result = UdtTools.monitorSocket(device.getDeviceID());
 			Log.d(TAG, "monitor result = " + result);
 			analyseResult(result, device);
@@ -640,13 +639,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void checkPwdState() {
+		Device device = camManager.getSelectDevice();
 		int resu = PackageUtil.checkPwdState(device.getDeviceID());
 		Log.d(TAG, "device manager checkPwdState result = " + resu);
 		if(resu == 0) { // unset
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG);
 		} else if(resu == 1) {// pwd seted
-			device = camManager.getSelectDevice();
 			if(device.getUnDefine2() != null && device.getUnDefine2().length()>0) {
 				Message mesg = mHandler.obtainMessage();
 				mesg.obj  = device.getUnDefine2();
@@ -675,6 +674,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private class AsynCheckPwdTask extends AsyncTask<Integer, Integer, Void> {
 		@Override
 		protected Void doInBackground(Integer... params) {
+			Device device = camManager.getSelectDevice();
 			int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),newPwd);
 			Log.d(TAG, "checkPwd result = " + checkPwd);
 			if(checkPwd == 1) {
