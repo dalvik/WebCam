@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@color/darkgray">
     
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:layout_width="fill_parent"
@@ -39,6 +40,7 @@
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
+	    			android:layout_marginLeft="5dip"
 	    			android:text="@string/device_param_inentify_str"/>
 	            
 	            <EditText android:id="@+id/device_param_set_inentify" 
@@ -46,7 +48,11 @@
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
 	    			android:singleLine="true"/>
-	            <!-- device version -->
+	           
+	        </TableRow>
+
+	         <TableRow >
+	              <!-- device version -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
@@ -58,8 +64,22 @@
 	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
-	        </TableRow>
-
+	            <!-- valuable time can store on sdcard -->
+	             <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:layout_marginLeft="5dip"
+	    			android:layout_weight="1"
+	    			android:text="@string/device_params_recorde_total_time_str"/>
+	            
+	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
+	                android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:editable="false"
+	    			android:layout_weight="1"
+	    			android:singleLine="true"/>
+	         </TableRow>
+	          
 	        <!-- TF storeage -->
 	        <TableRow >
 	            <TextView android:layout_width="wrap_content"
@@ -76,6 +96,7 @@
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
+	    			android:layout_marginLeft="5dip"
 	    			android:text="@string/device_params_outside_total_space_str"/>
 	            
 	            <EditText android:id="@+id/device_param_set_sdcard_tatal_space" 
@@ -83,19 +104,7 @@
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
 	    			android:singleLine="true"/>
-	            <!-- valuable time can store on sdcard -->
-	             <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_weight="1"
-	    			android:text="@string/device_params_recorde_total_time_str"/>
 	            
-	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:layout_weight="1"
-	    			android:singleLine="true"/>
 	        </TableRow>
 		    
 	    </TableLayout>
@@ -162,7 +171,8 @@
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:orientation="vertical"
+                android:visibility="gone" >
 
 	          <TextView android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
@@ -441,6 +451,7 @@
 			            <EditText android:id="@+id/device_params_apn_set_pwd_id" 
 			                android:layout_width="wrap_content"
 			    			android:layout_height="wrap_content"
+			    			android:password="true"
 			    			android:singleLine="true"/>
 		    	        
 		    	    </TableRow>
@@ -507,6 +518,7 @@
 		    	          
 			               <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
+				    			android:layout_gravity="right|center"
 				    			android:textColor="@color/white"
 				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
 			               
@@ -519,6 +531,7 @@
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
+				    			android:layout_gravity="right|center"
 				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
 		    	          
 		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_size_id" 
@@ -614,14 +627,16 @@
 			    	android:padding="3dip">
 	            
 		    	     <TableRow >
-		    	          <RadioButton android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
+		    	          <RadioButton 
+		    	              android:id="@+id/device_params_monitor_intelligent_mode_set_id" 
+		    	              android:layout_width="fill_parent"
+			    			  android:layout_height="fill_parent"
+			    			  android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
 		    	          
 			               <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/black"
+				    			android:visibility="gone"
 				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
 			               
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
@@ -633,13 +648,13 @@
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/black"
-				    			android:visibility="invisible"
+				    			android:visibility="gone"
 				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
 		    	          
 		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
-					    	android:visibility="invisible"
+					    	android:visibility="gone"
 					    	android:enabled="false"/>
 		    	    </TableRow>
 		    	    
@@ -648,7 +663,6 @@
 		    	                android:id="@+id/device_params_monitor_self_mode_set_id" 
 		    	                android:layout_width="fill_parent"
 			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
 			    				android:text="@string/device_params_monitor_self_mode_set_str"/>
 		    	          
 			               <TextView android:layout_width="wrap_content"
@@ -664,16 +678,16 @@
 		    	          <TextView android:layout_width="wrap_content"
 				    			android:layout_height="wrap_content"
 				    			android:textColor="@color/white"
+				    			android:visibility="gone"
 				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
 		    	          
 		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_size_id" 
 				            android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
 					    	android:entries="@array/monitor_frame_size"
+					    	android:visibility="invisible"
 					    	android:clickable="false"/>
 		    	    </TableRow>
-		    	    
-		    	     
 		       </TableLayout>
 	     </LinearLayout>
 	     
@@ -686,7 +700,8 @@
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:orientation="vertical" 
+                android:visibility="gone">
 		     <TextView android:layout_width="fill_parent"
 		    	android:layout_height="wrap_content"
 		    	android:textColor="@color/white"
@@ -704,6 +719,7 @@
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"
+				    	android:layout_margin="7dip"
 				    	android:text="@string/device_params_other_set_sound_str"/>
 			         
 		               <RadioGroup 
@@ -738,6 +754,7 @@
 				    	android:layout_height="wrap_content"
 				    	android:textColor="@color/white"
 				    	android:textSize="20dip"
+				    	android:layout_margin="7dip"
 				    	android:text="@string/device_params_other_set_mobile_alarm_str"/>
 			         
 		               <RadioGroup 
@@ -789,7 +806,7 @@
 					    	android:layout_height="wrap_content"/>
 		           </TableRow>
 		           
-		           <TableRow ><!-- security set -->
+		           <TableRow android:visibility="gone"><!-- security set -->
 			         <TextView 
 			            android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
@@ -811,6 +828,7 @@
 		           </TableRow>
 		           
 		            <TableRow >
+		                
 		            <!-- time set -->
 			         <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
@@ -839,18 +857,17 @@
 					    	android:textSize="20dip"
 					    	android:text="@string/device_params_other_set_time_time_format_str"/>
 		               
-		               <Button android:id="@+id/device_params_other_set_system_time_id"
-				            android:layout_width="wrap_content"
-		                    android:text="@string/device_params_other_set_system_str" 
-					    	android:layout_height="wrap_content"/>
 		           </TableRow>
 		           
 		           <TableRow >
-		              <!-- security_visit_password set -->
-		              <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
-		                 android:layout_width="wrap_content"
-				    	 android:layout_height="wrap_content"
-				    	 android:text="@string/password_modify_security_botton_str"/>
+		               
+		               <Button android:id="@+id/device_params_other_set_system_time_id"
+				            android:layout_width="wrap_content"
+				            android:layout_weight="1"
+		                    android:text="@string/device_params_other_set_system_str" 
+					    	android:layout_height="wrap_content"/>
+		               
+		             
 		              <!-- 
 			          <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
@@ -871,9 +888,21 @@
 	    	android:layout_height="3px"
 	    	android:background="?android:attr/listDivider"/>
 	      
+	       <!-- security_visit_password set -->
+           <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
+                android:layout_width="wrap_content"
+	    	 android:layout_height="wrap_content"
+	    	 android:layout_weight="1"
+	    	 android:text="@string/password_modify_security_botton_str"/>
+		    
+            <TextView android:layout_width="fill_parent"
+	    		android:layout_height="3px"
+	    		android:background="?android:attr/listDivider"/>
+	      
+              
 	        <TableLayout  android:layout_width="fill_parent"
 			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="0,1,2"
+			    	android:stretchColumns="1,2"
 			    	android:padding="3dip">
 	            
 	               <!-- bottom button-->
@@ -882,7 +911,8 @@
 		                    android:id="@+id/device_params_set_factory_button_id"
 		                    android:text="@string/device_params_reset_set_factory_para_str" 
 				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
+					    	android:layout_height="wrap_content"
+					    	android:visibility="gone"/>
 		               
 		                <Button android:id="@+id/device_params_set_commit_button_id"
 		                   android:text="@string/device_params_set_sure_str" 

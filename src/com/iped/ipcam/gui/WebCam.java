@@ -1,10 +1,15 @@
 package com.iped.ipcam.gui;
 
-import com.iped.ipcam.utils.AnimUtil;
+import java.util.List;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Intent.ShortcutIconResource;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,6 +17,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.iped.ipcam.utils.AnimUtil;
 
 public class WebCam extends Activity implements OnClickListener{
 
@@ -41,6 +48,8 @@ public class WebCam extends Activity implements OnClickListener{
         if(flag) {
         	userName.setText(settings.getString("USERNAME", "admin"));
         	password.setText(settings.getString("PASSWORD", ""));
+        }else {
+        	password.setText("");
         }
         loginButton.setOnClickListener(this);
         userExit.setOnClickListener(this);
@@ -68,6 +77,7 @@ public class WebCam extends Activity implements OnClickListener{
 			}
 			//System.out.println("username=" + username + "  pwd=" + pwd);
 			if(!settings.getString("USERNAME", "admin").equals(username)) {
+				AnimUtil.animEff(this, password, R.anim.shake_anim);
 				Toast.makeText(WebCam.this, getResources().getString(R.string.user_or_password_is_not_correct_str), Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -76,12 +86,16 @@ public class WebCam extends Activity implements OnClickListener{
 				Toast.makeText(WebCam.this, getResources().getString(R.string.user_or_password_is_not_correct_str), Toast.LENGTH_SHORT).show();
 				return;
 			}
-			if(keepPwd.isChecked()) {
+			/*if(keepPwd.isChecked()) {
 				//AnimUtil.animEff(this, password, R.anim.shake_anim);
-				saveUserInfo(username, pwd, keepPwd.isChecked());
 			} else {
 				saveUserInfo("", "", keepPwd.isChecked());
-			}
+			}*/
+			saveUserInfo(username, pwd, keepPwd.isChecked());
+			 boolean shutCutFlag = settings.getBoolean("CREATE_SHUT_CUT", false);
+	        if(!shutCutFlag) {
+	        	createShutcut(this, "com.iped.ipcam.gui");
+	        }
 			Intent intent = new Intent(WebCam.this, WebTabWidget.class);
 			startActivity(intent);
 			WebCam.this.finish();
@@ -97,6 +111,47 @@ public class WebCam extends Activity implements OnClickListener{
 	
 	public void saveUserInfo(String username, String pwd, boolean flag) {
 		settings.edit().putString("USERNAME", username).putString("PASSWORD", pwd).putBoolean("KEEP_USER_INFO", flag).commit();
+	}
+	
+	private void createShutcut(Context context, String pkg) {
+		// 快捷方式名  
+	    String title = "unknown";  
+	   // MainActivity完整名  
+	   String mainAct = null;  
+	   // 应用图标标识  
+	   int iconIdentifier = 0;  
+	   // 根据包名寻找MainActivity  
+	   PackageManager pkgMag = context.getPackageManager();  
+	   Intent queryIntent = new Intent(Intent.ACTION_MAIN, null);  
+	   queryIntent.addCategory(Intent.CATEGORY_LAUNCHER);  
+	   List<ResolveInfo> list = pkgMag.queryIntentActivities(queryIntent,  
+	           PackageManager.GET_ACTIVITIES);  
+	   for (int i = 0; i < list.size(); i++) {  
+	       ResolveInfo info = list.get(i);  
+	       if (info.activityInfo.packageName.equals(pkg)) {  
+	           title = info.loadLabel(pkgMag).toString();  
+	           mainAct = info.activityInfo.name;  
+	           iconIdentifier = info.activityInfo.applicationInfo.icon;  
+	           break;  
+	       }  
+	   }  
+	  
+	   Intent shortcutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");  
+	   // 快捷方式的名称  
+	   shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, context.getString(R.string.app_name));  
+	   //不允许重复创建  
+	   shortcutIntent.putExtra("duplicate", false);   
+	   ComponentName comp = new ComponentName(pkg, "com.iped.ipcam.gui.WebCam");  
+	   shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,  
+	           new Intent(Intent.ACTION_MAIN).setComponent(comp));  
+	   // 快捷方式的图标  
+	   ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext(context, R.drawable.ic_launcher);  
+	   shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes);  
+	   // 发送广播，让接收者创建快捷方式  
+	   // 需权限<uses-permission  
+	   // android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />  
+	   context.sendBroadcast(shortcutIntent);  
+	   settings.edit().putBoolean("CREATE_SHUT_CUT", true).commit();
 	}
 	
 }

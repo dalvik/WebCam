@@ -21,7 +21,9 @@
         android:layout_weight="1"
         android:maxLength="20"
         android:gravity="center"
+        android:layout_marginTop="5dip"
+        android:layout_marginBottom="5dip"
         android:textColor="#FFFFFFFF"
-        android:textSize="15dip" />
+        android:textSize="20dip" />
 
 </LinearLayout>

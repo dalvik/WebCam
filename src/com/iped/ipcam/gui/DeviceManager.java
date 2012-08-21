@@ -663,6 +663,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			//UdtTools.close();
 			String id = device.getDeviceID();
 			int res = UdtTools.checkCmdSocketEnable(id);
+			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
 			if(res>0) {
 				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
@@ -775,8 +776,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			m_Dialog = new ProgressDialog(DeviceManager.this);
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			m_Dialog.setCancelable(false);
-			m_Dialog.setMessage(getResources().getText(textId));
 		}
+		m_Dialog.setMessage(getResources().getString(textId, device.getDeviceID()));
 		if(!m_Dialog.isShowing()) {
 			m_Dialog.show();
 		}

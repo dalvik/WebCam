@@ -1,6 +1,7 @@
 .gitignore
 .class
 obj/
-libs/
 bin/
 gen/
+proguard/
+libs/armeabi/

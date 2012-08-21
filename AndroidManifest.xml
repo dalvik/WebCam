@@ -18,6 +18,10 @@
  	
  	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
  	
+ 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
+ 	
+ 	<uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
+ 	
     <!--  android:name=".WebTabWidget" -->
         
     <application
@@ -34,7 +38,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".WebTabWidget" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.NoTitleBar"/>
+        <activity android:name=".WebTabWidget" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
 
         <activity android:name=".LeftVideoView"/>
         
@@ -42,7 +46,7 @@
         
         <activity android:name=".DeviceManager"/>
         
-        <activity android:name=".DeviceParamSets">
+        <activity android:name=".DeviceParamSets" android:configChanges="keyboardHidden|orientation" android:screenOrientation="landscape" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         	<intent-filter>
         	    <action android:name="android.intent.action.QUERY_CONFIG_ACTION"/>
         	    <category android:name="android.intent.category.DEFAULT"/>

@@ -213,16 +213,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void stopPlayThread() {
-		UdtTools.exit();
 		if(!myVideoView.isStop()) {
 			myVideoView.onStop();
 		}
-		if(thread != null && thread.isAlive()) {
-			try {
-				thread.join(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		if(thread != null && !thread.isInterrupted()) {
+			thread.isInterrupted();
 		}
 	}
 	
@@ -414,9 +409,16 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		case R.id.mid_up:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_UP.ordinal());
+				if(!myVideoView.isReverseFlag()) {
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_UP.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_UP.ordinal()});
+				}else {
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_DOWN.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_DOWN.ordinal()});
+				}
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
 		case R.id.right_up:
@@ -424,16 +426,30 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		case R.id.left:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+				if(!myVideoView.isReverseFlag()) {
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_LEFT.ordinal()});
+				} else {
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_RIGHT.ordinal()});
+				}
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
 		case R.id.right:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
+				if(!myVideoView.isReverseFlag()) {
+					//PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_RIGHT.ordinal()});
+				} else {
+					//PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_LEFT.ordinal()});
+				}
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				//.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
 		case R.id.left_down:
@@ -441,11 +457,16 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		case R.id.mid_down:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				System.out.println("down");
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_DOWN.ordinal());
+				if(!myVideoView.isReverseFlag()) {
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_DOWN.ordinal()});
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_DOWN.ordinal());
+				}else {
+					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_UP.ordinal()});
+					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_UP.ordinal());
+				}
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				System.out.println("up");
-				PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
+				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_DOWN.ordinal()});
+				//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			
 			break;
@@ -461,7 +482,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	protected void onResume() {
 		super.onResume();
-		System.out.println("onresu");
 	}
 	
 	@Override
@@ -510,11 +530,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		if(m_Dialog == null) {
 			m_Dialog = new ProgressDialog(CamVideoH264.this);
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			m_Dialog.setCancelable(false);
-			m_Dialog.setMessage(getResources().getText(textId));
 		}
-		if(!m_Dialog.isShowing()) {
-			m_Dialog.show();
+		if(m_Dialog != null) {
+			m_Dialog.setMessage(getResources().getString(textId, device.getDeviceID()));
+			if(!m_Dialog.isShowing()) {
+				m_Dialog.show();
+			}
 		}
 	}
 	
@@ -566,6 +587,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			return null;
 		}
 		
+	}
+	
+	class AsynSendPTZ extends AsyncTask<Integer, Integer, Void> {
+	 @Override
+	 	protected Void doInBackground(Integer... params) {
+		 	PackageUtil.sendPTZCommond(params[0]);
+	 		return null;
+	 	}	
 	}
 	
 	private void analyseResult(int result, Device device) {

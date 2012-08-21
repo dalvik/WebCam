@@ -39,6 +39,7 @@
 			        android:singleLine="true"
 			        android:editable="false"
 			        android:text="admin"
+			        android:focusable="false"
 			        android:gravity="left"/>
 			      
 			      <TextView

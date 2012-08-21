@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -102,18 +104,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	private EditText apnPwdEditText = null;
 	
 	private Spinner wirelessSpinner = null;
-	
-	private EditText addrTypeEditText = null;
-
-	private EditText addressEditText = null;
-
-	private Spinner frameRateSpinner = null;
-
-	private Spinner frameSizeSpinner = null;
-
-	private Spinner compressQuarSpinner = null;
-
-	private Spinner compressTypeSpinner = null;
 
 	private RadioGroup soundFlagSet = null;
 	
@@ -128,6 +118,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	private Spinner recordFrameSizeOne = null;
 	
 	private RadioButton selfSetMonitor = null;
+	
+	private RadioButton selfIntelMonitor = null;
 	
 	private Spinner selfSetMonitorOneRate = null;
 	
@@ -299,7 +291,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		setContentView(R.layout.device_param_sets);
 		lookupEditText();
 		device = camManager.getSelectDevice();
-		Log.d(TAG, "device = " + device);
 		handler.sendEmptyMessage(Constants.SHOWQUERYCONFIGDLG);
 	}
 
@@ -335,6 +326,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		recordFrameSizeOne = (Spinner) findViewById(R.id.device_params_set_recorde_frame_size_id);
 		
 		selfSetMonitor = (RadioButton) findViewById(R.id.device_params_monitor_self_mode_set_id);
+		selfIntelMonitor = (RadioButton) findViewById(R.id.device_params_monitor_intelligent_mode_set_id);
 		selfSetMonitorOneRate = (Spinner) findViewById(R.id.device_params_monitor_one_frame_rate_id);
 		selfSetMonitorOneFrameSize = (Spinner) findViewById(R.id.device_params_monitor_one_frame_size_id);
 		
@@ -371,8 +363,18 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			searchWireless();
 			break;
 		case R.id.device_params_set_factory_button_id:
-			handler.sendEmptyMessage(Constants.SETCONFIGDLG);
-			resetFactory();
+			new AlertDialog.Builder(this)
+			.setTitle(getText(R.string.device_params_reset_config_title_str))
+			.setMessage(getString(R.string.device_params_reset_config_message_str))
+	        .setPositiveButton((getText(R.string.device_params_reset_config_sure_str)),
+	        new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog, int whichButton) {
+	            	handler.sendEmptyMessage(Constants.SETCONFIGDLG);
+	            	resetFactory();
+	            }
+	        }).setNegativeButton((getText(R.string.device_params_reset_config_cancle_str)), null)
+	        .create().show();
+			
 			break;
 		case R.id.device_params_set_commit_button_id:
 			handler.sendEmptyMessage(Constants.SETCONFIGDLG);
@@ -426,9 +428,14 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	private void initializeEditText(Map<String, String> paraMap) {
 		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
+		deviceIdEditText.setEnabled(false);
 		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : "V12.005.13");
+		versionEditText.setEnabled(false);
 		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize")) * 1024 * 1024) : "");
+		tfCardEditText.setEnabled(false);
 		sdCardEditText.setText(paraMap.containsKey("sdcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("sdcard_maxsize")) * 1024 * 1024) : "");
+		sdCardEditText.setEnabled(false);
+		valueableRecordeTimeEditText.setEnabled(false);
 		changeStorageMode.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
 			@Override
@@ -505,10 +512,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		
 		if(paraMap.containsKey("r_mode")) {
 			String s = paraMap.get("r_mode");
-			if("inteligent".equals(s)) {
+			if("inteligent".equals(s)) { //normal
 				recordSetOne.setChecked(true);
 			} else {
-				recordSetOne.setChecked(false);
+				recordSetOne.setChecked(true);
 			}
 		}
 		// 帧率
@@ -532,25 +539,48 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		// 画面尺寸
 		if(paraMap.containsKey("r_reso")) {
 			String s = paraMap.get("r_reso");
-			if("720P".equalsIgnoreCase(s)) {
-				recordFrameSizeOne.setSelection(0);
-			} else if("qvga".equalsIgnoreCase(s)){
-				recordFrameSizeOne.setSelection(2);
-			}else {
+			if("qvga".equalsIgnoreCase(s)){
 				recordFrameSizeOne.setSelection(1);
+			}else {
+				recordFrameSizeOne.setSelection(0);
 			}
 		}
 		
+
 		//监控模式
 		if(paraMap.containsKey("mon_mode")) {
 			String s = paraMap.get("mon_mode");
-			if("normal".equals(s)) {
+			if("normal".equals(s)) { //inteligent
 				selfSetMonitor.setChecked(true);
+				selfIntelMonitor.setChecked(false);
+			} else if("inteligent".equals(s)){
+				selfSetMonitor.setChecked(false);
+				selfIntelMonitor.setChecked(true);
 			} else {
 				selfSetMonitor.setChecked(false);
+				selfIntelMonitor.setChecked(false);
 			}
-			
 		}
+		
+		selfSetMonitor.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				selfSetMonitor.setChecked(true);
+				selfIntelMonitor.setChecked(false);
+				System.out.println(selfSetMonitor.isChecked());
+			}
+		});
+		selfIntelMonitor.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				selfSetMonitor.setChecked(false);
+				selfIntelMonitor.setChecked(true);	
+				System.out.println(selfSetMonitor.isChecked());
+			}
+		});
+		
 		
 		//监控模式的帧率
 		if(paraMap.containsKey("rate")) {
@@ -573,12 +603,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		// 监控模式的画面尺寸
 		if(paraMap.containsKey("r_reso")) {
 			String s = paraMap.get("r_reso");
-			if("720P".equalsIgnoreCase(s)) {
-				selfSetMonitorOneFrameSize.setSelection(0);
-			} else if("qvga".equalsIgnoreCase(s)){
-				selfSetMonitorOneFrameSize.setSelection(2);
-			}else {
+			if("qvga".equalsIgnoreCase(s)){
 				selfSetMonitorOneFrameSize.setSelection(1);
+			}else {
+				selfSetMonitorOneFrameSize.setSelection(0);
 			}
 		}
 		
@@ -610,7 +638,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				sensitvSet.setSelection(0);
 			}
 		}
-	
+		
+		apnEditText.setText(paraMap.containsKey("w_ssid")? paraMap.get("w_ssid") : "");
+		apnPwdEditText.setText(paraMap.containsKey("w_key")? paraMap.get("w_key") : "");
 		alarmEmailEditText.setText(paraMap.containsKey("mailbox")? paraMap.get("mailbox") : "");
 		securityVisitPass.setText(paraMap.containsKey("pswd")? paraMap.get("pswd") : "");
 		String systemTime = paraMap.get("system_time");
@@ -642,115 +672,146 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	}
 	
 	private void collectionData() {
-		paraMap.put("name", deviceNameEditText.getText().toString().trim());
+		if(paraMap.containsKey("name")){
+			paraMap.put("name", deviceNameEditText.getText().toString().trim());
+		}
+		String tmp = null;
 		switch(netWorkModeSet.getCheckedRadioButtonId()) {
 		case R.id.device_param_set_network_mode_wireuse:
-			paraMap.put("inet_mode", "eth_only");
+			tmp = "eth_only";
 			break;
 		case R.id.device_param_set_network_mode_wireless:
-			paraMap.put("inet_mode", "wlan_only");
+			tmp = "wlan_only";
 			break;
 			default:
-				paraMap.put("inet_mode", "inteligent");
+				tmp = "inteligent";
 				break;
+		}
+		if(paraMap.containsKey("inet_mode")){
+			paraMap.put("inet_mode", tmp);
+			
 		}
 		//有线网络设置
+		int i = 0;
 		switch(wireuseNetworkSet.getCheckedRadioButtonId()) {
 		case R.id.device_param_set_wireuse_network_mode_auto:
-			paraMap.put("udhcpc", 1 + "");
+			i = 1;
 			break;
 			default:
-				paraMap.put("udhcpc", 0 + "");
+				i = 0;
 				break;
 		}
+		if(paraMap.containsKey("udhcpc")){
+			paraMap.put("udhcpc", i +"");
+		}
 		
+		/*
 		paraMap.put("e_ip", wireuseIPAddress.getText().toString().trim());
 		paraMap.put("e_gw", wireuseGeteWayAddess.getText().toString().trim());
 		paraMap.put("e_mask", wireuseSubAddess.getText().toString().trim());
 		paraMap.put("e_dns1", wireuseDNS1Address.getText().toString().trim());
 		paraMap.put("e_dns2", wireuseDNS2Address.getText().toString().trim());
-		
+		*/
 		//无线网络设置 单选框与有线网络设置相同 此处不再设置
+		/*
 		paraMap.put("w_ip", wirelessIPAddress.getText().toString().trim());
 		paraMap.put("w_gw", wirelessGeteWayAddess.getText().toString().trim());
 		paraMap.put("w_mask", wirelessSubAddess.getText().toString().trim());
 		paraMap.put("w_dns1", wirelessDNS1Address.getText().toString().trim());
 		paraMap.put("w_dns2", wirelessDNS2Address.getText().toString().trim());
-		
+		*/
 		// 录像设置
 		if(recordSetOne.isChecked()) {
-			paraMap.put("r_mode", "inteligent");
+			tmp = "inteligent";
 		}else {
-			paraMap.put("r_mode", "normal");
+			tmp = "normal";
+		}
+		if(paraMap.containsKey("r_mode")){
+			paraMap.put("r_mode", tmp);
 		}
 		
 		// 帧率
 		switch(recordRateOne.getSelectedItemPosition()) {
 		case 0:
-			paraMap.put("r_nor_speed", "1");
+			i = 1;
 			break;
 		case 1:
-			paraMap.put("r_nor_speed", "2");
+			i = 2;
 			break;
 		case 2:
-			paraMap.put("r_nor_speed", "4");
+			i = 4;
 			break;
 		case 3:
-			paraMap.put("r_nor_speed", "8");
+			i = 8;
 			break;
 		case 4:
-			paraMap.put("r_nor_speed", "12");
+			i = 12;
 			break;
 			default:
-				paraMap.put("r_nor_speed", "24");
+				i = 24;
 				break;
 		}
 		
+		if(paraMap.containsKey("r_nor_speed")){
+			paraMap.put("r_nor_speed", i + "");
+		}
 		// 画面尺寸
 		switch(recordFrameSizeOne.getSelectedItemPosition()) {
 		case 0:
-			paraMap.put("r_reso", "720P");
+			tmp = "vga";
 			break;
 		case 1:
-			paraMap.put("r_reso", "vga");
+			tmp = "qvga";
 			break;
 			default:
-				paraMap.put("r_reso", "qvga");
+				tmp = "720P";
 				break;
+		}
+		if(paraMap.containsKey("r_reso")){
+			paraMap.put("r_reso", tmp);
 		}
 		
 		//监控模式
 		if(selfSetMonitor.isChecked()) {
-			paraMap.put("mon_mode", "1");
+			if(paraMap.containsKey("mon_mode")){
+				paraMap.put("mon_mode", "normal");
+			}
 		}else {
-			paraMap.put("mon_mode", "0");
+			if(paraMap.containsKey("mon_mode")){
+				paraMap.put("mon_mode", "inteligent");
+			}
 		}
 		
 		//监控模式的帧率
 		switch(selfSetMonitorOneRate.getSelectedItemPosition()) {
 		case 0:
-			paraMap.put("r_mode", "1");
+			i = 1;
 			break;
 		case 1:
-			paraMap.put("r_mode", "2");
+			i = 2;
 			break;
 		case 2:
-			paraMap.put("r_mode", "4");
+			i = 4;
 			break;
 		case 3:
-			paraMap.put("r_mode", "8");
+			i = 8; 
 			break;
 		case 4:
-			paraMap.put("r_mode", "12");
+			i = 12;
 			break;
 			default:
-				paraMap.put("r_mode", "24");
+				i = 24;
 				break;
+		}
+		
+		if(paraMap.containsKey("rate")){
+			paraMap.put("rate", i + "");
 		}
 		
 		// 监控模式的画面尺寸 与录像模式相同 此处不在设置
 		
 		//其他设置
+		/*
 		switch(soundFlagSet.getCheckedRadioButtonId()) {
 		case R.id.device_params_other_set_sound_open_flag_id:
 			paraMap.put("snd_duplex", "1");
@@ -768,8 +829,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				paraMap.put("email_alarm", "0");
 				break;
 		}
-
+		*/
 		// 灵敏度
+		/*
 		switch(recordFrameSizeOne.getSelectedItemPosition()) {
 		case 0:
 			paraMap.put("r_sensitivity", "1");
@@ -782,8 +844,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				break;
 		}
 		paraMap.put("mailbox", alarmEmailEditText.getText().toString().trim());
+		*/
 		//paraMap.put("password", securityVisitPass.getText().toString().trim());
-		
+		/*
 		if(wifiList != null) {
 			WifiConfig config = wifiList.get(wirelessSpinner.getSelectedItemPosition());
 			paraMap.put("w_ssid", config.getSsid());
@@ -799,7 +862,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			paraMap.put("inet_wlan_pairwise", config.getPairwise());
 			paraMap.put("inet_wlan_group",config.getGroup());
 		}
-
+		*/
 		/*if(paraMap.containsKey("system_time")){
 			paraMap.remove("system_time");
 		}
@@ -812,19 +875,18 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		if(paraMap.containsKey("system_time")){
 			paraMap.remove("system_time");
 		}*/
-		paraMap.put("system_time",dateSetButton.getText().toString().replaceAll("-", "") + timeSetButton.getText().toString().replaceAll(":", ""));
-		device.setDeviceName(deviceNameEditText.getText().toString().trim());
+		//paraMap.put("system_time",dateSetButton.getText().toString().replaceAll("-", "") + timeSetButton.getText().toString().replaceAll(":", ""));
+		//device.setDeviceName(deviceNameEditText.getText().toString().trim());
 		//device.setDeviceEthIp(wireuseIPAddress.getText().toString().trim());
 		//device.setDeviceEthGateWay(wireuseGeteWayAddess.getText().toString().trim());
 		//device.setDeviceEthMask(wireuseSubAddess.getText().toString().trim());
-		device.setDeviceEthDNS1(wireuseDNS1Address.getText().toString().trim());
-		device.setDeviceEthDNS2(wireuseDNS2Address.getText().toString().trim());
+		//device.setDeviceEthDNS1(wireuseDNS1Address.getText().toString().trim());
+		//device.setDeviceEthDNS2(wireuseDNS2Address.getText().toString().trim());
 		//device.setDeviceWlanIp(wirelessIPAddress.getText().toString().trim());
 		//device.setDeviceWlanGateWay(wirelessGeteWayAddess.getText().toString().trim());
 		//device.setDeviceWlanMask(wirelessSubAddess.getText().toString().trim());
 		//device.setDeviceWlanDNS1(wirelessDNS1Address.getText().toString().trim());
 		//device.setDeviceEthDNS2(wirelessDNS2Address.getText().toString().trim());
-		
 		//camManager.updateCam(device);
 		
 		handler.sendEmptyMessage(Constants.SENDCONFIGMSG);
@@ -862,24 +924,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		
 	}
 	
-	private void getConfigByWlan(final String wlan) {
-		new Thread(new Runnable(){
-			@Override
-			public void run() {
-				String rece;
-				try {
-					rece = PackageUtil.sendPackageByIp(CamCmdListHelper.GetCmd_Config, wlan, Constants.LOCALCMDPORT);
-					System.out.println("wlan = " + wlan + "  recv===="+ rece);
-				} catch (CamManagerException e) {
-					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-				} finally {
-					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-				}				
-			}
-		}).start();
-		
-	}
-	
 	public void resetFactory() {
 		new Thread(new Runnable(){
 			@Override
@@ -904,18 +948,21 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				byte[] recv = new byte[Constants.COMMNICATEBUFFERSIZE];
 				String id = device.getDeviceID();
 				int res = UdtTools.sendCmdMsgById(id, command, command.length());
+				Log.d(TAG, "search wireless send data length = " + res);
 				if( res >0) {
-					int re = UdtTools.recvCmdMsgById(id, recv, recv.length);
-					System.out.println("res2 = " + re);
+					int re = UdtTools.recvCmdMsgById(id, recv, Constants.COMMNICATEBUFFERSIZE);
+					Log.d(TAG, "search wireless  revc data length = " + re);
 					if(re > 0) {
 						String length = new String(recv, 0, 4).trim();
 						int l = re - 4;
-						if(length.equals(Integer.toString(l))) {
+						if(length.equals(Integer.toString(l)) || !length.equals(Integer.toString(l))) {
 							String wifiInfo = new String(recv,4, l);
-							System.out.println("s = "  + length.trim()  + " " + wifiInfo.trim());
+							Log.d(TAG, "s = "  + length.trim()  + " " + wifiInfo.trim());
 							wifiList = ParaUtil.encapsuWifiConfig(wifiInfo);
 							handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSSUCCESSMSG);
 						}else{
+							String cont = new String(recv,4, l);
+							Log.d(TAG, "recv length not legal!  header size = " + length + "  data content size = "  + cont.length() + " content = " + cont);
 							handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSERRORMSG);
 						}
 					}else {

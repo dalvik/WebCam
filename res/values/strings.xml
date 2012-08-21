@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="hello">Hello World, WebCamActivity!</string>
      <!-- 用户登录 -->
@@ -34,14 +34,14 @@
      <string name="password_modify_success_str">密码修改成功</string>
      <string name="password_modify_error_str">密码修改失败</string>
     
-    <string name="login_dialog_str">User login</string>
-    <string name="input_password">Please enter your password</string>
-    <string name="repeat_input_password">Repeat Password</string>
-    <string name="password_is_null">Sorry! Password can not be empty!</string>
-    <string name="password_not_equal">Sorry! Two password the importation is inconsistent!</string>
-    <string name="password_set_ok">Password set up, remember!</string>
-    <string name="login_str">Confirm</string>
-    <string name="cancle_login_str">Cancel</string>
+    <string name="login_dialog_str">用户登录</string>
+    <string name="input_password">请输入密码</string>
+    <string name="repeat_input_password">重复密码</string>
+    <string name="password_is_null">密码不能为空</string>
+    <string name="password_not_equal">两次输入的密码不一致！</string>
+    <string name="password_set_ok">密码已设定，请牢记！</string>
+    <string name="login_str">确定</string>
+    <string name="cancle_login_str">取消</string>
     <string name="device_manager_pwd_set_error">密码设置失败</string>
     <string name="device_manager_pwd_set_time_out">网络超时</string>
     <string name="device_manager_pwd_set_err">密码错误</string>
@@ -70,7 +70,7 @@
     	<string name="video_preview_minus_apertrue_str">光圈</string>
     	<string name="video_preview_add_apertrue">﹢</string>
     	<string name="video_preview_brightness">亮度</string>
-    	<string name="video_preview_contrast">透明度</string>
+    	<string name="video_preview_contrast">对比度</string>
     	<string name="video_preview_volume">音量</string>
     <string name="device_manager_str">设备管理</string>
     	<string name="auto_serch_str">自动搜索</string>
@@ -113,6 +113,8 @@
     		<string name="device_manager_add_net_type_wlan_str">外网</string>
     		<string name="device_manager_add_query_title_str">设备添加</string>
     		<string name="device_manager_add_query_message_str">正在添加设备请稍后</string>
+    		<string name="device_manager_add_id_str">设备</string>
+    		
     	<string name="clear_all_str">全部清除</string>	
     		<string name="clear_all_device_title_str">清空设备列表</string>
     		<string name="clear_all_device_message_str">确定清空设备列表吗</string>
@@ -137,7 +139,7 @@
     	<string name="device_params_address_type_str">地址类型：</string>
     	<string name="device_params_device_address_str">设备地址：</string>
     	<string name="device_params_inside_total_space_str">TF卡容量：</string>
-    	<string name="device_params_outside_total_space_str">移动磁盘总容量：</string>
+    	<string name="device_params_outside_total_space_str">外接磁盘容量：</string>
     	<string name="device_params_storage_device_str">存储设备：</string>
     	<string name="device_params_recorde_type_inside_str">TF卡</string>
     	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
@@ -180,9 +182,9 @@
     	
     	<!-- 录制设置 -->
     	<string name="device_params_video_record_set_str">录制设置：</string>
-    	<string name="device_params_video_record_frame_rate_set_str">帧率</string>
-    	<string name="device_params_video_record_frame_size_set_str">画面尺寸</string>
-    	<string name="device_params_video_record_set_one_str">录像设置一</string>
+    	<string name="device_params_video_record_frame_rate_set_str">帧率: </string>
+    	<string name="device_params_video_record_frame_size_set_str">画面尺寸: </string>
+    	<string name="device_params_video_record_set_one_str">录像设置</string>
     	<string name="device_params_video_record_set_two_str">录像设置二(当没有物体移动时，慢速录像)</string>
     	<string name="device_params_video_record_set_three_str">录像设置三(当有物体移动时，快速录像)</string>
     	<!-- 监控设置 -->
@@ -223,7 +225,6 @@
     	<string name="device_params_recorde_real_speed_str">实际码率：</string>
     	<string name="device_params_recorde_frame_size_str">画面大小：</string>
     		  <string-array name="monitor_frame_size">
-			        <item>720P(1280*720)</item>
 			        <item>VGA(640*480)</item>
 			        <item>QVGA(320*240)</item>
 			    </string-array>
@@ -270,6 +271,14 @@
     	<string name="device_params_set_config_success_str">配置信息设置成功</string>
     	<string name="device_params_set_config_error_str">配置信息设置失败</string>
     	
+    	<string name="device_params_reset_config_title_str">确定恢复出厂设置吗</string>
+    	<string name="device_params_reset_config_message_str">
+    	    \t\t1、所有个信息设置均将清除\n\r
+    	    \t\t2、网络配置将被清除，设备可能无法连接\n\r
+    	    \t\t3、可能需要重新配置USB
+    	</string>
+    	<string name="device_params_reset_config_sure_str">确定</string>
+    	<string name="device_params_reset_config_cancle_str">取消</string>
     	<string name="device_params_reset_config_success_str">恢复出厂设置成功</string>
     	<string name="device_params_reset_config_error_str">恢复出厂设置失败</string>
     	
@@ -330,7 +339,8 @@
         <string name="webcam_error_code_bind_error">端口绑定失败</string>
         
         <string name="webcam_connect_init_error">系统初始化连接失败</string>
-        <string name="webcam_check_pwd_dialog_str">正在校验，请稍后。。。</string>
-    <string name="version">12.05.20</string>
-    <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>
+        <string name="webcam_check_pwd_dialog_str">正在校验 <xliff:g id="number">%1$s</xliff:g>，请稍后。。。</string>
+    <string name="blank_str">More : hangzhouiped.taobao.com</string>
+    <string name="version">12.0.8205</string>
+    <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>
 </resources>

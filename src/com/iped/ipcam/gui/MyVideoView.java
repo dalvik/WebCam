@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.BCVInfo;
@@ -29,11 +29,11 @@ import com.iped.ipcam.utils.DateUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
 
-	private final static int DELAY_RECONNECT = 1000 * 60 * 5;
+	private final static int DELAY_RECONNECT = 1000 * 60 * 3;
 	
 	private final static int NALBUFLENGTH = 320 * 480 * 2; // 600*800*2
 
-	private final static int SOCKETBUFLENGTH = 342000;
+	private final static int SOCKETBUFLENGTH = 34200;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -43,7 +43,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	// private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 
-	private Bitmap video = Bitmap.createBitmap(320, 480, Config.RGB_565);
+	private Bitmap video;
 
 	byte[] pixel = new byte[NALBUFLENGTH];
 
@@ -67,8 +67,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private boolean stopPlay = true;
 
-	private int result = -1;
-
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * (1 + 1 / 2)];
 
 	private static final String TAG = "MyVideoView";
@@ -79,6 +77,8 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private Rect rect = null;
 
+	private Rect rect2 = null;
+
 	private int frameCount;
 
 	private int frameCountTemp;
@@ -86,6 +86,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	private String deviceId = "";
 
 	private Paint textPaint;
+	
+	private Paint bgPaint;
+	
+	private Paint infoPaint;
 
 	private int temWidth;
 
@@ -102,16 +106,22 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		textPaint = new Paint(Color.RED);
+		textPaint = new Paint();
 		m.setScale(-1, 1);
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 	}
 
 	void init(Handler handler, int w, int h) {
 		this.handler = handler;
-		textPaint = new Paint(Color.RED);
+		textPaint = new Paint();
+		textPaint.setColor(Color.BLUE);
 		m.setScale(-1, 1);
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
+		bgPaint = new Paint();
+		bgPaint.setColor(Color.WHITE);
+		infoPaint = new Paint();
+		infoPaint.setColor(Color.BLUE);
+		infoPaint.setTextSize(18);
 	}
 
 	@Override
@@ -122,13 +132,18 @@ public class MyVideoView extends ImageView implements Runnable {
 				temWidth = getWidth();
 				rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
-			canvas.drawBitmap(video, null, rect, null);
+			canvas.drawBitmap(video, null, rect, textPaint);
+			canvas.drawText(deviceId + "  "	+ DateUtil.formatTimeToDate5(System.currentTimeMillis()) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+		}else {
+			String text = "More : hangzhouiped.taobao.com";
+			if(rect2 == null) {
+				rect2 = new Rect(0, 0, getWidth(), getHeight() - 10);
+			}
+			infoPaint.getTextBounds(text, 0, text.length(), rect2);
+			int x = getWidth() /2 - rect2.centerX();
+			int y = getHeight() /2 - rect2.centerY();
+			canvas.drawText(text, x, y, infoPaint);
 		}
-		canvas.drawText(
-				deviceId
-						+ "  "
-						+ DateUtil.formatTimeToDate5(System.currentTimeMillis())
-						+ "  " + frameCountTemp + " p/s", 20, 25, textPaint);
 	}
 
 	public void run() {
@@ -137,8 +152,10 @@ public class MyVideoView extends ImageView implements Runnable {
 		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
 			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			//onStop();
+			//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+			Log.d(TAG, "sendCmdMsgById result = " + res);
+			onStop();
 			return;
 		}
 		int bufLength = 10;
@@ -146,8 +163,9 @@ public class MyVideoView extends ImageView implements Runnable {
 		res = UdtTools.recvCmdMsgById(deviceId,b, bufLength);
 		if (res < 0) {
 			//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
-			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			//onStop();
+			onStop();
+			//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+			Log.d(TAG, "recvCmdMsgById result = " + res);
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -162,12 +180,17 @@ public class MyVideoView extends ImageView implements Runnable {
 		handler.removeCallbacks(calculateFrameTask);
 		handler.post(calculateFrameTask);
 		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-		//new Thread(new RecvAudio()).start();
+		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			try {
 				readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
+				/*if(readLengthFromSocket<1024) {
+					System.out.println(readLengthFromSocket);
+				}*/
 			} catch (Exception e) {
 				e.printStackTrace();
+				stopPlay = true;
 				System.out.println("read exception break...." + e.getMessage());
 				break;
 			}
@@ -258,8 +281,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	public void onStop() {
+		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		stopPlay = true;
-		//handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 		release();
 		flushBitmap();
 	}
@@ -274,7 +299,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 
 	private void flushBitmap() {
-		video = Bitmap.createBitmap(320, 480, Config.RGB_565);
+		if(video != null && !video.isRecycled()) {
+			video.recycle();
+			video = null;
+		}
 		postInvalidate();
 	}
 
@@ -308,7 +336,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		@Override
 		public void run() {
 			int init = UdtTools.initAmrDecoder();
-			System.out.println("amr deocder init " + init);
+			Log.d(TAG, "amr deocder init " + init);
 			if (m_out_trk != null) {
 				m_out_trk.stop();
 				m_out_trk.release();
@@ -328,13 +356,9 @@ public class MyVideoView extends ImageView implements Runnable {
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
 				//System.out.println(recvDataLength + "----------------------" + audioBuffer[1] + " " + audioBuffer[2]);
-				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
-				// System.out.println("recvDataLength=" + recvDataLength +
-				// " decoderLength=" + decoderLength);
+				//UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
-				// System.out.println("audio size = " + size + "  "+
-				// returnSize);
-				m_out_trk.write(pcmArr, 0, pcmBufferLength);
+				//m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
 			if (m_out_trk != null) {
 				m_out_trk.stop();
