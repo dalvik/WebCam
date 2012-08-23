@@ -330,6 +330,12 @@
         <string name="system_settings_device_update_str">升级</string>
         <string name="system_settings_device_cancle_str">取消</string>
         
+        <!-- network check -->
+        <string name="webcam_network_invalid_title_str">提示</string>
+        <string name="webcam_network_invalid_message_str">网络无连接</string>
+        <string name="webcam_network_invalid_open">开启</string>
+        <string name="webcam_network_invalid_cancle">取消</string>
+        
         <!-- error code tips infor -->
         <string name="webcam_error_code_internel">内部错误</string>
         <string name="webcam_error_code_server_not_reached">服务器离线</string>
@@ -337,6 +343,12 @@
         <string name="webcam_error_code_unlegal">设备编号未注册</string>
         <string name="webcam_error_code_connect_error">连接失败</string>
         <string name="webcam_error_code_bind_error">端口绑定失败</string>
+        
+        <string name="sms_to_email_title_str">程序运行错误报告_</string>
+        <string name="accor_an_import_exception_str">程序运行运行过程当中出现问题即将退出！</string>
+        <string name="exception_tips_title_str">错误提示</string>
+        <string name="exception_tips_message_str">程序运行出错啦，即将退出！</string>
+        <string name="exception_commit_button_str">我知道了~</string>
         
         <string name="webcam_connect_init_error">系统初始化连接失败</string>
         <string name="webcam_check_pwd_dialog_str">正在校验 <xliff:g id="number">%1$s</xliff:g>，请稍后。。。</string>
