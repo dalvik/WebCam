@@ -3,18 +3,23 @@ package com.iped.ipcam.gui;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +43,7 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DialogUtils;
 import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
+import com.iped.ipcam.utils.NetworkUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ToastUtils;
@@ -160,9 +166,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Bundle bcvInfo = msg.getData();
 				if(bcvInfo != null) {
 					BCVInfo info = (BCVInfo) bcvInfo.get("UPDATEBCV");
-					brightnessProgerss.setProgress(info.getBrightness());
-					contrastProgressbar.setProgress(info.getContrast());
-					volumeProgressbar.setProgress(info.getVolume());
+					brightnessProgerss.setProgress(info.getBrightness()>0?info.getBrightness():0);
+					contrastProgressbar.setProgress(info.getContrast()>0?info.getContrast():0);
+					volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
 				}
 				break;
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
@@ -320,8 +326,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			listView.requestFocusFromTouch();
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-			new AsynMonitorSocketTask().execute(0);
+			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
+				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+				new AsynMonitorSocketTask().execute(0);
+			} else {
+				handleNetworkOpeartion(CamVideoH264.this);
+			}
 		}
 	};
 	
@@ -531,6 +541,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		}
 		if(m_Dialog != null) {
+			System.out.println(m_Dialog + " ---" + camManager.getSelectDevice());
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
 			if(!m_Dialog.isShowing()) {
 				m_Dialog.show();
@@ -568,8 +579,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(WebCamActions.ACTION_IPPLAY.equals(intent.getAction())) {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-				new AsynMonitorSocketTask().execute(0);
+				if(NetworkUtil.checkNetwokEnable(context)) {
+					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+					new AsynMonitorSocketTask().execute(0);
+				} else {
+					handleNetworkOpeartion(context);
+				}
 			}
 		}
 	}
@@ -692,6 +707,29 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			return null;
 		}
+	}
+
+	private void handleNetworkOpeartion(final Context context) {
+		new Thread() {  
+            @Override  
+            public void run() {  
+                Looper.prepare();  
+                new AlertDialog.Builder(context)
+                .setTitle(context.getResources().getString(R.string.webcam_network_invalid_title_str))
+                .setCancelable(false)  
+                .setMessage(context.getResources().getString(R.string.webcam_network_invalid_message_str))
+                .setNeutralButton(context.getResources().getString(R.string.webcam_network_invalid_open), new android.content.DialogInterface.OnClickListener() {  
+                            @Override  
+                            public void onClick(android.content.DialogInterface dialog, int which) {  
+                            	Intent intent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                            	context.startActivity(intent);
+                            }  
+                        })
+                        .setNegativeButton(context.getResources().getString(R.string.webcam_network_invalid_cancle), null)
+                        .create().show();
+                Looper.loop();  
+            }  
+        }.start();  
 	}
 }
 

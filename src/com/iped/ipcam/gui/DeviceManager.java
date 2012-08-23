@@ -671,7 +671,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				startActivity(intent);
 			}else {
 				String random = RandomUtil.generalRandom();
-				Log.d(TAG, "random = " + random);
+				//Log.d(TAG, "random = " + random);
 				int result = UdtTools.monitorCmdSocket(id, random);
 				Log.d(TAG, "monitor result = " + result);
 				analyseResult(result, device);
@@ -694,16 +694,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			return;
 		case ErrorCode.STUN_ERR_INVALIDID:
-			ToastUtils.showToast(this, R.string.webcam_error_code_unlegal);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			ToastUtils.showToast(this, R.string.webcam_error_code_unlegal);
 			return;
 		case ErrorCode.STUN_ERR_CONNECT:
-			ToastUtils.showToast(this, R.string.webcam_error_code_connect_error);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			ToastUtils.showToast(this, R.string.webcam_error_code_connect_error);
 			return;
 		case ErrorCode.STUN_ERR_BIND:
-			ToastUtils.showToast(this, R.string.webcam_error_code_bind_error);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			ToastUtils.showToast(this, R.string.webcam_error_code_bind_error);
 			return;
 		default:
 			break;

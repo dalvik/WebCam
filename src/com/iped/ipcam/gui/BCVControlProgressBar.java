@@ -2,7 +2,6 @@ package com.iped.ipcam.gui;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -15,6 +14,8 @@ public class BCVControlProgressBar extends ProgressBar {
 	private Paint paint;
 	
 	private String tips = "";
+	
+	private Rect rect = new Rect();
 	
 	public BCVControlProgressBar(Context context) {
 		super(context);
@@ -45,7 +46,6 @@ public class BCVControlProgressBar extends ProgressBar {
 	@Override
 	protected synchronized void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		Rect rect = new Rect();
 		this.paint.getTextBounds(this.text, 0, this.text.length(), rect);
 		int x = getWidth() /2 - rect.centerX();
 		int y = getHeight() /2 - rect.centerY();

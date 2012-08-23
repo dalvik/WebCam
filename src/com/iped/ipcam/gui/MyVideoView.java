@@ -29,7 +29,7 @@ import com.iped.ipcam.utils.DateUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
 
-	private final static int DELAY_RECONNECT = 1000 * 60 * 3;
+	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
 	
 	private final static int NALBUFLENGTH = 320 * 480 * 2; // 600*800*2
 
@@ -351,14 +351,17 @@ public class MyVideoView extends ImageView implements Runnable {
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
 			stopPlay = false;
+			int recvDataLength = -1;
 			while (!stopPlay) {
-				int recvDataLength = -1;
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				//System.out.println(recvDataLength + "----------------------" + audioBuffer[1] + " " + audioBuffer[2]);
-				//UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
+				if(recvDataLength<=0) {
+					stopPlay = true;
+					break;
+				}
+				int decodeLength = UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
-				//m_out_trk.write(pcmArr, 0, pcmBufferLength);
+				m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
 			if (m_out_trk != null) {
 				m_out_trk.stop();
@@ -379,7 +382,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		@Override
 		public void run() {
 			frameCountTemp = frameCount;
-			if(frameCountTemp<=3) {
+			if(frameCountTemp<=2) {
 				invalidate();
 			}
 			frameCount = 0;
