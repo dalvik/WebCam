@@ -50,7 +50,7 @@ public class Device implements Serializable{
 	
 	private String unDefine1;//ÍâÍøIP
 	
-	private String unDefine2 = "1234"; // ÃÜÂë
+	private String unDefine2; // ÃÜÂë
 	
 	private String unDefine3;
 

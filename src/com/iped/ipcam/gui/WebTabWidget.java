@@ -13,6 +13,7 @@ import android.widget.TabWidget;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.mail.ExceptionHandler;
 import com.iped.ipcam.utils.Constants;
 
 public class WebTabWidget extends TabActivity {
@@ -23,6 +24,12 @@ public class WebTabWidget extends TabActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.web_tab_widget);
+		ExceptionHandler crashHandler = ExceptionHandler.getInstance();    
+		crashHandler.init(this);
+		/*CrashHandler crashHandler = CrashHandler.getInstance();  
+        crashHandler.init(this);  */
+        // ´´½¨´íÎó
+		//Thread.setDefaultUncaughtExceptionHandler(this);
 		Resources resources = getResources();
 		tabHost = getTabHost();
 		TabHost.TabSpec tabSpec;
@@ -68,7 +75,6 @@ public class WebTabWidget extends TabActivity {
 		for (int i = 0; i < count; i++) {
 			tabWidget.getChildAt(i).getLayoutParams().height = tabWidget
 					.getChildAt(i).getLayoutParams().height * 2 / 3;
-
 		}
 	}
 
