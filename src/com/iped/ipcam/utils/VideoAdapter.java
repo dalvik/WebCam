@@ -57,7 +57,7 @@ public class VideoAdapter extends BaseAdapter {
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		viewHolder.name.setText(context.getResources().getText(R.string.video_preview_name_str) + video.getVideoName());
+		viewHolder.name.setText(context.getResources().getText(R.string.video_preview_name_str) + "" + (position + 1));
 		viewHolder.start.setText(context.getResources().getText(R.string.video_preview_start_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoStartTime()));
 		viewHolder.end.setText(context.getResources().getText(R.string.video_preview_end_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoEndTime()));
 		viewHolder.addr.setText(context.getResources().getText(R.string.video_preview_addr_str) + video.getAddress());

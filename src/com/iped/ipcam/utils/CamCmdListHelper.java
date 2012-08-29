@@ -17,7 +17,7 @@ public class CamCmdListHelper {
 	public final static String GetCmd_Statue = "GetRecordStatue:0 ";
 	public final static String SetCmd_Statue = "SetRecordStatue:";
 	public final static String SetCmd_ChangeIP = "SetIpAddress:";
-	public final static String GetCmd_NetFiles = "GetNandRecordFile:";
+	public final static String GetCmd_NetFiles = "GetNandRecordFile:00000000";
 	public final static String SetCmd_PlayNetFiles = "ReplayRecord:";
 	public final static String SetCmd_SearchWireless = "search_wifi:0 ";
 	public final static String SetCmdPTZ = "Rs485Cmd:";

@@ -9,14 +9,20 @@ import java.util.Date;
 import java.util.List;
 
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.Log;
 
+import com.iped.ipcam.gui.R;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.RandomUtil;
 
 public class VideoManagerImp implements IVideoManager {
 
@@ -29,6 +35,8 @@ public class VideoManagerImp implements IVideoManager {
 	private Date start;
 	
 	private Date end;
+	
+	private String id;
 	
 	private String  TAG = "VideoManagerImp";
 	
@@ -98,49 +106,20 @@ public class VideoManagerImp implements IVideoManager {
 		
 		@Override
 		public void run() {
-			byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-			byte [] tem = CamCmdListHelper.GetCmd_NetFiles.getBytes();
-			DatagramSocket datagramSocket = null;
-			//00068000:00fff5b2:20120104165801-20120104170649
-			String ip = null;
-			int port = 0;
-			if(device.getDeviceNetType()) {
-				ip = device.getUnDefine1();
-				port = device.getDeviceRemoteCmdPort();
+			
+			id = device.getDeviceID();
+			int res = UdtTools.checkCmdSocketEnable(id);
+			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
+			if(res>0) { // socket is valid
+				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+				//Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
+				//intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
 			}else {
-				port = device.getDeviceLocalCmdPort();
-				ip = device.getDeviceEthIp();
-			}
-			try {
-				datagramSocket = new DatagramSocket();
-				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-				System.arraycopy(tem, 0, buffTemp, 0, tem.length);
-				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(ip), port);
-				datagramSocket.send(datagramPacket);
-				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-				boolean flag = true;
-				StringBuffer sb = new StringBuffer();
-				while(flag) {
-					datagramSocket.receive(rece);
-					int l = rece.getLength();
-					if(l<Constants.COMMNICATEBUFFERSIZE) {
-						sb.append(new String(buffTemp, 0, l));
-						flag = false;
-						break;
-					}
-					sb.append(new String(buffTemp));
-				}
-				System.out.println("===>"+ sb.toString() +"<===");
-				splitFilesInfoFromBuf(PackageUtil.deleteZero(sb.toString().getBytes()));
-				updateList();
-			} catch (IOException e) {
-				e.printStackTrace();
-				Log.d(TAG, "VideoSearchThread " + e.getMessage());
-			} finally {
-				if(datagramSocket != null) {
-					datagramSocket.close();
-				}
-				handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
+				String random = RandomUtil.generalRandom();
+				//Log.d(TAG, "random = " + random);
+				int result = UdtTools.monitorCmdSocket(id, random);
+				Log.d(TAG, "monitor result = " + result);
+				analyseResult(result, device);
 			}
 		}
 		
@@ -175,7 +154,7 @@ public class VideoManagerImp implements IVideoManager {
 			//int i = Integer.parseInt(index, 16);
 			//int j = Integer.parseInt(fileLength, 16);
 			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(index, device.getDeviceName(), start, end, fileLength, device.getDeviceName());
+			Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 			videoList.add(video);
 		}
 		
@@ -189,8 +168,70 @@ public class VideoManagerImp implements IVideoManager {
 		public void updateList() {
 			handler.sendEmptyMessage(Constants.UPDATEVIDEOLIST);
 		}
+		
+		private void analyseResult(int result, Device device) {
+			switch (result) {
+			case ErrorCode.STUN_ERR_INTERNAL:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_internel);
+				return;
+			case ErrorCode.STUN_ERR_SERVER:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_server_not_reached);
+				return;
+			case ErrorCode.STUN_ERR_TIMEOUT:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_timeout);
+				return;
+			case ErrorCode.STUN_ERR_INVALIDID:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_unlegal);
+				return;
+			case ErrorCode.STUN_ERR_CONNECT:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_connect_error);
+				return;
+			case ErrorCode.STUN_ERR_BIND:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_bind_error);
+				return;
+			default:
+				break;
+			}
+			HandlerThread handlerThread = new HandlerThread("test1");
+			handlerThread.start();
+			Handler mHandler = new Handler(handlerThread.getLooper());
+			mHandler.post(checkPwdStateRunnable);
+		}
+		
+		private Runnable checkPwdStateRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+				String tem = CamCmdListHelper.GetCmd_NetFiles;
+				String id = device.getDeviceID();
+				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
+				//System.out.println("res=" + res);
+				res = UdtTools.recvCmdMsgById(id, buffTemp, Constants.COMMNICATEBUFFERSIZE);
+				if(res > 0) {
+					byte[] recv = new byte[res];
+					System.arraycopy(buffTemp, 4, recv, 0, res);
+					//System.out.println("### " + res + " " + new String(recv));
+					splitFilesInfoFromBuf(PackageUtil.deleteZero(recv));
+					updateList();
+					handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
+				}else {
+					sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
+				}
+				//00068000:00fff5b2:20120104165801-20120104170649
+			}
+		};
+		
+		
+		private void sendMessage(int msgId, int strId) {
+			Message msg = handler.obtainMessage();
+			msg.arg1 = strId;
+			msg.what = msgId;
+			handler.sendMessage(msg);
+		}
 	}
 
+	
 	private class DeleteFileThread implements Runnable {
 
 		private Handler handler;
