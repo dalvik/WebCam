@@ -301,7 +301,7 @@
     	<string name="video_preview_name_str">索引：</string>
     	<string name="video_preview_address_str">ID：</string>
     	<string name="video_preview_start_time_str">开始：</string>
-    	<string name="video_preview_addr_str">地址：</string>
+    	<string name="video_preview_addr_str">ID：</string>
     	<string name="video_preview_length_str">大小：</string>
     	<string name="video_preview_end_time_str">结束：</string>
     	<string name="play_back_auto_search_button_str">搜索</string>

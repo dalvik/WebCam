@@ -1,9 +1,5 @@
 package com.iped.ipcam.engine;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -106,7 +102,6 @@ public class VideoManagerImp implements IVideoManager {
 		
 		@Override
 		public void run() {
-			
 			id = device.getDeviceID();
 			int res = UdtTools.checkCmdSocketEnable(id);
 			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
@@ -114,6 +109,10 @@ public class VideoManagerImp implements IVideoManager {
 				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				//Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
 				//intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(fetchVideoRunnable);
 			}else {
 				String random = RandomUtil.generalRandom();
 				//Log.d(TAG, "random = " + random);
@@ -144,7 +143,7 @@ public class VideoManagerImp implements IVideoManager {
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
 			if((fileLength != null && fileLength.trim().length()<=0) || (end != null && end.trim().length()<=0)) {
-				Video video = new Video(index, device.getDeviceName(), start, end, fileLength, device.getDeviceName());
+				Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 				videoList.add(video);
 				return;
 			} 
@@ -195,10 +194,10 @@ public class VideoManagerImp implements IVideoManager {
 			HandlerThread handlerThread = new HandlerThread("test1");
 			handlerThread.start();
 			Handler mHandler = new Handler(handlerThread.getLooper());
-			mHandler.post(checkPwdStateRunnable);
+			mHandler.post(fetchVideoRunnable);
 		}
 		
-		private Runnable checkPwdStateRunnable = new Runnable() {
+		private Runnable fetchVideoRunnable = new Runnable() {
 
 			@Override
 			public void run() {
@@ -251,7 +250,23 @@ public class VideoManagerImp implements IVideoManager {
 		
 		@Override
 		public void run() {
-			byte [] tem = (CamCmdListHelper.DelCmd_DeleteFiles+ startIndex + endIndex).getBytes();
+			id = device.getDeviceID();
+			int res = UdtTools.checkCmdSocketEnable(id);
+			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
+			if(res>0) { // socket is valid
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(deleteVideoRunnable);
+			}else {
+				String random = RandomUtil.generalRandom();
+				//Log.d(TAG, "random = " + random);
+				int result = UdtTools.monitorCmdSocket(id, random);
+				Log.d(TAG, "monitor result = " + result);
+				analyseResult(result, device);
+			}
+			
+			/*byte [] tem = (CamCmdListHelper.DelCmd_DeleteFiles+ startIndex + endIndex).getBytes();
 			DatagramSocket datagramSocket = null;
 			try {
 				datagramSocket = new DatagramSocket();
@@ -284,8 +299,70 @@ public class VideoManagerImp implements IVideoManager {
 					datagramSocket.close();
 					datagramSocket = null;
 				}
-			}
+			}*/
 		}
+		
+		private void analyseResult(int result, Device device) {
+			switch (result) {
+			case ErrorCode.STUN_ERR_INTERNAL:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_internel);
+				return;
+			case ErrorCode.STUN_ERR_SERVER:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_server_not_reached);
+				return;
+			case ErrorCode.STUN_ERR_TIMEOUT:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_timeout);
+				return;
+			case ErrorCode.STUN_ERR_INVALIDID:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_unlegal);
+				return;
+			case ErrorCode.STUN_ERR_CONNECT:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_connect_error);
+				return;
+			case ErrorCode.STUN_ERR_BIND:
+				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_bind_error);
+				return;
+			default:
+				break;
+			}
+			HandlerThread handlerThread = new HandlerThread("test1");
+			handlerThread.start();
+			Handler mHandler = new Handler(handlerThread.getLooper());
+			mHandler.post(deleteVideoRunnable);
+		}
+		
+		private void sendMessage(int msgId, int strId) {
+			Message msg = handler.obtainMessage();
+			msg.arg1 = strId;
+			msg.what = msgId;
+			handler.sendMessage(msg);
+		}
+		
+		private Runnable deleteVideoRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				String tem = CamCmdListHelper.DelCmd_DeleteFiles + startIndex + endIndex;
+				String id = device.getDeviceID();
+				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
+				if(res > 0) {
+					if(!startIndex.equals(endIndex.trim())) {
+						clearVideoList();
+						handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+					} else {
+						boolean flag = removeVideoByIndex(startIndex);
+						if(flag) {
+							handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+						} else {
+							handler.sendEmptyMessage(Constants.DELETEFILEERROR);
+						}
+					}
+				}else {
+					sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.video_delete_error);
+				}
+			}
+		};
+		
 		
 	}
 }
