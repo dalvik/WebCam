@@ -1,15 +1,9 @@
 package com.iped.ipcam.gui;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -31,7 +25,6 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.DateUtil;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -98,6 +91,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	private Paint infoPaint;
 
 	private int temWidth;
+	
+	private String timeStr = "";
 
 	// private int temHeigth;
 
@@ -139,7 +134,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
-			canvas.drawText(deviceId + "  "	+ DateUtil.formatTimeToDate5(System.currentTimeMillis()) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+			canvas.drawText(deviceId + "  "	+ timeStr + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
 		}else {
 			String text = "More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
@@ -199,6 +194,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			while (readLengthFromSocket - sockBufferUsedLength > 0) {
 				// remain socket  buf  length
 				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf,	sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
+				// 根据nalSizeTemp的值决定是否刷新界面
 				while (looperFlag) {
 					looperFlag = false;
 					if (nalSizeTemp == -2) {
@@ -210,7 +206,7 @@ public class MyVideoView extends ImageView implements Runnable {
 						nalBuf[0] = -1;
 						nalBuf[1] = -40;
 						nalBuf[2] = -1;
-						nalBuf[3] = -32;
+						nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
 						sockBufferUsedLength += 4;
 						nalBufUsedLength = 4;
 						break;
@@ -231,16 +227,18 @@ public class MyVideoView extends ImageView implements Runnable {
 				firstStartFlag = false;
 				sockBufferUsedLength += 65;
 				looperFlag = true;
-				//Log.d(TAG, "### start---");
 				return -1;
 			} else if (socketBuf[i + sockBufferUsed] == -1
 					&& socketBuf[i + 1 + sockBufferUsed] == -40
 					&& socketBuf[i + 2 + sockBufferUsed] == -1
-					&& socketBuf[i + 3 + sockBufferUsed] == -32) {
+					&& socketBuf[i + 3 + sockBufferUsed] == -32) {// 每检测到jpeg的开头刷新图片
 				looperFlag = true;
-				//firstStartFlag = true;	
 				return -2;
 			}  else {
+				if(socketBuf[sockBufferUsed] == 0 && socketBuf[sockBufferUsed + 1] == 0
+						&& socketBuf[sockBufferUsed + 2] == 0 && socketBuf[sockBufferUsed + 3] == 1) {
+					timeStr = new String(socketBuf,sockBufferUsed+5,14);
+				}
 				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
 				sockBufferUsedLength++;
@@ -312,7 +310,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	class RecvAudio implements Runnable {
 
-		private int num = 0;
 		private AudioTrack m_out_trk = null;
 		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Command.CHANEL * 10;
 		byte[] pcmArr = new byte[pcmBufferLength];
@@ -347,7 +344,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					stopPlay = true;
 					break;
 				}
-				int decodeLength = UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
+				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
