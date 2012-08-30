@@ -36,6 +36,7 @@ public class CamCmdListHelper {
 	
 	public final static String SetCmd_Set_Time = "SetTime:";
 	
+	public final static String SetCmd_Play_Back = "ReplayRecord:";
 	
 	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();
 	

@@ -3,12 +3,10 @@ package com.iped.ipcam.gui;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -117,6 +115,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private String newPwd = "";
 	
+	private String playBackFlag;
+	
 	private String TAG = "CamVideoH264";
 	
 	private Handler mHandler = new Handler() {
@@ -203,7 +203,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				break;
 			case Constants.WEB_CAM_RECONNECT_MSG:
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-				new AsynMonitorSocketTask().execute(0);
+				new AsynMonitorSocketTask().execute("");
 				break;
 			default:
 				break;
@@ -238,6 +238,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         setContentView(R.layout.pre_videoview);
         ipPlayReceiver = new IpPlayReceiver();
         IntentFilter intentFilter =  new IntentFilter(WebCamActions.ACTION_IPPLAY);
+        intentFilter.addAction(WebCamActions.ACTION_PLAY_BACK);
         intentFilter.addAction(WebCamActions.WEB_CAM_CLOSE_CONN_ACTION);
         registerReceiver(ipPlayReceiver, intentFilter);
         updeviceListReceiver = new UpdeviceListReceiver(); 
@@ -328,7 +329,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			camManager.setSelectInde(index);
 			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-				new AsynMonitorSocketTask().execute(0);
+				new AsynMonitorSocketTask().execute("");
 			} else {
 				handleNetworkOpeartion(CamVideoH264.this);
 			}
@@ -581,19 +582,26 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(WebCamActions.ACTION_IPPLAY.equals(intent.getAction())) {
 				if(NetworkUtil.checkNetwokEnable(context)) {
 					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-					new AsynMonitorSocketTask().execute(0);
+					new AsynMonitorSocketTask().execute("");
 				} else {
 					handleNetworkOpeartion(context);
+				}
+			}else if(WebCamActions.ACTION_PLAY_BACK.equals(intent.getAction())) {
+				Bundle bundle = intent.getExtras();
+				if(bundle != null) {
+					String indexStr = bundle.getString("PLVIDEOINDEX");
+					new AsynMonitorSocketTask().execute(indexStr);
 				}
 			}
 		}
 	}
 	
-	class AsynMonitorSocketTask extends AsyncTask<Integer, Integer, Void> {
+	class AsynMonitorSocketTask extends AsyncTask<String, Integer, Void> {
 		
 		@Override
-		protected Void doInBackground(Integer... params) {
+		protected Void doInBackground(String... params) {
 			stopPlayThread();
+			playBackFlag = params[0];
 			Device device = camManager.getSelectDevice();
 			int result = UdtTools.monitorSocket(device.getDeviceID());
 			Log.d(TAG, "monitor result = " + result);
@@ -696,7 +704,19 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				device.setUnDefine2(newPwd);
 				camManager.updateCam(device);
 				FileUtil.persistentDevice(CamVideoH264.this,camManager.getCamList());
-				mHandler.sendEmptyMessage(Constants.CONNECTTING);
+				Log.d(TAG, "### playBackFlag = " + playBackFlag);
+				if(playBackFlag != null && playBackFlag.length()>0) {
+					String item = CamCmdListHelper.SetCmd_Play_Back + playBackFlag;
+					int res = UdtTools.sendCmdMsgById(device.getDeviceID(), item, item.length());
+					Log.d(TAG, "### send play flag res = " + res);
+					if(res>0) {
+						mHandler.sendEmptyMessage(Constants.CONNECTTING);
+					}else {
+						sendErrorMessage(R.string.device_manager_time_out_or_device_off_line);
+					}
+				}else {
+					mHandler.sendEmptyMessage(Constants.CONNECTTING);
+				}
 			} else if(checkPwd == -1) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				sendErrorMessage(R.string.device_manager_pwd_set_err);

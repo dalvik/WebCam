@@ -16,19 +16,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -38,7 +38,9 @@ import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.ProgressUtil;
+import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.VideoAdapter;
+import com.iped.ipcam.utils.WebCamActions;
 
 public class PlayBack extends ListActivity implements OnClickListener {
 
@@ -91,6 +93,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				videoAdapter.notifyDataSetChanged();
 				break;
 			case Constants.DISSMISVIDEOSEARCHDLG:
+				int strId = msg.arg1;
+				if(strId > 0) {
+					ToastUtils.showToast(PlayBack.this, strId);
+				}
 				ProgressUtil.hideProgress();
 				break;
 			case Constants.DELETEFILES:
@@ -163,7 +169,6 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		Video video = videoList.get(selectIndex);
-		System.out.println(featureId + "=====" + video);
 		switch (item.getItemId()) {
 		case DOWNLOAD:
 			break;
@@ -175,14 +180,14 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			break;
 		case PLAYBACK:
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-			String videoIndex = video.getIndex();
+			String videoIndex = video.getIndex() + "00000000";
 			Intent intent = new Intent();
 			Bundle bundle = new Bundle();
 			bundle.putString("PLVIDEOINDEX",videoIndex); 
-			bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
+			//bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
 			intent.putExtras(bundle);
-			//intent.setAction(Constants.ACTION_IPPLAY);
-			//sendBroadcast(intent);
+			intent.setAction(WebCamActions.ACTION_PLAY_BACK);
+			sendBroadcast(intent);
 			break;
 		default:
 			break;

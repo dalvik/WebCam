@@ -1,9 +1,15 @@
 package com.iped.ipcam.gui;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -31,7 +37,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
 	
-	private final static int NALBUFLENGTH = 320 * 480 * 2; // 600*800*2
+	private final static int NALBUFLENGTH = 320 * 480; // 600*800*2
 
 	private final static int SOCKETBUFLENGTH = 34200;//342000;
 
@@ -184,17 +190,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
-			try {
-				readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
-				/*if(readLengthFromSocket<1024) {
-					System.out.println(readLengthFromSocket);
-				}*/
-			} catch (Exception e) {
-				e.printStackTrace();
-				stopPlay = true;
-				System.out.println("read exception break...." + e.getMessage());
-				break;
-			}
+			readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
 			if (readLengthFromSocket <= 0) { // ¶ÁÈ¡Íê³É
 				System.out.println("read over break....");
 				break;
@@ -202,15 +198,14 @@ public class MyVideoView extends ImageView implements Runnable {
 			sockBufferUsedLength = 0;
 			while (readLengthFromSocket - sockBufferUsedLength > 0) {
 				// remain socket  buf  length
-				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf,
-						sockBufferUsedLength,
-						(readLengthFromSocket - sockBufferUsedLength));
+				nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, socketBuf,	sockBufferUsedLength, (readLengthFromSocket - sockBufferUsedLength));
 				while (looperFlag) {
 					looperFlag = false;
 					if (nalSizeTemp == -2) {
 						if (nalBufUsedLength > 0) {
 							frameCount++;
 							copyPixl();
+							//firstStartFlag = true;
 						}
 						nalBuf[0] = -1;
 						nalBuf[1] = -40;
@@ -227,6 +222,34 @@ public class MyVideoView extends ImageView implements Runnable {
 		System.out.println("onstop====" + stopPlay);
 	}
 
+	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
+			int sockBufferUsed, int socketBufRemain) {
+		int i = 0;
+		for (i = 0; i < socketBufRemain; i++) {
+			if (firstStartFlag && socketBuf[i] == 0 && socketBuf[i + 1] == 0
+					&& socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1) {
+				firstStartFlag = false;
+				sockBufferUsedLength += 65;
+				looperFlag = true;
+				//Log.d(TAG, "### start---");
+				return -1;
+			} else if (socketBuf[i + sockBufferUsed] == -1
+					&& socketBuf[i + 1 + sockBufferUsed] == -40
+					&& socketBuf[i + 2 + sockBufferUsed] == -1
+					&& socketBuf[i + 3 + sockBufferUsed] == -32) {
+				looperFlag = true;
+				//firstStartFlag = true;	
+				return -2;
+			}  else {
+				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
+				nalBufUsedLength++;
+				sockBufferUsedLength++;
+			}
+		}
+		looperFlag = true;
+		return i;
+	}
+	
 	public void copyPixl() {
 		if (reverseFlag) {
 			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0,
@@ -244,41 +267,6 @@ public class MyVideoView extends ImageView implements Runnable {
 			video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			postInvalidate();
 		}
-	}
-
-	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
-			int sockBufferUsed, int socketBufRemain) {
-		int i = 0;
-		for (i = 0; i < socketBufRemain; i++) {
-			if (firstStartFlag && socketBuf[i] == 0 && socketBuf[i + 1] == 0
-					&& socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1) {
-				firstStartFlag = false;
-				sockBufferUsedLength += 65;
-				looperFlag = true;
-				return -1;
-			} else if (socketBuf[i + sockBufferUsed] == -1
-					&& socketBuf[i + 1 + sockBufferUsed] == -40
-					&& socketBuf[i + 2 + sockBufferUsed] == -1
-					&& socketBuf[i + 3 + sockBufferUsed] == -32) {
-				/*
-				 * if((i + 3+ sockBufferUsed) < SOCKETBUFLENGTH) {
-				 * if(socketBuf[i + sockBufferUsed] == -1 && socketBuf[i + 1 +
-				 * sockBufferUsed] == -40 && socketBuf[i + 2 + sockBufferUsed]
-				 * == -1 && socketBuf[i + 3+ sockBufferUsed] == -32) {
-				 * looperFlag = true; return -2; } Synthesis } else {
-				 * nalBuf[i+nalBufUsed] = socketBuf[i + sockBufferUsed];
-				 * nalBufUsedLength++; sockBufferUsedLength++; }
-				 */
-				looperFlag = true;
-				return -2;
-			} else {
-				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
-				nalBufUsedLength++;
-				sockBufferUsedLength++;
-			}
-		}
-		looperFlag = true;
-		return i;
 	}
 
 	public void onStop() {

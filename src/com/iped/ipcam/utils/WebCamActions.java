@@ -6,8 +6,9 @@ public class WebCamActions {
 
 	public final static String QUERY_CONFIG_MINITYPE = "vnd.android.webcam.type/vnd.iped.webcam";
 
+	public final static String ACTION_IPPLAY = "iped.intent.action.IP_PLAY";
 
-	public final static String ACTION_IPPLAY = "iped.intent.action.IPPLAY";
+	public final static String ACTION_PLAY_BACK = "iped.intent.action.PLAY_BACK";
 	
 	// 设备列表更新通知
 	public final static String SEND_DEVICE_LIST_UPDATE_ACTION = "android.intent.action.UPDATE_DEVICES_ACTION";

@@ -171,22 +171,22 @@ public class VideoManagerImp implements IVideoManager {
 		private void analyseResult(int result, Device device) {
 			switch (result) {
 			case ErrorCode.STUN_ERR_INTERNAL:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_internel);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_internel);
 				return;
 			case ErrorCode.STUN_ERR_SERVER:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_server_not_reached);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_server_not_reached);
 				return;
 			case ErrorCode.STUN_ERR_TIMEOUT:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_timeout);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_timeout);
 				return;
 			case ErrorCode.STUN_ERR_INVALIDID:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_unlegal);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_unlegal);
 				return;
 			case ErrorCode.STUN_ERR_CONNECT:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_connect_error);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_connect_error);
 				return;
 			case ErrorCode.STUN_ERR_BIND:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_bind_error);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_bind_error);
 				return;
 			default:
 				break;
@@ -305,22 +305,22 @@ public class VideoManagerImp implements IVideoManager {
 		private void analyseResult(int result, Device device) {
 			switch (result) {
 			case ErrorCode.STUN_ERR_INTERNAL:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_internel);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_internel);
 				return;
 			case ErrorCode.STUN_ERR_SERVER:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_server_not_reached);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_server_not_reached);
 				return;
 			case ErrorCode.STUN_ERR_TIMEOUT:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_timeout);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_timeout);
 				return;
 			case ErrorCode.STUN_ERR_INVALIDID:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_unlegal);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_unlegal);
 				return;
 			case ErrorCode.STUN_ERR_CONNECT:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_connect_error);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_connect_error);
 				return;
 			case ErrorCode.STUN_ERR_BIND:
-				sendMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG,R.string.webcam_error_code_bind_error);
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_bind_error);
 				return;
 			default:
 				break;
