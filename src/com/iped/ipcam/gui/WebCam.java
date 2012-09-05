@@ -8,14 +8,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iped.ipcam.utils.AnimUtil;
@@ -36,13 +40,26 @@ public class WebCam extends Activity implements OnClickListener{
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.webview_login);
+        final View view = View.inflate(this, R.layout.webview_login, null);
+        setContentView(view);
+        //渐变展示启动屏
+      	AlphaAnimation aa = new AlphaAnimation(0.3f,1.0f);
+      	aa.setDuration(1500);
+		view.startAnimation(aa);
         settings = getSharedPreferences(WebCam.class.getName(), 0);
         userName = (EditText) findViewById(R.id.webview_username);
         password = (EditText) findViewById(R.id.webview_password);
         keepPwd = (CheckBox) findViewById(R.id.webview_keepuserpwd);
         loginButton = (Button) findViewById(R.id.webview_userLogin);
         Button userExit = (Button) findViewById(R.id.webview_user_exit);
+        try {
+        	PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        	TextView tv = (TextView)findViewById(R.id.web_version);
+        	tv.setText(packageInfo.versionName);
+        } catch (NameNotFoundException e) {
+        	// TODO Auto-generated catch block
+        	e.printStackTrace();
+        }
         boolean flag = settings.getBoolean("KEEP_USER_INFO", false);
         keepPwd.setChecked(flag);
         if(flag) {
