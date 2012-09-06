@@ -45,5 +45,6 @@
         android:gravity="fill_horizontal"
         android:password="true"
         android:singleLine="true"
+        android:imeOptions="actionNone"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 </LinearLayout>

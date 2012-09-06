@@ -299,6 +299,7 @@
     	<string name="video_playback">回放</string>
     	<string name="video_preview_no_video_str">没有可回放的视频</string>
     	<string name="video_preview_name_str">索引：</string>
+    	<string name="video_preview_search_name_str">名称：</string>
     	<string name="video_preview_address_str">ID：</string>
     	<string name="video_preview_start_time_str">开始：</string>
     	<string name="video_preview_addr_str">ID：</string>
@@ -336,6 +337,20 @@
         <string name="webcam_network_invalid_message_str">网络无连接</string>
         <string name="webcam_network_invalid_open">开启</string>
         <string name="webcam_network_invalid_cancle">取消</string>
+        
+        <!-- update -->
+        <string name="webcam_check_version_str">正在检查更新，请稍等。。。</string>
+        <string name="webcam_check_version_result_title_str">升级提示</string>
+        <string name="webcam_check_version_result_success_message_str">您当前已经是最新版本</string>
+        <string name="webcam_check_version_result_error_message_str">您当前已经是最新版本</string>
+        <string name="webcam_check_version_result_ok_str">确定</string>
+        <string name="webcam_check_version_dialog_title_str">软件版本更新</string>
+        <string name="webcam_check_version_dialog_ok_button_str">立即更新</string>
+        <string name="webcam_check_version_dialog_cancle_button_str">以后再说</string>
+        <string name="webcam_loading_new_str">正在下载新版本</string>
+        <string name="webcam_loading_new_cancle_str">取消</string>
+        
+        
         
         <!-- error code tips infor -->
         <string name="webcam_error_code_internel">内部错误</string>

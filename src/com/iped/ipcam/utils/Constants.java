@@ -149,6 +149,10 @@ public class Constants {
 	public final static int WEB_CAM_HIDE_CHECK_PWD_DLG_MSG = 5400;
 	
 	public final static int WEB_CAM_RECONNECT_MSG = 5500;
+	
+	//update new version
+	public final static int WEB_CAM_CHECK_VERSION = 5700;
+	
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 

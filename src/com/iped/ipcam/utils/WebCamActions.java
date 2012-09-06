@@ -15,5 +15,4 @@ public class WebCamActions {
 
 	public final static String WEB_CAM_CLOSE_CONN_ACTION = "android.intent.action_SOCKET_CLOSE_ACTION";
 	
-	
 }

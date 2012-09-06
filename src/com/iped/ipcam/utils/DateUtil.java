@@ -51,7 +51,7 @@ public class DateUtil {
 	}
 	
 	public static String formatTimeToDate5(long time) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH");
 		return sdf.format(new Date(time));
 	}
 	
