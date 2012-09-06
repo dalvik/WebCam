@@ -36,8 +36,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
-	private final static int SERVERSENDBUFFERSIZE = 1024;
-
 	// private final static int AUDIOBUFFERTMPSIZE = 1280;
 
 	// private final static int AUDIOBUFFERSTOERLENGTH = 12800;

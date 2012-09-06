@@ -31,6 +31,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -116,6 +118,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private String newPwd = "";
 	
 	private String playBackFlag;
+	
+	private SeekBar playBackSeekBar = null;
 	
 	private String TAG = "CamVideoH264";
 	
@@ -246,7 +250,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler,screenWidth, screenHeight);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
-        
+        playBackSeekBar = (SeekBar) layout.findViewById(R.id.play_back_seek_bar);
+        playBackSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
         listView = (ListView)view.findViewById(R.id.video_preview_list);
@@ -591,6 +596,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(bundle != null) {
 					String indexStr = bundle.getString("PLVIDEOINDEX");
 					new AsynMonitorSocketTask().execute(indexStr);
+					playBackSeekBar.setVisibility(View.VISIBLE);
 				}
 			}
 		}
@@ -612,7 +618,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	class AsynSendPTZ extends AsyncTask<Integer, Integer, Void> {
-	 @Override
+	 
+		@Override
 	 	protected Void doInBackground(Integer... params) {
 		 	PackageUtil.sendPTZCommond(params[0]);
 	 		return null;
@@ -751,5 +758,24 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
             }  
         }.start();  
 	}
+	
+	private OnSeekBarChangeListener seekBarChangeListener = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			Log.d(TAG, "### onStartTrackingTouch");
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			Log.d(TAG, "### onStopTrackingTouch");
+		}
+		
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			
+		}
+	};
 }
 

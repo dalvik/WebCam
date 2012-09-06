@@ -195,6 +195,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		return super.onMenuItemSelected(featureId, item);
 	}
 	
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -231,7 +232,8 @@ public class PlayBack extends ListActivity implements OnClickListener {
         LayoutInflater factory = LayoutInflater.from(PlayBack.this);
         myDialogView = factory.inflate(R.layout.play_back_video_search_dlg, null);
         initSearchDlg(device);
-        dlg = new AlertDialog.Builder(PlayBack.this).setTitle(getResources().getString(R.string.play_back_auto_search_video_str))
+        dlg = new AlertDialog.Builder(PlayBack.this)
+        .setTitle(getResources().getString(R.string.play_back_auto_search_video_str))
         .setView(myDialogView)//
         .setPositiveButton(getResources().getString(R.string.play_back_auto_search_button_str), //
         new DialogInterface.OnClickListener() {//
@@ -287,11 +289,9 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		EditText videoSearchName = (EditText) myDialogView.findViewById(R.id.play_back_video_search_name);
         EditText vodeoSearchAddr = (EditText) myDialogView.findViewById(R.id.play_back_video_search_addr);
         videoSearchName.setText(device.getDeviceName());
-        if(device.getDeviceNetType()) {
-        	vodeoSearchAddr.setText(device.getUnDefine1());
-        } else {
-        	vodeoSearchAddr.setText(device.getDeviceEthIp());
-        }
+        videoSearchName.setEnabled(false);
+        vodeoSearchAddr.setText(device.getDeviceID());
+        vodeoSearchAddr.setEnabled(false);
         startSearchDate = (Button) myDialogView.findViewById(R.id.start_date_buttion);
         startSearchTime = (Button) myDialogView.findViewById(R.id.start_time_buttion);
         endSearchDate = (Button) myDialogView.findViewById(R.id.end_date_buttion);

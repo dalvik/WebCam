@@ -5,9 +5,10 @@
 	    android:orientation="vertical" 
 	    android:background="@drawable/jbshape">
 	   
-	    <TextView android:layout_width="fill_parent"
+	    <TextView 
+	        android:id="@+id/web_version"
+	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:text="@string/version"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="15dip"
 	        android:layout_marginTop="15dip"

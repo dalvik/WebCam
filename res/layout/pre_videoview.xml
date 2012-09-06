@@ -3,14 +3,30 @@
     android:id="@+id/container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:baselineAligned="false"
     android:background="@color/darkgray"
     android:orientation="horizontal" >
 
-    <com.iped.ipcam.gui.MyVideoView
-        android:id="@+id/videoview"
-        android:layout_marginLeft="5dip"
-        android:layout_marginTop="5dip"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:background="@color/darkgray"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <com.iped.ipcam.gui.MyVideoView
+            android:id="@+id/videoview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
+        <SeekBar
+            android:id="@+id/play_back_seek_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </LinearLayout>
