@@ -13,6 +13,7 @@ import android.widget.TabWidget;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.engine.UpdateManager;
 import com.iped.ipcam.mail.ExceptionHandler;
 import com.iped.ipcam.utils.Constants;
 
@@ -20,16 +21,14 @@ public class WebTabWidget extends TabActivity {
 
 	public static TabHost tabHost = null;
 
+	public static int tabHeight = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.web_tab_widget);
 		ExceptionHandler crashHandler = ExceptionHandler.getInstance();    
 		crashHandler.init(this);
-		/*CrashHandler crashHandler = CrashHandler.getInstance();  
-        crashHandler.init(this);  */
-        // ´´½¨´íÎó
-		//Thread.setDefaultUncaughtExceptionHandler(this);
 		Resources resources = getResources();
 		tabHost = getTabHost();
 		TabHost.TabSpec tabSpec;
@@ -74,9 +73,10 @@ public class WebTabWidget extends TabActivity {
 		TabWidget tabWidget = tabHost.getTabWidget();
 		int count = tabWidget.getChildCount();
 		for (int i = 0; i < count; i++) {
-			tabWidget.getChildAt(i).getLayoutParams().height = tabWidget
-					.getChildAt(i).getLayoutParams().height * 2 / 3;
+			tabHeight = tabWidget.getChildAt(i).getLayoutParams().height * 2 / 3;
+			tabWidget.getChildAt(i).getLayoutParams().height = tabHeight; 
 		}
+		UpdateManager.getUpdateManager().checkAppUpdate(this, false);
 	}
 
 	@Override

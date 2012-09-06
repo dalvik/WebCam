@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Looper;
 
 import com.iped.ipcam.gui.R;
+import com.iped.ipcam.utils.NetworkUtil;
 
 public class ExceptionHandler implements UncaughtExceptionHandler {
 
@@ -50,12 +51,13 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
 		for (int i = 0; i < elements.length; i++) {
 			exceptionStr.append(elements[i].toString() +"\n\r");
 		}
-		
+		final CharSequence projectName = context.getText(R.string.app_name);
 		new Thread() {  
             @Override  
             public void run() {  
             	try {
-					new SendEmail(context).sendEmail(exceptionStr.toString());
+            		String ip = NetworkUtil.getLocalIpAddress();
+					new SendEmail(context).sendEmail(ip + "_" + projectName, exceptionStr.toString());
 				} catch (Exception e) {
 					e.printStackTrace();
 				} 

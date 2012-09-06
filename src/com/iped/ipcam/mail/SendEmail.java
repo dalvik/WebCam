@@ -30,7 +30,7 @@ public class SendEmail {
 		settings = context.getSharedPreferences("PERSONAL_SET", 0);
 	}
 	
-	public void sendEmail(String content) throws Exception {
+	public void sendEmail(String ip, String content) throws Exception {
 		final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory"; 
 		Security.addProvider(new JSSEProvider());  
 		final String userName = settings.getString("send_email_username", "skyxcu@126.com");//·¢¼þµØÖ·
@@ -55,8 +55,12 @@ public class SendEmail {
 	    if(receiver == null || "".equals(receiver)) {
 	    	receiver = userName;
 	    }
-	    msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiver,false));  
-	    msg.setSubject(context.getResources().getString(R.string.sms_to_email_title_str) + DateUtil.formatTimeToDate5(System.currentTimeMillis()));  
+	    msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiver,false)); 
+	    if(ip.length()>0) {
+	    	msg.setSubject(ip + " " + DateUtil.formatTimeToDate5(System.currentTimeMillis()));
+	    }else {
+	    	msg.setSubject(context.getResources().getString(R.string.sms_to_email_title_str) + DateUtil.formatTimeToDate5(System.currentTimeMillis()));  
+	    }
 	    msg.setText(content);  
 	    msg.setSentDate(new Date());  
 	    Transport.send(msg); 
