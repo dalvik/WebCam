@@ -30,15 +30,11 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
 	
-	private final static int NALBUFLENGTH = 320 * 480; // 600*800*2
+	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
-	private final static int SOCKETBUFLENGTH = 342000;//342000;
+	private final static int SOCKETBUFLENGTH = 642000;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
-
-	// private final static int AUDIOBUFFERTMPSIZE = 1280;
-
-	// private final static int AUDIOBUFFERSTOERLENGTH = 12800;
 
 	private Bitmap video;
 
@@ -99,6 +95,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	private byte [] table2 = null;
 	
 	private boolean playBackFlag = false;
+	
+	private boolean initPlayBackParaFlag = true;
+	
+	private int frameRate =0;
 	
 	private int rate;
 	
@@ -187,6 +187,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
 		firstStartFlag = true;
+		initPlayBackParaFlag = true;
 		socketBuf = new byte[SOCKETBUFLENGTH];
 		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
@@ -226,44 +227,48 @@ public class MyVideoView extends ImageView implements Runnable {
 	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int socketBufRemain) {
 		int i = 0;
-		for (i = 0; i < socketBufRemain; i++) {
-			if (firstStartFlag && socketBuf[i] == 0 && socketBuf[i + 1] == 0
-					&& socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1) {
+		if(playBackFlag && initPlayBackParaFlag) {
+			initPlayBackParaFlag = false;
+			byte[] t1 = new byte[4];
+			
+			System.arraycopy(socketBuf, 0, t1, 0 , t1.length);
+			Log.d(TAG, "### 1111 = "  + t1[0] + " " + t1[1] + " " + t1[3] + " " + t1[3]);
+			int t1Length =  ByteUtil.byteToInt4(t1,0);
+			
+			byte[] t2 = new byte[4];
+			System.arraycopy(socketBuf, 4, t2, 0, t2.length);
+			Log.d(TAG, "### 22222 = "  + t2[0] + " " + t2[1] + " " + t2[3] + " " + t2[3]);
+			int t2Length =  ByteUtil.byteToInt4(t2,0);
+			Log.d(TAG, "### t1Length=" + t1Length + "  t2Length=" + t2Length);
+			if(t2Length<=0 || t2Length > 32 * 1024) {
+				//disable seekbar
+				handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
+			}else {
+				if(t2Length < 32 * 1024) {
+					table2 = new byte[t2Length];
+					System.arraycopy(socketBuf, 8 + t1Length, table2, 0, t2Length);
+					// send table2 info
+					Message message = handler.obtainMessage();
+					Bundle bundle = new Bundle();
+					bundle.putByteArray("TABLE2", table2);
+					message.setData(bundle);
+					message.what = PlayBackConstants.INIT_SEEK_BAR;
+					handler.sendMessage(message);
+				}
+			}
+			Log.d(TAG, "index=" + "#" + t1Length +  " " + t2Length);
+		}
+		for (; i < socketBufRemain; i++) {
+			if (firstStartFlag && socketBuf[i] == 0 && socketBuf[i + 1] == 0 && socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1) {
 				firstStartFlag = false;
-				sockBufferUsedLength += 65;
 				looperFlag = true;
 				if(playBackFlag) {
-					byte[] t1 = new byte[4];
-					System.arraycopy(socketBuf, 0, t1, 0 + sockBufferUsed, 4);
-					Log.d(TAG, "1111 = "  + t1[0] + " " + t1[1] + " " + t1[3] + " " + t1[3]);
-					byte[] t2 = new byte[4];
-					System.arraycopy(socketBuf, 4, t2, 0 + sockBufferUsed, 4);
-					Log.d(TAG, "22222 = "  + t2[0] + " " + t2[1] + " " + t2[3] + " " + t2[3]);
-					int t1Length =  ByteUtil.byteToInt2(t1);
-					int t2Length =  ByteUtil.byteToInt2(t2);
-					Log.d(TAG, "### t1Length=" + t1Length + "  t2Length=" + t2Length);
-					/*byte[] r = new byte[8];
-					System.arraycopy(socketBuf, 23, r, 0 + sockBufferUsed, 8);
-					System.out.println(ByteUtil.byteToInt2(r));*/
-					//byte [] table1 = new byte[t1Length];
-					if(t2Length<=0 || t2Length > 32 * 1024) {
-						//disable seekbar
-						handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-					}else {
-						if(t2Length < 32 * 1024) {
-							table2 = new byte[t2Length];
-							System.arraycopy(socketBuf, 8 + t1Length + sockBufferUsed, table2, 0, t2Length);
-							// send table2 info
-							Message message = handler.obtainMessage();
-							Bundle bundle = new Bundle();
-							bundle.putByteArray("TABLE2", table2);
-							message.setData(bundle);
-							message.what = PlayBackConstants.INIT_SEEK_BAR;
-							handler.sendMessage(message);
-						}
+					for(int j=sockBufferUsedLength+i+23;j<sockBufferUsedLength+i+31;j++) {
+						Log.d(TAG, "frame rate = " + socketBuf[j]);
 					}
-					Log.d(TAG, "index=" + "#" + t1Length +  " " + t2Length);
+					Log.d(TAG, "### video start flag = " + new String(socketBuf,sockBufferUsedLength+i+23,sockBufferUsedLength+i+31));
 				}
+				sockBufferUsedLength += 65;
 				return -1;
 			} else if (socketBuf[i + sockBufferUsed] == -1
 					&& socketBuf[i + 1 + sockBufferUsed] == -40

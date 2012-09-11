@@ -72,6 +72,16 @@ public class ByteUtil {
 		return b[0] | (b[1]<<8) | (b[2]<<16) | (b[3]<<24);
 	}
 	
+	public static int byteToInt4(byte[] b, int offSet) {
+		int n;
+		n = 0;
+		n = (n<<8)|(b[3+offSet]&0xff);
+		n = (n<<8)|(b[2+offSet]&0xff);
+		n = (n<<8)|(b[1+offSet]&0xff);
+		n = (n<<8)|(b[0+offSet]&0xff);
+		return n;
+	}
+	
 	public static int byteToInt3(byte[] b, int offset) {   
 		return b[0+offset] | (b[offset+1]<<8) | (b[offset+2]<<16) | (b[offset+3]<<24);
 	}

@@ -819,14 +819,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			int index = seekBar.getProgress()/15;
 			currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, index *15));
 			Log.d(TAG, "### onStopTrackingTouch = " + seekBar.getProgress() + " index = " + index);
-			if(table2 != null) {
-					int pos = index * 4;
-					int seekPos = ByteUtil.byteToInt3(table2, pos);
-					Log.d(TAG, "seekPos = " + seekPos);
-					int l = table2.length;
+			int pos = index * 4;
+			if(table2 != null && table2.length>=pos+4) {
+					int seekPos = ByteUtil.byteToInt4(table2, pos);
+					Log.d(TAG, "seek position = " + seekPos);
+					new AsynPlayBackTask().execute(seekPos);
+					/*int l = table2.length;
 					for(int i=0;i<l;i+=4) {
 						Log.d(TAG, "i=" + i + "===" + TransCode.byte2HexString(table2[i]) + " " + TransCode.byte2HexString(table2[i+1]) + " " +TransCode.byte2HexString(table2[i+2]) + " " + TransCode.byte2HexString(table2[i+3]));
-					}
+					}*/
 			}
 		}
 		
@@ -836,5 +837,16 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress));
 		}
 	};
+
+	private class AsynPlayBackTask extends AsyncTask<Integer, Integer, Void> {
+		
+		@Override
+		protected Void doInBackground(Integer... params) {
+			String item = CamCmdListHelper.SetCmd_Seek + params[0];
+			int res = UdtTools.sendCmdMsgById( camManager.getSelectDevice().getDeviceID(), item, item.length());
+			Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res);
+			return null;
+		}
+	}
 
 }
