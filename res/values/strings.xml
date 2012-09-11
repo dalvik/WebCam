@@ -290,7 +290,12 @@
     		<string name="play_back_clear_dlg_message_str">确定情况全部视频文件吗</string>
     		<string name="play_back_clear_dlg_sure_str">确定</string>
     		<string name="play_back_clear_dlg_cancle_str">取消</string>
-    	<string name="video_download">下载</string>
+    		<!-- Do not translate. Duration format for duration < 1 hour -->
+    		<string translatable="false" name="durationformatshort"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
+    		<!-- Do not translate. Duration format for duration >= 1 hour -->
+    		<string translatable="false" name="durationformatlong"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
+    
+    	<string name="video_download">取消</string>
     	<string name="video_delete">删除</string>
     		<string name="video_delete_ing">正在删除。。。</string>
     		<string name="video_clear_ing">正在 清空。。。</string>
@@ -349,7 +354,7 @@
         <string name="webcam_check_version_dialog_cancle_button_str">以后再说</string>
         <string name="webcam_loading_new_str">正在下载新版本</string>
         <string name="webcam_loading_new_cancle_str">取消</string>
-        
+         <string name="webcam_loading_str">下载</string>
         
         
         <!-- error code tips infor -->

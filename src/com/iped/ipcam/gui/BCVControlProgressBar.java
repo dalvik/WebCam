@@ -40,7 +40,7 @@ public class BCVControlProgressBar extends ProgressBar {
 	
 	private void setText(int progress){ 
         int i = (progress * 100)/this.getMax(); 
-        this.text = tips + String.valueOf(i); 
+        this.text = tips + String.valueOf(i) + "%"; 
     } 
 
 	@Override

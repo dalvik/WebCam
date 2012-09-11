@@ -11,31 +11,31 @@ import java.net.URL;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.iped.ipcam.gui.BCVControlProgressBar;
 import com.iped.ipcam.gui.R;
 import com.iped.ipcam.pojo.UpdateInfo;
 import com.iped.ipcam.utils.Constants;
@@ -57,7 +57,7 @@ public class UpdateManager {
 	
 	private Dialog downloadDialog;
 	
-	private ProgressBar downLoadProgressBar;
+	private BCVControlProgressBar downLoadProgressBar;
 	
 	private ProgressDialog queryDialog;
 	
@@ -93,13 +93,12 @@ public class UpdateManager {
     	public void handleMessage(Message msg) {
     		switch (msg.what) {
 			case DOWN_UPDATE:
-				Log.d(TAG, "### downLoadProgressValue = " + downLoadProgressValue);
 				downLoadProgressBar.setProgress(downLoadProgressValue);
 				break;
 			case DOWN_OVER:
 				downloadDialog.dismiss();
 				Log.d(TAG, "###### installApk");
-				//installApk();
+				installApk();
 				break;
 			case DOWN_NOSDCARD:
 				downloadDialog.dismiss();
@@ -289,8 +288,9 @@ public class UpdateManager {
 		
 		final LayoutInflater inflater = LayoutInflater.from(context);
 		View v = inflater.inflate(R.layout.update_progress, null);
-		downLoadProgressBar = (ProgressBar)v.findViewById(R.id.update_progress);
-		
+		downLoadProgressBar = (BCVControlProgressBar)v.findViewById(R.id.update_progress);
+		downLoadProgressBar.init(context.getText(R.string.webcam_loading_str).toString());
+		downLoadProgressBar.setProgress(0);
 		builder.setView(v);
 		builder.setNegativeButton(context.getText(R.string.webcam_loading_new_cancle_str), new OnClickListener() {	
 			@Override
@@ -318,7 +318,7 @@ public class UpdateManager {
 		@Override
 		public void run() {
 			try {
-				String apkName = "OSChinaApp_"+updateInfo.getVersionName()+".apk";
+				String apkName = "WebCam_"+updateInfo.getVersionName()+".apk";
 				//判断是否挂载了SD卡
 				String storageState = Environment.getExternalStorageState();		
 				if(storageState.equals(Environment.MEDIA_MOUNTED)){
@@ -342,7 +342,7 @@ public class UpdateManager {
 				if(ApkFile.exists()){
 					downloadDialog.dismiss();
 					Log.d(TAG, "### installApk");
-					//installApk();
+					installApk();
 					return;
 				}
 				
@@ -380,4 +380,18 @@ public class UpdateManager {
 			
 		}
 	};
+	
+	/**
+	    * 安装apk
+	    * @param url
+	    */
+		private void installApk(){
+			File apkfile = new File(apkFilePath);
+	        if (!apkfile.exists()) {
+	            return;
+	        }    
+	        Intent i = new Intent(Intent.ACTION_VIEW);
+	        i.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive"); 
+	        context.startActivity(i);
+		}
 }

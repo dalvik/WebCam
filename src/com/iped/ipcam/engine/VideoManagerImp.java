@@ -104,7 +104,7 @@ public class VideoManagerImp implements IVideoManager {
 		public void run() {
 			id = device.getDeviceID();
 			int res = UdtTools.checkCmdSocketEnable(id);
-			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
+			Log.d(TAG, "### UdtTools checkCmdSocketEnable result = " + res);
 			if(res>0) { // socket is valid
 				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				//Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
@@ -128,6 +128,7 @@ public class VideoManagerImp implements IVideoManager {
 			//System.out.println(s);
 			String[] temp = s.split("\n");
 			for(String t:temp) {
+				//Log.d(TAG, "### temp = " + t);
 				analyFileFromString(t);
 			}
 		}
@@ -136,23 +137,25 @@ public class VideoManagerImp implements IVideoManager {
 		public void analyFileFromString(String s) {
 			int length = s.length();
 			if(s== null || length<47) {
+				Log.d(TAG, "### video ="  + s);
 				return;
 			}
 			String index = s.substring(0, 8);
 			String fileLength = s.substring(9, 17);
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
+			//Log.d(TAG, "### video ="  + "index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
 			if((fileLength != null && fileLength.trim().length()<=0) || (end != null && end.trim().length()<=0)) {
 				Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 				videoList.add(video);
 				return;
 			} 
-			if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
+			/*if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
+				Log.d(TAG, "########## =====");
 				return ;
-			}
+			}*/
 			//int i = Integer.parseInt(index, 16);
 			//int j = Integer.parseInt(fileLength, 16);
-			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
 			Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 			videoList.add(video);
 		}
@@ -210,6 +213,7 @@ public class VideoManagerImp implements IVideoManager {
 				if(res > 0) {
 					byte[] recv = new byte[res];
 					System.arraycopy(buffTemp, 4, recv, 0, res);
+					Log.d(TAG, "### length =  " + res + " content = " + new String(recv));
 					//System.out.println("### " + res + " " + new String(recv));
 					splitFilesInfoFromBuf(PackageUtil.deleteZero(recv));
 					updateList();

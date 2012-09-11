@@ -68,6 +68,14 @@ public class ByteUtil {
 				| (b[0] & 0xff) << 24;
 	}
 
+	public static int byteToInt2(byte[] b) {   
+		return b[0] | (b[1]<<8) | (b[2]<<16) | (b[3]<<24);
+	}
+	
+	public static int byteToInt3(byte[] b, int offset) {   
+		return b[0+offset] | (b[offset+1]<<8) | (b[offset+2]<<16) | (b[offset+3]<<24);
+	}
+	
 	public static int byte2int(byte[] res) { 
 		// 一个byte数据左移24位变成0x??000000，再右移8位变成0x00??0000 
 		int targets = (res[0] & 0xff) | ((res[1] << 8) & 0xff00) // | 表示安位或 

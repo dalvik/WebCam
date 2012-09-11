@@ -4,10 +4,12 @@
   	android:layout_width="fill_parent"
   	android:layout_height="wrap_content"
   	android:paddingLeft="5dip"
-  	android:paddingRight="5dip">  
-  	<ProgressBar
+  	android:paddingRight="5dip">
+  	
+  	<com.iped.ipcam.gui.BCVControlProgressBar
   		android:id="@+id/update_progress"
   		android:layout_width="fill_parent"
   		android:layout_height="wrap_content"
   		style="?android:attr/progressBarStyleHorizontal"/>
+  	
 </LinearLayout>

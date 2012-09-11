@@ -52,11 +52,11 @@ public class PlayBack extends ListActivity implements OnClickListener {
 
 	private VideoAdapter videoAdapter = null;
 	
-	private final int DOWNLOAD = Menu.FIRST;
+	private final int PLAYBACK = Menu.FIRST;
 	
 	private final int DELETE = Menu.FIRST + 1;
 	
-	private final int PLAYBACK = Menu.FIRST + 2;
+	private final int DOWNLOAD = Menu.FIRST + 2;
 	
 	private Button videoSearch = null;
 	
@@ -161,9 +161,9 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		}
 		Video video = videoList.get(info.position);
 		menu.setHeaderTitle(video.getVideoName());
-		menu.add(0, DOWNLOAD, 1, getResources().getString(R.string.video_download));
+		menu.add(0, PLAYBACK, 1, getResources().getString(R.string.video_playback));
 		menu.add(0, DELETE, 2, getResources().getString(R.string.video_delete));
-		menu.add(0, PLAYBACK, 3, getResources().getString(R.string.video_playback));
+		menu.add(0, DOWNLOAD, 3, getResources().getString(R.string.video_download));
 	}
 	
 	@Override
@@ -183,7 +183,15 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			String videoIndex = video.getIndex() + "00000000";
 			Intent intent = new Intent();
 			Bundle bundle = new Bundle();
-			bundle.putString("PLVIDEOINDEX",videoIndex); 
+			bundle.putString("PLVIDEOINDEX",videoIndex);
+			String start = video.getVideoStartTime();
+			String end = video.getVideoEndTime();
+			long startTime = DateUtil.formatTimeToDate(start).getTime();
+			if(end == null || end.trim().length()<=0) {
+				bundle.putLong("TOTALTIME", 0);
+			}else {
+				bundle.putLong("TOTALTIME", DateUtil.formatTimeToDate(end).getTime() - startTime);
+			}
 			//bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
 			intent.putExtras(bundle);
 			intent.setAction(WebCamActions.ACTION_PLAY_BACK);

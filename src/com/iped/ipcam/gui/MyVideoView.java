@@ -1,7 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.nio.ByteBuffer;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,9 +20,11 @@ import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.PlayBackConstants;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -32,7 +32,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int NALBUFLENGTH = 320 * 480; // 600*800*2
 
-	private final static int SOCKETBUFLENGTH = 34200;//342000;
+	private final static int SOCKETBUFLENGTH = 342000;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -46,13 +46,11 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	byte[] nalBuf = new byte[NALBUFLENGTH];//
 
-	ByteBuffer buffer = ByteBuffer.wrap(nalBuf);
-
 	int nalSizeTemp = 0;
 
-	int nalBufUsedLength = 0;
+	int nalBufUsedLength;
 
-	byte[] socketBuf = new byte[SOCKETBUFLENGTH];
+	byte[] socketBuf ;
 
 	int readLengthFromSocket = 0;
 
@@ -98,6 +96,11 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private boolean reverseFlag = false;
 
+	private byte [] table2 = null;
+	
+	private boolean playBackFlag = false;
+	
+	private int rate;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -147,6 +150,8 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void run() {
 		deviceId = device.getDeviceID();
+		nalBufUsedLength = 0;
+		sockBufferUsedLength = 0;
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
 		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
@@ -175,12 +180,14 @@ public class MyVideoView extends ImageView implements Runnable {
 		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
 		m.setData(bundle);
 		handler.sendMessage(m);
-		//handler.sendEmptyMessage(Constants.HIDECONNDIALOG);
 		stopPlay = false;
 		handler.removeCallbacks(calculateFrameTask);
 		handler.post(calculateFrameTask);
 		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+		Log.d(TAG, "### playBackFlag = " + playBackFlag);
+		firstStartFlag = true;
+		socketBuf = new byte[SOCKETBUFLENGTH];
 		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromSocket = UdtTools.recvVideoMsg(socketBuf, SOCKETBUFLENGTH);
@@ -225,17 +232,51 @@ public class MyVideoView extends ImageView implements Runnable {
 				firstStartFlag = false;
 				sockBufferUsedLength += 65;
 				looperFlag = true;
+				if(playBackFlag) {
+					byte[] t1 = new byte[4];
+					System.arraycopy(socketBuf, 0, t1, 0 + sockBufferUsed, 4);
+					Log.d(TAG, "1111 = "  + t1[0] + " " + t1[1] + " " + t1[3] + " " + t1[3]);
+					byte[] t2 = new byte[4];
+					System.arraycopy(socketBuf, 4, t2, 0 + sockBufferUsed, 4);
+					Log.d(TAG, "22222 = "  + t2[0] + " " + t2[1] + " " + t2[3] + " " + t2[3]);
+					int t1Length =  ByteUtil.byteToInt2(t1);
+					int t2Length =  ByteUtil.byteToInt2(t2);
+					Log.d(TAG, "### t1Length=" + t1Length + "  t2Length=" + t2Length);
+					/*byte[] r = new byte[8];
+					System.arraycopy(socketBuf, 23, r, 0 + sockBufferUsed, 8);
+					System.out.println(ByteUtil.byteToInt2(r));*/
+					//byte [] table1 = new byte[t1Length];
+					if(t2Length<=0 || t2Length > 32 * 1024) {
+						//disable seekbar
+						handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
+					}else {
+						if(t2Length < 32 * 1024) {
+							table2 = new byte[t2Length];
+							System.arraycopy(socketBuf, 8 + t1Length + sockBufferUsed, table2, 0, t2Length);
+							// send table2 info
+							Message message = handler.obtainMessage();
+							Bundle bundle = new Bundle();
+							bundle.putByteArray("TABLE2", table2);
+							message.setData(bundle);
+							message.what = PlayBackConstants.INIT_SEEK_BAR;
+							handler.sendMessage(message);
+						}
+					}
+					Log.d(TAG, "index=" + "#" + t1Length +  " " + t2Length);
+				}
 				return -1;
 			} else if (socketBuf[i + sockBufferUsed] == -1
 					&& socketBuf[i + 1 + sockBufferUsed] == -40
 					&& socketBuf[i + 2 + sockBufferUsed] == -1
-					&& socketBuf[i + 3 + sockBufferUsed] == -32) {// 每检测到jpeg的开头刷新图片
+					&& socketBuf[i + 3 + sockBufferUsed] == -32) { // 每检测到jpeg的开头刷新图片
 				looperFlag = true;
 				return -2;
 			}  else {
-				if(socketBuf[sockBufferUsed] == 0 && socketBuf[sockBufferUsed + 1] == 0
-						&& socketBuf[sockBufferUsed + 2] == 0 && socketBuf[sockBufferUsed + 3] == 1) {
-					timeStr = new String(socketBuf,sockBufferUsed+5,14);
+				if(!playBackFlag) {
+					if(socketBuf[sockBufferUsed] == 0 && socketBuf[sockBufferUsed + 1] == 0
+							&& socketBuf[sockBufferUsed + 2] == 0 && socketBuf[sockBufferUsed + 3] == 1) {
+						timeStr = new String(socketBuf, sockBufferUsed+5,14);
+					}
 				}
 				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
@@ -248,8 +289,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	public void copyPixl() {
 		if (reverseFlag) {
-			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0,
-					nalBufUsedLength);
+			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			if (tmp != null) {
 				video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(),
 						tmp.getHeight(), m, true);
@@ -279,6 +319,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private void release() {
 		handler.removeCallbacks(calculateFrameTask);
+		handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
 		//UdtTools.exit();
 	}
 
@@ -304,6 +345,10 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void setReverseFlag(boolean reverseFlag) {
 		this.reverseFlag = reverseFlag;
+	}
+
+	public void setPlayBackFlag(boolean playBackFlag) {
+		this.playBackFlag = playBackFlag;
 	}
 
 	class RecvAudio implements Runnable {
@@ -373,4 +418,5 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	};
 
+	
 }
