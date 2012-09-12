@@ -153,6 +153,9 @@ public class Constants {
 	//update new version
 	public final static int WEB_CAM_CHECK_VERSION = 5700;
 	
+	// update play back
+	public final static int UPDATE_PLAY_BACK_TIME = 5800;
+	
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 

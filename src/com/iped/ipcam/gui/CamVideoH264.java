@@ -51,7 +51,6 @@ import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.StringUtils;
 import com.iped.ipcam.utils.ToastUtils;
-import com.iped.ipcam.utils.TransCode;
 import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
 import com.iped.ipcam.utils.WebCamActions;
 import com.iped.ipcam.utils.WinTaiCmd;
@@ -231,8 +230,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, 0));
 				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, 0));
 				totalTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, during/1000));
-				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, during/1000));
+				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, during/1000) + " " + during);
 				playBackSeekBar.setEnabled(true);
+				playBackSeekBar.setProgress(1);
 				playBackSeekBar.setMax((int)during/1000);
 				Bundle bundle = msg.getData();
 				if(bundle != null) {
@@ -247,7 +247,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				playBackBottomlayout.setVisibility(View.VISIBLE);
 				break;
 			case PlayBackConstants.DISABLE_SEEKBAR:
+				playBackSeekBar.setProgress(0);
 				playBackSeekBar.setEnabled(false);
+				break;
+			case Constants.UPDATE_PLAY_BACK_TIME:
+				//Log.d(TAG, "##############" + playBackSeekBar.getProgress());
+				playBackSeekBar.setProgress((int)(playBackSeekBar.getProgress()) + 1);
+				//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, playBackSeekBar.getProgress() + 1));
 				break;
 			default:
 				break;
@@ -824,16 +830,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					int seekPos = ByteUtil.byteToInt4(table2, pos);
 					Log.d(TAG, "seek position = " + seekPos);
 					new AsynPlayBackTask().execute(seekPos);
-					/*int l = table2.length;
-					for(int i=0;i<l;i+=4) {
-						Log.d(TAG, "i=" + i + "===" + TransCode.byte2HexString(table2[i]) + " " + TransCode.byte2HexString(table2[i+1]) + " " +TransCode.byte2HexString(table2[i+2]) + " " + TransCode.byte2HexString(table2[i+3]));
-					}*/
 			}
 		}
 		
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
+			//Log.d(TAG, "change" + progress);
 			currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress));
 		}
 	};

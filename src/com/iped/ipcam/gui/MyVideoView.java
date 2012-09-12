@@ -74,6 +74,8 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private int frameCountTemp;
 
+	private static int timeUpdate = 0;
+	
 	private String deviceId = "";
 
 	private Paint textPaint;
@@ -100,7 +102,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int frameRate =0;
 	
-	private int rate;
+	private int rate = 1;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -188,6 +190,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
 		firstStartFlag = true;
 		initPlayBackParaFlag = true;
+		timeUpdate = 0;
 		socketBuf = new byte[SOCKETBUFLENGTH];
 		new Thread(new RecvAudio()).start();
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
@@ -206,7 +209,21 @@ public class MyVideoView extends ImageView implements Runnable {
 					if (nalSizeTemp == -2) {
 						if (nalBufUsedLength > 0) {
 							frameCount++;
+							/*if(++timeUpdate%rate == 0 ) {
+								handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
+								timeUpdate = 0;
+							}*/
 							copyPixl();
+							timeUpdate+=1000/rate;
+							if(timeUpdate%1000 == 0) {
+								handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
+								timeUpdate = 0;
+							}
+							try {
+								Thread.sleep(1000/rate);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 							//firstStartFlag = true;
 						}
 						nalBuf[0] = -1;
@@ -226,7 +243,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int socketBufRemain) {
-		int i = 0;
+
 		if(playBackFlag && initPlayBackParaFlag) {
 			initPlayBackParaFlag = false;
 			byte[] t1 = new byte[4];
@@ -258,15 +275,19 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 			Log.d(TAG, "index=" + "#" + t1Length +  " " + t2Length);
 		}
+		int i = 0;
 		for (; i < socketBufRemain; i++) {
 			if (firstStartFlag && socketBuf[i] == 0 && socketBuf[i + 1] == 0 && socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1) {
 				firstStartFlag = false;
 				looperFlag = true;
 				if(playBackFlag) {
-					for(int j=sockBufferUsedLength+i+23;j<sockBufferUsedLength+i+31;j++) {
-						Log.d(TAG, "frame rate = " + socketBuf[j]);
+					byte[] rateByte = new byte[8];
+					System.arraycopy(socketBuf, sockBufferUsed+i+49, rateByte, 0, rateByte.length);
+					String rateStr = new String(rateByte);
+					if(rateStr.matches("\\d+")) {
+						rate = 1000*1000/Integer.parseInt(rateStr);
 					}
-					Log.d(TAG, "### video start flag = " + new String(socketBuf,sockBufferUsedLength+i+23,sockBufferUsedLength+i+31));
+					Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 				}
 				sockBufferUsedLength += 65;
 				return -1;
@@ -277,12 +298,15 @@ public class MyVideoView extends ImageView implements Runnable {
 				looperFlag = true;
 				return -2;
 			}  else {
-				if(!playBackFlag) {
 					if(socketBuf[sockBufferUsed] == 0 && socketBuf[sockBufferUsed + 1] == 0
 							&& socketBuf[sockBufferUsed + 2] == 0 && socketBuf[sockBufferUsed + 3] == 1) {
-						timeStr = new String(socketBuf, sockBufferUsed+5,14);
+						if(!playBackFlag) { 
+							timeStr = new String(socketBuf, sockBufferUsed+5,14);
+						}else { // »Ø·Å
+							// timeStr = new String(socketBuf, sockBufferUsed+9,14);
+							//Log.d(TAG, "====" + new String(socketBuf, sockBufferUsed+23,8));
+						}
 					}
-				}
 				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
 				sockBufferUsedLength++;
