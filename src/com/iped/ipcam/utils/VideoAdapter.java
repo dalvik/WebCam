@@ -15,6 +15,7 @@ import com.iped.ipcam.pojo.Video;
 public class VideoAdapter extends BaseAdapter {
 
 	private Context context;
+	
 	private List<Video> videoList = null;
 	
 	private LayoutInflater inflater = null;
@@ -61,7 +62,7 @@ public class VideoAdapter extends BaseAdapter {
 		viewHolder.start.setText(context.getResources().getText(R.string.video_preview_start_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoStartTime()));
 		viewHolder.end.setText(context.getResources().getText(R.string.video_preview_end_time_str) + DateUtil.formatTimeStrToTimeStr(video.getVideoEndTime()));
 		viewHolder.addr.setText(context.getResources().getText(R.string.video_preview_addr_str) + video.getAddress());
-		viewHolder.size.setText(context.getResources().getText(R.string.video_preview_length_str) + "" + getFileLength(video.getFileLength())/1020/1024 + " kb");
+		viewHolder.size.setText(context.getResources().getText(R.string.video_preview_length_str) + "" + FileUtil.formetFileSize(getFileLength(video.getFileLength())));
 		convertView.setTag(viewHolder);
 		return convertView;
 	}
