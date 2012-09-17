@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ListActivity;
@@ -246,7 +245,6 @@ public class PlayBack extends ListActivity implements OnClickListener {
         .setView(myDialogView)//
         .setPositiveButton(getResources().getString(R.string.play_back_auto_search_button_str), //
         new DialogInterface.OnClickListener() {//
-            @SuppressLint("ParserError")
 			public void onClick(DialogInterface dialog, int whichButton) {
             	Date startDate = DateUtil.formatTimeToDate2(getStartTime());
             	Date endDate = DateUtil.formatTimeToDate2(getEndTime());

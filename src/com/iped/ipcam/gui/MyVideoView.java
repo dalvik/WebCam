@@ -282,7 +282,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							//disable seekbar
 							handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
 						}
-						if(t2Length<readLengthFromVideoSocket) { // 数据收集完毕
+						if(8+t1Length+t2Length<=readLengthFromVideoSocket) {// 数据一次接收完毕
 							initPlayBackParaFlag = false;
 							table2 = new byte[t2Length];
 							System.arraycopy(videoSocketBuf, 8 + t1Length, table2, 0, t2Length);
@@ -293,24 +293,25 @@ public class MyVideoView extends ImageView implements Runnable {
 							message.setData(b2);
 							message.what = PlayBackConstants.INIT_SEEK_BAR;
 							handler.sendMessage(message);
-						} else {
+						} else {//
 							tableBuffer = new byte[t2Length];
-							recvTableIndex = readLengthFromVideoSocket- (8 + t1Length);//table 2  数据长度
+							recvTableIndex = readLengthFromVideoSocket - (8 + t1Length); //第一次复制的数据长度
 							System.arraycopy(videoSocketBuf, 8 + t1Length, tableBuffer, 0, recvTableIndex);
-							remainTable2Data = t2Length - recvTableIndex;
+							remainTable2Data = t2Length - recvTableIndex;// 还需要拷贝的数据长度
+							Log.d(TAG, "remainTable2Data=" + remainTable2Data + " recvTableIndex=" + recvTableIndex);
 							continue;
 						}
 					}
 					
 					while(initPlayBackParaFlag) {
-						if(remainTable2Data>readLengthFromVideoSocket) {
+						if(remainTable2Data>readLengthFromVideoSocket) {//还未接收完毕
+							Log.d(TAG, "buffersize=" + tableBuffer.length + " recvTableIndex=" + recvTableIndex);
 							System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, readLengthFromVideoSocket);
+							remainTable2Data-=readLengthFromVideoSocket;
 							recvTableIndex+=readLengthFromVideoSocket;
-							Log.d(TAG, "############-----------");
 							break;
 						}else {
 							System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, remainTable2Data);
-							recvTableIndex +=remainTable2Data;
 							initPlayBackParaFlag = false;
 							Message message = handler.obtainMessage();
 							Bundle b2 = new Bundle();
@@ -318,6 +319,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							message.setData(b2);
 							message.what = PlayBackConstants.INIT_SEEK_BAR;
 							handler.sendMessage(message);
+							break;
 						}
 					}
 				} else {
@@ -338,11 +340,11 @@ public class MyVideoView extends ImageView implements Runnable {
 										handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
 										timeUpdate = 0;
 									}
-									/*try {
+									try {
 										Thread.sleep(1000/rate - 3);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
-									}*/
+									}
 									//firstStartFlag = true;
 								}
 								nalBuf[0] = -1;
