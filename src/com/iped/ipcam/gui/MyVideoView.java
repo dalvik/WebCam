@@ -119,6 +119,12 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int t2Length = 0;
 	
+	private int amrBufferUsedLength;
+	
+	private byte[] amrDataBuffer = new byte[1024];
+	
+	private boolean hasAmrData = false;
+	
 	private int rate = 1;
 	
 	private byte isVideo = 0;
@@ -173,6 +179,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		deviceId = device.getDeviceID();
 		nalBufUsedLength = 0;
 		videoSockBufferUsedLength = 0;
+		amrBufferUsedLength = 0;
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
 		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
 		if (res < 0) {
@@ -265,6 +272,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				}
 				if(playBackFlag && initPlayBackParaFlag) {
 					if(initTableInfo) { // 初始化回放表的长度信息 仅且执行一次
+						new Thread(new PlayBackAudio()).start();
 						initTableInfo = false;
 						byte[] t1 = new byte[4];
 						System.arraycopy(videoSocketBuf, 0, t1, 0 , t1.length);
@@ -326,7 +334,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					videoSockBufferUsedLength = 0;
 					while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
 						// remain socket  buf  length 将视频音频数据合并到缓冲区中
-						nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
+						nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, amrBufferUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
 						//Log.d(TAG, "### nalSizeTemp = " +nalSizeTemp);
 						// 根据nalSizeTemp的值决定是否刷新界面
 						while (looperFlag) {
@@ -441,7 +449,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		return i;
 	}
 	
-	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
+	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, int audioBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int videoSocketBufRemain) {
 		int i = 0;
 		for (; i < videoSocketBufRemain; i++) {
@@ -458,13 +466,30 @@ public class MyVideoView extends ImageView implements Runnable {
 						&& socketBuf[i + 2 + sockBufferUsed] == -1
 						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
 						looperFlag = true;
+						hasAmrData = true;//播放声音数据
+						Log.d(TAG, "amrDataUsedLength===" + amrBufferUsedLength);
 						return -2;
 					}else {
 						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 						nalBufUsedLength++;
 						videoSockBufferUsedLength++;
 					}
-			} else {
+			} else if (isVideo == 2) {
+				if(socketBuf[i + sockBufferUsed] == 60) {
+ 					//looperFlag = true;
+					hasAmrData = false;
+					amrDataBuffer[0] = 60;
+					amrBufferUsedLength =1;
+					videoSockBufferUsedLength++;
+ 				}else {
+ 					if(amrBufferUsedLength>amrDataBuffer.length) {
+ 						Log.d(TAG, "amrDataBuffer.length===" + amrDataBuffer.length + "  amrBufferUsedLength=" + amrBufferUsedLength);
+ 					}
+ 					amrDataBuffer[amrBufferUsedLength] = socketBuf[i + sockBufferUsed];
+					amrBufferUsedLength++;
+ 					videoSockBufferUsedLength++;
+ 				}
+			}else {
 				videoSockBufferUsedLength++;
 			}
 		}
@@ -596,6 +621,56 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	}
 
+	class PlayBackAudio implements Runnable {
+
+		private AudioTrack m_out_trk = null;
+		private int pcmBufferLength = 320 * Command.CHANEL * 10;
+		byte[] pcmArr = new byte[pcmBufferLength];
+
+		public PlayBackAudio() {
+
+		}
+
+		@Override
+		public void run() {
+			int init = UdtTools.initAmrDecoder();
+			Log.d(TAG, "amr deocder init " + init);
+			if (m_out_trk != null) {
+				m_out_trk.stop();
+				m_out_trk.release();
+				m_out_trk = null;
+			}
+			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
+					8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+					AudioFormat.ENCODING_PCM_16BIT);
+			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
+					AudioFormat.CHANNEL_CONFIGURATION_MONO,
+					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size,
+					AudioTrack.MODE_STREAM);
+			m_out_trk.play();
+			stopPlay = false;
+			while (!stopPlay) {
+				if(hasAmrData) {
+					UdtTools.amrDecoder(amrDataBuffer, amrBufferUsedLength, pcmArr, 0, Command.CHANEL);
+					m_out_trk.write(pcmArr, 0, pcmBufferLength);
+				}else {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			if (m_out_trk != null) {
+				m_out_trk.stop();
+				m_out_trk.release();
+				m_out_trk = null;
+				UdtTools.exitAmrDecoder();
+			}
+		}
+
+	}
+	
 	public void setDevice(Device device) {
 		this.device = device;
 	}
