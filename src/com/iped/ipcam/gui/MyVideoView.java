@@ -121,7 +121,9 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int amrBufferUsedLength;
 	
-	private byte[] amrDataBuffer = new byte[1024];
+	private int audioPackageCount = 0;
+	
+	//private byte[] amrDataBuffer = new byte[1024];
 	
 	private boolean hasAmrData = false;
 	
@@ -466,8 +468,11 @@ public class MyVideoView extends ImageView implements Runnable {
 						&& socketBuf[i + 2 + sockBufferUsed] == -1
 						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
 						looperFlag = true;
-						hasAmrData = true;//播放声音数据
-						Log.d(TAG, "amrDataUsedLength===" + amrBufferUsedLength);
+						if(audioPackageCount++/20 == 0) {
+							hasAmrData = true;//播放声音数据
+							audioPackageCount = 0;
+							Log.d(TAG, "amrDataUsedLength===" + amrBufferUsedLength);
+						}
 						return -2;
 					}else {
 						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
@@ -478,14 +483,15 @@ public class MyVideoView extends ImageView implements Runnable {
 				if(socketBuf[i + sockBufferUsed] == 60) {
  					//looperFlag = true;
 					hasAmrData = false;
-					amrDataBuffer[0] = 60;
+					audioBuffer[0] = 60;
+					//amrDataBuffer[0] = 60;
 					amrBufferUsedLength =1;
 					videoSockBufferUsedLength++;
  				}else {
- 					if(amrBufferUsedLength>amrDataBuffer.length) {
- 						Log.d(TAG, "amrDataBuffer.length===" + amrDataBuffer.length + "  amrBufferUsedLength=" + amrBufferUsedLength);
- 					}
- 					amrDataBuffer[amrBufferUsedLength] = socketBuf[i + sockBufferUsed];
+ 					//Log.d(TAG, "amrDataBuffer.length===" + amrDataBuffer.length + "  amrBufferUsedLength=" + amrBufferUsedLength);
+ 					//Log.d(TAG, "i + sockBufferUsed = " + (i + sockBufferUsed) + " socketBuf.length=" + socketBuf.length);
+ 					//amrDataBuffer[amrBufferUsedLength] = socketBuf[i + sockBufferUsed];
+ 					audioBuffer[amrBufferUsedLength] = socketBuf[i + sockBufferUsed];
 					amrBufferUsedLength++;
  					videoSockBufferUsedLength++;
  				}
@@ -624,7 +630,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	class PlayBackAudio implements Runnable {
 
 		private AudioTrack m_out_trk = null;
-		private int pcmBufferLength = 320 * Command.CHANEL * 10;
+		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Command.CHANEL * 10;
 		byte[] pcmArr = new byte[pcmBufferLength];
 
 		public PlayBackAudio() {
@@ -651,7 +657,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			stopPlay = false;
 			while (!stopPlay) {
 				if(hasAmrData) {
-					UdtTools.amrDecoder(amrDataBuffer, amrBufferUsedLength, pcmArr, 0, Command.CHANEL);
+					UdtTools.amrDecoder(audioBuffer, amrBufferUsedLength, pcmArr, 0, Command.CHANEL);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
 				}else {
 					try {
