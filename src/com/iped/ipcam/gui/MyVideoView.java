@@ -152,6 +152,24 @@ public class MyVideoView extends ImageView implements Runnable {
 		infoPaint.setTextSize(18);
 	}
 
+	private void initBCV(BCVInfo info) {
+		Message m = handler.obtainMessage();
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("UPDATEBCV", info);
+		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
+		m.setData(bundle);
+		handler.sendMessage(m);
+		stopPlay = false;
+		handler.removeCallbacks(calculateFrameTask);
+		handler.post(calculateFrameTask);
+		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+		Log.d(TAG, "### playBackFlag = " + playBackFlag);
+		firstStartFlag = true;
+		timeUpdate = 0;
+		timeStr = "";
+	}
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -197,21 +215,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
-		Message m = handler.obtainMessage();
-		Bundle bundle = new Bundle();
-		bundle.putSerializable("UPDATEBCV", info);
-		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
-		m.setData(bundle);
-		handler.sendMessage(m);
-		stopPlay = false;
-		handler.removeCallbacks(calculateFrameTask);
-		handler.post(calculateFrameTask);
-		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
-		Log.d(TAG, "### playBackFlag = " + playBackFlag);
-		firstStartFlag = true;
-		timeUpdate = 0;
-		timeStr = "";
+		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
 			new Thread(new RecvAudio()).start();
@@ -260,116 +264,58 @@ public class MyVideoView extends ImageView implements Runnable {
 			initTableInfo = true;
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
-				//Log.d(TAG, "readLengthFromVideoSocket=" + readLengthFromVideoSocket);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
 					System.out.println("read over break....");
 					break;
 				}
 				if(playBackFlag && initPlayBackParaFlag) {
-					if(initTableInfo) { // 初始化回放表的长度信息 仅且执行一次
-						//TODO
-						new Thread(new PalyBackAudio()).start();
-						
-						initTableInfo = false;
-						byte[] t1 = new byte[4];
-						System.arraycopy(videoSocketBuf, 0, t1, 0 , t1.length);
-						Log.d(TAG, "### 1111 = "  + t1[0] + " " + t1[1] + " " + t1[3] + " " + t1[3]);
-						t1Length =  ByteUtil.byteToInt4(t1,0);
-						
-						byte[] t2 = new byte[4];
-						System.arraycopy(videoSocketBuf, 4, t2, 0, t2.length);
-						Log.d(TAG, "### 22222 = "  + t2[0] + " " + t2[1] + " " + t2[3] + " " + t2[3]);
-						int t2Length =  ByteUtil.byteToInt4(t2,0);
-						Log.d(TAG, "### t1Length=" + t1Length + "  t2Length=" + t2Length);
-						
-						if(t2Length<=0 || t2Length > 32 * 1024) {
-							initPlayBackParaFlag = false;
-							//disable seekbar
-							handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-						}
-						if(8+t1Length+t2Length<=readLengthFromVideoSocket) {// 数据一次接收完毕
-							initPlayBackParaFlag = false;
-							table2 = new byte[t2Length];
-							System.arraycopy(videoSocketBuf, 8 + t1Length, table2, 0, t2Length);
-							// send table2 info
-							Message message = handler.obtainMessage();
-							Bundle b2 = new Bundle();
-							b2.putByteArray("TABLE2", table2);
-							message.setData(b2);
-							message.what = PlayBackConstants.INIT_SEEK_BAR;
-							handler.sendMessage(message);
-						} else {//
-							tableBuffer = new byte[t2Length];
-							recvTableIndex = readLengthFromVideoSocket - (8 + t1Length); //第一次复制的数据长度
-							System.arraycopy(videoSocketBuf, 8 + t1Length, tableBuffer, 0, recvTableIndex);
-							remainTable2Data = t2Length - recvTableIndex;// 还需要拷贝的数据长度
-							Log.d(TAG, "remainTable2Data=" + remainTable2Data + " recvTableIndex=" + recvTableIndex);
-							continue;
-						}
-					}
-					
-					while(initPlayBackParaFlag) {
-						if(remainTable2Data>readLengthFromVideoSocket) {//还未接收完毕
-							Log.d(TAG, "buffersize=" + tableBuffer.length + " recvTableIndex=" + recvTableIndex);
-							System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, readLengthFromVideoSocket);
-							remainTable2Data-=readLengthFromVideoSocket;
-							recvTableIndex+=readLengthFromVideoSocket;
-							break;
-						}else {
-							System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, remainTable2Data);
-							initPlayBackParaFlag = false;
-							Message message = handler.obtainMessage();
-							Bundle b2 = new Bundle();
-							b2.putByteArray("TABLE2", tableBuffer);
-							message.setData(b2);
-							message.what = PlayBackConstants.INIT_SEEK_BAR;
-							handler.sendMessage(message);
-							break;
-						}
-					}
+					initSeekTable();
 				} else {
-					videoSockBufferUsedLength = 0;
-					while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
-						// remain socket  buf  length 将视频音频数据合并到缓冲区中
-						nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, audioBufferUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
-						//Log.d(TAG, "### nalSizeTemp = " +nalSizeTemp);
-						// 根据nalSizeTemp的值决定是否刷新界面
-						while (looperFlag) {
-							looperFlag = false;
-							if (nalSizeTemp == -2) {
-								if (nalBufUsedLength > 0) {
-									frameCount++;
-									copyPixl();
-									timeUpdate+=1000/rate;
-									if(timeUpdate%1000 == 0) {
-										handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
-										timeUpdate = 0;
-									}
-									try {
-										Thread.sleep(1000/rate - 3);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-									//firstStartFlag = true;
-								}
-								nalBuf[0] = -1;
-								nalBuf[1] = -40;
-								nalBuf[2] = -1;
-								nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
-								videoSockBufferUsedLength += 4;
-								nalBufUsedLength = 4;
-								break;
-							}
-						}
-					}
+					playBack();
 				}
-				
 			} 	
 		}
 		onStop();
 		System.out.println("onstop====" + stopPlay);
 	}
 
+	private void playBack() {
+		videoSockBufferUsedLength = 0;
+		while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
+			// remain socket  buf  length 将视频音频数据合并到缓冲区中
+			nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, audioBufferUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
+			//Log.d(TAG, "### nalSizeTemp = " +nalSizeTemp);
+			// 根据nalSizeTemp的值决定是否刷新界面
+			while (looperFlag) {
+				looperFlag = false;
+				if (nalSizeTemp == -2) {
+					if (nalBufUsedLength > 0) {
+						frameCount++;
+						copyPixl();
+						timeUpdate+=1000/rate;
+						if(timeUpdate%1000 == 0) {
+							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
+							timeUpdate = 0;
+						}
+						try {
+							Thread.sleep(1000/rate - 3);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						//firstStartFlag = true;
+					}
+					nalBuf[0] = -1;
+					nalBuf[1] = -40;
+					nalBuf[2] = -1;
+					nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
+					videoSockBufferUsedLength += 4;
+					nalBufUsedLength = 4;
+					break;
+				}
+			}
+		}
+	}
+	
 	private int mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int socketBufRemain) {
 
@@ -671,5 +617,68 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	};
 
+	private void initSeekTable() {
+		if(initTableInfo) { // 初始化回放表的长度信息 仅且执行一次
+			//TODO
+			new Thread(new PalyBackAudio()).start();
+			
+			initTableInfo = false;
+			byte[] t1 = new byte[4];
+			System.arraycopy(videoSocketBuf, 0, t1, 0 , t1.length);
+			Log.d(TAG, "### 1111 = "  + t1[0] + " " + t1[1] + " " + t1[3] + " " + t1[3]);
+			t1Length =  ByteUtil.byteToInt4(t1,0);
+			
+			byte[] t2 = new byte[4];
+			System.arraycopy(videoSocketBuf, 4, t2, 0, t2.length);
+			Log.d(TAG, "### 22222 = "  + t2[0] + " " + t2[1] + " " + t2[3] + " " + t2[3]);
+			int t2Length =  ByteUtil.byteToInt4(t2,0);
+			Log.d(TAG, "### t1Length=" + t1Length + "  t2Length=" + t2Length);
+			
+			if(t2Length<=0 || t2Length > 32 * 1024) {
+				initPlayBackParaFlag = false;
+				//disable seekbar
+				handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
+			}
+			if(8+t1Length+t2Length<=readLengthFromVideoSocket) {// 数据一次接收完毕
+				initPlayBackParaFlag = false;
+				table2 = new byte[t2Length];
+				System.arraycopy(videoSocketBuf, 8 + t1Length, table2, 0, t2Length);
+				// send table2 info
+				Message message = handler.obtainMessage();
+				Bundle b2 = new Bundle();
+				b2.putByteArray("TABLE2", table2);
+				message.setData(b2);
+				message.what = PlayBackConstants.INIT_SEEK_BAR;
+				handler.sendMessage(message);
+			} else {//
+				tableBuffer = new byte[t2Length];
+				recvTableIndex = readLengthFromVideoSocket - (8 + t1Length); //第一次复制的数据长度
+				System.arraycopy(videoSocketBuf, 8 + t1Length, tableBuffer, 0, recvTableIndex);
+				remainTable2Data = t2Length - recvTableIndex;// 还需要拷贝的数据长度
+				Log.d(TAG, "remainTable2Data=" + remainTable2Data + " recvTableIndex=" + recvTableIndex);
+				return;
+			}
+		}
+		
+		while(initPlayBackParaFlag) {
+			if(remainTable2Data>readLengthFromVideoSocket) {//还未接收完毕
+				Log.d(TAG, "buffersize=" + tableBuffer.length + " recvTableIndex=" + recvTableIndex);
+				System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, readLengthFromVideoSocket);
+				remainTable2Data-=readLengthFromVideoSocket;
+				recvTableIndex+=readLengthFromVideoSocket;
+				break;
+			}else {
+				System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, remainTable2Data);
+				initPlayBackParaFlag = false;
+				Message message = handler.obtainMessage();
+				Bundle b2 = new Bundle();
+				b2.putByteArray("TABLE2", tableBuffer);
+				message.setData(b2);
+				message.what = PlayBackConstants.INIT_SEEK_BAR;
+				handler.sendMessage(message);
+				break;
+			}
+		}
+	}
 	
 }
