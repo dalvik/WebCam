@@ -37,7 +37,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 6420;//342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 1500;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 	
@@ -57,7 +57,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int bitmapTmpBufferUsed;
 
-	
 	int readLengthFromVideoSocket = 0;
 
 	int videoSockBufferUsedLength;
@@ -279,7 +278,7 @@ public class MyVideoView extends ImageView implements Runnable {
 						}
 						frameCount++;
 						//copyPixl();
-						timeUpdate+=1000/rate;
+						timeUpdate+=(1000/rate);
 						if(timeUpdate%1000 == 0) {
 							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
 							timeUpdate = 0;
@@ -368,7 +367,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							// timeStr = new String(socketBuf, sockBufferUsed+9,14);
 							//Log.d(TAG, "====" + new String(socketBuf, i+sockBufferUsed+9,14));
 						}
-						Log.d(TAG, "====" + new String(socketBuf, i + sockBufferUsed + 9, 14));
+						//Log.d(TAG, "====" + new String(socketBuf, i + sockBufferUsed + 9, 14));
 					}
 				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
@@ -379,9 +378,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		return i;
 	}
 	
-	private int index = 0;
-	
-	private boolean audioStart = false;
 	
 	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int videoSocketBufRemain) {
@@ -395,7 +391,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				if(rateStr.matches("\\d+")) {
 					rate = 1000*1000/Integer.parseInt(rateStr);
 				}
-				//Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
+				Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 			}			
 			if(isVideo == 1) {
 				if(socketBuf[i + sockBufferUsed] == -1
@@ -412,7 +408,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			} else if (isVideo == 2) {
 					if(socketBuf[i + sockBufferUsed] == 60) {
 						if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
-							Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
+							//Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
 							audioTmpBufferUsed = audioBufferUsedLength;
 							audioBufferUsedLength = 0;
 							synchronized (audioTmpBuffer) {
@@ -428,17 +424,13 @@ public class MyVideoView extends ImageView implements Runnable {
 							i += 31;
 							videoSockBufferUsedLength+=32;
 						}else {
-							//System.arraycopy(socketBuf,i + sockBufferUsed , amrBuffer, audioBufferUsedLength, audioHeadIndex);
-							//audioBufferUsedLength += audioHeadIndex;
 							i += (audioHeadIndex-1);
 							videoSockBufferUsedLength+=audioHeadIndex;
 						}
 					}else {
 						videoSockBufferUsedLength++;
-						//Log.d(TAG, "########## **********");
 					}
 			}else {
-				//Log.d(TAG, "#################");
 				videoSockBufferUsedLength++;
 			}
 		}
@@ -589,12 +581,11 @@ public class MyVideoView extends ImageView implements Runnable {
 		public void run() {
 			while(!stopPlay) {
 				if(hasAudioData) {
-					//TODO
-					Log.d(TAG, "audio decode =" + audioTmpBufferUsed);
-					int del = UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
+					//Log.d(TAG, "audio decode =" + audioTmpBufferUsed);
+					UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
 					hasAudioData = false;
-					Log.d(TAG, "del ==== " + del);
+					//Log.d(TAG, "del ==== " + del);
 				}else {
 					synchronized (audioTmpBuffer) {
 						try {
@@ -646,7 +637,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			while (!stopPlay) {
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				Log.d(TAG, "audio recvDataLength===" + recvDataLength);
+				//Log.d(TAG, "audio recvDataLength===" + recvDataLength);
 				if(recvDataLength<=0) {
 					stopPlay = true;
 					break;
