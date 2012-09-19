@@ -1,5 +1,8 @@
 package com.iped.ipcam.gui;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,17 +31,17 @@ import com.iped.ipcam.utils.PlayBackConstants;
 
 public class MyVideoView extends ImageView implements Runnable {
 
+	private Queue<Bitmap> bitmapQueue = new LinkedList<Bitmap>();  
+	
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
 	
 	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 642000;//342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 6420;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
 	private Bitmap video;
-
-	byte[] pixel = new byte[NALBUFLENGTH];
 
 	byte[] nalBuf = new byte[NALBUFLENGTH];//
 
@@ -48,11 +51,19 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	byte[] videoSocketBuf ;
 
+	byte[] bitmapTmpBuffer = new byte[NALBUFLENGTH];
+	
+	private int bitmapTmpBufferUsed;
+
+	private byte[] audioTmpBuffer = new byte[RECEAUDIOBUFFERSIZE * 10];
+	
+	private int audioTmpBufferUsed;
+	
 	int readLengthFromVideoSocket = 0;
 
 	int videoSockBufferUsedLength;
 
-	boolean firstStartFlag = true;
+	boolean firstStartFlag = false;
 
 	boolean looperFlag = false;
 
@@ -127,6 +138,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	byte[] pcmArr = new byte[pcmBufferLength];
 
+	private boolean firstAudioStart = true;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -152,23 +164,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		infoPaint.setTextSize(18);
 	}
 
-	private void initBCV(BCVInfo info) {
-		Message m = handler.obtainMessage();
-		Bundle bundle = new Bundle();
-		bundle.putSerializable("UPDATEBCV", info);
-		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
-		m.setData(bundle);
-		handler.sendMessage(m);
-		stopPlay = false;
-		handler.removeCallbacks(calculateFrameTask);
-		handler.post(calculateFrameTask);
-		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
-		Log.d(TAG, "### playBackFlag = " + playBackFlag);
-		firstStartFlag = true;
-		timeUpdate = 0;
-		timeStr = "";
-	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -236,17 +231,6 @@ public class MyVideoView extends ImageView implements Runnable {
 							if (nalBufUsedLength > 0) {
 								frameCount++;
 								copyPixl();
-								timeUpdate+=1000/rate;
-								if(timeUpdate%1000 == 0) {
-									handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
-									timeUpdate = 0;
-								}
-								try {
-									Thread.sleep(1000/rate - 3);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-								//firstStartFlag = true;
 							}
 							nalBuf[0] = -1;
 							nalBuf[1] = -40;
@@ -290,18 +274,24 @@ public class MyVideoView extends ImageView implements Runnable {
 				looperFlag = false;
 				if (nalSizeTemp == -2) {
 					if (nalBufUsedLength > 0) {
+						synchronized (bitmapTmpBuffer) {
+							System.arraycopy(nalBuf, 0, bitmapTmpBuffer, 0, nalBufUsedLength);
+							bitmapTmpBufferUsed = nalBufUsedLength;
+							hasVideoData = true;
+							bitmapTmpBuffer.notify();
+						}
 						frameCount++;
-						copyPixl();
+						//copyPixl();
 						timeUpdate+=1000/rate;
 						if(timeUpdate%1000 == 0) {
 							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
 							timeUpdate = 0;
-						}
+						}/**/
 						try {
-							Thread.sleep(1000/rate - 3);
+							Thread.sleep(1000/rate);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
-						}
+						}/**/
 						//firstStartFlag = true;
 					}
 					nalBuf[0] = -1;
@@ -400,6 +390,11 @@ public class MyVideoView extends ImageView implements Runnable {
 				looperFlag = true;
 				timeStr =  new String(socketBuf, i + 9, 14);
 				isVideo = socketBuf[i + 6];
+				String rateStr = new String(socketBuf, i + 23, 8);
+				if(rateStr.matches("\\d+")) {
+					rate = 1000*1000/Integer.parseInt(rateStr);
+				}
+				//Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 			}			
 			if(isVideo == 1) {
 				if(socketBuf[i + sockBufferUsed] == -1
@@ -407,10 +402,18 @@ public class MyVideoView extends ImageView implements Runnable {
 						&& socketBuf[i + 2 + sockBufferUsed] == -1
 						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
 						looperFlag = true;
-						hasAudioData = true;
-						Log.d(TAG, "audioBufferUsedLength=" + audioBufferUsedLength);
-						//UdtTools.amrDecoder(audioBuffer, audioBufferUsedLength, pcmArr, 0, Command.CHANEL);
-						//m_out_trk.write(pcmArr, 0, pcmBufferLength);
+						/*if(firstAudioStart) {
+							firstAudioStart = false;
+							if(audioBufferUsedLength>0) {
+								synchronized (audioTmpBuffer) {
+									System.arraycopy(audioBuffer,0 , audioTmpBuffer, 0, audioBufferUsedLength);
+									audioTmpBufferUsed = audioBufferUsedLength;
+									audioBufferUsedLength = 0;
+									hasAudioData = true;
+									audioTmpBuffer.notify();
+								}
+							}
+						}*/
 						return -2;
 					}else {
 						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
@@ -418,18 +421,33 @@ public class MyVideoView extends ImageView implements Runnable {
 						videoSockBufferUsedLength++;
 					}
 			} else if (isVideo == 2) {
-				if(socketBuf[i + sockBufferUsed] == 60) {
-					audioBuffer[audioBufferUsedLength] = 60;
-					audioBufferUsedLength++;
-					videoSockBufferUsedLength++;
- 				}else {
- 					if(audioBufferUsedLength>=audioBuffer.length) {
- 						Log.d(TAG, "######=" + audioBufferUsedLength);
- 					}
- 					audioBuffer[audioBufferUsedLength] = socketBuf[i + sockBufferUsed];
-					audioBufferUsedLength++;
- 					videoSockBufferUsedLength++;
- 				}
+					if(socketBuf[i + sockBufferUsed] == 60) {
+						/*if(!firstAudioStart) {
+							firstAudioStart = true;
+							audioBufferUsedLength = 0;
+						}
+						Log.d(TAG, "audioBufferUsedLength=" + audioBufferUsedLength);*/
+						if(audioBufferUsedLength%32>=10) {
+							synchronized (audioTmpBuffer) {
+								System.arraycopy(audioBuffer,0 , audioTmpBuffer, 0, audioBufferUsedLength);
+								audioTmpBufferUsed = audioBufferUsedLength;
+								audioBufferUsedLength = 0;
+								hasAudioData = true;
+								audioTmpBuffer.notify();
+							}
+						}
+						audioBuffer[audioBufferUsedLength] = 60;
+						audioBufferUsedLength++;
+						videoSockBufferUsedLength++;
+					}else {
+						if(audioBufferUsedLength>=RECEAUDIOBUFFERSIZE * 10) {
+							hasAudioData = true;
+						}else {
+							audioBuffer[audioBufferUsedLength] = socketBuf[i + sockBufferUsed];
+						}
+						audioBufferUsedLength++;
+						videoSockBufferUsedLength++;
+					}
 			}else {
 				videoSockBufferUsedLength++;
 			}
@@ -510,6 +528,60 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private boolean hasAudioData;
 	
+	private boolean hasVideoData;
+	
+	private class PlayBackVideo implements Runnable {
+		
+		public PlayBackVideo() {
+			
+		}
+		
+		@Override
+		public void run() {
+			while(!stopPlay) {
+				if(hasVideoData) {
+					hasVideoData = false;
+					if (reverseFlag) {
+						Bitmap tmp = BitmapFactory.decodeByteArray(bitmapTmpBuffer, 0, bitmapTmpBufferUsed);
+						if (tmp != null) {
+							video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(),
+									tmp.getHeight(), m, true);
+							m.setRotate(180);
+							if (!tmp.isRecycled()) {
+								tmp.recycle();
+							}
+						}
+					} else {
+						video = BitmapFactory.decodeByteArray(bitmapTmpBuffer, 0, bitmapTmpBufferUsed);
+					}
+					if(video != null) {
+						postInvalidate();
+					}
+					/*Log.d(TAG, "decode bitmap image-----------" + video);
+					timeUpdate+=1000/rate;
+					if(timeUpdate%1000 == 0) {
+						handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
+						timeUpdate = 0;
+					}
+					try {
+						Thread.sleep(1000/rate - 3);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}*/
+				}else {
+					synchronized (bitmapTmpBuffer) {
+						try {
+							bitmapTmpBuffer.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+ 
+	
 	private class PalyBackAudio implements Runnable {
 		
 		public PalyBackAudio(){
@@ -534,15 +606,20 @@ public class MyVideoView extends ImageView implements Runnable {
 		public void run() {
 			while(!stopPlay) {
 				if(hasAudioData) {
-					UdtTools.amrDecoder(audioBuffer, audioBufferUsedLength, pcmArr, 0, Command.CHANEL);
+					//TODO
+					int length = UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
 					hasAudioData = false;
 					audioBufferUsedLength =1;
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
-					Log.d(TAG, "pcmBufferLength=" + pcmBufferLength + " audioBufferUsedLength=" + audioBufferUsedLength);			
+					//Log.d(TAG, "pcmBufferLength=" + pcmBufferLength + " audioBufferUsedLength=" + audioBufferUsedLength);			
 				}else {
-					try{
-						Thread.sleep(1);
-						}catch(Exception e){};
+					synchronized (audioTmpBuffer) {
+						try {
+							audioTmpBuffer.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
 					}
 				}
 		}
@@ -617,9 +694,32 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	};
 
+	private void initBCV(BCVInfo info) {
+		Message m = handler.obtainMessage();
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("UPDATEBCV", info);
+		m.what = Constants.SEND_UPDATE_BCV_INFO_MSG;
+		m.setData(bundle);
+		handler.sendMessage(m);
+		stopPlay = false;
+		handler.removeCallbacks(calculateFrameTask);
+		handler.post(calculateFrameTask);
+		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+		Log.d(TAG, "### playBackFlag = " + playBackFlag);
+		firstStartFlag = true;
+		timeUpdate = 0;
+		timeStr = "";
+		bitmapQueue.clear();
+		nalBufUsedLength = 0;
+		bitmapTmpBufferUsed = 0;
+		audioTmpBufferUsed = 0;
+	}
+	
 	private void initSeekTable() {
 		if(initTableInfo) { // 初始化回放表的长度信息 仅且执行一次
 			//TODO
+			new Thread(new PlayBackVideo()).start();
 			new Thread(new PalyBackAudio()).start();
 			
 			initTableInfo = false;
