@@ -667,7 +667,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		public void run() {
 			frameCountTemp = frameCount;
 			if(frameCountTemp<=2) {
-				//invalidate();
+				invalidate();
 			}
 			frameCount = 0;
 			handler.postDelayed(calculateFrameTask, 1000);
@@ -698,10 +698,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private void initSeekTable() {
 		if(initTableInfo) { // 初始化回放表的长度信息 仅且执行一次
-			//TODO
 			new Thread(new PlayBackVideo()).start();
 			new Thread(new PalyBackAudio()).start();
-			
 			initTableInfo = false;
 			byte[] t1 = new byte[4];
 			System.arraycopy(videoSocketBuf, 0, t1, 0 , t1.length);
