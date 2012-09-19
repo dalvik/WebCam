@@ -40,6 +40,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	private final static int VIDEOSOCKETBUFLENGTH = 6420;//342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
+	
+	private final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
 	private Bitmap video;
 
@@ -55,9 +57,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int bitmapTmpBufferUsed;
 
-	private byte[] audioTmpBuffer = new byte[RECEAUDIOBUFFERSIZE * 10];
-	
-	private int audioTmpBufferUsed;
 	
 	int readLengthFromVideoSocket = 0;
 
@@ -70,7 +69,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	private boolean stopPlay = true;
 
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 10];
-
+	
 	private static final String TAG = "MyVideoView";
 
 	private Handler handler;
@@ -131,14 +130,12 @@ public class MyVideoView extends ImageView implements Runnable {
 	private int rate = 1;
 	
 	private byte isVideo = 0;
-	
-	private AudioTrack m_out_trk = null;
-	
-	private int pcmBufferLength = audioBuffer.length * Command.CHANEL * 10;
-	
-	byte[] pcmArr = new byte[pcmBufferLength];
 
-	private boolean firstAudioStart = true;
+	private int MAX_FRAME = 32;
+
+	private int TOTAL_FRAME_SIZE = 50 * MAX_FRAME;
+	
+	private byte[] amrBuffer = new byte[TOTAL_FRAME_SIZE];
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -255,8 +252,8 @@ public class MyVideoView extends ImageView implements Runnable {
 				if(playBackFlag && initPlayBackParaFlag) {
 					initSeekTable();
 				} else {
-					playBack();
 				}
+				playBack();
 			} 	
 		}
 		onStop();
@@ -267,7 +264,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		videoSockBufferUsedLength = 0;
 		while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
 			// remain socket  buf  length 将视频音频数据合并到缓冲区中
-			nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, audioBufferUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
+			nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
 			//Log.d(TAG, "### nalSizeTemp = " +nalSizeTemp);
 			// 根据nalSizeTemp的值决定是否刷新界面
 			while (looperFlag) {
@@ -286,12 +283,12 @@ public class MyVideoView extends ImageView implements Runnable {
 						if(timeUpdate%1000 == 0) {
 							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
 							timeUpdate = 0;
-						}/**/
+						}
 						try {
 							Thread.sleep(1000/rate);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
-						}/**/
+						}
 						//firstStartFlag = true;
 					}
 					nalBuf[0] = -1;
@@ -382,7 +379,11 @@ public class MyVideoView extends ImageView implements Runnable {
 		return i;
 	}
 	
-	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, int audioBufUsed, byte[] socketBuf,
+	private int index = 0;
+	
+	private boolean audioStart = false;
+	
+	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int videoSocketBufRemain) {
 		int i = 0;
 		for (; i < videoSocketBufRemain; i++) {
@@ -402,18 +403,6 @@ public class MyVideoView extends ImageView implements Runnable {
 						&& socketBuf[i + 2 + sockBufferUsed] == -1
 						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
 						looperFlag = true;
-						/*if(firstAudioStart) {
-							firstAudioStart = false;
-							if(audioBufferUsedLength>0) {
-								synchronized (audioTmpBuffer) {
-									System.arraycopy(audioBuffer,0 , audioTmpBuffer, 0, audioBufferUsedLength);
-									audioTmpBufferUsed = audioBufferUsedLength;
-									audioBufferUsedLength = 0;
-									hasAudioData = true;
-									audioTmpBuffer.notify();
-								}
-							}
-						}*/
 						return -2;
 					}else {
 						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
@@ -422,33 +411,34 @@ public class MyVideoView extends ImageView implements Runnable {
 					}
 			} else if (isVideo == 2) {
 					if(socketBuf[i + sockBufferUsed] == 60) {
-						/*if(!firstAudioStart) {
-							firstAudioStart = true;
+						if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
+							Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
+							audioTmpBufferUsed = audioBufferUsedLength;
 							audioBufferUsedLength = 0;
-						}
-						Log.d(TAG, "audioBufferUsedLength=" + audioBufferUsedLength);*/
-						if(audioBufferUsedLength%32>=10) {
 							synchronized (audioTmpBuffer) {
-								System.arraycopy(audioBuffer,0 , audioTmpBuffer, 0, audioBufferUsedLength);
-								audioTmpBufferUsed = audioBufferUsedLength;
-								audioBufferUsedLength = 0;
+								System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
 								hasAudioData = true;
 								audioTmpBuffer.notify();
 							}
 						}
-						audioBuffer[audioBufferUsedLength] = 60;
-						audioBufferUsedLength++;
-						videoSockBufferUsedLength++;
-					}else {
-						if(audioBufferUsedLength>=RECEAUDIOBUFFERSIZE * 10) {
-							hasAudioData = true;
+						int audioHeadIndex = videoSocketBufRemain - i;
+						if(audioHeadIndex>=32) {
+							System.arraycopy(socketBuf,i + sockBufferUsed, amrBuffer, audioBufferUsedLength, 32);
+							audioBufferUsedLength += 32;
+							i += 31;
+							videoSockBufferUsedLength+=32;
 						}else {
-							audioBuffer[audioBufferUsedLength] = socketBuf[i + sockBufferUsed];
+							//System.arraycopy(socketBuf,i + sockBufferUsed , amrBuffer, audioBufferUsedLength, audioHeadIndex);
+							//audioBufferUsedLength += audioHeadIndex;
+							i += (audioHeadIndex-1);
+							videoSockBufferUsedLength+=audioHeadIndex;
 						}
-						audioBufferUsedLength++;
+					}else {
 						videoSockBufferUsedLength++;
+						//Log.d(TAG, "########## **********");
 					}
 			}else {
+				//Log.d(TAG, "#################");
 				videoSockBufferUsedLength++;
 			}
 		}
@@ -489,12 +479,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	private void release() {
 		handler.removeCallbacks(calculateFrameTask);
 		handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-		if (m_out_trk != null) {
-			m_out_trk.stop();
-			m_out_trk.release();
-			m_out_trk = null;
-			UdtTools.exitAmrDecoder();
-		}
 		//UdtTools.exit();
 	}
 
@@ -557,17 +541,6 @@ public class MyVideoView extends ImageView implements Runnable {
 					if(video != null) {
 						postInvalidate();
 					}
-					/*Log.d(TAG, "decode bitmap image-----------" + video);
-					timeUpdate+=1000/rate;
-					if(timeUpdate%1000 == 0) {
-						handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
-						timeUpdate = 0;
-					}
-					try {
-						Thread.sleep(1000/rate - 3);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}*/
 				}else {
 					synchronized (bitmapTmpBuffer) {
 						try {
@@ -581,8 +554,18 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	}
  
+	private byte[] audioTmpBuffer = new byte[PLAYBACK_AUDIOBUFFERSIZE * 10];
+	
+	private int audioTmpBufferUsed;
 	
 	private class PalyBackAudio implements Runnable {
+		
+		private int pcmBufferLength = TOTAL_FRAME_SIZE * 10; //PLAYBACK_AUDIOBUFFERSIZE * Command.CHANEL * 50;
+		
+		private byte[] pcmArr = new byte[pcmBufferLength];
+		
+
+		private AudioTrack m_out_trk = null;
 		
 		public PalyBackAudio(){
 			int init = UdtTools.initAmrDecoder();
@@ -607,11 +590,11 @@ public class MyVideoView extends ImageView implements Runnable {
 			while(!stopPlay) {
 				if(hasAudioData) {
 					//TODO
-					int length = UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
-					hasAudioData = false;
-					audioBufferUsedLength =1;
+					Log.d(TAG, "audio decode =" + audioTmpBufferUsed);
+					int del = UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
 					m_out_trk.write(pcmArr, 0, pcmBufferLength);
-					//Log.d(TAG, "pcmBufferLength=" + pcmBufferLength + " audioBufferUsedLength=" + audioBufferUsedLength);			
+					hasAudioData = false;
+					Log.d(TAG, "del ==== " + del);
 				}else {
 					synchronized (audioTmpBuffer) {
 						try {
@@ -622,6 +605,12 @@ public class MyVideoView extends ImageView implements Runnable {
 					}
 					}
 				}
+			if (m_out_trk != null) {
+				m_out_trk.stop();
+				m_out_trk.release();
+				m_out_trk = null;
+				UdtTools.exitAmrDecoder();
+			}
 		}
 	}
 	
