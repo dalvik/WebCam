@@ -251,8 +251,8 @@ public class MyVideoView extends ImageView implements Runnable {
 				if(playBackFlag && initPlayBackParaFlag) {
 					initSeekTable();
 				} else {
+					playBack();
 				}
-				playBack();
 			} 	
 		}
 		onStop();
@@ -277,12 +277,16 @@ public class MyVideoView extends ImageView implements Runnable {
 							bitmapTmpBuffer.notify();
 						}
 						frameCount++;
+						Message msg = handler.obtainMessage();
+						msg.what = Constants.UPDATE_PLAY_BACK_TIME;
+						msg.obj = timeStr;
+						handler.sendMessage(msg);
 						//copyPixl();
-						timeUpdate+=(1000/rate);
+						/*timeUpdate+=(1000/rate);
 						if(timeUpdate%1000 == 0) {
 							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
 							timeUpdate = 0;
-						}
+						}*/
 						try {
 							Thread.sleep(1000/rate);
 						} catch (InterruptedException e) {
@@ -342,13 +346,15 @@ public class MyVideoView extends ImageView implements Runnable {
 				firstStartFlag = false;
 				looperFlag = true;
 				if(playBackFlag) {
-					byte[] rateByte = new byte[8];
-					System.arraycopy(socketBuf, sockBufferUsed+i+49, rateByte, 0, rateByte.length);
-					String rateStr = new String(rateByte);
-					if(rateStr.matches("\\d+")) {
-						rate = 1000*1000/Integer.parseInt(rateStr);
+					//byte[] rateByte = new byte[8];
+					//System.arraycopy(socketBuf, sockBufferUsed+i+49, rateByte, 0, rateByte.length);
+					if((sockBufferUsed+i+49+8)<=socketBufRemain) {
+						String rateStr = new String(socketBuf,sockBufferUsed+i+49,8);
+						if(rateStr.matches("\\d+")) {
+							rate = 1000*1000/Integer.parseInt(rateStr);
+						}
+						//Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 					}
-					Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 				}
 				videoSockBufferUsedLength += 65;
 				return -1;
@@ -361,13 +367,10 @@ public class MyVideoView extends ImageView implements Runnable {
 			}  else {
 					if(socketBuf[sockBufferUsed] == 0 && socketBuf[sockBufferUsed + 1] == 0
 							&& socketBuf[sockBufferUsed + 2] == 0 && socketBuf[sockBufferUsed + 3] == 1 && socketBuf[i + 4] == 12) {
-						if(!playBackFlag) { 
+						if(!playBackFlag && (sockBufferUsed+5+14) <= socketBufRemain) { 
 							timeStr = new String(socketBuf, sockBufferUsed+5,14);
-						}else { // »Ø·Å
-							// timeStr = new String(socketBuf, sockBufferUsed+9,14);
-							//Log.d(TAG, "====" + new String(socketBuf, i+sockBufferUsed+9,14));
 						}
-						//Log.d(TAG, "====" + new String(socketBuf, i + sockBufferUsed + 9, 14));
+						//Log.d(TAG, "====" + timeStr);
 					}
 				nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
 				nalBufUsedLength++;
@@ -385,13 +388,19 @@ public class MyVideoView extends ImageView implements Runnable {
 		for (; i < videoSocketBufRemain; i++) {
 			if ( socketBuf[i] == 0 && socketBuf[i + 1] == 0 && socketBuf[i + 2] == 0 && socketBuf[i + 3] == 1 && socketBuf[i + 4] == 12) {
 				looperFlag = true;
-				timeStr =  new String(socketBuf, i + 9, 14);
-				isVideo = socketBuf[i + 6];
-				String rateStr = new String(socketBuf, i + 23, 8);
-				if(rateStr.matches("\\d+")) {
-					rate = 1000*1000/Integer.parseInt(rateStr);
+				if(i+9+14<=videoSocketBufRemain){
+					timeStr =  new String(socketBuf, i + 9, 14);
 				}
-				Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
+				if(i+6<=videoSocketBufRemain) {
+					isVideo = socketBuf[i + 6];
+				}
+				if(i+23+8<=videoSocketBufRemain) {
+					String rateStr = new String(socketBuf, i + 23, 8);
+					if(rateStr.matches("\\d+")) {
+						rate = 1000*1000/Integer.parseInt(rateStr);
+					}
+					//Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
+				}
 			}			
 			if(isVideo == 1) {
 				if(socketBuf[i + sockBufferUsed] == -1
@@ -458,8 +467,10 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void onStop() {
 		stopPlay = true;
-		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
-		handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+		if(!playBackFlag){
+			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
+			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+		}
 		release();
 		flushBitmap();
 	}
