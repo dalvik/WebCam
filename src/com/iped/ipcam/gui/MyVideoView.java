@@ -642,7 +642,6 @@ public class MyVideoView extends ImageView implements Runnable {
 					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size,
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
-			stopPlay = false;
 			int recvDataLength = -1;
 			while (!stopPlay) {
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
