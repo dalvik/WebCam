@@ -192,6 +192,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			}else {
 				bundle.putLong("TOTALTIME", DateUtil.formatTimeToDate(end).getTime() - startTime);
 			}
+			bundle.putLong("STARTTIME", startTime);
 			//bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
 			intent.putExtras(bundle);
 			intent.setAction(WebCamActions.ACTION_PLAY_BACK);
