@@ -101,4 +101,13 @@ public class DateUtil {
 			return dateStr;
 		}
 	}
+	
+	public static long formatTimeStrToLong(String timeStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		try {
+			return sdf.parse(timeStr).getTime();
+		} catch (ParseException e) {
+			return 0;
+		}
+	}
 }
