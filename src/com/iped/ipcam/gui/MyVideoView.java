@@ -83,8 +83,6 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private int frameCountTemp;
 
-	private static int timeUpdate = 0;
-	
 	private String deviceId = "";
 
 	private Paint textPaint;
@@ -109,8 +107,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private boolean initPlayBackParaFlag = true;
 	
-	private int frameRate =0;
-	
 	//接受回放信息表的buffer
 	private byte[] tableBuffer;
 	
@@ -121,8 +117,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	private boolean initTableInfo = true;
 	
 	private int t1Length = 0;
-	
-	private int t2Length = 0;
 	
 	private int audioBufferUsedLength;
 	
@@ -209,6 +203,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
+			temWidth = 1;
 			new Thread(new RecvAudio()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
@@ -513,6 +508,10 @@ public class MyVideoView extends ImageView implements Runnable {
 		this.playBackFlag = playBackFlag;
 	}
 
+	public boolean isPlayBackFlag() {
+		return playBackFlag;
+	}
+	
 	private boolean hasAudioData;
 	
 	private boolean hasVideoData;
@@ -678,7 +677,9 @@ public class MyVideoView extends ImageView implements Runnable {
 		public void run() {
 			frameCountTemp = frameCount;
 			if(frameCountTemp<=2) {
-				invalidate();
+				if(video != null) {
+					invalidate();
+				}
 			}
 			frameCount = 0;
 			handler.postDelayed(calculateFrameTask, 1000);
@@ -699,7 +700,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
 		firstStartFlag = true;
-		timeUpdate = 0;
 		timeStr = "";
 		bitmapQueue.clear();
 		nalBufUsedLength = 0;

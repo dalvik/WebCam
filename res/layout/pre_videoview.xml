@@ -13,6 +13,7 @@
         android:layout_height="fill_parent"
         android:background="@color/darkgray"
         android:layout_weight="1"
+        android:padding="1dip"
         android:orientation="vertical" >
 
         <com.iped.ipcam.gui.MyVideoView
@@ -22,15 +23,6 @@
 
         <include layout="@layout/play_back_bottom"/>
         
-        <!-- 
-        <SeekBar
-            android:id="@+id/play_back_seek_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
-            android:visibility="visible" />
-         -->
     </LinearLayout>
 
 </LinearLayout>
