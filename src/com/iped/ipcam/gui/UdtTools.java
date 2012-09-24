@@ -6,6 +6,7 @@ public class UdtTools {
 		System.loadLibrary("udt");
 		System.loadLibrary("RecvFile");
 		System.loadLibrary("amr");
+		System.loadLibrary("pcm");
 	}
 	
 	public static  native int recvFile(String ip,String port, String remoteName,String localName);
@@ -22,6 +23,11 @@ public class UdtTools {
 	public static native int amrDecoder(byte[] src, int srcLength, byte[] des, int desLength, int chanel);
 	
 	public static native void exitAmrDecoder();
+	
+	//decode pcm to amr
+	public static native int initAmrEncoder();
+	
+	public static native int EncoderPcm(byte[] pcmBuffer, int pcmLength, byte[] amrBuffer, int amrLength);
 	
 	// change throughnet type
 	
@@ -47,6 +53,8 @@ public class UdtTools {
 	
 	public static native int recvAudioMsg(int smalBuffLength, byte[] buf, int bufLength);
 	
+	public static native int sendAudioMsg(byte[] buf, int sendLength);
+	
 	public static native int sendPTZMsg(byte[] comm);
 	
 	public static native int close();
@@ -56,5 +64,6 @@ public class UdtTools {
 	public static native int startUp();
 	
 	public static native int cleanUp();
+	
 	
 }

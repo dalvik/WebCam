@@ -545,8 +545,11 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				.inflate(R.layout.device_manager_add, null);
 		((EditText) addDeviceView
 				.findViewById(R.id.device_manager_new_dns1_id)).setText("");// Constants.TCPPORT+
-		((EditText) addDeviceView
-				.findViewById(R.id.device_manager_new_dns2_id)).setText(""); // Constants.UDPPORT+
+		EditText idNum = ((EditText) addDeviceView
+				.findViewById(R.id.device_manager_new_dns2_id));
+		idNum.setText(""); // Constants.UDPPORT+
+		idNum.requestFocusFromTouch();
+		idNum.requestFocus();
 		return addDeviceView;
 	}
 
