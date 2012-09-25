@@ -15,6 +15,8 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -42,6 +44,7 @@ public class WebCam extends Activity implements OnClickListener{
         super.onCreate(savedInstanceState);
         final View view = View.inflate(this, R.layout.webview_login, null);
         setContentView(view);
+
         //渐变展示启动屏
       	AlphaAnimation aa = new AlphaAnimation(0.3f,1.0f);
       	aa.setDuration(1500);
@@ -75,7 +78,7 @@ public class WebCam extends Activity implements OnClickListener{
 		//startActivity(intent);
 		//WebCam.this.finish();
     }
-
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {

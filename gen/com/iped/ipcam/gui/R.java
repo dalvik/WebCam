@@ -9,7 +9,8 @@ package com.iped.ipcam.gui;
 
 public final class R {
     public static final class anim {
-        public static final int shake_anim=0x7f040000;
+        public static final int alpha_enter=0x7f040000;
+        public static final int shake_anim=0x7f040001;
     }
     public static final class array {
         public static final int compress_quar_array=0x7f070003;
@@ -984,5 +985,7 @@ public final class R {
     }
     public static final class style {
         public static final int dialog=0x7f080000;
+        public static final int main_exit_style=0x7f080001;
+        public static final int main_exit_themes=0x7f080002;
     }
 }

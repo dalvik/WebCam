@@ -217,6 +217,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
+					stopPlay = true;
 					System.out.println("read over break....");
 					break;
 				}
@@ -686,6 +687,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		private int pcmBufferLength = 0;
 		
+		private int amrBufferLength = 0;
+		
 		private int index = 0;
 		
 		private static final String AUDIO_RECORDER_FOLDER = "WebCamRecorder";
@@ -701,11 +704,13 @@ public class MyVideoView extends ImageView implements Runnable {
 		private AudioTrack m_out_trk = null;
 		
 		private WebCamAudioRecord() {
+			Speex.initEcho(160, 160*10);
 			UdtTools.initAmrEncoder();
 			createAudioRecord();
-			pcmBufferLength = miniRecoderBufSize * 10;
+			pcmBufferLength = miniRecoderBufSize * 5;
+			amrBufferLength = miniRecoderBufSize /2;
 			pcmBuffer = new byte[pcmBufferLength];
-			amrBuffer = new byte[miniRecoderBufSize];
+			amrBuffer = new byte[amrBufferLength];
 		}
 		
 		public void run() {
@@ -724,7 +729,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		  miniRecoderBufSize = AudioRecord.getMinBufferSize(frequency,
 				  AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate);
     		audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, frequency,
-    				AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate, miniRecoderBufSize);    	
+    				AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate, miniRecoderBufSize*10);    	
     	 }
 		  
 		  private void startRecording(){
@@ -734,44 +739,26 @@ public class MyVideoView extends ImageView implements Runnable {
 		  
 		  private void writeAudioDataToFile(){
               byte data[] = new byte[miniRecoderBufSize];
-              /*String filename = getTempFilename();
-              FileOutputStream os = null;
-              try {
-                      os = new FileOutputStream(filename);
-              } catch (FileNotFoundException e) {
-                      e.printStackTrace();
-              }*/
-              
               int read = 0;
-             // if(null != os){
-                      while(!stopPlay && !stopPlay){
-                              read = audioRecord.read(data, 0, miniRecoderBufSize);
-                              if(AudioRecord.ERROR_INVALID_OPERATION != read){
-                            	  //m_out_trk.write(data, 0, miniRecoderBufSize);
-                            	  int res = 0;
-                            	  if(++index%10 ==0) {
-                            		 res = UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, miniRecoderBufSize);
-                            		 Log.d(TAG, "### encode = " + res +  " index=" + index);
-                            		 index= 0;
-                            		 UdtTools.sendAudioMsg(amrBuffer, miniRecoderBufSize);
-                            	  }
-                            	  System.arraycopy(data, 0, pcmBuffer, index*miniRecoderBufSize, read);
-                            	  Log.d(TAG, "audio size = " + miniRecoderBufSize  + " pcmBufferLength=" + pcmBufferLength +  " index=" + index);
-                              }
-                      }
-                      
-                     /* try {
-                              os.close();
-                      } catch (IOException e) {
-                              e.printStackTrace();
-                      }*/
-                      //
-                      stopRecording();
-                      
-             // }
+              while(!stopPlay && !stopPlay){
+                      read = audioRecord.read(data, 0, miniRecoderBufSize);
+                      if(AudioRecord.ERROR_INVALID_OPERATION != read){
+                    	  //m_out_trk.write(data, 0, miniRecoderBufSize);
+                    	  if(++index%5 ==0) {
+                    		 UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
+                    		 //Log.d(TAG, "### encode = " + res +  " index=" + index);
+                    		 index= 0;
+                    		 UdtTools.sendAudioMsg(amrBuffer, amrBufferLength);
+                    	  }
+                    	  System.arraycopy(data, 0, pcmBuffer, index*miniRecoderBufSize, read);
+                    	  //Log.d(TAG, "audio size = " + miniRecoderBufSize  + " pcmBufferLength=" + pcmBufferLength +  " index=" + index);
+                   }
+              }
+              stopRecording();
       }
 	
 		  private void stopRecording(){
+			  Speex.stopEcho();
               if(null != audioRecord){
                       audioRecord.stop();
                       audioRecord.release();

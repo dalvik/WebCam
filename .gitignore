@@ -4,4 +4,4 @@ obj/
 bin/
 gen/
 proguard/
-libs/armeabi/
+libs/
