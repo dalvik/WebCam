@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -47,7 +49,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int VIDEOSOCKETBUFLENGTH = 1500;//342000;
 
-	private final static int RECEAUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 320 * Command.CHANEL * 1;
 	
 	private final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -75,7 +77,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private boolean stopPlay = true;
 
-	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE * 10];
+	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE];
 	
 	private static final String TAG = "MyVideoView";
 
@@ -137,6 +139,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	private int TOTAL_FRAME_SIZE = 50 * MAX_FRAME;
 	
 	private byte[] amrBuffer = new byte[TOTAL_FRAME_SIZE];
+	
+	private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Command.CHANEL * 10;
+	
+	byte[] pcmArr = new byte[pcmBufferLength];
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -628,8 +634,6 @@ public class MyVideoView extends ImageView implements Runnable {
 	class RecvAudio implements Runnable {
 
 		private AudioTrack m_out_trk = null;
-		private int pcmBufferLength = RECEAUDIOBUFFERSIZE * Command.CHANEL * 10;
-		byte[] pcmArr = new byte[pcmBufferLength];
 
 		public RecvAudio() {
 
@@ -656,7 +660,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			while (!stopPlay) {
 				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				//Log.d(TAG, "audio recvDataLength===" + recvDataLength);
+				Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
 				if(recvDataLength<=0) {
 					stopPlay = true;
 					break;
@@ -701,8 +705,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		private byte[] pcmBuffer;
 		
-		private AudioTrack m_out_trk = null;
-		
 		private WebCamAudioRecord() {
 			Speex.initEcho(160, 160*10);
 			UdtTools.initAmrEncoder();
@@ -714,14 +716,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		
 		public void run() {
-			/*int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
-					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size,
-					AudioTrack.MODE_STREAM);
-			m_out_trk.play();*/
 			startRecording();
 		}
 		
@@ -729,7 +723,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		  miniRecoderBufSize = AudioRecord.getMinBufferSize(frequency,
 				  AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate);
     		audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, frequency,
-    				AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate, miniRecoderBufSize*10);    	
+    				AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate, miniRecoderBufSize*5);    	
     	 }
 		  
 		  private void startRecording(){
@@ -738,14 +732,15 @@ public class MyVideoView extends ImageView implements Runnable {
 		  }
 		  
 		  private void writeAudioDataToFile(){
-              byte data[] = new byte[miniRecoderBufSize];
+			  byte data[] = new byte[miniRecoderBufSize];
               int read = 0;
               while(!stopPlay && !stopPlay){
                       read = audioRecord.read(data, 0, miniRecoderBufSize);
                       if(AudioRecord.ERROR_INVALID_OPERATION != read){
                     	  //m_out_trk.write(data, 0, miniRecoderBufSize);
                     	  if(++index%5 ==0) {
-                    		 UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
+                    		  //Speex.cancellation(pcmBuffer, pcmArr, amrBuffer);
+                    		  UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
                     		 //Log.d(TAG, "### encode = " + res +  " index=" + index);
                     		 index= 0;
                     		 UdtTools.sendAudioMsg(amrBuffer, amrBufferLength);
