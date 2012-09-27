@@ -2,13 +2,11 @@ package com.iped.ipcam.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-<<<<<<< HEAD
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-=======
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,36 +17,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
->>>>>>> playbackok
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
-<<<<<<< HEAD
 import android.os.Environment;
 import android.widget.Toast;
 
 import com.iped.ipcam.gui.R;
-=======
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
 import com.iped.ipcam.pojo.Device;
->>>>>>> playbackok
-
 /** 文件处理工具类 **/
 public class FileUtil {
 
-<<<<<<< HEAD
-=======
 	private static String TAG = "FileUtil";
 	
->>>>>>> playbackok
 	/** 获取SD路径 **/
 	public static String getDefaultPath() {
-		// 判断sd卡是否存在
 		if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
 			File sdDir = Environment.getExternalStorageDirectory();// 获取跟目录
 			return sdDir.getPath();
@@ -92,8 +81,6 @@ public class FileUtil {
 	public static String combinPath(String path, String fileName) {
 		return path + (path.endsWith(File.separator) ? "" : File.separator) + fileName;
 	}
-<<<<<<< HEAD
-=======
 	
 	public static String formetFileSize(long fileS) {
 		DecimalFormat df = new DecimalFormat("#.00");
@@ -110,8 +97,6 @@ public class FileUtil {
 		return fileSizeString;
 	}
 	
->>>>>>> playbackok
-
 	/** 复制文件 **/
 	public static boolean copyFile(File src, File tar) throws Exception {
 		if (src.isFile()) {
@@ -164,8 +149,6 @@ public class FileUtil {
 	}
 	
 	
-<<<<<<< HEAD
-=======
 	public static void persistentDevice(Context context, List<Device> deviceList) {
 		File file = new File(context.getFilesDir().getPath() + File.separator +  Constants.DEVICELIST);
 		if(file.exists()) {
@@ -255,5 +238,4 @@ public class FileUtil {
 		}
 		return deviceList;
 	}
->>>>>>> playbackok
 }
