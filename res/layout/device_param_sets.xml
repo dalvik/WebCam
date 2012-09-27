@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@color/darkgray">
     
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    android:orientation="vertical" >
 	
 	    <TextView android:layout_width="fill_parent"
@@ -15,273 +16,917 @@
 	    	android:text="@string/device_params_info_str"/>
 	    
 	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
+	    	android:layout_height="3dp"
 	    	android:background="?android:attr/listDivider"/>
 	    
+	    <!-- 设备信息 -->
 	    <TableLayout  android:layout_width="fill_parent"
 	    	android:layout_height="wrap_content"
-	    	android:stretchColumns="1,3"
+	    	android:stretchColumns="1,3,5"
 	    	android:padding="3dip">
-	        
 	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_version_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	            
+	            <!-- device name -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_device_name_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_set_name" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:singleLine="true"/>
-	        </TableRow>
-	        
-	        <TableRow >
+	            
+	            <!-- device id -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_address_type_str"/>
+	    			android:layout_marginLeft="5dip"
+	    			android:text="@string/device_param_inentify_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_set_inentify" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
-	            
+	           
+	        </TableRow>
+
+	         <TableRow >
+	              <!-- device version -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_device_address_str"/>
+	    			android:text="@string/device_params_version_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_set_version" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
-	        </TableRow>
-	        
+	            
+	            <!-- valuable time can store on sdcard -->
+	             <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:layout_marginLeft="5dip"
+	    			android:layout_weight="1"
+	    			android:text="@string/device_params_recorde_total_time_str"/>
+	            
+	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
+	                android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:editable="false"
+	    			android:layout_weight="1"
+	    			android:singleLine="true"/>
+	         </TableRow>
+	          
+	        <!-- TF storeage -->
 	        <TableRow >
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
 	    			android:text="@string/device_params_inside_total_space_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_set_tfcard_tatal_space" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
-	            
+	            <!-- mobile storeage -->
 	            <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
+	    			android:layout_marginLeft="5dip"
 	    			android:text="@string/device_params_outside_total_space_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText android:id="@+id/device_param_set_sdcard_tatal_space" 
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	        </TableRow>
-	        
-	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_total_time_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
+	    			android:editable="false"
 	    			android:singleLine="true"/>
 	            
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text=""/>
-	            
 	        </TableRow>
-	        
+		    
 	    </TableLayout>
 	    
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
-	    	android:background="?android:attr/listDivider"/>
-	    
-	     <LinearLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-	          <TextView android:layout_width="wrap_content"
-		    	android:layout_height="wrap_content"
-		    	android:textSize="20dip"
-		    	android:textColor="@color/white"
-		    	android:text="@string/device_params_recorde_type_str"/>
-	    
-                <RadioGroup android:layout_width="fill_parent"
-	    				android:layout_height="fill_parent"
-	    				android:layout_weight="1"
+	    <!-- 存储设备 -->
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"
+		    android:visibility="gone"
+		    android:orientation="horizontal" >
+	        
+	         <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:layout_weight="1"
+	    			android:text="@string/device_params_storage_device_str"/>
+	             
+	             <RadioGroup android:id="@+id/device_param_set_storage_device_mode" 
+	                    android:layout_width="wrap_content"
+	    			    android:layout_height="wrap_content"
+	    			    android:layout_weight="1"
 	    				android:orientation="horizontal">
 	            
-	                <RadioButton android:layout_width="fill_parent"
-	    				android:layout_height="fill_parent"
+	                <RadioButton android:layout_width="wrap_content"
+	    				android:layout_height="wrap_content"
 	    				android:layout_weight="1"
 	    				android:text="@string/device_params_recorde_type_inside_str"/>
 	                
-	                <RadioButton android:layout_width="fill_parent"
-	    				android:layout_height="fill_parent"
+	                <RadioButton android:layout_width="wrap_content"
+	    				android:layout_height="wrap_content"
 	    				android:layout_weight="1"
 	    				android:text="@string/device_params_recorde_type_outsize_str"/>
 	                
 	            </RadioGroup>
 	            
-	            <CheckBox android:layout_width="fill_parent"
-    				android:layout_height="wrap_content"
-    				android:layout_weight="1"
-    				android:focusable="false"
-    				android:text="@string/device_params_recorde_type_close_str"
-    				android:checked="true"/>
-         </LinearLayout>
-         
-	         
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
-	    	android:background="?android:attr/listDivider"/>
-	    
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:textColor="@color/white"
-	    	android:textSize="20dip"
-	    	android:text="@string/device_params_recorde_speed_str"/>
-	    
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
-	    	android:background="?android:attr/listDivider"/>
-        
-	    <TableLayout  android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:stretchColumns="1,3"
-	    	android:padding="3dip">
-	        
-	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
+	             <!-- valuable time can store on sdcard -->
+	             <TextView android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_real_speed_str"/>
+	    			android:layout_weight="1"
+	    			android:text="@string/device_params_recorde_total_time_str"/>
 	            
-	            <EditText android:layout_width="wrap_content"
+	            <EditText    
+	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
+	    			android:editable="false"
+	    			android:layout_weight="1"
 	    			android:singleLine="true"/>
 	            
 	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text=""/>
-	        </TableRow>
-	        
-	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_frame_size_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	            
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_frame_speed_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	        </TableRow>
-	        
-	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_comp_quar_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	            
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_recorde_comp_type_str"/>
-	            
-	            <EditText android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	        </TableRow>
-	    </TableLayout>
+			    	android:layout_height="wrap_content"
+			    	android:layout_weight="1"
+			    	android:text=""/>
+			    
+	    </LinearLayout>
 	    
 	    <TextView android:layout_width="fill_parent"
 	    	android:layout_height="3px"
 	    	android:background="?android:attr/listDivider"/>
-	          
+	    
+	    <!-- 网卡设置 -->
 	     <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="vertical"
+                android:visibility="gone" >
 
 	          <TextView android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
 		    	android:textSize="20dip"
 		    	android:textColor="@color/white"
-		    	android:text="@string/device_params_monitor_speed_str"/>
+		    	android:text="@string/device_params_network_set_str"/>
 	    
+                <RadioGroup
+                    android:id="@+id/device_param_set_network_mode" 
+                    android:layout_width="fill_parent"
+	    			android:layout_height="wrap_content"
+	    			android:orientation="horizontal">
 	            
-	          <TextView android:layout_width="fill_parent"
-		    	android:layout_height="fill_parent"
-		    	android:textColor="@color/white"
-		    	android:layout_weight="1"
-		    	android:text="@string/device_params_monitor_frame_size_str"/>
+	                <RadioButton
+	                    android:id="@+id/device_param_set_network_mode_intelligent"
+	                    android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:text="@string/device_params_network_intelligent_mode_str"/>
+	                
+	                <RadioButton 
+	                    android:id="@+id/device_param_set_network_mode_wireuse"
+	                    android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:text="@string/device_params_network_wire_mode_str"/>
+	                
+	                <RadioButton
+	                    android:id="@+id/device_param_set_network_mode_wireless" 
+	                    android:layout_width="fill_parent"
+	    				android:layout_height="fill_parent"
+	    				android:layout_weight="1"
+	    				android:text="@string/device_params_network_wireless_mode_str"/>
+	                
+	            </RadioGroup>
+	           
+                
+	            <!-- 有线网络设置 -->
+                <TextView android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"
+			    	android:textSize="20dip"
+			    	android:textColor="@color/white"
+			    	android:text="@string/device_params_wireuse_network_set_str"/>
 	    
-	           <Spinner android:layout_width="fill_parent"
-		    	android:layout_height="fill_parent"
-		    	android:layout_weight="1"/>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="1"
+				    android:orientation="horizontal" >
+	        
+                    <RadioGroup
+		    	            android:id="@+id/device_param_set_wireuse_network_mode"  
+		    	            android:layout_width="fill_parent"
+			    			android:layout_height="fill_parent"
+			    			android:layout_weight="1"
+			    			android:orientation="horizontal">
+			            
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireuse_network_mode_auto"   
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:checked="true"
+			    				android:text="@string/device_params_wireuse_audo_ipaddress_mode_str"/>
+			                
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireuse_network_mode_static"   
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_wireuse_static_ipaddress_mode_str"/>
+			                
+			        </RadioGroup>
+               </LinearLayout>
+               
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="1dip">
+	                
+			         <!-- ip address  -->
+		    	     <TableRow >
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireuse_ip_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireuse_ip_address" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			            
+			            <!-- getway address -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireuse_getway_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireuse_gateway_address" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+
+			            <!-- subaddress address -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireuse_sub_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireuse_subway_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			        </TableRow>
+	        
+		    	      <TableRow >
+			            <!-- dns -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireuse_set_dns1_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireuse_dns1_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			            
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireuse_set_dns2_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireuse_dns2_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			        </TableRow>
+		        </TableLayout>
+		        
+		    	 <TextView android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"
+			    	android:textSize="20dip"
+			    	android:textColor="@color/white"
+			    	android:text="@string/device_params_wireless_network_set_str"/>
+	    
+	    	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="1"
+				    android:orientation="horizontal" >
+	        
+	    	         <RadioGroup android:id="@+id/device_param_set_wireless_network_mode"  
+		    	                android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:orientation="horizontal">
+			            
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireless_network_mode_audo" 
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:checked="true"
+			    				android:text="@string/device_params_wireless_audo_ipaddress_mode_str"/>
+			                
+			                <RadioButton
+			                    android:id="@+id/device_param_set_wireless_network_static" 
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_wireless_static_ipaddress_mode_str"/>
+			                
+			        </RadioGroup>
+			            
+		    	</LinearLayout>
+	           
+		        <!-- 无线网络设置 -->
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="3dip">
+		    	    
+		    	     <TableRow >
+			            <!-- ip address  -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireless_ip_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireless_ip_address" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			            
+			            <!-- getway address -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireless_getway_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireless_gateway_address" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+
+			            <!-- subaddress address -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireless_sub_address_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireless_subway_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			        </TableRow>
+	        
+		    	      <TableRow >
+			            <!-- dns -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireless_set_dns1_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireless_dns1_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			            
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_wireless_set_dns2_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_wireless_dns2_address"
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:singleLine="true"/>
+			        </TableRow>
+		        </TableLayout>
+		        
+		        <TextView android:layout_width="fill_parent"
+			    	android:layout_height="3px"
+			    	android:background="?android:attr/listDivider"/>
+		    	<!-- 接入点设置 -->
+		    	 <!-- apn  -->
+	            <TextView android:layout_width="wrap_content"
+	    			android:layout_height="wrap_content"
+	    			android:textColor="@color/white"
+	    			android:text="@string/device_params_apn_set_str"/>
+		            
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3"
+			    	android:padding="3dip">
+		    	    
+		    	    <TableRow >
+			    	    <!-- apn  -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_apn_set_name_str"/>
+			            
+			            <EditText android:id="@+id/device_params_apn_set_name_id" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:singleLine="true"/>
+			            
+			            <!-- apn pwd -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:textColor="@color/white"
+			    			android:text="@string/device_params_apn_set_pwd_str"/>
+			            
+			            <EditText android:id="@+id/device_params_apn_set_pwd_id" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:password="true"
+			    			android:singleLine="true"/>
+		    	        
+		    	    </TableRow>
+		    	</TableLayout>
+		    	
+		    	  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					    android:layout_width="fill_parent"
+					    android:layout_height="wrap_content"
+					    android:layout_weight="1"
+					    android:orientation="horizontal" >
+		            
+		             <Button
+		                android:id="@+id/device_params_apn_set_search_wireles_id" 
+		                android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					    android:layout_weight="1"
+					    android:text="@string/device_params_apn_set_search_wireless_str"/>
+		             
+		             <TextView android:layout_width="wrap_content"
+		    			android:layout_height="wrap_content"
+		    			android:textColor="@color/white"
+		    			android:layout_weight="1"
+		    			android:gravity="left"
+		    			android:text="@string/device_params_apn_set_wireless_list_str"/>
+		              
+		    	   </LinearLayout>
+		    	   
+	    	     <Spinner android:id="@+id/device_params_apn_set_wireless_list_id" 
+			            android:layout_width="wrap_content"
+			            android:prompt="@string/device_params_apn_set_wireless_list_str"
+				    	android:layout_height="wrap_content"/>
          </LinearLayout>
          
 	      <TextView android:layout_width="fill_parent"
 	    	android:layout_height="3px"
 	    	android:background="?android:attr/listDivider"/>
-	      
-	       <LinearLayout
+	    
+	     <!-- 录像设置 -->
+	     <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
+                android:orientation="vertical" >
+		    	 
 	          <TextView android:layout_width="wrap_content"
-		    	android:layout_height="wrap_content"
-		    	android:textSize="20dip"
-		    	android:textColor="@color/white"
-		    	android:text="@string/device_params_date_str"/>
-	    
+			    	android:layout_height="wrap_content"
+			    	android:textSize="20dip"
+			    	android:textColor="@color/white"
+			    	android:text="@string/device_params_video_record_set_str"/>
+	          
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="3dip">
 	            
-	          <DatePicker android:layout_width="wrap_content"
-               		android:layout_height="wrap_content"/>
+		    	    <TableRow >
+		    	          <RadioButton
+		    	                android:id="@+id/device_params_video_record_set_one_id" 
+		    	                android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:checked="true"
+			    				android:text="@string/device_params_video_record_set_one_str"/>
+		    	          
+			               <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:layout_gravity="right|center"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+			               
+		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_rate_one_id" 
+					            android:layout_width="wrap_content"
+					            android:prompt="@string/device_params_recorde_frame_speed_str"
+					            android:entries="@array/frame_rate_array"
+						    	android:layout_height="wrap_content"/>
+		    	          
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:layout_gravity="right|center"
+				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+		    	          
+		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_size_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:entries="@array/monitor_frame_size"
+					    	android:prompt="@string/device_params_recorde_frame_size_str"/>
+		    	    </TableRow>
+		    	    
+		    	    <TableRow android:visibility="gone">
+		    	          <RadioButton android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_video_record_set_two_str"
+			    				android:enabled="false"/>
+			                
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+			               
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
+		    	          
+		    	           <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+		    	          
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
+		    	    </TableRow>
+		    	    
+		    	    <TableRow android:visibility="gone">
+		    	          <RadioButton android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:enabled="false"
+			    				android:text="@string/device_params_video_record_set_three_str"/>
+			                
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+			               
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
+		    	          
+		    	           <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+		    	          
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:clickable="false"
+					    	android:enabled="false"/>
+		    	    </TableRow>
+		    	</TableLayout>
+	         
+	    </LinearLayout>
 	    
-	           <TimePicker android:layout_width="wrap_content"
-                	android:layout_height="wrap_content"/>
-	           
-	           <Button android:layout_width="wrap_content"
-               		android:layout_height="wrap_content"
-               		android:text="@string/device_params_sync_date_str"/>
-         </LinearLayout>
-         
+	    <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	    
+	      <!-- 监控设置 -->
+	     <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+		    	 
+	          <TextView android:layout_width="wrap_content"
+			    	android:layout_height="wrap_content"
+			    	android:textSize="20dip"
+			    	android:textColor="@color/white"
+			    	android:text="@string/device_params_monitor_set_str"/>
+	          
+		    	<TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="3dip">
+	            
+		    	     <TableRow >
+		    	          <RadioButton 
+		    	              android:id="@+id/device_params_monitor_intelligent_mode_set_id" 
+		    	              android:layout_width="fill_parent"
+			    			  android:layout_height="fill_parent"
+			    			  android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
+		    	          
+			               <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/black"
+				    			android:visibility="gone"
+				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+			               
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:visibility="gone"
+					    	android:enabled="false"/>
+		    	          
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/black"
+				    			android:visibility="gone"
+				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+		    	          
+		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:visibility="gone"
+					    	android:enabled="false"/>
+		    	    </TableRow>
+		    	    
+		    	    <TableRow >
+		    	          <RadioButton
+		    	                android:id="@+id/device_params_monitor_self_mode_set_id" 
+		    	                android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:text="@string/device_params_monitor_self_mode_set_str"/>
+		    	          
+			               <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+			               
+		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_rate_id" 
+				            android:layout_width="wrap_content"
+				            android:entries="@array/frame_rate_array"
+					    	android:layout_height="wrap_content"/>
+		    	          
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:visibility="gone"
+				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+		    	          
+		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_size_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:entries="@array/monitor_frame_size"
+					    	android:visibility="invisible"
+					    	android:clickable="false"/>
+		    	    </TableRow>
+		       </TableLayout>
+	     </LinearLayout>
+	     
+	     <TextView android:layout_width="fill_parent"
+	    	android:layout_height="3px"
+	    	android:background="?android:attr/listDivider"/>
+	    
+	      <!-- 其他设置 -->
+	     <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" 
+                android:visibility="gone">
+		     <TextView android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:textColor="@color/white"
+		    	android:textSize="20dip"
+		    	android:text="@string/device_params_other_set_str"/>
+		    
+		     <TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="6dip">
+	            
+	               <!-- sound set -->
+		           <TableRow >
+			         <TextView android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:layout_margin="7dip"
+				    	android:text="@string/device_params_other_set_sound_str"/>
+			         
+		               <RadioGroup 
+		                    android:id="@+id/device_params_other_set_sound_open_id"
+		                    android:layout_width="fill_parent"
+		    				android:layout_height="fill_parent"
+		    				android:layout_weight="1"
+		    				android:orientation="horizontal">
+			            
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_sound_open_flag_id"
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:checked="true"
+			    				android:text="@string/device_params_other_set_sound_open_str"/>
+			                
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_sound_close_flag_id"
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_other_set_sound_close_str"/>
+			                
+			            </RadioGroup>
+		           </TableRow>
+		           
+	                <!-- alarm set -->
+		            <TableRow >
+			         
+			         <TextView android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:layout_margin="7dip"
+				    	android:text="@string/device_params_other_set_mobile_alarm_str"/>
+			         
+		               <RadioGroup 
+		                    android:id="@+id/device_params_other_set_mobile_alarm_flag_id"
+		                    android:layout_width="fill_parent"
+		    				android:layout_height="fill_parent"
+		    				android:layout_weight="1"
+		    				android:orientation="horizontal">
+			            
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_mobile_alarm_flag_open_id"
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:checked="true"
+			    				android:text="@string/device_params_other_set_sound_open_str"/>
+			                
+			                <RadioButton 
+			                    android:id="@+id/device_params_other_set_mobile_alarm_flag_close_id"
+			                    android:layout_width="fill_parent"
+			    				android:layout_height="fill_parent"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_other_set_sound_close_str"/>
+			                
+			            </RadioGroup>
+			            
+			           
+		           </TableRow>
+			           
+		            <TableRow >
+		                  <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_other_set_mobile_alarm_offset_str"/>
+				         
+		    	         <Spinner android:id="@+id/device_params_other_set_mobile_alarm_offset_prompt_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:entries="@array/mobile_alarm_offset_prompt_array"
+					    	android:prompt="@string/device_params_other_set_mobile_alarm_offset_prompt_str"/>
+		    	         
+		    	          <TextView android:layout_width="wrap_content"
+				    			android:layout_height="wrap_content"
+				    			android:textColor="@color/white"
+				    			android:text="@string/device_params_other_set_mobile_alarm_email_str"/>
+		    	          
+		    	          <EditText android:id="@+id/device_params_other_set_mobile_alarm_email_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+		           </TableRow>
+		           
+		           <TableRow android:visibility="gone"><!-- security set -->
+			         <TextView 
+			            android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:text="@string/device_params_other_set_security_str"/>
+			         
+			         <TextView android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:text="@string/device_params_other_set_visit_password_str"/>
+			         
+		               <EditText android:id="@+id/device_params_other_set_security_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:inputType="textPassword"/>
+
+		           </TableRow>
+		           
+		            <TableRow >
+		                
+		            <!-- time set -->
+			         <TextView android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:text="@string/device_params_other_set_time_str"/>
+			         
+		               <Button android:id="@+id/device_params_other_set_date_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+		               
+		                <TextView android:layout_width="fill_parent"
+					    	android:layout_height="wrap_content"
+					    	android:textColor="@color/white"
+					    	android:textSize="20dip"
+					    	android:text="@string/device_params_other_set_time_date_format_str"/>
+		                
+			         
+			           <Button android:id="@+id/device_params_other_set_time_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+		               
+		                <TextView android:layout_width="fill_parent"
+					    	android:layout_height="wrap_content"
+					    	android:textColor="@color/white"
+					    	android:textSize="20dip"
+					    	android:text="@string/device_params_other_set_time_time_format_str"/>
+		               
+		           </TableRow>
+		           
+		           <TableRow >
+		               
+		               <Button android:id="@+id/device_params_other_set_system_time_id"
+				            android:layout_width="wrap_content"
+				            android:layout_weight="1"
+		                    android:text="@string/device_params_other_set_system_str" 
+					    	android:layout_height="wrap_content"/>
+		               
+		             
+		              <!-- 
+			          <TextView android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:textColor="@color/white"
+				    	android:textSize="20dip"
+				    	android:text="@string/device_params_other_set_security_visit_password_str"/>
+			         
+		               <EditText android:id="@+id/device_params_other_set_security_id" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+ 					-->
+		           </TableRow>
+		     </TableLayout>
+		    	
+	     </LinearLayout>
+	     
 	      <TextView android:layout_width="fill_parent"
 	    	android:layout_height="3px"
 	    	android:background="?android:attr/listDivider"/>
 	      
+	       <!-- security_visit_password set -->
+           <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
+                android:layout_width="wrap_content"
+	    	 android:layout_height="wrap_content"
+	    	 android:layout_weight="1"
+	    	 android:text="@string/password_modify_security_botton_str"/>
+		    
+            <TextView android:layout_width="fill_parent"
+	    		android:layout_height="3px"
+	    		android:background="?android:attr/listDivider"/>
+	      
+              
+	        <TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,2"
+			    	android:padding="3dip">
+	            
+	               <!-- bottom button-->
+		           <TableRow >
+		               <Button 
+		                    android:id="@+id/device_params_set_factory_button_id"
+		                    android:text="@string/device_params_reset_set_factory_para_str" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:visibility="gone"/>
+		               
+		                <Button android:id="@+id/device_params_set_commit_button_id"
+		                   android:text="@string/device_params_set_sure_str" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+		                
+		                 <Button android:id="@+id/device_params_set_concle_button_id"
+		                   android:text="@string/device_params_set_cancle_str" 
+				            android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"/>
+		           </TableRow>
+		               
+		    </TableLayout>
 	       <TextView android:layout_width="fill_parent"
 	    	  android:layout_height="30dip"/>
-	      
 	</LinearLayout>
 </ScrollView>

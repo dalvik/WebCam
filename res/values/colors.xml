@@ -295,5 +295,7 @@
  <!-- 海军色 -->
     <color name="black">#000000</color>
  <!-- 黑色 -->
+ 
+ <color name="transport">#00FFFFFF</color>
 
 </resources>

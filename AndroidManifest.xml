@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iped.ipcam.gui"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="3"
+    android:versionName="3.5.1" >
 
-    <uses-sdk android:minSdkVersion="4"/>
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="9"/>
     
 	<uses-permission android:name="android.permission.INTERNET"/>
-	
+
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -16,15 +18,24 @@
  	
  	<uses-permission android:name="android.permission.RESTART_PACKAGES"/>  
  	
+ 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+ 	
+ 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
+ 	
+ 	<uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
+ 	
+ 	<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
+ 	
     <!--  android:name=".WebTabWidget" -->
         
-    <application
+    <application android:debuggable="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-        <activity
+        <activity 
             android:label="@string/app_name"
-            android:name=".WebCam" 
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+			android:debuggable="true"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name=".WebCam">
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,19 +43,26 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".WebTabWidget" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.NoTitleBar"/>
+        <!-- android:theme="@style/main_exit_themes"android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
+        <activity android:launchMode="singleInstance" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  android:name=".WebTabWidget" android:configChanges="keyboardHidden|orientation"/>
 
         <activity android:name=".LeftVideoView"/>
         
-        <activity android:name=".CamVideoH264"/>
+        <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
         
-        <activity android:name=".DeviceManager"/>
+        <activity android:launchMode="singleInstance" android:name=".DeviceManager"/>
         
-        <activity android:name=".DeviceParamSets"/>
+        <activity android:launchMode="singleInstance" android:name=".DeviceParamSets" android:configChanges="keyboardHidden|orientation" android:screenOrientation="landscape" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        	<intent-filter>
+        	    <action android:name="android.intent.action.QUERY_CONFIG_ACTION"/>
+        	    <category android:name="android.intent.category.DEFAULT"/>
+        	    <data android:mimeType="vnd.android.webcam.type/vnd.iped.webcam"/>
+        	</intent-filter>    
+        </activity>
         
-        <activity android:name=".PlayBack"/>
+        <activity android:launchMode="singleInstance" android:name=".PlayBack"/>
         
-        <activity android:name=".SystemSettings"/>
+        <activity android:launchMode="singleInstance" android:name=".SystemSettings"/>
         
         <activity android:name=".List1" android:theme="@android:style/Theme.Dialog"/>
         

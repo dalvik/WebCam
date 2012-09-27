@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@color/darkgray" >
 
     <TableLayout
         android:id="@+id/user_oper"
@@ -13,7 +14,6 @@
         android:stretchColumns="0,1,2" >
 
         <TableRow >
-
             <Button android:id="@+id/play_back_video_search"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

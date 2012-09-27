@@ -144,6 +144,7 @@ public class Panel extends LinearLayout {
 			} else if (lp.rightMargin == -(mRightMargin) && panelClosedEvent != null) {// 收缩之后
 				panelClosedEvent.onPanelClosed(Panel.this);// 调用CLOSE回调函数
 			}
+			System.out.println(lp.width);
 			Panel.this.setLayoutParams(lp);
 		}
 	}

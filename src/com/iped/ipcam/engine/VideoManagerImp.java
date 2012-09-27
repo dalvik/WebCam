@@ -1,23 +1,24 @@
 package com.iped.ipcam.engine;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.Log;
 
+import com.iped.ipcam.gui.R;
+import com.iped.ipcam.gui.UdtTools;
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.RandomUtil;
 
 public class VideoManagerImp implements IVideoManager {
 
@@ -25,11 +26,13 @@ public class VideoManagerImp implements IVideoManager {
 	
 	private List<Video> videoList = new ArrayList<Video>();
 	
-	private String deviceName;
+	private Device device;
 	
 	private Date start;
 	
 	private Date end;
+	
+	private String id;
 	
 	private String  TAG = "VideoManagerImp";
 	
@@ -44,8 +47,8 @@ public class VideoManagerImp implements IVideoManager {
 	}
 
 	@Override
-	public void videoSearchInit(String device, Date start, Date end) {
-		this.deviceName = device;
+	public void videoSearchInit(Device device, Date start, Date end) {
+		this.device = device;
 		this.start = start;
 		this.end = end;
 	}
@@ -99,42 +102,33 @@ public class VideoManagerImp implements IVideoManager {
 		
 		@Override
 		public void run() {
-			byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-			byte [] tem = CamCmdListHelper.GetCmd_NetFiles.getBytes();
-			DatagramSocket datagramSocket = null;
-			//00068000:00fff5b2:20120104165801-20120104170649
-			try {
-				datagramSocket = new DatagramSocket();
-				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-				System.arraycopy(tem, 0, buffTemp, 0, tem.length);
-				System.out.println(deviceName);
-				DatagramPacket datagramPacket = new DatagramPacket(buffTemp, buffTemp.length, InetAddress.getByName(deviceName), 60000);
-				datagramSocket.send(datagramPacket);
-				DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-				datagramSocket.receive(rece);
-				splitFilesInfoFromBuf(PackageUtil.deleteZero(buffTemp));
-				updateList();
-			} catch (SocketException e) {
-				e.printStackTrace();
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if(datagramSocket != null) {
-					datagramSocket.close();
-				}
-				handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
+			id = device.getDeviceID();
+			int res = UdtTools.checkCmdSocketEnable(id);
+			Log.d(TAG, "### UdtTools checkCmdSocketEnable result = " + res);
+			if(res>0) { // socket is valid
+				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+				//Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
+				//intent.setType(WebCamActions.QUERY_CONFIG_MINITYPE);
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(fetchVideoRunnable);
+			}else {
+				String random = RandomUtil.generalRandom();
+				//Log.d(TAG, "random = " + random);
+				int result = UdtTools.monitorCmdSocket(id, random);
+				Log.d(TAG, "monitor result = " + result);
+				analyseResult(result, device);
 			}
 		}
-		
 		
 		//00000000:00fff094:20120104150759-20120104151643
 		public void splitFilesInfoFromBuf(byte[]files) {
 			String s = new String(files);
-			System.out.println(s);
+			//System.out.println(s);
 			String[] temp = s.split("\n");
 			for(String t:temp) {
+				//Log.d(TAG, "### temp = " + t);
 				analyFileFromString(t);
 			}
 		}
@@ -143,24 +137,26 @@ public class VideoManagerImp implements IVideoManager {
 		public void analyFileFromString(String s) {
 			int length = s.length();
 			if(s== null || length<47) {
+				Log.d(TAG, "### video ="  + s);
 				return;
 			}
 			String index = s.substring(0, 8);
 			String fileLength = s.substring(9, 17);
 			String start = s.substring(18, 32);
 			String end = s.substring(33, length);
+			//Log.d(TAG, "### video ="  + "index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
 			if((fileLength != null && fileLength.trim().length()<=0) || (end != null && end.trim().length()<=0)) {
-				Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
+				Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 				videoList.add(video);
 				return;
 			} 
-			if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
+			/*if(!checkDate(DateUtil.formatTimeToDate(start), DateUtil.formatTimeToDate(end))) {
+				Log.d(TAG, "########## =====");
 				return ;
-			}
+			}*/
 			//int i = Integer.parseInt(index, 16);
 			//int j = Integer.parseInt(fileLength, 16);
-			//System.out.println("index=" + index + " fileLenght=" + fileLength + " start=" + start + " end=" + end);
-			Video video = new Video(index, deviceName, start, end, fileLength, deviceName);
+			Video video = new Video(index, device.getDeviceName(), start, end, fileLength, id);
 			videoList.add(video);
 		}
 		
@@ -174,8 +170,71 @@ public class VideoManagerImp implements IVideoManager {
 		public void updateList() {
 			handler.sendEmptyMessage(Constants.UPDATEVIDEOLIST);
 		}
+		
+		private void analyseResult(int result, Device device) {
+			switch (result) {
+			case ErrorCode.STUN_ERR_INTERNAL:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_internel);
+				return;
+			case ErrorCode.STUN_ERR_SERVER:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_server_not_reached);
+				return;
+			case ErrorCode.STUN_ERR_TIMEOUT:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_timeout);
+				return;
+			case ErrorCode.STUN_ERR_INVALIDID:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_unlegal);
+				return;
+			case ErrorCode.STUN_ERR_CONNECT:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_connect_error);
+				return;
+			case ErrorCode.STUN_ERR_BIND:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_bind_error);
+				return;
+			default:
+				break;
+			}
+			HandlerThread handlerThread = new HandlerThread("test1");
+			handlerThread.start();
+			Handler mHandler = new Handler(handlerThread.getLooper());
+			mHandler.post(fetchVideoRunnable);
+		}
+		
+		private Runnable fetchVideoRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+				String tem = CamCmdListHelper.GetCmd_NetFiles;
+				String id = device.getDeviceID();
+				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
+				//System.out.println("res=" + res);
+				res = UdtTools.recvCmdMsgById(id, buffTemp, Constants.COMMNICATEBUFFERSIZE);
+				if(res > 0) {
+					byte[] recv = new byte[res];
+					System.arraycopy(buffTemp, 4, recv, 0, res);
+					Log.d(TAG, "### length =  " + res + " content = " + new String(recv));
+					//System.out.println("### " + res + " " + new String(recv));
+					splitFilesInfoFromBuf(PackageUtil.deleteZero(recv));
+					updateList();
+					handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
+				}else {
+					sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
+				}
+				//00068000:00fff5b2:20120104165801-20120104170649
+			}
+		};
+		
+		
+		private void sendMessage(int msgId, int strId) {
+			Message msg = handler.obtainMessage();
+			msg.arg1 = strId;
+			msg.what = msgId;
+			handler.sendMessage(msg);
+		}
 	}
 
+	
 	private class DeleteFileThread implements Runnable {
 
 		private Handler handler;
@@ -195,12 +254,28 @@ public class VideoManagerImp implements IVideoManager {
 		
 		@Override
 		public void run() {
-			byte [] tem = (CamCmdListHelper.DelCmd_DeleteFiles+ startIndex + endIndex).getBytes();
+			id = device.getDeviceID();
+			int res = UdtTools.checkCmdSocketEnable(id);
+			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
+			if(res>0) { // socket is valid
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(deleteVideoRunnable);
+			}else {
+				String random = RandomUtil.generalRandom();
+				//Log.d(TAG, "random = " + random);
+				int result = UdtTools.monitorCmdSocket(id, random);
+				Log.d(TAG, "monitor result = " + result);
+				analyseResult(result, device);
+			}
+			
+			/*byte [] tem = (CamCmdListHelper.DelCmd_DeleteFiles+ startIndex + endIndex).getBytes();
 			DatagramSocket datagramSocket = null;
 			try {
 				datagramSocket = new DatagramSocket();
 				datagramSocket.setSoTimeout(Constants.VIDEOSEARCHTIMEOUT);
-				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.UDPPORT);
+				DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), Constants.LOCALCMDPORT);
 				datagramSocket.send(datagramPacket);
 				DatagramPacket rece = new DatagramPacket(tem, tem.length);
 				datagramSocket.receive(rece);
@@ -228,8 +303,70 @@ public class VideoManagerImp implements IVideoManager {
 					datagramSocket.close();
 					datagramSocket = null;
 				}
-			}
+			}*/
 		}
+		
+		private void analyseResult(int result, Device device) {
+			switch (result) {
+			case ErrorCode.STUN_ERR_INTERNAL:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_internel);
+				return;
+			case ErrorCode.STUN_ERR_SERVER:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_server_not_reached);
+				return;
+			case ErrorCode.STUN_ERR_TIMEOUT:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_timeout);
+				return;
+			case ErrorCode.STUN_ERR_INVALIDID:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_unlegal);
+				return;
+			case ErrorCode.STUN_ERR_CONNECT:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_connect_error);
+				return;
+			case ErrorCode.STUN_ERR_BIND:
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_bind_error);
+				return;
+			default:
+				break;
+			}
+			HandlerThread handlerThread = new HandlerThread("test1");
+			handlerThread.start();
+			Handler mHandler = new Handler(handlerThread.getLooper());
+			mHandler.post(deleteVideoRunnable);
+		}
+		
+		private void sendMessage(int msgId, int strId) {
+			Message msg = handler.obtainMessage();
+			msg.arg1 = strId;
+			msg.what = msgId;
+			handler.sendMessage(msg);
+		}
+		
+		private Runnable deleteVideoRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				String tem = CamCmdListHelper.DelCmd_DeleteFiles + startIndex + endIndex;
+				String id = device.getDeviceID();
+				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
+				if(res > 0) {
+					if(!startIndex.equals(endIndex.trim())) {
+						clearVideoList();
+						handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+					} else {
+						boolean flag = removeVideoByIndex(startIndex);
+						if(flag) {
+							handler.sendEmptyMessage(Constants.DELETEFILESUCCESS);
+						} else {
+							handler.sendEmptyMessage(Constants.DELETEFILEERROR);
+						}
+					}
+				}else {
+					sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.video_delete_error);
+				}
+			}
+		};
+		
 		
 	}
 }

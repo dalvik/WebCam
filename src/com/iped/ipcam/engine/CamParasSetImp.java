@@ -1,88 +1,94 @@
 package com.iped.ipcam.engine;
 
-import android.os.Bundle;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
-import com.iped.ipcam.exception.CamManagerException;
-import com.iped.ipcam.pojo.CamConfig;
+import com.iped.ipcam.gui.UdtTools;
+import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.PackageUtil;
+import com.iped.ipcam.utils.ParaUtil;
 
 public class CamParasSetImp implements ICamParasSet {
 
+	private Thread getCamParaThread = null;
+	
+	private Map<String, String> paraMap = new LinkedHashMap<String, String>();
+	
 	@Override
-	public CamParasSetImp getCamPara(String ip, Handler handler) {
-		new Thread(new CamGetParas(ip, handler)).start();
+	public CamParasSetImp getCamPara(Device device, Handler handler) {
+		if(getCamParaThread != null) {
+			try {
+				getCamParaThread.join(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+			}
+			getCamParaThread = null;
+		}
+		getCamParaThread = new Thread(new CamGetParas(device, handler));
+		getCamParaThread.start();
 		return null;
 	}
 	
 	class CamGetParas implements Runnable {
 		
-		private String ip;
+		private Device device;
 		
 		private Handler handler;
 		
-		public CamGetParas(String ip, Handler handler) {
-			this.ip = ip;
+		private String TAG = "CamGetParas";
+		
+		public CamGetParas(Device device, Handler handler) {
+			this.device = device;
 			this.handler = handler;
 		}
 		
 		@Override
 		public void run() {
-			try {
-				PackageUtil.isOnline(ip, Constants.UDPPORT);
-			} catch (CamManagerException e) {
-				e.printStackTrace();
-				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-				return;
-			}
-			String rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Statue, ip, Constants.UDPPORT);
-			System.out.println("*/"  +rece.trim()+"/0");
-			if(rece != null) {
-				String[] info = rece.split("\n");
-				for(String s:info) {
-					System.out.println("-" + s.trim());
+			   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0";
+			   int res = UdtTools.sendCmdMsgById(device.getDeviceID(), cmdStr, cmdStr.length());
+			   Log.d(TAG, "### get web cam config result = " + res);
+			   if(res < 0) {
+					//return -2;
+				   handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+				   return;
 				}
-				if(info.length>4) {
-					CamConfig camConfig = new CamConfig();
-					camConfig.setVersion(info[0].trim());
-					camConfig.setInTotalSpace(info[1].trim());
-					camConfig.setOutTotalSpace(info[2].trim());
-					camConfig.setAddrType(info[3].trim());
-					camConfig.setValidRecordTime(info[4].trim());
-					
-					rece = PackageUtil.CMDPackage2(CamCmdListHelper.GetCmd_Config, ip, Constants.UDPPORT);
-					if(rece != null) {
-						String[] info2 = rece.split("\n");
-						for(String s:info2) {
-							System.out.println("-" + s.trim());
-						}
-						if(info2.length>8) {
-							camConfig.setFrameRate(info2[0].substring(info2[0].indexOf("=")+1));
-							camConfig.setCompression(info2[1].substring(info2[1].indexOf("=")+1));
-							camConfig.setResolution(info2[2].substring(info2[2].indexOf("=")+1));
-							camConfig.setGop(info2[3].substring(info2[3].indexOf("=")+1));
-							camConfig.setBitRate(info2[7].substring(info2[7].indexOf("=")+1));
-							Message msg = handler.obtainMessage();
-							Bundle data = new Bundle();
-							data.putParcelable("CAMPARAMCONFIG", camConfig);
-							msg.setData(data);
-							msg.what = Constants.HIDEQUERYCONFIGDLG;
-							handler.sendMessage(msg);
-						}else {
-							handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
-						}
-					} else {
-						handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-					}
-				}else {
-					handler.sendEmptyMessage(Constants.HIDEQUERYCONFIGDLG);
+				int bufLength = 1500;
+				byte[] recvBuf = new byte[bufLength];
+				int recvLength = UdtTools.recvCmdMsgById(device.getDeviceID(), recvBuf, bufLength);
+				Log.d(TAG, "### check pwd recv length " + recvLength);
+				if(recvLength<0) {
+					//return -2; // time out
+					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
+					return;
 				}
-			} else {
-				handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
-			}
+				String recvConfigStr = new String(recvBuf,0, recvLength);
+				Log.d(TAG, "### recvConfigStr " + recvConfigStr);
+				int rs = 0;
+				if("PSWD_NOT_SET".equals(recvConfigStr)) {
+					rs = -1;
+					Log.d(TAG, "CamParasSetImp PSWD_not set");
+				} else if("PSWD_FAIL".equals(recvConfigStr)) {
+					rs = -2;
+					Log.d(TAG, "CamParasSetImp PSWD_FAIL");
+				} else {
+					ParaUtil.putParaByString(recvConfigStr, paraMap);
+				}
+				Message msg = handler.obtainMessage();
+				msg.what = Constants.HIDEQUERYCONFIGDLG;
+				msg.arg1 = rs; 
+				handler.sendMessage(msg);
 		}
+		
 	}
+
+	public Map<String, String> getParaMap() {
+		return paraMap;
+	}
+
 }

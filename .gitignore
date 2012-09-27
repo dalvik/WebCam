@@ -1,5 +1,7 @@
+.gitignore
 .class
 obj/
-lib/
 bin/
 gen/
+proguard/
+libs/

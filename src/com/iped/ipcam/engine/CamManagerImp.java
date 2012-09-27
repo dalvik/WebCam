@@ -1,11 +1,5 @@
 package com.iped.ipcam.engine;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +8,9 @@ import android.os.Message;
 import android.util.Log;
 
 import com.iped.ipcam.exception.CamManagerException;
+import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.PackageUtil;
 
 public class CamManagerImp implements ICamManager {
 
@@ -30,9 +23,9 @@ public class CamManagerImp implements ICamManager {
 	
 	private int selectIndex = 0;
 
-	private int temp = -1;
+	private boolean stopFlag = false;
 	
-	private int  count = 1;
+	private static int searchCounter = 1;
 	
 	private String TAG = "CamManagerImp";
 	
@@ -40,18 +33,23 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
-	public Device addCam(String ip) {
-		Device d = new Device(ip, "Ip Camera", ip, Constants.TCPPORT, Constants.UDPPORT, Constants.DEFAULTWAY);
-		if(checkName(ip)) {
+	public Device addCam(String ip, String id) {
+		Device d = new Device();
+		d.setDeviceName("IpCam");
+		d.setDeviceID(id);
+		/*d.setDeviceEthIp(ip);
+		d.setDeviceEthGateWay((ip.substring(0, ip.lastIndexOf(".")+1) + "1"));
+		d.setDeviceEthMask("255.255.255.0");*/
+		if(checkName(d)) {
 			deviceList.add(d);
 			return d;
 		}
 		return null;
 	}
 
-	private boolean checkName(String ip) {
+	private boolean checkName(Device device) {
 		for(Device de:deviceList) {
-			if(ip.equalsIgnoreCase(de.getDeviceIp())) {
+			if(device.hashCode() == de.hashCode()) {
 				return false;
 			}
 		}
@@ -60,7 +58,7 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public boolean addCam(Device device) {
-		if(checkName(device.getDeviceIp())) {
+		if(checkName(device)) {
 			deviceList.add(device);
 			return true;
 		}
@@ -69,9 +67,6 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public boolean editCam(Device deviceOLd, Device deviceNew) {
-		deviceOLd.setDeviceName(deviceNew.getDeviceName());
-		deviceOLd.setDeviceIp(deviceNew.getDeviceIp());
-		deviceOLd.setDeviceGateWay(deviceNew.getDeviceGateWay());
 		return true;
 	}
 	
@@ -83,8 +78,13 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	@Override
+	public void updateCam(Device device) {
+		deviceList.remove(selectIndex);
+		deviceList.add(selectIndex,device);
+	}
+	
+	@Override
 	public boolean delCam(String name) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
@@ -103,7 +103,6 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public Device getDeviceByName(String name) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -114,39 +113,12 @@ public class CamManagerImp implements ICamManager {
 
 	@Override
 	public boolean isOnline(String ip, int port) throws CamManagerException {
-		DatagramSocket datagramSocket = null;
-		 byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-		
-		byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
-		try {
-			datagramSocket = new DatagramSocket();
-			datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-			DatagramPacket datagramPacket = new DatagramPacket(tem, tem.length, InetAddress.getByName(ip), port);
-			datagramSocket.send(datagramPacket);
-			DatagramPacket rece = new DatagramPacket(buffTemp, buffTemp.length);
-			datagramSocket.receive(rece);
-			Log.d(TAG, "receive inof ");
-			return true;
-		} catch (SocketException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} catch (UnknownHostException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} catch (IOException e) {
-			//Log.d(TAG, "CamManagerImp isOnline : " + e.getLocalizedMessage());
-			throw new CamManagerException(e);
-		} finally {
-			if(datagramSocket != null) {
-				datagramSocket.close();
-				datagramSocket = null;
-			}
-		}
-		
+		return true;
 	}
 	
 	@Override
 	public void clearCamList() {
+		selectIndex = 0;
 		deviceList.clear();
 	}
 	
@@ -159,14 +131,17 @@ public class CamManagerImp implements ICamManager {
 	}
 
 	public void startThread(Handler handler) {
-		stopThread();
-		queryThread = new QueryCamThread(handler);
-		queryThread.setDaemon(true);
-		queryThread.start();
+		//stopThread();
+		if(queryThread == null || !queryThread.isAlive() || stopFlag) {
+			queryThread = new QueryCamThread(handler);
+			queryThread.start();
+		}
 	}
 	
 	@Override
 	public void stopThread() {
+		stopFlag = true;
+		UdtTools.stopSearch();
 		if(queryThread != null && queryThread.isAlive()) {
 			try {
 				queryThread.join(100);
@@ -182,7 +157,7 @@ public class CamManagerImp implements ICamManager {
 	}
 	
 	private void updateDeviceList() {
-		queryThread.tes();
+		queryThread.update();
 	}
 	
 	public void dismissAutoSearch() {
@@ -197,22 +172,21 @@ public class CamManagerImp implements ICamManager {
 		
 		private Handler handler;
 		
-		private int i = 0;
+		//private int i = 0;
 		
 		private QueryCamThread(Handler handler) {
 			this.handler = handler;
 		}
 		
-		public void tes() {
-			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+		public void update() {
+			if(!stopFlag) {
+				handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+				System.out.println("update=======>" + deviceList.size());
+			}
 		}
 		
 		public void dissmiss() {
-			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-			/*Message message = handler.obtainMessage();
-			message.what = Constants.UPDATEAUTOSEARCH;
-			message.arg1 = i; //int)(i*per);
-			handler.sendMessage(message);*/
+			handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
 		}
 		
 		public void updateProgressBar(int value) {
@@ -220,135 +194,41 @@ public class CamManagerImp implements ICamManager {
 			message.what = Constants.UPDATEAUTOSEARCH;
 			message.arg1 = value; //int)(i*per);
 			if(value>=100){
-				count = 1;
-				temp = -1;
 			}
 			handler.sendMessage(message);
 		}
 		
 		@Override
 		public void run() {
-			for(i=1; i<=10; i++) {
-				new Thread(new QueryOnline(i*26)).start();
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	
-	class QueryOnline implements Runnable {
-
-		private int index;
-
-		byte [] tem = CamCmdListHelper.QueryCmd_Online.getBytes();
-		
-		public QueryOnline(int index) {
-			this.index = index;
+			stopFlag = false;
+			handler.postDelayed(fetchWebCamIdTask, 100);
+			UdtTools.startSearch();
 		}
 		
-		
-		@Override
-		public void run() {
-			int i = 0;
-			for(i=index-25; i<=index; i++){
-				if(i>1 && i<255) {
-					//test(String.valueOf(i));
-					boolean res = PackageUtil.CMDPackage(CamCmdListHelper.QueryCmd_Online, Constants.DEFAULTSEARCHIP + i, Constants.UDPPORT);
-					if(res) {
-						synchronized (deviceList) {
-							addCam(Constants.DEFAULTSEARCHIP + i);
-							updateDeviceList();
-						}
-					}
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				synchronized (deviceList) {
-			      count++;	
-				}
-				//System.out.println(count + " " + i + " " + count/26);
-				if(temp<count/26) {
-					temp = count/26;
-					updateProgress(temp);
-				}
-			}
-			dismissAutoSearch();
-		}
-		
-		public void test(String ip) {
-			DatagramSocket datagramSocket = null;
-			try {
-				datagramSocket = new DatagramSocket();
-				datagramSocket.setSoTimeout(Constants.DEVICESEARCHTIMEOUT);
-				DatagramPacket datagramPacket = new DatagramPacket(tem, CamCmdListHelper.QueryCmd_Online.length(), InetAddress.getByName("192.168.1." + ip), Constants.UDPPORT);
-				datagramSocket.send(datagramPacket);
-				DatagramPacket rece = new DatagramPacket(tem, tem.length);
-				datagramSocket.receive(rece);
-				synchronized (deviceList) {
-					addCam(Constants.DEFAULTSEARCHIP + ip);
-					updateDeviceList();
-				}
-				Log.d(TAG, "receive inof //////////////" + "192.168.1." + ip);
-			} catch (SocketException e) {
-				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-			} catch (UnknownHostException e) {
-				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-			} catch (IOException e) {
-				//Log.d(TAG, "CamManagerImp isoffline : " + (Constants.DEFAULTSEARCHIP + ip) + " " + e.getLocalizedMessage());
-			} finally {
-				if(datagramSocket != null) {
-					datagramSocket.disconnect();
-					datagramSocket.close();
-					datagramSocket = null;
-				}
-			}
-		}
-	}
-	
-	
-	
-	
-class MyTimer extends Thread {
-		
-		private int i = 0;
-		
-		private Handler handler;
-		
-		public MyTimer(Handler handler) {
-			this.handler = handler;
-		}
-		
-		public void run() {
-			float max = 100;
-			try {
-				while(i<max) {
-					i++;
-					try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} finally {
-						Message message = handler.obtainMessage();
-						message.what = Constants.UPDATEAUTOSEARCH;
-						message.arg1 = i; //int)(i*per);
-						handler.sendMessage(message);
-					}
-				}
-			} catch(Exception  e) {
-				
-			} finally {
-				Message message = handler.obtainMessage();
-				message.what = Constants.HIDETEAUTOSEARCH;
-				handler.sendMessage(message);
-			}
+		private Runnable fetchWebCamIdTask = new Runnable() {
 			
-		}
+			@Override
+			public void run() {
+				String id = UdtTools.fetchCamId();
+				if(id != null) {
+					Log.d(TAG, "cam id = " + id);
+					searchCounter = 1;
+					addCam(id, id);
+					updateDeviceList();
+				}else {
+					if(searchCounter++>=3) {
+						stopFlag = true;
+					}
+				}
+				if(stopFlag) {
+					dismissAutoSearch();
+					handler.removeCallbacks(fetchWebCamIdTask);
+					searchCounter = 1;
+				}else {
+					handler.postDelayed(fetchWebCamIdTask, 350);
+				}
+			}
+		};
 	}
+
 }

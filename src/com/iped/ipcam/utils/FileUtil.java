@@ -2,24 +2,50 @@ package com.iped.ipcam.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+<<<<<<< HEAD
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+=======
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DecimalFormat;
+>>>>>>> playbackok
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+<<<<<<< HEAD
 import android.os.Environment;
 import android.widget.Toast;
 
 import com.iped.ipcam.gui.R;
+=======
+import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
+
+import com.iped.ipcam.pojo.Device;
+>>>>>>> playbackok
 
 /** 文件处理工具类 **/
 public class FileUtil {
 
+<<<<<<< HEAD
+=======
+	private static String TAG = "FileUtil";
+	
+>>>>>>> playbackok
 	/** 获取SD路径 **/
 	public static String getDefaultPath() {
 		// 判断sd卡是否存在
@@ -66,6 +92,25 @@ public class FileUtil {
 	public static String combinPath(String path, String fileName) {
 		return path + (path.endsWith(File.separator) ? "" : File.separator) + fileName;
 	}
+<<<<<<< HEAD
+=======
+	
+	public static String formetFileSize(long fileS) {
+		DecimalFormat df = new DecimalFormat("#.00");
+		String fileSizeString = "";
+		if (fileS < 1024) {
+			fileSizeString = fileS + " B";
+		} else if (fileS < 1048576) {
+			fileSizeString = df.format((double) fileS / 1024) + " K";
+		} else if (fileS < 1073741824) {
+			fileSizeString = df.format((double) fileS / 1048576) + " M";
+		} else {
+			fileSizeString = df.format((double) fileS / 1073741824) + " G";
+		}
+		return fileSizeString;
+	}
+	
+>>>>>>> playbackok
 
 	/** 复制文件 **/
 	public static boolean copyFile(File src, File tar) throws Exception {
@@ -119,4 +164,96 @@ public class FileUtil {
 	}
 	
 	
+<<<<<<< HEAD
+=======
+	public static void persistentDevice(Context context, List<Device> deviceList) {
+		File file = new File(context.getFilesDir().getPath() + File.separator +  Constants.DEVICELIST);
+		if(file.exists()) {
+			file.delete();
+		}
+		FileOutputStream fos = null;
+		try {
+			file.createNewFile();
+			StringBuffer sb = new StringBuffer();
+			for(Device device:deviceList) {
+				String unDefine2 = (device.getUnDefine2() == null || device.getUnDefine2().length()<=0)?"null":device.getUnDefine2();
+				boolean netType = device.getDeviceNetType();
+				sb.append(device.getDeviceName() + "&" + device.getDeviceID() + "&" + device.getUnDefine1() + "&" + netType + "&");
+				if(netType){
+					sb.append(device.getUnDefine1() + "&" + device.getDeviceEthGateWay()+ "&" + device.getDeviceRemoteCmdPort() + "&" + device.getDeviceRemoteVideoPort() + "&" + device.getDeviceRemoteAudioPort() + "&" + unDefine2 +"\n");
+				} else {
+					sb.append(device.getDeviceEthIp() + "&" + device.getDeviceEthGateWay() + "&" + device.getDeviceLocalCmdPort() + "&" + device.getDeviceLocalVideoPort() + "&" + device.getDeviceLocalAudioPort() + "&" + unDefine2 +"\n");
+				}
+			}
+			//System.out.println(sb.toString());
+			fos = new FileOutputStream(file);
+			fos.write(sb.toString().getBytes());
+			fos.flush();
+		} catch (IOException e) {
+			Log.d(TAG, "FileUtil persistentDevice " + e.getStackTrace());
+		} finally {
+			if(fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fos = null;
+			}
+		}
+	}
+	
+	public static List<Device> fetchDeviceFromFile(Context context) {
+		List<Device> deviceList = new ArrayList<Device>();
+		File file = new File(context.getFilesDir().getPath() + File.separator + Constants.DEVICELIST);
+		if(!file.exists()) {
+			return deviceList;
+		}
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(file));
+			String str = null;
+			while((str = br.readLine())!= null) {
+				String[] info = str.split("&");
+				int l = info.length;
+				//System.out.println("device info str=" + str + " length="  + l);
+				if(l<8) {
+					continue;
+				}
+				Device device = new Device();
+				device.setDeviceName(info[0]);
+				device.setDeviceID(info[1]);
+				device.setUnDefine1(info[2]);
+				if("true".equals(info[3])) {
+					device.setDeviceNetType(true);
+					device.setDeviceEthIp(info[4]);
+					device.setDeviceEthGateWay(info[5]);
+				}else {
+					device.setDeviceNetType(false);
+					device.setDeviceEthIp(info[4]);
+					device.setDeviceEthGateWay(info[5]);
+				}
+				device.setDeviceRemoteCmdPort(Integer.parseInt(info[6]));
+				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));
+				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
+				device.setUnDefine2(info[9].equals("null")?null:info[9]);
+				deviceList.add(device);
+				//System.out.println("get device form file "  + device);
+			}
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return deviceList;
+	}
+>>>>>>> playbackok
 }

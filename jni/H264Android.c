@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<android/log.h>
-
 #include "common.h"
 #include "avcodec.h"
 

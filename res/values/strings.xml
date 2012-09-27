@@ -1,33 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="hello">Hello World, WebCamActivity!</string>
-    <string name="app_name">WebCam</string>
+     <!-- 用户登录 -->
+    <string name="app_name">IPED视频监控</string>
     <string name="user_name">账号：</string>
     <string name="user_name_hint">请输入账号</string>
     <string name="password">密码：</string>
     <string name="password_hint">请输入密码</string>
     <string name="keep_user_pass">记住用户名和密码</string>
     <string name="user_login">登录</string>
-    	<string name="username_null">用户名不能为空</string>
+    	<string name="username_null">密码不能为空，默认密码admin</string>
     <string name="user_exit">取消</string>
+    <string name="user_or_password_is_not_correct_str">用户名或密码错误</string>
+    
+    <!-- 更改登录密码 -->
+    <string name="change_login_pass_str">更改登录密码</string>
+    
+    <!-- 用户退出 -->
+    <string name="user_exit_title">退出确认</string>
+    <string name="user_exit_message">您确定退出吗</string>
+    <string name="user_exit_sure">退出</string>
+    <string name="user_exit_cancle">取消</string> 
+    
+    <!-- modify password  -->
+    <string name="password_modify_security_botton_str">更改访问密码</string>
+    <string name="password_modify_title_str">密码修改</string>
+    <string name="password_modify_str">修改</string>
+    <string name="old_input_password">旧密码</string>
+    <string name="old_input_password_error">与旧密码不符</string>
+    <string name="new_input_password">新密码</string>
+    <string name="repeat_new_input_password">确认新密码</string>
+     <string name="password_modify_success_str">密码修改成功</string>
+     <string name="password_modify_error_str">密码修改失败</string>
+    
+    <string name="login_dialog_str">用户登录</string>
+    <string name="input_password">请输入密码</string>
+    <string name="repeat_input_password">重复密码</string>
+    <string name="password_is_null">密码不能为空</string>
+    <string name="password_not_equal">两次输入的密码不一致！</string>
+    <string name="password_set_ok">密码已设定，请牢记！</string>
+    <string name="login_str">确定</string>
+    <string name="cancle_login_str">取消</string>
+    <string name="device_manager_pwd_set_error">密码设置失败</string>
+    <string name="device_manager_pwd_set_time_out">网络超时</string>
+    <string name="device_manager_pwd_set_err">密码错误</string>
+    <string name="device_manager_time_out_or_device_off_line">网络超时或设备离线</string>
     
     <string name="default_activity_str">视频</string>
     	<string name="connection">正在为您连接，请稍等片刻</string>
     	<string name="connection_error">对不起，连接失败，请检查网络状况，稍后重试。</string>
+    	<string name="video_preview_list_null">设备列表为空</string>
+    	<string name="video_preview_left_up">左上</string>
+    	<string name="video_preview_mid_up">↑</string>
+    	<string name="video_preview_right_up">右上</string>
+    	<string name="video_preview_left">←</string>
+    	<string name="video_preview_mid">翻转</string>
+    	<string name="video_preview_right">→</string>
+    	<string name="video_preview_left_down">左下</string>
+    	<string name="video_preview_left_mid">↓</string>
+    	<string name="video_preview_right_down">右下</string>
+    	<string name="video_preview_minus_zoom">﹣</string>
+    	<string name="video_preview_minus_zoom_str">变倍</string>
+    	<string name="video_preview_add_zoom">﹢</string>
+    	<string name="video_preview_minus_foucs">﹣</string>
+    	<string name="video_preview_minus_foucs_str">聚焦</string>
+    	<string name="video_preview_add_foucs">﹢</string>
+    	<string name="video_preview_minus_apertrue">﹣</string>
+    	<string name="video_preview_minus_apertrue_str">光圈</string>
+    	<string name="video_preview_add_apertrue">﹢</string>
+    	<string name="video_preview_brightness">亮度</string>
+    	<string name="video_preview_contrast">对比度</string>
+    	<string name="video_preview_volume">音量</string>
     <string name="device_manager_str">设备管理</string>
     	<string name="auto_serch_str">自动搜索</string>
-    	<string name="auto_search_tips_str">正在为您搜索，请稍等...</string>	
+    	<string name="auto_search_tips_str">正在为您搜索，请稍等</string>	
     	<string name="manu_add_str">手工添加</string>	
     		<string name="device_manager_add_title_str">添加新设备</string>
     		<string name="device_manager_add_str">设备名称</string>
     		<string name="device_manager_add_hint_str">设备名称</string>
+    		<string name="device_manager_add_name_default_str">Dafult</string>
     		<string name="device_manager_local_net_para_str">局域网参数</string>
     		<string name="device_manager_new_addr_str">IP地址</string>
-    		<string name="device_manager_new_tcp_port_str">TCP端口</string>
+    		<string name="device_manager_new_addr_default_str">192.168.1.</string>
+    		<string name="device_manager_new_device_id">设备ID号</string>
+    		<string name="device_manager_new_device_id_hint">请输入设备的ID号</string>
+    		<string name="device_manager_new_device_id_not_null">设备ID号不能为空</string>
+    		<string name="device_manager_new_device_id_not_number">设备ID号必须为数字</string>
+    		<string name="device_manager_find_device_id_error">查询设备ID失败</string>
+    		<string name="device_manager_find_device_id_not_online">设备不在线</string>
+    		<string name="device_manager_add_device_is_exist">设备已经存在</string>
+    		<string name="device_manager_new_device_title">添加新设备</string>
+    		<string name="device_manager_new_device_add_fail_str">添加新设备失败</string>
+    		<string name="device_manager_new_device_add_success_str">添加新设备成功</string>
+    		<string name="device_manager_new_device_message">确认添加新设备</string>
+    		<string name="device_manager_new_device_subnet_parameter_id">局域网参数</string>
+    		<string name="device_manager_new_dns1_str">DNS1 </string>
     		<string name="device_manager_new_gateway_addr_str">网关地址</string>
-    		<string name="device_manager_new_udp_port_str">TCP端口</string>
+    		<string name="device_manager_new_gateway_addr_default_str">192.168.1.1</string>
+    		<string name="device_manager_new_dns2_str">DNS2 </string>
     		<string name="device_manager_new_sub_net_addr_str">掩码地址</string>
+    		<string name="device_manager_new_sub_net_addr_defualt_str">255.255.255.0</string>
     		<string name="device_manager_new_domain_addr_str">域名</string>
     		<string name="device_manager_public_new_tcp_port_str">TCP端口</string>
     		<string name="device_manager_dynamic_addr_str">动态IP地址</string>
@@ -36,49 +109,136 @@
     		<string name="device_manager_add_cancle_str">取消</string>
     		<string name="device_manager_add_not_null_str">设备IP地址不能为空</string>
     		<string name="device_manager_add_same_ip_str">设备地址冲突</string>
+    		<string name="device_manager_add_net_type_eth_str">内网</string>
+    		<string name="device_manager_add_net_type_wlan_str">外网</string>
+    		<string name="device_manager_add_query_title_str">设备添加</string>
+    		<string name="device_manager_add_query_message_str">正在添加设备请稍后</string>
+    		<string name="device_manager_add_id_str">设备</string>
+    		
     	<string name="clear_all_str">全部清除</string>	
-    	<string name="device_edit_str">修改</string>	
+    		<string name="clear_all_device_title_str">清空设备列表</string>
+    		<string name="clear_all_device_message_str">确定清空设备列表吗</string>
+    		<string name="clear_all_device_ok_str">确定</string>
+    		<string name="clear_all_device_cancle_str">取消</string>
+    	<string name="device_edit_str">取消</string>	
     	<string name="device_del_str">删除</string>	
     	<string name="device_preview_str">预览</string>	
     	<string name="no_device_online">没有在线设备</string>
     	<string name="device_type_str">类型：</string>
     	<string name="device_ip_str">IP：</string>
-    	<string name="device_tcp_str">TCP：</string>
-    	<string name="device_udp_str">UDP：</string>
+    	<string name="device_cmd_port_str">CMD：</string>
+    	<string name="device_diveo_port_str">Video：</string>
     	<string name="device_gateway_str">网关：</string>
+    	<string name="device_audio_port_str">Audio：</string>
     <string name="device_params_sets_str">参数设置</string>
+    	<string name="device_params_info_no_device_str">请先添加设备</string>
     	<string name="device_params_info_str">设备信息:</string>
+    	<string name="device_param_inentify_str">设备ID:</string>
     	<string name="device_params_version_str">软件版本：</string>
     	<string name="device_params_device_name_str">设备名称：</string>
     	<string name="device_params_address_type_str">地址类型：</string>
     	<string name="device_params_device_address_str">设备地址：</string>
-    	<string name="device_params_inside_total_space_str">内置磁盘总容量：</string>
-    	<string name="device_params_outside_total_space_str">移动磁盘总容量：</string>
+    	<string name="device_params_inside_total_space_str">TF卡容量：</string>
+    	<string name="device_params_outside_total_space_str">外接磁盘容量：</string>
+    	<string name="device_params_storage_device_str">存储设备：</string>
+    	<string name="device_params_recorde_type_inside_str">TF卡</string>
+    	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
     	<string name="device_params_recorde_total_time_str">可录制时间：</string>
     	
-    	<string name="device_params_recorde_type_str">录制方式：</string>
-    	<string name="device_params_recorde_type_inside_str">内置磁盘</string>
-    	<string name="device_params_recorde_type_outsize_str">移动磁盘</string>
+    	<!-- 网卡设置 -->
+    	<string name="device_params_network_set_str">网卡设置：</string>
+    	<string name="device_params_network_intelligent_mode_str">智能选择网络</string>
+    	<string name="device_params_network_wire_mode_str">有线网络</string>
+    	<string name="device_params_network_wireless_mode_str">无线网络</string>
+    	<!-- 有线设置 -->
+    	<string name="device_params_wireuse_network_set_str">有线网络设置</string>
+    	<string name="device_params_wireuse_audo_ipaddress_mode_str">自动获得IP地址</string>
+    	<string name="device_params_wireuse_static_ipaddress_mode_str">静态IP地址</string>
+    	<string name="device_params_wireuse_ip_address_str">IP地址</string>
+    	<string name="device_params_wireuse_getway_address_str">网关地址</string>
+    	<string name="device_params_wireuse_sub_address_str">掩码地址</string>
+    	<string name="device_params_wireuse_set_dns1_str">DNS1</string>
+    	<string name="device_params_wireuse_set_dns2_str">DNS2</string>
+    	
+    	
+	    <!-- 无线设置 -->
+	    <string name="device_params_wireless_network_set_str">无线网络设置</string>
+    	<string name="device_params_wireless_audo_ipaddress_mode_str">自动获得IP地址</string>
+    	<string name="device_params_wireless_static_ipaddress_mode_str">静态IP地址</string>
+    	<string name="device_params_wireless_ip_address_str">IP地址</string>
+    	<string name="device_params_wireless_getway_address_str">网关地址</string>
+    	<string name="device_params_wireless_sub_address_str">掩码地址</string>
+    	<string name="device_params_wireless_set_dns1_str">DNS1</string>
+    	<string name="device_params_wireless_set_dns2_str">DNS2</string>
+    	
+    	<!-- 接入点设置 -->
+    	<string name="device_params_apn_set_str">接入点设置</string>
+    	<string name="device_params_apn_set_name_str">接入点名称</string>
+    	<string name="device_params_apn_set_pwd_str">接入点密码</string>
+    	<string name="device_params_apn_set_search_wireless_str">搜索无线网络</string>
+    	<string name="device_params_apn_set_wireless_list_str">无线网络列表</string>
+    	<string name="device_params_apn_set_search_wireless_success_str">搜索无线网络完成</string>
+    	<string name="device_params_apn_set_search_wireless_error_str">搜索无线网络失败</string>
+    	
+    	<!-- 录制设置 -->
+    	<string name="device_params_video_record_set_str">录制设置：</string>
+    	<string name="device_params_video_record_frame_rate_set_str">帧率: </string>
+    	<string name="device_params_video_record_frame_size_set_str">画面尺寸: </string>
+    	<string name="device_params_video_record_set_one_str">录像设置</string>
+    	<string name="device_params_video_record_set_two_str">录像设置二(当没有物体移动时，慢速录像)</string>
+    	<string name="device_params_video_record_set_three_str">录像设置三(当有物体移动时，快速录像)</string>
+    	<!-- 监控设置 -->
+    	<string name="device_params_monitor_set_str">监控设置：</string>
+    	<string name="device_params_monitor_self_mode_set_str">自定义模式(帧率可调，画面同录像一致)</string>
+    	<string name="device_params_monitor_intelligent_mode_set_str">智能模式(根据网络性能，自动调节画面和帧率)</string>
+    	<!-- 其他设置 -->
+    	<string name="device_params_other_set_str">其他设置：</string>
+    	<string name="device_params_other_set_sound_str">声音设置：</string>
+    	<string name="device_params_other_set_sound_open_str">开</string>
+    	<string name="device_params_other_set_sound_close_str">关</string>
+    	<string name="device_params_other_set_mobile_alarm_str">移动侦测报警</string>
+    	<string name="device_params_other_set_mobile_alarm_offset_str">灵敏度</string>
+    	<string name="device_params_other_set_mobile_alarm_offset_prompt_str">灵敏度</string>
+    		<string-array name="mobile_alarm_offset_prompt_array">
+    		    <item>1</item>
+		        <item>2</item>
+		        <item>3</item>
+    		</string-array>
+    	<string name="device_params_other_set_mobile_alarm_email_str">报警邮箱设置</string>
+    	<string name="device_params_other_set_security_str">安全设置</string>
+    	<string name="device_params_other_set_visit_password_str">访问密码</string>
+    	<string name="device_params_other_set_time_str">时间设置</string>
+    	<string name="device_params_other_set_time_date_format_str">年/月/日</string>
+    	<string name="device_params_other_set_time_time_format_str">时/分/秒</string>
+    	<string name="device_params_other_set_system_str">同步系统时间</string>
+    		<string name="device_params_other_set_system_success_str">同步系统时间成功</string>
+    		<string name="device_params_other_set_system_error_str">同步系统时间失败</string>
+    	<string name="device_params_other_set_security_visit_password_str">访问密码设置</string>
+    	<string name="device_params_reset_set_factory_para_str">恢复出厂设置</string>
+    	<string name="device_params_set_sure_str">确认</string>
+    	<string name="device_params_set_cancle_str">取消</string>
+    	
+    	<string name="device_params_recorde_type_str">录制设置：</string>
     	<string name="device_params_recorde_type_close_str">关闭</string>
 
     	<string name="device_params_recorde_speed_str">录像码流：</string>
     	<string name="device_params_recorde_real_speed_str">实际码率：</string>
     	<string name="device_params_recorde_frame_size_str">画面大小：</string>
-    		<string-array name="frame_size_array">
-    		    <item>4CIF (704 x 576)</item>
-    		    <item>VGA (640 x 480)</item>
-    		    <item>CIF (352 x 288)</item>
-    		    <item>QVGA (320 x 240)</item>
-    		    <item>QCIF (176 x 144)</item>
-    		    <item>SQCIF (128 x 96)</item>
-    		</string-array>
+    		  <string-array name="monitor_frame_size">
+			        <item>VGA(640*480)</item>
+			        <item>QVGA(320*240)</item>
+			    </string-array>
+    
     	<string name="device_params_recorde_frame_speed_str">帧率：</string>
     		<string-array name="frame_rate_array">
-    		    <item>4</item>
-    		    <item>8</item>
-    		    <item>12</item>
-    		    <item>25</item>
+    		    <item>1</item>
+		        <item>2</item>
+		        <item>4</item>
+		        <item>8</item>
+		        <item>12</item>
+		        <item>24</item>
     		</string-array>
+      
     	<string name="device_params_recorde_comp_quar_str">压缩质量：</string>
     		<string-array name="compress_quar_array">
     		    <item>VBR</item>
@@ -96,15 +256,7 @@
     		</string-array>
     	
     	<string name="device_params_monitor_speed_str">监控码流：</string>
-    	<string name="device_params_monitor_frame_size_str">画面大小：</string>
-    	    <string-array name="monitor_frame_size_array">
-    		    <item>4CIF (704 x 576)</item>
-    		    <item>VGA (640 x 480)</item>
-    		    <item>CIF (352 x 288)</item>
-    		    <item>QVGA (320 x 240)</item>
-    		    <item>QCIF (176 x 144)</item>
-    		    <item>SQCIF (128 x 96)</item>
-    		</string-array>
+    	
     	<string name="device_params_date_str">设备时间：</string>
     	<string name="device_params_sync_date_str">同步系统时间</string>
     	<string name="device_params_no_device_select_str">请先选择查看的设备</string>
@@ -113,7 +265,23 @@
     	<string name="device_params_request_config_str">正在获取配置信息</string>
     	<string name="device_params_static_ip_str">静态IP</string>
     	<string name="device_params_dynamic_ip_str">动态IP</string>
-    	    
+    	
+    	<string name="device_params_request_config_error_str">获取配置信息失败</string>
+    	<string name="device_params_set_config_str">正在设置配置信息</string>
+    	<string name="device_params_set_config_success_str">配置信息设置成功</string>
+    	<string name="device_params_set_config_error_str">配置信息设置失败</string>
+    	
+    	<string name="device_params_reset_config_title_str">确定恢复出厂设置吗</string>
+    	<string name="device_params_reset_config_message_str">
+    	    \t\t1、所有个信息设置均将清除\n\r
+    	    \t\t2、网络配置将被清除，设备可能无法连接\n\r
+    	    \t\t3、可能需要重新配置USB
+    	</string>
+    	<string name="device_params_reset_config_sure_str">确定</string>
+    	<string name="device_params_reset_config_cancle_str">取消</string>
+    	<string name="device_params_reset_config_success_str">恢复出厂设置成功</string>
+    	<string name="device_params_reset_config_error_str">恢复出厂设置失败</string>
+    	
     <string name="play_back_str">视频回放</string>
     	<string name="play_back_auto_search_video_str">视频搜索</string>
     	<string name="play_back_auto_clear_all_str">清除全部</string>
@@ -122,7 +290,12 @@
     		<string name="play_back_clear_dlg_message_str">确定情况全部视频文件吗</string>
     		<string name="play_back_clear_dlg_sure_str">确定</string>
     		<string name="play_back_clear_dlg_cancle_str">取消</string>
-    	<string name="video_download">下载</string>
+    		<!-- Do not translate. Duration format for duration < 1 hour -->
+    		<string translatable="false" name="durationformatshort"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
+    		<!-- Do not translate. Duration format for duration >= 1 hour -->
+    		<string translatable="false" name="durationformatlong"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
+    
+    	<string name="video_download">取消</string>
     	<string name="video_delete">删除</string>
     		<string name="video_delete_ing">正在删除。。。</string>
     		<string name="video_clear_ing">正在 清空。。。</string>
@@ -130,16 +303,18 @@
     		<string name="video_delete_error">操作失败-_-</string>
     	<string name="video_playback">回放</string>
     	<string name="video_preview_no_video_str">没有可回放的视频</string>
-    	<string name="video_preview_name_str">名      称：</string>
-    	<string name="video_preview_address_str">地         址：</string>
+    	<string name="video_preview_name_str">索引：</string>
+    	<string name="video_preview_search_name_str">名称：</string>
+    	<string name="video_preview_address_str">ID：</string>
     	<string name="video_preview_start_time_str">开始：</string>
-    	<string name="video_preview_addr_str">地址：</string>
+    	<string name="video_preview_addr_str">ID：</string>
     	<string name="video_preview_length_str">大小：</string>
     	<string name="video_preview_end_time_str">结束：</string>
     	<string name="play_back_auto_search_button_str">搜索</string>
     	<string name="play_back_auto_cancle_button_str">取消</string>
     	<string name="play_back_select_device_first_str">请先选择设备</string>
     	<string name="play_back_start_above_start_time_str">开始时间不能晚于结束时间</string>
+    	<string name="play_back_auto_search_error_str">视频搜索失败</string>
     	
     <string name="system_settings_str">系统设置</string>
         <string name="system_settings_save_path_hint_str">监控录像保存路径</string>
@@ -162,6 +337,43 @@
         <string name="system_settings_device_update_str">升级</string>
         <string name="system_settings_device_cancle_str">取消</string>
         
-    <string name="version">2.5.10</string>
-    <string name="cory_right">Copyright© 2009. www.iped.com.cn. All Rights Reserved</string>
+        <!-- network check -->
+        <string name="webcam_network_invalid_title_str">提示</string>
+        <string name="webcam_network_invalid_message_str">网络无连接</string>
+        <string name="webcam_network_invalid_open">开启</string>
+        <string name="webcam_network_invalid_cancle">取消</string>
+        
+        <!-- update -->
+        <string name="webcam_check_version_str">正在检查更新，请稍等。。。</string>
+        <string name="webcam_check_version_result_title_str">升级提示</string>
+        <string name="webcam_check_version_result_success_message_str">您当前已经是最新版本</string>
+        <string name="webcam_check_version_result_error_message_str">您当前已经是最新版本</string>
+        <string name="webcam_check_version_result_ok_str">确定</string>
+        <string name="webcam_check_version_dialog_title_str">软件版本更新</string>
+        <string name="webcam_check_version_dialog_ok_button_str">立即更新</string>
+        <string name="webcam_check_version_dialog_cancle_button_str">以后再说</string>
+        <string name="webcam_loading_new_str">正在下载新版本</string>
+        <string name="webcam_loading_new_cancle_str">取消</string>
+         <string name="webcam_loading_str">下载</string>
+        
+        
+        <!-- error code tips infor -->
+        <string name="webcam_error_code_internel">内部错误</string>
+        <string name="webcam_error_code_server_not_reached">服务器离线</string>
+        <string name="webcam_error_code_timeout">网络超时</string>
+        <string name="webcam_error_code_unlegal">设备编号未注册</string>
+        <string name="webcam_error_code_connect_error">连接失败</string>
+        <string name="webcam_error_code_bind_error">端口绑定失败</string>
+        
+        <string name="sms_to_email_title_str">程序运行错误报告_</string>
+        <string name="accor_an_import_exception_str">程序运行运行过程当中出现问题即将退出！</string>
+        <string name="exception_tips_title_str">错误提示</string>
+        <string name="exception_tips_message_str">程序运行出错啦，即将退出！</string>
+        <string name="exception_commit_button_str">我知道了~</string>
+        
+        <string name="webcam_connect_init_error">系统初始化连接失败</string>
+        <string name="webcam_check_pwd_dialog_str">正在校验 <xliff:g id="number">%1$s</xliff:g>，请稍后。。。</string>
+    <string name="blank_str">More : hangzhouiped.taobao.com</string>
+    <string name="version">12.0.8205</string>
+    <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>
 </resources>
