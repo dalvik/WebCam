@@ -27,7 +27,7 @@ public class UdtTools {
 	//decode pcm to amr
 	public static native int initAmrEncoder();
 	
-	public static native int EncoderPcm(byte[] pcmBuffer, int pcmLength, byte[] amrBuffer, int amrLength);
+	public static native int EncoderPcm(short[] pcmBuffer, int pcmLength, short[] amrBuffer, int amrLength);
 	
 	// change throughnet type
 	
@@ -53,7 +53,7 @@ public class UdtTools {
 	
 	public static native int recvAudioMsg(int smalBuffLength, byte[] buf, int bufLength);
 	
-	public static native int sendAudioMsg(byte[] buf, int sendLength);
+	public static native int sendAudioMsg(short[] buf, int sendLength);
 	
 	public static native int sendPTZMsg(byte[] comm);
 	

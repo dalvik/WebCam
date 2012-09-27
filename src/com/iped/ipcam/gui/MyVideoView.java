@@ -49,7 +49,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private final static int VIDEOSOCKETBUFLENGTH = 1500;//342000;
 
-	private final static int RECEAUDIOBUFFERSIZE = 320 * Command.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
 	
 	private final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -658,15 +658,13 @@ public class MyVideoView extends ImageView implements Runnable {
 			m_out_trk.play();
 			int recvDataLength = -1;
 			while (!stopPlay) {
-				//recvDataLength = audioDis.read(audioBuffer, 0, RECEAUDIOBUFFERSIZE);
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
+				//Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
 				if(recvDataLength<=0) {
 					stopPlay = true;
 					break;
 				}
 				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
-				//m_out_trk.write(pcmArr, 0, AUDIOBUFFERTMPSIZE);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
 			if (m_out_trk != null) {
@@ -695,24 +693,23 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		private int index = 0;
 		
-		private static final String AUDIO_RECORDER_FOLDER = "WebCamRecorder";
-		
-		private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.raw";
-		
 		protected AudioRecord audioRecord;
 
-		private byte[] amrBuffer;
+		private short[] amrBuffer;
 		
-		private byte[] pcmBuffer;
+		private short[] pcmBuffer;
+		
+		private short[] micBuffer;
 		
 		private WebCamAudioRecord() {
 			Speex.initEcho(160, 160*10);
 			UdtTools.initAmrEncoder();
 			createAudioRecord();
-			pcmBufferLength = miniRecoderBufSize * 5;
-			amrBufferLength = miniRecoderBufSize /2;
-			pcmBuffer = new byte[pcmBufferLength];
-			amrBuffer = new byte[amrBufferLength];
+			pcmBufferLength = RECEAUDIOBUFFERSIZE;
+			amrBufferLength = RECEAUDIOBUFFERSIZE/10;
+			pcmBuffer = new short[pcmBufferLength];
+			micBuffer = new short[pcmBufferLength];
+			amrBuffer = new short[amrBufferLength];
 		}
 		
 		public void run() {
@@ -732,25 +729,22 @@ public class MyVideoView extends ImageView implements Runnable {
 		  }
 		  
 		  private void writeAudioDataToFile(){
-			  byte data[] = new byte[miniRecoderBufSize];
+			  //byte data[] = new byte[miniRecoderBufSize];
               int read = 0;
               while(!stopPlay && !stopPlay){
-                      read = audioRecord.read(data, 0, miniRecoderBufSize);
+                      read = audioRecord.read(pcmBuffer, 0, pcmBufferLength);
                       if(AudioRecord.ERROR_INVALID_OPERATION != read){
-                    	  //m_out_trk.write(data, 0, miniRecoderBufSize);
-                    	  if(++index%5 ==0) {
-                    		  //Speex.cancellation(pcmBuffer, pcmArr, amrBuffer);
-                    		  UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
-                    		 //Log.d(TAG, "### encode = " + res +  " index=" + index);
+                    	 // if(++index%5 == 0) {
+                    		 //Speex.cancellation(pcmBuffer, pcmBuffer, amrBuffer);
+                    		 UdtTools.EncoderPcm(pcmBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
                     		 index= 0;
                     		 UdtTools.sendAudioMsg(amrBuffer, amrBufferLength);
-                    	  }
-                    	  System.arraycopy(data, 0, pcmBuffer, index*miniRecoderBufSize, read);
-                    	  //Log.d(TAG, "audio size = " + miniRecoderBufSize  + " pcmBufferLength=" + pcmBufferLength +  " index=" + index);
+                    	//  }
+                    	 // System.arraycopy(data, 0, pcmBuffer, index*miniRecoderBufSize, read);
                    }
               }
               stopRecording();
-      }
+		  }
 	
 		  private void stopRecording(){
 			  Speex.stopEcho();
@@ -760,121 +754,6 @@ public class MyVideoView extends ImageView implements Runnable {
                       
                       audioRecord = null;
               }
-              //copyWaveFile(getTempFilename(),getFilename());
-              //deleteTempFile();
-      }
-		  private String getFilename(){
-              String filepath = Environment.getExternalStorageDirectory().getAbsolutePath();
-              File file = new File(filepath,AUDIO_RECORDER_FOLDER);
-              
-              if(file.exists()){
-              	 file.delete();
-              }
-                              
-              return (file.getAbsolutePath() + "/session.wav" );
-      }
-		  private void deleteTempFile() {
-              File file = new File(getTempFilename());
-              file.delete();
-      }
-		  private void copyWaveFile(String inFilename,String outFilename){
-              FileInputStream in = null;
-              FileOutputStream out = null;
-              long totalAudioLen = 0;
-              long totalDataLen = totalAudioLen + 36;
-              long longSampleRate = frequency;
-              int channels = 2;
-              long byteRate = RECORDER_BPP * frequency * channels/8;
-              
-              byte[] data = new byte[miniRecoderBufSize];
-              try {
-                      in = new FileInputStream(inFilename);
-                      out = new FileOutputStream(outFilename);
-                      totalAudioLen = in.getChannel().size();
-                      totalDataLen = totalAudioLen + 36;
-                      
-                      //AppLog.logString("File size: " + totalDataLen);
-                      
-                      WriteWaveFileHeader(out, totalAudioLen, totalDataLen,
-                                      longSampleRate, channels, byteRate);
-                      
-                      while(in.read(data) != -1){
-                              out.write(data);
-                      }
-                      
-                      in.close();
-                      out.close();
-              } catch (FileNotFoundException e) {
-                      e.printStackTrace();
-              } catch (IOException e) {
-                      e.printStackTrace();
-              }
-      }
-		  
-		  private void WriteWaveFileHeader(
-                  FileOutputStream out, long totalAudioLen,
-                  long totalDataLen, long longSampleRate, int channels,
-                  long byteRate) throws IOException {
-          
-          byte[] header = new byte[44];
-          
-          header[0] = 'R';  // RIFF/WAVE header
-          header[1] = 'I';
-          header[2] = 'F';
-          header[3] = 'F';
-          header[4] = (byte) (totalDataLen & 0xff);
-          header[5] = (byte) ((totalDataLen >> 8) & 0xff);
-          header[6] = (byte) ((totalDataLen >> 16) & 0xff);
-          header[7] = (byte) ((totalDataLen >> 24) & 0xff);
-          header[8] = 'W';
-          header[9] = 'A';
-          header[10] = 'V';
-          header[11] = 'E';
-          header[12] = 'f';  // 'fmt ' chunk
-          header[13] = 'm';
-          header[14] = 't';
-          header[15] = ' ';
-          header[16] = 16;  // 4 bytes: size of 'fmt ' chunk
-          header[17] = 0;
-          header[18] = 0;
-          header[19] = 0;
-          header[20] = 1;  // format = 1
-          header[21] = 0;
-          header[22] = (byte) channels;
-          header[23] = 0;
-          header[24] = (byte) (longSampleRate & 0xff);
-          header[25] = (byte) ((longSampleRate >> 8) & 0xff);
-          header[26] = (byte) ((longSampleRate >> 16) & 0xff);
-          header[27] = (byte) ((longSampleRate >> 24) & 0xff);
-          header[28] = (byte) (byteRate & 0xff);
-          header[29] = (byte) ((byteRate >> 8) & 0xff);
-          header[30] = (byte) ((byteRate >> 16) & 0xff);
-          header[31] = (byte) ((byteRate >> 24) & 0xff);
-          header[32] = (byte) (2 * 16 / 8);  // block align
-          header[33] = 0;
-          header[34] = RECORDER_BPP;  // bits per sample
-          header[35] = 0;
-          header[36] = 'd';
-          header[37] = 'a';
-          header[38] = 't';
-          header[39] = 'a';
-          header[40] = (byte) (totalAudioLen & 0xff);
-          header[41] = (byte) ((totalAudioLen >> 8) & 0xff);
-          header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
-          header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
-
-          out.write(header, 0, 44);
-  }
-	private String getTempFilename(){
-              String filepath = Environment.getExternalStorageDirectory().getPath();
-              File file = new File(filepath,AUDIO_RECORDER_FOLDER);
-              if(!file.exists()){
-                      file.mkdirs();
-              }
-              File tempFile = new File(filepath,AUDIO_RECORDER_TEMP_FILE);
-              if(tempFile.exists())
-                      tempFile.delete();
-              return (file.getAbsolutePath() + "/" + AUDIO_RECORDER_TEMP_FILE);
       }
 	}
 	
