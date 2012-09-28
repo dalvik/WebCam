@@ -140,7 +140,22 @@ public class ByteUtil {
 		array[offset + 1] = (byte) (n & 0xff);
 		array[offset] = (byte) ((n >> 8) & 0xff);
 	}
+	
+	public static void shortsToBytes(short[] n, int length, byte[] array) {
+		int index = 0;
+		for(int i=0;i<length;i++) {
+			array[index++] = (byte) ((n[i] >> 8) & 0xff);
+			array[index++] = (byte) (n[i] & 0xff);
+		}
+		
+	}
 
+	public static void bytesToShorts(byte[] b, int byteLength, short[] s) {
+		for(int i=0;i<byteLength;i+=2){
+			s[i/2] = (short) (b[i+1] & 0xff | (b[i] & 0xff) << 8);
+		}
+	}
+	
 	public static short bytesToShort(byte[] b) {
 		return (short) (b[1] & 0xff | (b[0] & 0xff) << 8);
 	}

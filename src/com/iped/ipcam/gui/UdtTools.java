@@ -53,7 +53,7 @@ public class UdtTools {
 	
 	public static native int recvAudioMsg(int smalBuffLength, byte[] buf, int bufLength);
 	
-	public static native int sendAudioMsg(short[] buf, int sendLength);
+	public static native int sendAudioMsg(byte[] buf, int sendLength);
 	
 	public static native int sendPTZMsg(byte[] comm);
 	

@@ -22,7 +22,7 @@ public class Speex {
 
 	public static native int initEcho(int frameLength, int taliLength);
 	
-	public static native int cancellation(short[] mic, short[] ref, short[] out);
+	public static native int cancellation(short[] mic, short[] recf, short[] out);
 	
 	public static native int stopEcho();
 	
