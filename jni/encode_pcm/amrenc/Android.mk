@@ -1,0 +1,8 @@
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := AMR_NB_ENC
+LOCAL_SRC_FILES := libAMR_NB_ENC.a
+
+include $(PREBUILT_STATIC_LIBRARY)
