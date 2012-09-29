@@ -89,8 +89,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_left_down"
-                        android:visibility="invisible" />
+                        android:text="@string/video_preview_left_down"/>
 
                     <Button
                         android:id="@+id/mid_down"
@@ -107,8 +106,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_right_down"
-                        android:visibility="invisible" />
+                        android:text="@string/video_preview_right_down"/>
                 </TableRow>
  
                 <TableRow>

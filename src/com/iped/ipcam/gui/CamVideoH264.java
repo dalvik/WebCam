@@ -137,8 +137,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private long startTime = 0;
 	
 	private byte[] table2 = null;
+
+	private ImageViewer imageViewerDialog = null;
 	
 	private String TAG = "CamVideoH264";
+	
 	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -297,7 +300,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        
         setContentView(R.layout.pre_videoview);
         ipPlayReceiver = new IpPlayReceiver();
         IntentFilter intentFilter =  new IntentFilter(WebCamActions.ACTION_IPPLAY);
@@ -358,6 +360,20 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		right.setOnTouchListener(this);
 		
 		view.findViewById(R.id.mid).setOnClickListener(this);
+		
+		Button leftDown = (Button) view.findViewById(R.id.left_down);
+		//right.setOnClickListener(this);
+		//right.setOnFocusChangeListener(this);
+		leftDown.setOnClickListener(this);
+		
+		view.findViewById(R.id.mid).setOnClickListener(this);
+		
+		Button RightDown = (Button) view.findViewById(R.id.right_down);
+		//right.setOnClickListener(this);
+		//right.setOnFocusChangeListener(this);
+		RightDown.setOnClickListener(this);
+		
+		view.findViewById(R.id.mid).setOnClickListener(this);
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
@@ -406,6 +422,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	@Override
 	public void onClick(View v) {
+		if(v.getId() == R.id.right_down){
+			startActivity(new Intent(this,ImageViewer.class));
+			return;
+		}
 		if(myVideoView.isStop()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
 			return ;
@@ -469,17 +489,29 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			volumeProgressbar.setProgress(value6);
 			//PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value6+"");
 			break;
+		case R.id.left_down:
+			if(myVideoView.takePic()) {
+				ToastUtils.showToast(this, R.string.webcam_takepic_success_str);
+			}else {
+				ToastUtils.showToast(this, R.string.webcam_takepic_error_str);
+			}
+			break;
+		case R.id.right_down:
+			startActivity(new Intent(this,ImageViewer.class));
+			break;
 		default:
 			break;
 		}/**/
 	}
+	
+	private boolean f  = true;
 	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		Log.d(TAG, "is stop = " + myVideoView.isStop());
 		if(myVideoView.isStop()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
-			return false;
+			//return false;
 		}
 		switch(v.getId()) {
 		case R.id.left_up:
@@ -530,7 +562,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			break;
 		case R.id.left_down:
-
+			if(f) {
+				f = false;
+				if(myVideoView.takePic()) {
+					ToastUtils.showToast(this, R.string.webcam_takepic_success_str);
+				}else {
+					ToastUtils.showToast(this, R.string.webcam_takepic_error_str);
+				}
+				f = true;
+			}
 			break;
 		case R.id.mid_down:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -548,7 +588,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			
 			break;
 		case R.id.right_down:
-
+			if(f) {
+				f = false;
+				startActivity(new Intent(this,ImageViewer.class));
+				f = true;
+			}
+			//FileUtil.openImage(this);
+			//loadImage.initImage();
+			/*if(imageViewerDialog == null || !imageViewerDialog.isShowing()) {
+				imageViewerDialog = new ImageViewer(this, R.style.image_list_dialog);
+				imageViewerDialog.show();
+			}*/
 			break;
 			default:
 			break;

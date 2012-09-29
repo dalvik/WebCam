@@ -29,6 +29,7 @@ import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 
 public class MyVideoView extends ImageView implements Runnable {
@@ -221,7 +222,6 @@ public class MyVideoView extends ImageView implements Runnable {
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
-					stopPlay = true;
 					System.out.println("read over break....");
 					break;
 				}
@@ -474,6 +474,12 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	}
 
+	public boolean takePic() {
+		if(null != video){
+			return FileUtil.takePicture(video, timeStr +".jpg");
+		}
+		return false;
+	}
 	public void onStop() {
 		stopPlay = true;
 		if(!playBackFlag){

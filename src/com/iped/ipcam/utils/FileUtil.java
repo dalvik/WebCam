@@ -22,11 +22,16 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
 
 import com.iped.ipcam.gui.R;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
@@ -237,5 +242,50 @@ public class FileUtil {
 			}
 		}
 		return deviceList;
+	}
+
+	public static String parentPath = File.separator + "IPED" + File.separator;
+	
+	public static String picForder = "Image" + File.separator;
+	
+	private static String lastImageName  = "";
+	
+	public static boolean takePicture(Bitmap video, String fileName) {
+		if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
+			String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();// 获取跟目录
+			File file = new File(sdDir + parentPath + picForder);
+			if(!file.exists()) {
+				file.mkdirs();
+				File noMedia = new File(sdDir + FileUtil.parentPath + FileUtil.picForder + ".nomedia");
+				try {
+					noMedia.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				FileOutputStream fos = new FileOutputStream(sdDir + parentPath + picForder + fileName);
+				video.compress(CompressFormat.JPEG, 90, fos);
+				fos.flush();
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
+	public static void openImage(Context context) {
+		if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
+			String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();// 获取跟目录
+			File file = new File(sdDir + parentPath + picForder);
+			if(!file.exists()) {
+				file.mkdirs();
+			}
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			Uri uri = Uri.parse("file://"+file.getPath());
+			i.setDataAndType(uri, "image/*"); 
+			context.startActivity(i);
+		}
 	}
 }

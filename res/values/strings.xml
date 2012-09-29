@@ -57,9 +57,9 @@
     	<string name="video_preview_left">←</string>
     	<string name="video_preview_mid">翻转</string>
     	<string name="video_preview_right">→</string>
-    	<string name="video_preview_left_down">左下</string>
+    	<string name="video_preview_left_down">拍照</string>
     	<string name="video_preview_left_mid">↓</string>
-    	<string name="video_preview_right_down">右下</string>
+    	<string name="video_preview_right_down">查看</string>
     	<string name="video_preview_minus_zoom">﹣</string>
     	<string name="video_preview_minus_zoom_str">变倍</string>
     	<string name="video_preview_add_zoom">﹢</string>
@@ -355,6 +355,12 @@
         <string name="webcam_loading_new_str">正在下载新版本</string>
         <string name="webcam_loading_new_cancle_str">取消</string>
          <string name="webcam_loading_str">下载</string>
+        
+        <!-- take picture -->
+        <string name="webcam_takepic_success_str">拍照成功</string>
+        <string name="webcam_takepic_error_str">拍照失败</string>
+        <string name="webcam_load_pic_title_str">加载图片</string>
+        <string name="webcam_load_pic_message_str">正在加载图片，请稍等。。。</string>
         
         
         <!-- error code tips infor -->

@@ -39,6 +39,7 @@ import com.iped.ipcam.gui.BCVControlProgressBar;
 import com.iped.ipcam.gui.R;
 import com.iped.ipcam.pojo.UpdateInfo;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.URLs;
 
 public class UpdateManager {
@@ -322,7 +323,7 @@ public class UpdateManager {
 				//≈–∂œ «∑Òπ“‘ÿ¡ÀSDø®
 				String storageState = Environment.getExternalStorageState();		
 				if(storageState.equals(Environment.MEDIA_MOUNTED)){
-					savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "IPED" + File.separator + "update" + File.separator;
+					savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + FileUtil.parentPath + "update" + File.separator;
 					File file = new File(savePath);
 					Log.d(TAG, "### save path = " + savePath);
 					if(!file.exists()){
