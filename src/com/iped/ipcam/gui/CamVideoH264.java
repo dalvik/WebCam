@@ -138,8 +138,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private byte[] table2 = null;
 
-	private ImageViewer imageViewerDialog = null;
-	
 	private String TAG = "CamVideoH264";
 	
 	
@@ -285,10 +283,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void stopPlayThread() {
-		if(!myVideoView.isStop()) {
-			myVideoView.onStop();
+		if(!myVideoView.isStopPlay()) {
+			myVideoView.setStopPlay(true);
 		}
 		if(thread != null && !thread.isInterrupted()) {
+			Log.d(TAG, "############## interrupt.");
 			thread.isInterrupted();
 		}
 	}
@@ -426,7 +425,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			startActivity(new Intent(this,ImageViewer.class));
 			return;
 		}
-		if(myVideoView.isStop()) {
+		if(myVideoView.isStopPlay()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
 			return ;
 		}
@@ -508,8 +507,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		Log.d(TAG, "is stop = " + myVideoView.isStop());
-		if(myVideoView.isStop()) {
+		Log.d(TAG, "is stop = " + myVideoView.isStopPlay());
+		if(myVideoView.isStopPlay()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
 			//return false;
 		}
@@ -659,7 +658,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		}
 		if(m_Dialog != null) {
-			System.out.println(m_Dialog + " ---" + camManager.getSelectDevice());
+			//System.out.println(m_Dialog + " ---" + camManager.getSelectDevice());
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
 			if(!m_Dialog.isShowing()) {
 				m_Dialog.show();

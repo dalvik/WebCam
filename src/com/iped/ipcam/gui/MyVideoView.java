@@ -34,7 +34,7 @@ import com.iped.ipcam.utils.PlayBackConstants;
 
 public class MyVideoView extends ImageView implements Runnable {
 
-	private Queue<Bitmap> bitmapQueue = new LinkedList<Bitmap>();  
+	private Thread recvAudioThread = null;
 	
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
 	
@@ -69,6 +69,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	boolean looperFlag = false;
 
 	private boolean stopPlay = true;
+	
+	private boolean stopRecvAudioFlag = true;
 
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE];
 	
@@ -217,8 +219,11 @@ public class MyVideoView extends ImageView implements Runnable {
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
 			temWidth = 1;
-			new Thread(new RecvAudio()).start();
-			new Thread(new WebCamAudioRecord()).start();
+			RecvAudio recvAudio = new RecvAudio();
+			recvAudioThread = new Thread(recvAudio);
+			stopRecvAudioFlag = false;
+			recvAudioThread.start();
+			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
@@ -481,7 +486,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		return false;
 	}
 	public void onStop() {
-		stopPlay = true;
 		if(!playBackFlag){
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
@@ -490,8 +494,18 @@ public class MyVideoView extends ImageView implements Runnable {
 		flushBitmap();
 	}
 
-	public boolean isStop() {
+	public boolean isStopPlay() {
 		return stopPlay;
+	}
+
+	public void setStopPlay(boolean stopPlay) {
+		this.stopPlay = stopPlay;
+		stopRecvAudioFlag = stopPlay;
+		if(recvAudioThread != null && recvAudioThread.isInterrupted()) {
+			System.out.println("---------- interrutp.");
+			recvAudioThread.interrupt();
+			recvAudioThread = null;
+		}
 	}
 
 	private void release() {
@@ -657,30 +671,31 @@ public class MyVideoView extends ImageView implements Runnable {
 					AudioFormat.ENCODING_PCM_16BIT);
 			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
 					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size,
+					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 10,
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
 			int recvDataLength = -1;
-			while (!stopPlay) {
+			while (!stopRecvAudioFlag) {
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
 				//Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
 				if(recvDataLength<=0) {
 					//Log.d(TAG, "### audio recv audio over");
-					stopPlay = true;
+					stopRecvAudioFlag = true;
 					break;
 				}
 				if(recFlag) {
-						recFlag = false;
+						recFlag = true;
 						ByteUtil.bytesToShorts(audioBuffer,RECEAUDIOBUFFERSIZE, recfBuffer);//转换参考数据
 				}else {
-					synchronized (recfBuffer) {
+					/*synchronized (recfBuffer) {
 						try {
 							//Log.d(TAG, "### audio recv audio wait. ###");
 							recfBuffer.wait();
 						} catch (InterruptedException e) {
+							stopRecvAudioFlag = true;
 							e.printStackTrace();
 						}
-					}
+					}*/
 				}
 				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
@@ -817,7 +832,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
 		firstStartFlag = true;
 		timeStr = "";
-		bitmapQueue.clear();
 		nalBufUsedLength = 0;
 		bitmapTmpBufferUsed = 0;
 		audioTmpBufferUsed = 0;
