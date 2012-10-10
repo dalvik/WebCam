@@ -17,9 +17,8 @@
 package com.iped.ipcam.pojo;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.widget.ImageView;
 
 /**
  * Represents a launchable application. An application is made of a name (or title), an intent
@@ -39,8 +38,11 @@ public class ImageInfo {
     /**
      * The application icon.
      */
-    public Bitmap icon;
+    //public Bitmap icon;
+    public String path;
 
+    public ImageView imageView;
+    
     /**
      * When set to true, indicates that the icon has been resized.
      */
@@ -84,8 +86,8 @@ public class ImageInfo {
 
 	@Override
 	public String toString() {
-		return "ImageInfo [title=" + title + ", intent=" + intent + ", icon="
-				+ icon + ", filtered=" + filtered + "]";
+		return "ImageInfo [title=" + title + ", intent=" + intent + ", path="
+				+ path + ", filtered=" + filtered + "]";
 	}
     
     
