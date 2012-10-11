@@ -223,7 +223,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			recvAudioThread = new Thread(recvAudio);
 			stopRecvAudioFlag = false;
 			recvAudioThread.start();
-			//new Thread(new WebCamAudioRecord()).start();
+			new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
@@ -684,10 +684,10 @@ public class MyVideoView extends ImageView implements Runnable {
 					break;
 				}
 				if(recFlag) {
-						recFlag = true;
+						recFlag = false;
 						ByteUtil.bytesToShorts(audioBuffer,RECEAUDIOBUFFERSIZE, recfBuffer);//转换参考数据
 				}else {
-					/*synchronized (recfBuffer) {
+					synchronized (recfBuffer) {
 						try {
 							//Log.d(TAG, "### audio recv audio wait. ###");
 							recfBuffer.wait();
@@ -695,7 +695,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							stopRecvAudioFlag = true;
 							e.printStackTrace();
 						}
-					}*/
+					}
 				}
 				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);

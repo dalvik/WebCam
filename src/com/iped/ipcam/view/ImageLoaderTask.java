@@ -56,7 +56,7 @@ public class ImageLoaderTask extends AsyncTask<ImageInfo, Void, Bitmap> {
 			ImageView imageView = imageViewReference.get();
 			if (imageView != null) {
 				if (bitmap != null) {
-					int width = bitmap.getWidth(); //获取真实宽高
+					int width = bitmap.getWidth(); // 获取真实宽高
 					int height = bitmap.getHeight();
 					LayoutParams lp = imageView.getLayoutParams();
 					lp.height = (height * ImageViewer.itemWidth) / width;//调整高度

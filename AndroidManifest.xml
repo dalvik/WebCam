@@ -28,7 +28,7 @@
 
         <activity android:name=".LeftVideoView"/>
         
-        <activity android:name=".ImageViewer" android:configChanges="orientation|keyboard"/>
+        <activity android:name=".ImageViewer" />
         
         <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
         

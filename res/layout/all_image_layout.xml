@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<com.iped.ipcam.view.LazyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/waterFallScrollView">
+
+    <LinearLayout
+        android:id="@+id/waterFallContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@android:color/white" >
+    </LinearLayout>
+
+</com.iped.ipcam.view.LazyScrollView>
+<!-- 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -19,3 +33,4 @@
         android:stretchMode="columnWidth"/>
 
 </RelativeLayout>
+-->

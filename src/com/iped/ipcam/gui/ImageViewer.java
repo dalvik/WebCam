@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -18,31 +19,51 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.iped.ipcam.pojo.ImageInfo;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.ImageZoom;
+import com.iped.ipcam.view.ImageLoaderTask;
+import com.iped.ipcam.view.LazyScrollView;
+import com.iped.ipcam.view.LazyScrollView.OnScrollListener;
 
-public class ImageViewer extends Activity {
+public class ImageViewer extends Activity implements OnClickListener  {
 
-	private GridView gridView = null;
+	//private GridView gridView = null;
 
+	private LazyScrollView waterFallScrollView;
+	
+	private LinearLayout waterFallContainer;
+	
+	private List<LinearLayout> waterFallItems;
+	
 	private ImageAdapter adapter = null;
 
-	private ArrayList<ImageInfo> imageList = new ArrayList<ImageInfo>();
+	private List<ImageInfo> imageList = new ArrayList<ImageInfo>();
 
 	private Context context;
 	
 	private ProgressDialog progressDialog = null;
 
+	private int column_count = 3;// 显示列数
+	
+	private int page_count = 15;// 每次加载15张图片
+
+	private int current_page = 0;
+	
+	public static int itemWidth;
+	
 	private Handler handler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
@@ -65,25 +86,157 @@ public class ImageViewer extends Activity {
 	
 	private String TAG = "ImageViewer";
 	
-	/*public ImageViewer(Context context, int theme) {
-		super(context, theme);
-		this.context = context;
-	}*/
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		context = this;
 		setContentView(R.layout.all_image_layout);
-		gridView = (GridView) findViewById(R.id.all_image_gridview);
-		progressDialog = ProgressDialog.show(context, context.getText(R.string.webcam_load_pic_title_str), context.getText(R.string.webcam_load_pic_message_str));
-		adapter = new ImageAdapter(context, imageList);
-		gridView.setAdapter(adapter); 
-		gridView.setOnItemClickListener(new OpenImage()); 
+		Display display = this.getWindowManager().getDefaultDisplay();
+		itemWidth = display.getWidth() / column_count;// 根据屏幕大小计算每列大小
+		//gridView = (GridView) findViewById(R.id.all_image_gridview);
+		//progressDialog = ProgressDialog.show(context, context.getText(R.string.webcam_load_pic_title_str), context.getText(R.string.webcam_load_pic_message_str));
+		initLayout();
+		//adapter = new ImageAdapter(context, imageList);
+		//gridView.setAdapter(adapter); 
+		//gridView.setOnItemClickListener(new OpenImage()); 
 		//gridView.setSelection(0);
-		new LoadImageTask().execute();
+		//new LoadImageTask().execute();
 	}
 
+	private void initLayout() {
+		waterFallScrollView = (LazyScrollView) findViewById(R.id.waterFallScrollView);
+		waterFallContainer = (LinearLayout) findViewById(R.id.waterFallContainer);
+		waterFallItems = new ArrayList<LinearLayout>();
+		waterFallScrollView.getView();
+		waterFallScrollView.setOnScrollListener(new OnScrollListener() {
+			
+			@Override
+			public void onTop() {
+				Log.d(TAG, "### onTop");
+			}
+			
+			@Override
+			public void onScroll() {
+				Log.d(TAG, "### onScroll");
+			}
+			
+			@Override
+			public void onBottom() {
+				Log.d(TAG, "### onBottom");
+				addItemToContainer(++current_page, page_count);
+			}
+		});
+		
+		for(int i=0;i<column_count;i++) {
+			LinearLayout itemLayout = new LinearLayout(this);
+			LinearLayout.LayoutParams itemParam = new LinearLayout.LayoutParams(itemWidth, LayoutParams.WRAP_CONTENT);
+			itemLayout.setPadding(2, 2, 2, 2);
+			itemLayout.setOrientation(LinearLayout.VERTICAL);
+			itemLayout.setLayoutParams(itemParam);
+			waterFallItems.add(itemLayout);
+			waterFallContainer.addView(itemLayout);
+		}
+		// 第一次加载
+		loadImageFiles();
+		addItemToContainer(current_page, page_count);
+	}
+	
+	@Override
+	public void onClick(View v) {
+		Integer index = (Integer) v.getTag();
+		startActivity(imageList.get(index).intent);
+		
+	}
+	
+	private void addItemToContainer(int pageindex, int pagecount) {
+		int j = 0;
+		int imageCount = imageList.size();
+		for (int i = pageindex * pagecount; i < pagecount * (pageindex + 1)
+				&& i < imageCount; i++) {
+			j = j >= column_count ? j = 0 : j;
+			addImage(imageList.get(i), i, j++);
+		}
+	}
+	
+	private void addImage(ImageInfo imageInfo, int index, int columnIndex) {
+		ImageView imageViewItem = (ImageView) LayoutInflater.from(this).inflate(
+				R.layout.waterfallitem, null);
+		waterFallItems.get(columnIndex).addView(imageViewItem);
+		imageViewItem.setTag(index);
+		imageViewItem.setOnClickListener(this);
+		imageInfo.imageView = imageViewItem;
+		ImageLoaderTask imageLoaderTask = new ImageLoaderTask(imageViewItem);
+		imageLoaderTask.execute(imageInfo);
+
+	}
+	
+	private void loadImageFiles() {
+		if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
+			String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();// 获取跟目录
+			File file = new File(sdDir + FileUtil.parentPath + FileUtil.picForder);
+			if(!file.exists()) {
+				file.mkdirs();
+				File noMedia = new File(sdDir + FileUtil.parentPath + FileUtil.picForder + ".nomedia");
+				try {
+					noMedia.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			File[] files = file.listFiles(new FileFilter() {
+				
+				@Override
+				public boolean accept(File pathname) {
+					if(pathname.isDirectory()) {
+						return true;
+					}
+					String name = pathname.getName().toLowerCase();
+					return name.endsWith(".jpeg") || name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".gif");
+				}
+			});
+           // String[] paths = new String[files.length];
+            //Bitmap bitmap;
+            //Bitmap newBitmap;
+            for(int i = 0; i < files.length; i++){
+            	//paths[i] = files[i].getPath();
+            	ImageInfo imageInfo = new ImageInfo();
+            	imageInfo.path = files[i].getPath();
+            	Uri uri = Uri.parse("file://"+files[i].getPath());
+            	imageInfo.setActivity(uri, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            	imageList.add(imageInfo);
+            	/*try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 10;
+                    bitmap = BitmapFactory.decodeFile(paths[i],options);
+                    newBitmap = ImageZoom.extractThumbnail(bitmap, 90, 100);
+                    if(!newBitmap.isRecycled()) {
+                    	bitmap.recycle();
+                    	bitmap = null;
+                    }
+                    if(newBitmap != null) {
+                    	ImageInfo imageInfo = new ImageInfo();
+                    	imageInfo.title = files[i].getName();
+                    	//BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);      
+                    	//Drawable drawable = (Drawable)bitmapDrawable; 
+                    	//imageInfo.icon = newBitmap;//drawable;
+                    	Uri uri = Uri.parse("file://"+files[i].getPath());
+                    	imageInfo.setActivity(uri, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    	imageList.add(imageInfo);
+                    	handler.sendEmptyMessage(update);
+                    	if(debug){
+                    		Log.d(TAG, imageInfo.toString());
+                    	}
+                    }
+            	}catch(Exception e){
+            		if(debug){
+            			Log.d(TAG, "### Exception==>" + e.getLocalizedMessage());
+            		}
+            	}
+*/
+            }
+		}
+	}
+	
 	private class ImageAdapter extends ArrayAdapter<ImageInfo> {
 
 		public ImageAdapter(Context context, ArrayList<ImageInfo> apps) {
@@ -108,7 +261,7 @@ public class ImageViewer extends Activity {
 				holder = (ViewHolder) convertView.getTag();
 			}
 			//holder.icon.setImageBitmap(BitmapUtil.resizeApplicationIcon(info.icon, 150, 150));
-			holder.icon.setImageBitmap(info.icon);
+			//holder.icon.setImageBitmap(info.icon);
 			holder.name.setText(info.title);
 			convertView.setTag(holder);
 			return convertView;
@@ -175,7 +328,7 @@ public class ImageViewer extends Activity {
                         	imageInfo.title = files[i].getName();
                         	//BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);      
                         	//Drawable drawable = (Drawable)bitmapDrawable; 
-                        	imageInfo.icon = newBitmap;//drawable;
+                        	//imageInfo.icon = newBitmap;//drawable;
                         	Uri uri = Uri.parse("file://"+files[i].getPath());
                         	imageInfo.setActivity(uri, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                         	imageList.add(imageInfo);
