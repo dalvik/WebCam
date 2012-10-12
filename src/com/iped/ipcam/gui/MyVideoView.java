@@ -1,8 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -675,17 +672,19 @@ public class MyVideoView extends ImageView implements Runnable {
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
 			int recvDataLength = -1;
-			while (!stopRecvAudioFlag) {
+			while (!stopRecvAudioFlag && !stopPlay) {
 				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
 				//Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
 				if(recvDataLength<=0) {
-					//Log.d(TAG, "### audio recv audio over");
+					Log.d(TAG, "### audio recv audio over");
 					stopRecvAudioFlag = true;
 					break;
 				}
 				if(recFlag) {
+					synchronized (recfBuffer) {
 						recFlag = false;
-						ByteUtil.bytesToShorts(audioBuffer,RECEAUDIOBUFFERSIZE, recfBuffer);//转换参考数据
+					}
+					ByteUtil.bytesToShorts(audioBuffer,RECEAUDIOBUFFERSIZE, recfBuffer);//转换参考数据
 				}else {
 					synchronized (recfBuffer) {
 						try {
@@ -770,8 +769,9 @@ public class MyVideoView extends ImageView implements Runnable {
 		  private void writeAudioDataToFile(){
 			  //byte data[] = new byte[miniRecoderBufSize];
               int read = 0;
-              while(!stopPlay && !stopPlay){
+              while(!stopPlay){
                       read = audioRecord.read(micBuffer, 0, pcmBufferLength);
+                      //Log.d(TAG, "### recording recFlag " + recFlag + " read= " + read);
                       if(AudioRecord.ERROR_INVALID_OPERATION != read){
                     	  if(!recFlag) {
                     		  synchronized (recfBuffer) {
@@ -779,16 +779,18 @@ public class MyVideoView extends ImageView implements Runnable {
                     			  Speex.cancellation(micBuffer, recfBuffer, amrBuffer);
                     			  UdtTools.EncoderPcm(recfBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
                     			  ByteUtil.shortsToBytes(amrBuffer, amrBufferLength, sendAudioBufferToCam);
-                    			  UdtTools.sendAudioMsg(sendAudioBufferToCam, sendAudioToCamLength);
                     			  recfBuffer.notify();
                     		  }
+                    		  UdtTools.sendAudioMsg(sendAudioBufferToCam, sendAudioToCamLength);
                     	  }
                    }
               }
+              //Log.d(TAG, "### recording recFlag " + recFlag + " read===== " + read);
               stopRecording();
 		  }
 	
 		  private void stopRecording(){
+			  Log.d(TAG, "### stop recording.");
 			  Speex.stopEcho();
               if(null != audioRecord){
                       audioRecord.stop();
