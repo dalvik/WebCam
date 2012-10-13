@@ -781,7 +781,7 @@ public class MyVideoView extends ImageView implements Runnable {
                     			  ByteUtil.shortsToBytes(amrBuffer, amrBufferLength, sendAudioBufferToCam);
                     			  recfBuffer.notify();
                     		  }
-                    		  UdtTools.sendAudioMsg(sendAudioBufferToCam, sendAudioToCamLength);
+                    		  //UdtTools.sendAudioMsg(sendAudioBufferToCam, sendAudioToCamLength);
                     	  }
                    }
               }
