@@ -43,7 +43,7 @@ public class UdtTools {
 	
 	public static native int checkCmdSocketEnable(String camId);
 	
-	public static native int initialSocket(String camId, String random);
+	//public static native int initialSocket(String camId, String random);
 	
 	public static native int sendCmdMsgById(String camId, String cmd, int cmdLength);
 	
@@ -56,6 +56,8 @@ public class UdtTools {
 	public static native int sendAudioMsg(short[] buf, int sendLength);
 	
 	public static native int sendPTZMsg(byte[] comm);
+	
+	public static native int free();
 	
 	public static native int close();
 	

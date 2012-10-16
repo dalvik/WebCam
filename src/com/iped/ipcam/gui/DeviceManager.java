@@ -177,7 +177,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
 				String random = RandomUtil.generalRandom();
 				Log.d(TAG, "random = " + random);
-				int initRes = UdtTools.initialSocket(device.getDeviceID(),random);
+				int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
 				if(initRes<0) {
 					Log.d(TAG, "initialSocket init error!");
 					ToastUtils.showToast(DeviceManager.this, R.string.webcam_connect_init_error);

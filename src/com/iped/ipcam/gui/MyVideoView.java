@@ -219,7 +219,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		if(!playBackFlag) {
 			temWidth = 1;
 			new Thread(new RecvAudio()).start();
-			new Thread(new WebCamAudioRecord()).start();
+			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
@@ -482,6 +482,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 		}
+		UdtTools.free();
 		release();
 		flushBitmap();
 	}
