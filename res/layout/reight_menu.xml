@@ -89,6 +89,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
+                        android:visibility="invisible"
                         android:text="@string/video_preview_left_down"/>
 
                     <Button
@@ -106,6 +107,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
+                        android:visibility="invisible"
                         android:text="@string/video_preview_right_down"/>
                 </TableRow>
  

@@ -774,7 +774,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
 		String random = RandomUtil.generalRandom();
 		Log.d(TAG, "random = " + random);
-		int initRes = UdtTools.initialSocket(device.getDeviceID(),random);
+		int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
 		if(initRes<0) {
 			Log.d(TAG, "initialSocket init error!");
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);

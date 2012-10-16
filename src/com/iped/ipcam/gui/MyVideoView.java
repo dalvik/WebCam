@@ -216,11 +216,12 @@ public class MyVideoView extends ImageView implements Runnable {
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
 			temWidth = 1;
-			RecvAudio recvAudio = new RecvAudio();
-			recvAudioThread = new Thread(recvAudio);
+			//RecvAudio recvAudio = new RecvAudio();
+			//recvAudioThread = new Thread(recvAudio);
 			stopRecvAudioFlag = false;
-			recvAudioThread.start();
-			new Thread(new WebCamAudioRecord()).start();
+			//recvAudioThread.start();
+			new Thread(new RecvAudio()).start();
+			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
@@ -680,7 +681,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					stopRecvAudioFlag = true;
 					break;
 				}
-				if(recFlag) {
+				/*if(recFlag) {
 					synchronized (recfBuffer) {
 						recFlag = false;
 					}
@@ -695,7 +696,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							e.printStackTrace();
 						}
 					}
-				}
+				}*/
 				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
@@ -703,8 +704,9 @@ public class MyVideoView extends ImageView implements Runnable {
 				m_out_trk.stop();
 				m_out_trk.release();
 				m_out_trk = null;
-				UdtTools.exitAmrDecoder();
 			}
+			UdtTools.exitAmrDecoder();
+			Log.d(TAG, "### audio exit amr decoder.");
 		}
 
 	}
