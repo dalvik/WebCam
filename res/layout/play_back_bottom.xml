@@ -36,10 +36,11 @@
             android:shadowDy="0"
             android:shadowRadius="3"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
 
-        <SeekBar
+       <!-- <SeekBar -->
+       <com.iped.ipcam.gui.MySeekBar
             android:id="@+id/play_back_seek_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dip"
@@ -62,7 +63,7 @@
             android:shadowDy="0"
             android:shadowRadius="3"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 

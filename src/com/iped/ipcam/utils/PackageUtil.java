@@ -295,8 +295,8 @@ public class PackageUtil {
 		return false;
 	}
 
-	public static void setBCV(String id, String comm, String value) {
+	public static int setBCV(String id, String comm, String value) {
 		String BCVCommon = (comm + value +"\0");
-		UdtTools.sendCmdMsgById(id, BCVCommon, BCVCommon.length());
+		return UdtTools.sendCmdMsgById(id, BCVCommon, BCVCommon.length());
 	}
 }

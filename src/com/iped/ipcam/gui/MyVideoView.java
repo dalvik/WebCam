@@ -26,6 +26,7 @@ import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
+import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 
@@ -156,7 +157,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	void init(Handler handler, int w, int h) {
 		this.handler = handler;
 		textPaint = new Paint();
-		textPaint.setColor(Color.BLUE);
+		textPaint.setColor(Color.RED);
 		m.setScale(-1, 1);
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 		bgPaint = new Paint();
@@ -176,7 +177,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
-			canvas.drawText(deviceId + "  "	+ timeStr + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+			canvas.drawText(deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
 		}else {
 			String text = "More : hangzhouiped.taobao.com";
 			if(rect2 == null) {

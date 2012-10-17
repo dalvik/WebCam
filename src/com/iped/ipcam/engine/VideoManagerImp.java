@@ -204,7 +204,7 @@ public class VideoManagerImp implements IVideoManager {
 
 			@Override
 			public void run() {
-				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE];
+				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE*100];
 				String tem = CamCmdListHelper.GetCmd_NetFiles;
 				String id = device.getDeviceID();
 				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());

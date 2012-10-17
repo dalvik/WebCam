@@ -124,7 +124,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private String playBackFlag;
 	
-	private SeekBar playBackSeekBar = null;
+	private MySeekBar playBackSeekBar = null;
 	
 	private LinearLayout playBackBottomlayout;
 
@@ -231,9 +231,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				currentTextView = (TextView) playBackBottomlayout.findViewById(R.id.currenttime);
 				totalTextView = (TextView) playBackBottomlayout.findViewById(R.id.totaltime);
 				playBackSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-				currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, 0));
+				playBackSeekBar.init(startTime);
+				//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, 0));
+				currentTextView.setText(DateUtil.formatTimeToDate6(startTime));
 				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, 0));
-				totalTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, during/1000));
+				//totalTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, during/1000));
+				totalTextView.setText(DateUtil.formatTimeToDate6(during+startTime));
 				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, during/1000) + " " + during/1000 + " s");
 				playBackSeekBar.setEnabled(true);
 				playBackSeekBar.setProgress(1);
@@ -311,7 +314,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         myVideoView.init(mHandler,screenWidth, screenHeight);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
-        playBackSeekBar = (SeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
+        playBackSeekBar = (MySeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
         LayoutInflater factory = LayoutInflater.from(this);
         View view = factory.inflate(R.layout.reight_menu, null);
         listView = (ListView)view.findViewById(R.id.video_preview_list);
@@ -440,8 +443,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value2 <=0) {
 				value2 = 0;
 			}
-			brightnessProgerss.setProgress(value2);
-			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"")>0){
+				brightnessProgerss.setProgress(value2);
+			}
 			break;
 		case R.id.add_zoom:
 			int value = brightnessProgerss.getProgress();
@@ -449,8 +453,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value >=100) {
 				value = 100;
 			}
-			brightnessProgerss.setProgress(value);
-			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"")>0) {
+				brightnessProgerss.setProgress(value);
+			}
 			break;
 		case R.id.minus_foucs:
 			int value3 = contrastProgressbar.getProgress();
@@ -458,8 +463,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value3 <=0) {
 				value3 = 0;
 			}
-			contrastProgressbar.setProgress(value3);
-			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"")>0) {
+				contrastProgressbar.setProgress(value3);
+			}
 			break;
 		case R.id.add_foucs:
 			int value4 = contrastProgressbar.getProgress();
@@ -467,8 +473,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value4 >=100) {
 				value4 = 100;
 			}
-			contrastProgressbar.setProgress(value4);
-			PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"")>0){
+				contrastProgressbar.setProgress(value4);
+			}
 			break;
 		case R.id.minus_apertrue:
 			int value5 = volumeProgressbar.getProgress();
@@ -476,8 +483,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value5 <=0) {
 				value5 = 0;
 			}
-			volumeProgressbar.setProgress(value5);
-			//PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value5+"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Volume, value5+"")>0) {
+				volumeProgressbar.setProgress(value5);
+			}
 			break;
 		case R.id.add_apertrue:
 			int value6 = volumeProgressbar.getProgress();
@@ -485,8 +493,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(value6 >=100) {
 				value6 = 100;
 			}
-			volumeProgressbar.setProgress(value6);
-			//PackageUtil.setBCV(CamCmdListHelper.SetCmp_Set_Volume, value6+"");
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Volume,value6+"")>0){
+				volumeProgressbar.setProgress(value6);
+			}
+			
 			break;
 		case R.id.left_down:
 			if(myVideoView.takePic()) {
@@ -885,7 +895,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
 			int progress = seekBar.getProgress()/15;
-			currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress *15));
+			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress *15));
+			//currentTextView.setText(DateUtil.formatTimeToDate6(progress * 1000+startTime));
 			int index = progress * 4;
 			if(table2 != null && table2.length>=index+4) {
 					int seekPos = ByteUtil.byteToInt4(table2, index);
@@ -898,7 +909,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
 			//Log.d(TAG, "change" + progress);
-			currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress));
+			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress));
+			//currentTextView.setText(DateUtil.formatTimeToDate6(progress*1000+startTime));
+			playBackSeekBar.setProgress(progress);
+			//System.out.println(progress + "####" + startTime+" "+ DateUtil.formatTimeToDate6(progress+startTime));
 		}
 	};
 
