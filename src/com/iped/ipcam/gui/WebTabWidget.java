@@ -13,6 +13,7 @@ import android.widget.TabWidget;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.engine.UpdateManager;
 import com.iped.ipcam.mail.ExceptionHandler;
 import com.iped.ipcam.utils.Constants;
 
@@ -75,7 +76,7 @@ public class WebTabWidget extends TabActivity {
 			tabHeight = tabWidget.getChildAt(i).getLayoutParams().height * 2 / 3;
 			tabWidget.getChildAt(i).getLayoutParams().height = tabHeight; 
 		}
-		//UpdateManager.getUpdateManager().checkAppUpdate(this, false);
+		UpdateManager.getUpdateManager().checkAppUpdate(this, false);
 	}
 
 	@Override
