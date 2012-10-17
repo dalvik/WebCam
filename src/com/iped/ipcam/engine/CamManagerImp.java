@@ -90,6 +90,9 @@ public class CamManagerImp implements ICamManager {
 	
 	@Override
 	public Device getDevice(int index){
+		if(index>=deviceList.size()) {
+			return null;
+		}
 		return deviceList.get(index);
 	}
 	

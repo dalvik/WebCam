@@ -11,6 +11,7 @@ import android.app.ListActivity;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,9 +25,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -74,11 +78,15 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	
 	private AlertDialog dlg = null;
 	
-	private Calendar calendar = null;
+	private Calendar startCalendar = null;
 
+	private Calendar endCalendar = null;
+	
 	//private ProgressDialog videoSearchProgressDialog = null;
 	
 	private int selectIndex = 0;
+	
+	private int selectIndexDevcie = 0;
 	
 	private String TAG = "PlayBack";
 	
@@ -209,10 +217,11 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.play_back_video_search:
-			Device device = camManager.getSelectDevice();
+			Device device = camManager.getDevice(selectIndexDevcie);//.getSelectDevice();
 			if(device == null) {
 				Toast.makeText(this, getResources().getString(R.string.play_back_select_device_first_str), Toast.LENGTH_SHORT).show();
 			} else {
+				Log.d(TAG, "### select device id = " + device.getDeviceID());
 				vodeoSearchDia(device);
 			}
 			break;
@@ -255,7 +264,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
             		 ProgressUtil.showProgress(R.string.auto_search_tips_str,PlayBack.this);
             		 videoList.clear();
             		 videoAdapter.notifyDataSetChanged();
-            		 videoManager.videoSearchInit(device, startDate, endDate);
+            		 videoManager.videoSearchInit(camManager.getDevice(selectIndexDevcie), startDate, endDate);
             		 videoManager.startSearchThread(handler);
             		 try {
             			 Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
@@ -296,37 +305,76 @@ public class PlayBack extends ListActivity implements OnClickListener {
 
 	
 	private void initSearchDlg(Device device) {
-		calendar = Calendar.getInstance();
+		startCalendar  = Calendar.getInstance();
+		startCalendar.set(Calendar.YEAR, startCalendar.get(Calendar.YEAR)-1);
+		endCalendar = Calendar.getInstance();
 		EditText videoSearchName = (EditText) myDialogView.findViewById(R.id.play_back_video_search_name);
-        EditText vodeoSearchAddr = (EditText) myDialogView.findViewById(R.id.play_back_video_search_addr);
+        //EditText vodeoSearchAddr = (EditText) myDialogView.findViewById(R.id.play_back_video_search_addr);
+		Spinner searchSpinnerList = (Spinner) myDialogView.findViewById(R.id.search_device_id_list);
+		final List<Device> list = camManager.getCamList();
+		int l = list.size();
+		CharSequence[] idArr = new CharSequence[l];
+		for(int i=0;i<l;i++) {
+			idArr[i] = list.get(i).getDeviceID();
+		}
+		final SharedPreferences settings = getSharedPreferences(WebCam.class.getName(), 0);
+		selectIndexDevcie = settings.getInt("SEARCH_DEVICE_INDEX", 0);
+		ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, idArr);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		searchSpinnerList.setAdapter(adapter);
+		if(selectIndexDevcie>l-1) {
+			searchSpinnerList.setSelection(l-1);
+		}else {
+			searchSpinnerList.setSelection(selectIndexDevcie);
+		}
         videoSearchName.setText(device.getDeviceName());
         videoSearchName.setEnabled(false);
-        vodeoSearchAddr.setText(device.getDeviceID());
-        vodeoSearchAddr.setEnabled(false);
+        searchSpinnerList.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				selectIndexDevcie = position;
+				settings.edit().putInt("SEARCH_DEVICE_INDEX", selectIndexDevcie).commit();
+				Log.d(TAG, "### search select index = " + position + " device id = " + list.get(position).getDeviceID());
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+        	
+		});
+        //vodeoSearchAddr.setText(device.getDeviceID());
+        //vodeoSearchAddr.setEnabled(false);
         startSearchDate = (Button) myDialogView.findViewById(R.id.start_date_buttion);
         startSearchTime = (Button) myDialogView.findViewById(R.id.start_time_buttion);
         endSearchDate = (Button) myDialogView.findViewById(R.id.end_date_buttion);
         endSearchTime = (Button) myDialogView.findViewById(R.id.end_time_buttion);
-        startSearchDate.setText(initDateStr());
-        String date = initDateStr();
+
         String time = initTimeStr();
-        startSearchDate.setText(date);
+        startSearchDate.setText(initStartDateStr());
         startSearchTime.setText(time);
         
-        endSearchDate.setText(date);
+        endSearchDate.setText(initEndDateStr());
         endSearchTime.setText(time);
+        
         startSearchDate.setOnClickListener(this);
         startSearchTime.setOnClickListener(this);
         endSearchDate.setOnClickListener(this);
         endSearchTime.setOnClickListener(this);
 	}
 	
-	private String initDateStr() {
-		return  format(calendar.get(Calendar.YEAR)) + "-" + format(calendar.get(Calendar.MONTH) + 1) + "-" + format(calendar.get(Calendar.DAY_OF_MONTH));
+
+	private String initStartDateStr() {
+		return  format(startCalendar.get(Calendar.YEAR)) + "-" + format(startCalendar.get(Calendar.MONTH) + 1) + "-" + format(startCalendar.get(Calendar.DAY_OF_MONTH));
+	}
+	
+	private String initEndDateStr() {
+		return  format(endCalendar.get(Calendar.YEAR)) + "-" + format(endCalendar.get(Calendar.MONTH) + 1) + "-" + format(endCalendar.get(Calendar.DAY_OF_MONTH));
 	}
 	
 	private String initTimeStr() {
-		return format(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + format(calendar.get(Calendar.MINUTE));
+		return format(endCalendar.get(Calendar.HOUR_OF_DAY)) + ":" + format(endCalendar.get(Calendar.MINUTE));
 	}
 
 	private void setDateStr(final Button button) {
@@ -335,10 +383,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
 					int dayOfMonth) {
-				String time = format(year) + "-" + format(monthOfYear + 1) + "-" + format(dayOfMonth);
+				String time = format(year-1) + "-" + format(monthOfYear + 1) + "-" + format(dayOfMonth);
 				button.setText(time);
 			}
-		}, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+		}, endCalendar.get(Calendar.YEAR), endCalendar.get(Calendar.MONTH), endCalendar.get(Calendar.DAY_OF_MONTH)).show();
 	}
 	
 	private void setTimeStr(final Button button) {
@@ -347,7 +395,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				String time = format(hourOfDay) + ":" + format(minute);
 				button.setText(time);
 			}
-		},calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),true).show();
+		},endCalendar.get(Calendar.HOUR_OF_DAY), endCalendar.get(Calendar.MINUTE),true).show();
 	}
 	
 	private String getStartTime() {

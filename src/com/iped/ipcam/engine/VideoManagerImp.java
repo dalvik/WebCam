@@ -104,7 +104,7 @@ public class VideoManagerImp implements IVideoManager {
 		public void run() {
 			id = device.getDeviceID();
 			int res = UdtTools.checkCmdSocketEnable(id);
-			Log.d(TAG, "### UdtTools checkCmdSocketEnable result = " + res);
+			Log.d(TAG, "### UdtTools checkCmdSocketEnable result = " + res + " device id = " + id);
 			if(res>0) { // socket is valid
 				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 				//Intent intent = new Intent(WebCamActions.QUERY_CONFIG_ACTION);
@@ -204,12 +204,13 @@ public class VideoManagerImp implements IVideoManager {
 
 			@Override
 			public void run() {
-				byte [] buffTemp = new byte[Constants.COMMNICATEBUFFERSIZE*100];
+				int bufLength = Constants.COMMNICATEBUFFERSIZE*100;
+				byte [] buffTemp = new byte[bufLength];
 				String tem = CamCmdListHelper.GetCmd_NetFiles;
 				String id = device.getDeviceID();
 				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 				//System.out.println("res=" + res);
-				res = UdtTools.recvCmdMsgById(id, buffTemp, Constants.COMMNICATEBUFFERSIZE);
+				res = UdtTools.recvCmdMsgById(id, buffTemp, bufLength);
 				if(res > 0) {
 					byte[] recv = new byte[res];
 					System.arraycopy(buffTemp, 4, recv, 0, res);
