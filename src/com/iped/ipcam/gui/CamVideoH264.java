@@ -591,7 +591,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_UP.ordinal());
 				}
 			} else if(event.getAction() == MotionEvent.ACTION_UP) {
-				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_DOWN.ordinal()});
+				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 				//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_STOP.ordinal());
 			}
 			
