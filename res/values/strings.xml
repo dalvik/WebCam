@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <string-array name="colors">
-        <item>red</item>
-        <item>orange</item>
-        <item>yellow</item>
-        <item>green</item>
-        <item>blue</item>
-        <item>violet</item>
-    </string-array>
-    
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"> 
     <string name="hello">Hello World, WebCamActivity!</string>
      <!-- 用户登录 -->
     <string name="app_name">IPED视频监控</string>
@@ -88,7 +78,7 @@
     		<string name="device_manager_add_title_str">添加新设备</string>
     		<string name="device_manager_add_str">设备名称</string>
     		<string name="device_manager_add_hint_str">设备名称</string>
-    		<string name="device_manager_add_name_default_str">Dafult</string>
+    		<string name="device_manager_add_name_default_str"></string>
     		<string name="device_manager_local_net_para_str">局域网参数</string>
     		<string name="device_manager_new_addr_str">IP地址</string>
     		<string name="device_manager_new_addr_default_str">192.168.1.</string>
@@ -293,6 +283,7 @@
     	
     <string name="play_back_str">视频回放</string>
     	<string name="play_back_auto_search_video_str">视频搜索</string>
+    	<string name="play_back_auto_search_video_device_list">设备列表</string>
     	<string name="play_back_auto_clear_all_str">清除全部</string>
     	<string name="play_back_auto_clear_no_files_str">暂无文件</string>
     		<string name="play_back_clear_dlg_title_str">清除确认</string>
@@ -314,11 +305,11 @@
     	<string name="video_preview_no_video_str">没有可回放的视频</string>
     	<string name="video_preview_name_str">索引：</string>
     	<string name="video_preview_search_name_str">名称：</string>
-    	<string name="video_preview_address_str">ID：</string>
-    	<string name="video_preview_start_time_str">开始：</string>
+    	<string name="video_preview_address_str">设备ID：</string>
+    	<string name="video_preview_start_time_str">开始时间：</string>
     	<string name="video_preview_addr_str">ID：</string>
     	<string name="video_preview_length_str">大小：</string>
-    	<string name="video_preview_end_time_str">结束：</string>
+    	<string name="video_preview_end_time_str">结束时间：</string>
     	<string name="play_back_auto_search_button_str">搜索</string>
     	<string name="play_back_auto_cancle_button_str">取消</string>
     	<string name="play_back_select_device_first_str">请先选择设备</string>
@@ -371,6 +362,9 @@
         <string name="webcam_load_pic_title_str">加载图片</string>
         <string name="webcam_load_pic_message_str">正在加载图片，请稍等。。。</string>
         
+        <!-- long press video popmenu -->
+        <string name="webcam_video_popup_menu_stop">停止</string>
+        <string name="webcam_video_popup_menu_cancle">取消</string>
         
         <!-- error code tips infor -->
         <string name="webcam_error_code_internel">内部错误</string>

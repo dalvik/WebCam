@@ -448,7 +448,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 								unCloseDialog(dlg, -1, false);
 								String newDiviceName = ((EditText) addDeviceView
 										.findViewById(R.id.device_manager_add_name_id))
-										.getText().toString();
+										.getText().toString().trim();
 								if (serchConfig.isChecked()) {
 									String cameraId = ((EditText) addDeviceView
 											.findViewById(R.id.device_manager_new_device_id_edittext))

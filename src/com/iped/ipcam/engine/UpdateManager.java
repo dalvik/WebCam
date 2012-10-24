@@ -40,6 +40,7 @@ import com.iped.ipcam.gui.R;
 import com.iped.ipcam.pojo.UpdateInfo;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.FileUtil;
+import com.iped.ipcam.utils.NetworkUtil;
 import com.iped.ipcam.utils.URLs;
 
 public class UpdateManager {
@@ -159,21 +160,22 @@ public class UpdateManager {
 				}
 			}
 		};
-		
-		new Thread() {
-			public void run() {
-				Message msg = new Message();
-				try {
-					UpdateInfo updateInfo = checkVersion();
-					msg.what = Constants.WEB_CAM_CHECK_VERSION;
-					msg.obj = updateInfo;
-					Log.d(TAG, "### " + updateInfo.toString());
-				} catch (IOException e) {
-					e.printStackTrace();
+		if(NetworkUtil.checkNetwokEnable(context)) {
+			new Thread() {
+				public void run() {
+					Message msg = new Message();
+					try {
+						UpdateInfo updateInfo = checkVersion();
+						msg.what = Constants.WEB_CAM_CHECK_VERSION;
+						msg.obj = updateInfo;
+						Log.d(TAG, "### " + updateInfo.toString());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					handler.sendMessage(msg);
 				}
-				handler.sendMessage(msg);
-			}
-		}.start();
+			}.start();
+		}
 	}
 	
 	public UpdateInfo checkVersion() throws IOException {

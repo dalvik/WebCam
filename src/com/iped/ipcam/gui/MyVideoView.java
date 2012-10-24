@@ -94,6 +94,8 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private String deviceId = "";
 
+	private String devicenName = "";
+	
 	private Paint textPaint;
 	
 	private Paint bgPaint;
@@ -177,7 +179,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
-			canvas.drawText(deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
 		}else {
 			String text = "More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
@@ -192,6 +194,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	public void run() {
 		deviceId = device.getDeviceID();
+		devicenName = device.getDeviceName();
 		nalBufUsedLength = 0;
 		videoSockBufferUsedLength = 0;
 		audioBufferUsedLength = 0;
@@ -294,7 +297,7 @@ public class MyVideoView extends ImageView implements Runnable {
 						msg.what = Constants.UPDATE_PLAY_BACK_TIME;
 						msg.obj = timeStr;
 						handler.sendMessage(msg);
-						//copyPixl();
+						copyPixl();
 						/*timeUpdate+=(1000/rate);
 						if(timeUpdate%1000 == 0) {
 							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);

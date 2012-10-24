@@ -88,6 +88,8 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	
 	private int selectIndexDevcie = 0;
 	
+	private int searchDviceIndexCurrent = 0;
+	
 	private String TAG = "PlayBack";
 	
 	private Handler handler = new Handler() {
@@ -202,6 +204,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			}
 			bundle.putLong("STARTTIME", startTime);
 			//bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
+			bundle.putInt("PLAYBACKDEVICEINDEX", searchDviceIndexCurrent);
 			intent.putExtras(bundle);
 			intent.setAction(WebCamActions.ACTION_PLAY_BACK);
 			sendBroadcast(intent);
@@ -261,6 +264,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
             	//String s = getStartTime();
             	//String w = getEndTime();
             	 if(compareDate(startDate, endDate)) {
+            		 searchDviceIndexCurrent = selectIndexDevcie;
             		 ProgressUtil.showProgress(R.string.auto_search_tips_str,PlayBack.this);
             		 videoList.clear();
             		 videoAdapter.notifyDataSetChanged();

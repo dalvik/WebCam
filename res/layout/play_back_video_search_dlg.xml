@@ -15,12 +15,14 @@
 	    			android:layout_height="wrap_content"
 	    			android:textColor="@color/white"
 	    			android:gravity="center_horizontal"
+	    			android:visibility="gone"
 	    			android:text="@string/video_preview_name_str"/>
 	            
 	            <EditText android:id="@+id/play_back_video_search_name" 
 	                android:layout_width="wrap_content"
 	    			android:layout_height="wrap_content"
 	    			android:editable="false"
+	    			android:visibility="gone"
 	    			android:singleLine="true"/>
 	            
 	        </TableRow>
@@ -41,7 +43,7 @@
 	            <Spinner android:id="@+id/search_device_id_list" 
 		            android:layout_width="wrap_content"
 			    	android:layout_height="wrap_content"
-		            android:prompt="@string/device_params_apn_set_wireless_list_str"
+		            android:prompt="@string/play_back_auto_search_video_device_list"
 			    	/>
 	            
 	        </TableRow>

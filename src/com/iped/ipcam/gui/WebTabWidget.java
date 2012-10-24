@@ -76,7 +76,7 @@ public class WebTabWidget extends TabActivity {
 			tabHeight = tabWidget.getChildAt(i).getLayoutParams().height * 2 / 3;
 			tabWidget.getChildAt(i).getLayoutParams().height = tabHeight; 
 		}
-		//UpdateManager.getUpdateManager().checkAppUpdate(this, false);
+		UpdateManager.getUpdateManager().checkAppUpdate(this, false);
 	}
 
 	@Override
