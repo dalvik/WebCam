@@ -34,9 +34,12 @@ public class DateUtil {
 		try {
 			date = sdf.parse(dateStr);
 			sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if(date.getYear()<=80) {
+				return "";
+			}
 			return sdf.format(date);
 		} catch (ParseException e) {
-			return dateStr;
+			return "";
 		}
 	}
 	
@@ -57,7 +60,11 @@ public class DateUtil {
 	
 	public static String formatTimeToDate6(long time) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return sdf.format(new Date(time));
+		Date date = new Date(time);
+		if(date.getYear()<=80) {
+			return "";
+		}
+		return sdf.format(date);
 	}
 	
 	public static Date formatTimeToDate5(String dateStr) {

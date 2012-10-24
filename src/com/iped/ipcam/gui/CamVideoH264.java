@@ -20,10 +20,12 @@ import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -55,6 +57,7 @@ import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
 import com.iped.ipcam.utils.WebCamActions;
 import com.iped.ipcam.utils.WinTaiCmd;
+import com.iped.ipcam.view.VideoPopupMenu;
 
 
 /**
@@ -140,6 +143,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 	private String TAG = "CamVideoH264";
 	
+	private int [] videoPopMenuItem = {R.string.webcam_video_popup_menu_stop, R.string.webcam_video_popup_menu_cancle};
+	
+	private VideoPopupMenu popupMenu = null;
+	
+	private View rightView = null;
+	
+	private int playBackDeviceIndex = 0;
 	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -266,11 +276,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				//Log.d(TAG, "##############" + playBackSeekBar.getProgress());
 				String time = (String)msg.obj;
 				long currentDuringTime = DateUtil.formatTimeStrToLong(time) - startTime;// 当前播放时间
-				//Log.d(TAG, "### play time = " +time + " currentTime=" + currentTime/1000 + " startTime=" + startTime);
+				//Log.d(TAG, "### play time = " +time + " currentTime=" + currentDuringTime/1000 + " startTime=" + startTime);
 				if(currentDuringTime <= during){
 					playBackSeekBar.setProgress((int)(currentDuringTime/1000));
 				}
 				//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, playBackSeekBar.getProgress() + 1));
+				break;
+			case 7001:
+				myVideoView.setStopPlay(true);
 				break;
 			default:
 				break;
@@ -280,6 +293,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void startThread() {
 		myVideoView.setDevice(camManager.getSelectDevice());
+		myVideoView.setOnLongClickListener(longClickListener);
 		myVideoView.onStart();
 		thread = new Thread(myVideoView);
 		thread.start();
@@ -316,17 +330,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
         playBackSeekBar = (MySeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
         LayoutInflater factory = LayoutInflater.from(this);
-        View view = factory.inflate(R.layout.reight_menu, null);
-        listView = (ListView)view.findViewById(R.id.video_preview_list);
-        registerListener(view);
+        rightView = factory.inflate(R.layout.reight_menu, null);
+        listView = (ListView)rightView.findViewById(R.id.video_preview_list);
+        registerListener(rightView);
+        updateCompoent(false);
         int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
         int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-        view.measure(w, h);
-        int width =view.getMeasuredWidth(); //
+        rightView.measure(w, h);
+        int width =rightView.getMeasuredWidth(); //
         //int height = view.getMeasuredHeight();
 		rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
 		layout.addView(rightControlPanel);
-		rightControlPanel.fillPanelContainer(view);
+		rightControlPanel.fillPanelContainer(rightView);
 		camManager = CamMagFactory.getCamManagerInstance();
 		list = camManager.getCamList();
 		listView.setOnItemClickListener(itemClickListener);
@@ -338,6 +353,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	       mWakeLock.acquire();
 	    }
 		mHandler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
+		popupMenu = new VideoPopupMenu(this, mHandler, videoPopMenuItem);
 	}
 
 	private void registerListener(View view) {
@@ -361,8 +377,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		//right.setOnFocusChangeListener(this);
 		right.setOnTouchListener(this);
 		
-		view.findViewById(R.id.mid).setOnClickListener(this);
-		
 		Button leftDown = (Button) view.findViewById(R.id.left_down);
 		//right.setOnClickListener(this);
 		//right.setOnFocusChangeListener(this);
@@ -375,7 +389,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		//right.setOnFocusChangeListener(this);
 		RightDown.setOnClickListener(this);
 		
-		view.findViewById(R.id.mid).setOnClickListener(this);
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
@@ -520,7 +533,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		Log.d(TAG, "is stop = " + myVideoView.isStopPlay());
 		if(myVideoView.isStopPlay()) {
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
-			//return false;
+			return false;
 		}
 		switch(v.getId()) {
 		case R.id.left_up:
@@ -696,11 +709,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				listView.setAdapter(previewDeviceAdapter);
 				ToastUtils.setListViewHeightBasedOnChildren(listView);
 			}
-			
 		}	
-		
 	};
-	
+	//TODO
 	private class IpPlayReceiver extends BroadcastReceiver {
 
 		@Override
@@ -709,6 +720,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(NetworkUtil.checkNetwokEnable(context)) {
 					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 					myVideoView.setPlayBackFlag(false);
+					updateCompoent(true);
 					mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
 					new AsynMonitorSocketTask().execute("");
 				} else {
@@ -719,13 +731,30 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(bundle != null) {
 					String indexStr = bundle.getString("PLVIDEOINDEX");
 					myVideoView.setPlayBackFlag(true);
+					updateCompoent(false);
 					mHandler.sendEmptyMessage(PlayBackConstants.SHOW_SEEKBAR_LAYOUT);
 					during = bundle.getLong("TOTALTIME");
 					startTime = bundle.getLong("STARTTIME");
+					playBackDeviceIndex = bundle.getInt("PLAYBACKDEVICEINDEX");
+					camManager.setSelectInde(playBackDeviceIndex);
 					new AsynMonitorSocketTask().execute(indexStr);
 				}
 			}
 		}
+	}
+	
+	private void updateCompoent(boolean flag) {
+		rightView.findViewById(R.id.mid_up).setEnabled(flag); 
+		rightView.findViewById(R.id.mid_down).setEnabled(flag);
+		rightView.findViewById(R.id.left).setEnabled(flag);
+		rightView.findViewById(R.id.right).setEnabled(flag);
+		rightView.findViewById(R.id.mid).setEnabled(flag);
+		rightView.findViewById(R.id.minus_zoom).setEnabled(flag);
+		rightView.findViewById(R.id.add_zoom).setEnabled(flag);
+		rightView.findViewById(R.id.minus_foucs).setEnabled(flag);
+		rightView.findViewById(R.id.add_foucs).setEnabled(flag);
+		rightView.findViewById(R.id.minus_apertrue).setEnabled(flag);
+		rightView.findViewById(R.id.add_apertrue).setEnabled(flag);
 	}
 	
 	class AsynMonitorSocketTask extends AsyncTask<String, Integer, Void> {
@@ -736,8 +765,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			playBackFlag = params[0];
 			Device device = camManager.getSelectDevice();
 			int result = UdtTools.monitorSocket(device.getDeviceID());
-			Log.d(TAG, "monitor result = " + result);
-			analyseResult(result, device);
+			Log.d(TAG, "monitor result = " + result + " device info =  " + device.toString());
+			analyseResult(result);
 			return null;
 		}
 		
@@ -752,7 +781,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	 	}	
 	}
 	
-	private void analyseResult(int result, Device device) {
+	private void analyseResult(int result) {
 		switch (result) {
 		case ErrorCode.STUN_ERR_INTERNAL:
 			sendErrorMessage(R.string.webcam_error_code_internel);
@@ -926,5 +955,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			return null;
 		}
 	}
+	
+	private OnLongClickListener longClickListener = new OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+			if(!myVideoView.getPlayStatus()) {
+				if(!popupMenu.isShowing()) {
+					popupMenu.showAtLocation(myVideoView, Gravity.CENTER, 0, 0);
+				}
+			}
+			return false;
+		}
+	};
 
 }

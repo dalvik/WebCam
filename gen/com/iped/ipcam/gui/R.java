@@ -669,13 +669,13 @@ public final class R {
         public static final int list_options_menu=0x7f090000;
     }
     public static final class string {
-        public static final int accor_an_import_exception_str=0x7f060126;
+        public static final int accor_an_import_exception_str=0x7f060127;
         /**  用户登录 
          */
         public static final int app_name=0x7f060001;
         public static final int auto_search_tips_str=0x7f060040;
         public static final int auto_serch_str=0x7f06003f;
-        public static final int blank_str=0x7f06012c;
+        public static final int blank_str=0x7f06012d;
         public static final int cancle_login_str=0x7f060020;
         /**  更改登录密码 
          */
@@ -687,7 +687,7 @@ public final class R {
         public static final int clear_all_str=0x7f060068;
         public static final int connection=0x7f060026;
         public static final int connection_error=0x7f060027;
-        public static final int cory_right=0x7f06012e;
+        public static final int cory_right=0x7f06012f;
         public static final int default_activity_str=0x7f060025;
         public static final int device_audio_port_str=0x7f060076;
         public static final int device_cmd_port_str=0x7f060073;
@@ -858,10 +858,10 @@ public final class R {
         /**  Do not translate. Duration format for duration < 1 hour 
          */
         public static final int durationformatshort=0x7f0600e1;
-        public static final int exception_commit_button_str=0x7f060129;
-        public static final int exception_tips_message_str=0x7f060128;
-        public static final int exception_tips_title_str=0x7f060127;
-        public static final int file_cannotopen=0x7f0600fe;
+        public static final int exception_commit_button_str=0x7f06012a;
+        public static final int exception_tips_message_str=0x7f060129;
+        public static final int exception_tips_title_str=0x7f060128;
+        public static final int file_cannotopen=0x7f0600ff;
         public static final int hello=0x7f060000;
         public static final int input_password=0x7f06001a;
         public static final int keep_user_pass=0x7f060006;
@@ -888,37 +888,38 @@ public final class R {
         public static final int play_back_auto_clear_all_str=0x7f0600db;
         public static final int play_back_auto_clear_no_files_str=0x7f0600dc;
         public static final int play_back_auto_search_button_str=0x7f0600f2;
-        public static final int play_back_auto_search_error_str=0x7f0600f6;
+        public static final int play_back_auto_search_error_str=0x7f0600f7;
         public static final int play_back_auto_search_video_device_list=0x7f0600da;
         public static final int play_back_auto_search_video_str=0x7f0600d9;
         public static final int play_back_clear_dlg_cancle_str=0x7f0600e0;
         public static final int play_back_clear_dlg_message_str=0x7f0600de;
         public static final int play_back_clear_dlg_sure_str=0x7f0600df;
         public static final int play_back_clear_dlg_title_str=0x7f0600dd;
+        public static final int play_back_no_device_str=0x7f0600f5;
         public static final int play_back_select_device_first_str=0x7f0600f4;
-        public static final int play_back_start_above_start_time_str=0x7f0600f5;
+        public static final int play_back_start_above_start_time_str=0x7f0600f6;
         public static final int play_back_str=0x7f0600d8;
         public static final int repeat_input_password=0x7f06001b;
         public static final int repeat_new_input_password=0x7f060016;
-        public static final int sms_to_email_title_str=0x7f060125;
-        public static final int system_settings_device_bin_addr_hint_str=0x7f060106;
-        public static final int system_settings_device_bin_addr_str=0x7f060105;
-        public static final int system_settings_device_cancle_str=0x7f060109;
-        public static final int system_settings_device_ip_hint_str=0x7f060104;
-        public static final int system_settings_device_ip_str=0x7f060103;
-        public static final int system_settings_device_name_hint_str=0x7f060102;
-        public static final int system_settings_device_name_str=0x7f060101;
-        public static final int system_settings_device_update_str=0x7f060108;
-        public static final int system_settings_preview_str=0x7f060100;
-        public static final int system_settings_save_path_back_str=0x7f0600fc;
-        public static final int system_settings_save_path_choice_str=0x7f0600fd;
-        public static final int system_settings_save_path_hint_str=0x7f0600f8;
-        public static final int system_settings_save_path_preview_cancle_str=0x7f0600fb;
-        public static final int system_settings_save_path_preview_str=0x7f0600f9;
-        public static final int system_settings_save_path_preview_sure_str=0x7f0600fa;
-        public static final int system_settings_save_path_str=0x7f0600ff;
-        public static final int system_settings_str=0x7f0600f7;
-        public static final int system_settings_update_str=0x7f060107;
+        public static final int sms_to_email_title_str=0x7f060126;
+        public static final int system_settings_device_bin_addr_hint_str=0x7f060107;
+        public static final int system_settings_device_bin_addr_str=0x7f060106;
+        public static final int system_settings_device_cancle_str=0x7f06010a;
+        public static final int system_settings_device_ip_hint_str=0x7f060105;
+        public static final int system_settings_device_ip_str=0x7f060104;
+        public static final int system_settings_device_name_hint_str=0x7f060103;
+        public static final int system_settings_device_name_str=0x7f060102;
+        public static final int system_settings_device_update_str=0x7f060109;
+        public static final int system_settings_preview_str=0x7f060101;
+        public static final int system_settings_save_path_back_str=0x7f0600fd;
+        public static final int system_settings_save_path_choice_str=0x7f0600fe;
+        public static final int system_settings_save_path_hint_str=0x7f0600f9;
+        public static final int system_settings_save_path_preview_cancle_str=0x7f0600fc;
+        public static final int system_settings_save_path_preview_str=0x7f0600fa;
+        public static final int system_settings_save_path_preview_sure_str=0x7f0600fb;
+        public static final int system_settings_save_path_str=0x7f060100;
+        public static final int system_settings_str=0x7f0600f8;
+        public static final int system_settings_update_str=0x7f060108;
         public static final int user_exit=0x7f060009;
         public static final int user_exit_cancle=0x7f06000f;
         public static final int user_exit_message=0x7f06000d;
@@ -931,7 +932,7 @@ public final class R {
         public static final int user_name_hint=0x7f060003;
         public static final int user_or_password_is_not_correct_str=0x7f06000a;
         public static final int username_null=0x7f060008;
-        public static final int version=0x7f06012d;
+        public static final int version=0x7f06012e;
         public static final int video_clear_ing=0x7f0600e6;
         public static final int video_delete=0x7f0600e4;
         public static final int video_delete_error=0x7f0600e8;
@@ -969,45 +970,45 @@ public final class R {
         public static final int video_preview_search_name_str=0x7f0600ec;
         public static final int video_preview_start_time_str=0x7f0600ee;
         public static final int video_preview_volume=0x7f06003d;
-        public static final int webcam_check_pwd_dialog_str=0x7f06012b;
-        public static final int webcam_check_version_dialog_cancle_button_str=0x7f060115;
-        public static final int webcam_check_version_dialog_ok_button_str=0x7f060114;
-        public static final int webcam_check_version_dialog_title_str=0x7f060113;
-        public static final int webcam_check_version_result_error_message_str=0x7f060111;
-        public static final int webcam_check_version_result_ok_str=0x7f060112;
-        public static final int webcam_check_version_result_success_message_str=0x7f060110;
-        public static final int webcam_check_version_result_title_str=0x7f06010f;
+        public static final int webcam_check_pwd_dialog_str=0x7f06012c;
+        public static final int webcam_check_version_dialog_cancle_button_str=0x7f060116;
+        public static final int webcam_check_version_dialog_ok_button_str=0x7f060115;
+        public static final int webcam_check_version_dialog_title_str=0x7f060114;
+        public static final int webcam_check_version_result_error_message_str=0x7f060112;
+        public static final int webcam_check_version_result_ok_str=0x7f060113;
+        public static final int webcam_check_version_result_success_message_str=0x7f060111;
+        public static final int webcam_check_version_result_title_str=0x7f060110;
         /**  update 
          */
-        public static final int webcam_check_version_str=0x7f06010e;
-        public static final int webcam_connect_init_error=0x7f06012a;
-        public static final int webcam_error_code_bind_error=0x7f060124;
-        public static final int webcam_error_code_connect_error=0x7f060123;
+        public static final int webcam_check_version_str=0x7f06010f;
+        public static final int webcam_connect_init_error=0x7f06012b;
+        public static final int webcam_error_code_bind_error=0x7f060125;
+        public static final int webcam_error_code_connect_error=0x7f060124;
         /**  error code tips infor 
          */
-        public static final int webcam_error_code_internel=0x7f06011f;
-        public static final int webcam_error_code_server_not_reached=0x7f060120;
-        public static final int webcam_error_code_timeout=0x7f060121;
-        public static final int webcam_error_code_unlegal=0x7f060122;
-        public static final int webcam_load_pic_message_str=0x7f06011c;
-        public static final int webcam_load_pic_title_str=0x7f06011b;
-        public static final int webcam_loading_new_cancle_str=0x7f060117;
-        public static final int webcam_loading_new_str=0x7f060116;
-        public static final int webcam_loading_str=0x7f060118;
-        public static final int webcam_network_invalid_cancle=0x7f06010d;
-        public static final int webcam_network_invalid_message_str=0x7f06010b;
-        public static final int webcam_network_invalid_open=0x7f06010c;
+        public static final int webcam_error_code_internel=0x7f060120;
+        public static final int webcam_error_code_server_not_reached=0x7f060121;
+        public static final int webcam_error_code_timeout=0x7f060122;
+        public static final int webcam_error_code_unlegal=0x7f060123;
+        public static final int webcam_load_pic_message_str=0x7f06011d;
+        public static final int webcam_load_pic_title_str=0x7f06011c;
+        public static final int webcam_loading_new_cancle_str=0x7f060118;
+        public static final int webcam_loading_new_str=0x7f060117;
+        public static final int webcam_loading_str=0x7f060119;
+        public static final int webcam_network_invalid_cancle=0x7f06010e;
+        public static final int webcam_network_invalid_message_str=0x7f06010c;
+        public static final int webcam_network_invalid_open=0x7f06010d;
         /**  network check 
          */
-        public static final int webcam_network_invalid_title_str=0x7f06010a;
-        public static final int webcam_takepic_error_str=0x7f06011a;
+        public static final int webcam_network_invalid_title_str=0x7f06010b;
+        public static final int webcam_takepic_error_str=0x7f06011b;
         /**  take picture 
          */
-        public static final int webcam_takepic_success_str=0x7f060119;
-        public static final int webcam_video_popup_menu_cancle=0x7f06011e;
+        public static final int webcam_takepic_success_str=0x7f06011a;
+        public static final int webcam_video_popup_menu_cancle=0x7f06011f;
         /**  long press video popmenu 
          */
-        public static final int webcam_video_popup_menu_stop=0x7f06011d;
+        public static final int webcam_video_popup_menu_stop=0x7f06011e;
     }
     public static final class style {
         public static final int dialog=0x7f080000;

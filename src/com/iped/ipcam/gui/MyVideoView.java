@@ -230,6 +230,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
 					System.out.println("read over break....");
+					stopPlay = true;
 					break;
 				}
 				videoSockBufferUsedLength = 0;
@@ -262,6 +263,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
 					System.out.println("read over break....");
+					stopPlay = true;
 					break;
 				}
 				if(playBackFlag && initPlayBackParaFlag) {
@@ -297,18 +299,11 @@ public class MyVideoView extends ImageView implements Runnable {
 						msg.what = Constants.UPDATE_PLAY_BACK_TIME;
 						msg.obj = timeStr;
 						handler.sendMessage(msg);
-						copyPixl();
-						/*timeUpdate+=(1000/rate);
-						if(timeUpdate%1000 == 0) {
-							handler.sendEmptyMessage(Constants.UPDATE_PLAY_BACK_TIME);
-							timeUpdate = 0;
-						}*/
 						try {
 							Thread.sleep(1000/rate);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						//firstStartFlag = true;
 					}
 					nalBuf[0] = -1;
 					nalBuf[1] = -40;

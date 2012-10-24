@@ -1,6 +1,8 @@
 package com.iped.ipcam.engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +17,6 @@ import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
-import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.RandomUtil;
@@ -204,24 +205,62 @@ public class VideoManagerImp implements IVideoManager {
 
 			@Override
 			public void run() {
-				int bufLength = Constants.COMMNICATEBUFFERSIZE*100;
+				int bufLength = 1000;
 				byte [] buffTemp = new byte[bufLength];
 				String tem = CamCmdListHelper.GetCmd_NetFiles;
 				String id = device.getDeviceID();
 				int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 				//System.out.println("res=" + res);
-				res = UdtTools.recvCmdMsgById(id, buffTemp, bufLength);
-				if(res > 0) {
+				//res = ;
+				int fileLength = 0;
+				StringBuffer sb = new StringBuffer();
+				while(true) {
+					res = UdtTools.recvCmdMsgById(id, buffTemp, bufLength);
+					if(res<0) {
+						sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
+						break;
+					}
+					if(res<bufLength) {// recv over
+						fileLength +=res;
+						sb.append(new String(buffTemp));
+						int realDataLength = 0;
+						try {
+							realDataLength = Integer.parseInt((sb.subSequence(0, 4).toString()));
+						}catch (Exception e) {
+							
+						}
+						if((fileLength-4) == realDataLength) {
+							splitFilesInfoFromBuf(PackageUtil.deleteZero(sb.substring(4).getBytes()));
+							Collections.sort(videoList,new Comparator<Video>() {
+								@Override
+								public int compare(Video v1, Video v2) {
+									/*if()>=0) {
+										return 1000;
+									}
+									return 0;*/
+									return v1.getVideoStartTime().compareTo(v2.getVideoStartTime());
+								}
+							});
+							updateList();
+							handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
+						}
+						break;
+					}
+					fileLength +=res;
+					sb.append(new String(buffTemp));
+				} 
+				//Log.d(TAG, "fileLength=" + fileLength + " res=" + res + " = " + sb.toString());
+				/*if(res > 0) {
 					byte[] recv = new byte[res];
 					System.arraycopy(buffTemp, 4, recv, 0, res);
 					Log.d(TAG, "### length =  " + res + " content = " + new String(recv));
 					//System.out.println("### " + res + " " + new String(recv));
 					splitFilesInfoFromBuf(PackageUtil.deleteZero(recv));
 					updateList();
-					handler.sendEmptyMessage(Constants.DISSMISVIDEOSEARCHDLG);
 				}else {
-					sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
-				}
+					
+				}*/
+				//sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
 				//00068000:00fff5b2:20120104165801-20120104170649
 			}
 		};

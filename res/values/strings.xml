@@ -313,6 +313,7 @@
     	<string name="play_back_auto_search_button_str">搜索</string>
     	<string name="play_back_auto_cancle_button_str">取消</string>
     	<string name="play_back_select_device_first_str">请先选择设备</string>
+    	<string name="play_back_no_device_str">请先添加设备</string>
     	<string name="play_back_start_above_start_time_str">开始时间不能晚于结束时间</string>
     	<string name="play_back_auto_search_error_str">视频搜索失败</string>
     	

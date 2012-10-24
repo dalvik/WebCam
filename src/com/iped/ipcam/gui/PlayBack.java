@@ -220,6 +220,14 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.play_back_video_search:
+			int camListLength = camManager.getCamList().size(); 
+			if(camListLength<=0) {
+				Toast.makeText(this, getResources().getString(R.string.play_back_no_device_str), Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			if(camListLength<selectIndexDevcie) {
+				selectIndexDevcie = camListLength-1;
+			}
 			Device device = camManager.getDevice(selectIndexDevcie);//.getSelectDevice();
 			if(device == null) {
 				Toast.makeText(this, getResources().getString(R.string.play_back_select_device_first_str), Toast.LENGTH_SHORT).show();
