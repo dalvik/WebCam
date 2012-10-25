@@ -41,6 +41,8 @@ public class UdtTools {
 	
 	public static native int monitorCmdSocket(String camId, String random);
 	
+	public static native int freeCmdSocket();
+	
 	public static native int checkCmdSocketEnable(String camId);
 	
 	//public static native int initialSocket(String camId, String random);

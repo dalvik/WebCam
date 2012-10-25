@@ -896,6 +896,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
+				device.setDeviceName(deviceNameEditText.getText().toString().trim());
+				camManager.updateCam(device);
+				FileUtil.persistentDevice(DeviceParamSets.this,camManager.getCamList());
 				String ws = ParaUtil.enCapsuPara(paraMap);
 				int l = ws.length();
 				StringBuffer sb = new StringBuffer(CamCmdListHelper.SetCmd_Config);

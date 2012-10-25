@@ -592,7 +592,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 		@Override
 		public void run() {
-				int res = UdtTools.checkCmdSocketEnable(ip);
+				int res = UdtTools.checkCmdSocketEnable(ip);// ip 其实是设备的ID
 				System.out.println("res=" + res);
 				if (res>0) {
 					deviceTmp = new Device();
@@ -606,10 +606,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					handler.sendMessage(msg);
 				}else {
 					String random = RandomUtil.generalRandom();
-					Log.d(TAG, "random = " + random);
+					//Log.d(TAG, "random = " + random);
 					int result = UdtTools.monitorCmdSocket(ip, random);
 					Log.d(TAG, "monitor result = " + result);
-					if(result>0) {
+					if(result>=0) {
 						deviceTmp = new Device();
 						deviceTmp.setDeviceName(name);
 						deviceTmp.setDeviceID(ip);
@@ -621,7 +621,31 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 						handler.sendMessage(msg);
 					}else {
 						Message msg = handler.obtainMessage();
-						msg.arg1 = R.string.device_manager_new_device_add_fail_str;
+						int tips = 0;
+						switch (result) {
+						case ErrorCode.STUN_ERR_INTERNAL:
+							tips = R.string.webcam_error_code_internel;
+							break;
+						case ErrorCode.STUN_ERR_SERVER:
+							tips = R.string.webcam_error_code_server_not_reached;
+							break;
+						case ErrorCode.STUN_ERR_TIMEOUT:
+							tips = R.string.webcam_error_code_timeout;
+							break;
+						case ErrorCode.STUN_ERR_INVALIDID:
+							tips = R.string.webcam_error_code_unlegal;
+							break;
+						case ErrorCode.STUN_ERR_CONNECT:
+							tips = R.string.webcam_error_code_connect_error;
+							break;
+						case ErrorCode.STUN_ERR_BIND:
+							tips = R.string.webcam_error_code_bind_error;
+							break;
+						default:
+							tips = R.string.device_manager_new_device_add_fail_str;
+							break;
+						}
+						msg.arg1 = tips;
 						msg.what = Constants.SHOWTOASTMSG;
 						handler.sendMessage(msg);
 					}
@@ -633,6 +657,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	private AlertDialog ad  = null;
 	
 	private void showResult(final Device device) {
+		UdtTools.freeCmdSocket();
 		ad = new AlertDialog.Builder(DeviceManager.this)
 		.setTitle(getString(R.string.device_manager_new_device_title))
 		.setMessage(getString(R.string.device_manager_new_device_message))

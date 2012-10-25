@@ -102,6 +102,7 @@ public class DialogUtils {
             	 try {
             		 handler.sendEmptyMessage(Constants.SENDSETCONFIGSUCCESSMSG);
             		 dismissDialog(dialog, dlg);
+            		 UdtTools.freeCmdSocket();
              	} catch  (Exception e) {
              		Log.v(TAG, e.getMessage());
              	}
@@ -188,6 +189,7 @@ public class DialogUtils {
  	     	                	message.obj  = newPwd1;
  	     	                	message.what = msgType;
  	     	                	handler.sendMessage(message);
+ 	     	                	UdtTools.freeCmdSocket();
  							}else {
  								 ToastUtils.showToast(context, R.string.password_modify_error_str);
  							}
@@ -203,25 +205,6 @@ public class DialogUtils {
 	                  	} catch  (Exception e) {
 	                  		Log.v(TAG, e.getMessage());
 	                  	}
-                	/* if(device.getDeviceNetType()) {
-                		DatagramPacket datagramPacket;
-                	 } else {
-                		 int result = PackageUtil.setPwd(device, common);
-                		 if(result == 1) {
-                			ToastUtils.showToast(context, R.string.password_modify_success_str);
-                			Message message = handler.obtainMessage();
-     	                	message.obj  = newPwd1;
-     	                	message.what = msgType;
-     	                	handler.sendMessage(message);
-                		 } else {
-                			 ToastUtils.showToast(context, R.string.password_modify_error_str);
-                		 }
-                	 }
-                	try {
-                		dismissDialog(dialog, dlg);
-                  	} catch  (Exception e) {
-                  		Log.v(TAG, e.getMessage());
-                  	}*/
                  }
             }
         }).setNegativeButton(context.getResources().getString(R.string.cancle_login_str), 
@@ -229,6 +212,7 @@ public class DialogUtils {
             public void onClick(DialogInterface dialog, int whichButton) {
             	 try {
             		 dismissDialog(dialog, dlg);
+            		 UdtTools.freeCmdSocket();
              	} catch  (Exception e) {
              		Log.v(TAG, e.getMessage());
              	}

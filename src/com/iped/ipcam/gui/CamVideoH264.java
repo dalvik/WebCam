@@ -269,7 +269,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				playBackBottomlayout.setVisibility(View.VISIBLE);
 				break;
 			case PlayBackConstants.DISABLE_SEEKBAR:
+				playBackSeekBar.init(0);
 				playBackSeekBar.setProgress(0);
+				if(currentTextView != null) {
+					currentTextView.setText("");
+				}
+				if(totalTextView != null) {
+					totalTextView.setText("");
+				}
 				playBackSeekBar.setEnabled(false);
 				break;
 			case Constants.UPDATE_PLAY_BACK_TIME:
@@ -426,6 +433,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				myVideoView.setPlayBackFlag(false);
+				updateCompoent(true);
 				mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
 				new AsynMonitorSocketTask().execute("");
 			} else {
