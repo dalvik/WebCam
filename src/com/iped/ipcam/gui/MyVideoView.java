@@ -38,7 +38,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 1500;//342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
 	
@@ -133,7 +133,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private int rate = 1;
 	
-	private byte isVideo = 0;
+	private byte isVideo = 1;
 
 	private int MAX_FRAME = 32;
 
@@ -169,7 +169,6 @@ public class MyVideoView extends ImageView implements Runnable {
 		infoPaint.setTextSize(18);
 	}
 
-	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -228,6 +227,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
+				//Log.d(TAG, "monitor readLengthFromVideoSocket=" +readLengthFromVideoSocket);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
 					System.out.println("read over break....");
 					stopPlay = true;
@@ -261,6 +261,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			initTableInfo = true;
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
+				//Log.d(TAG, "playback readLengthFromVideoSocket=" +readLengthFromVideoSocket);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
 					System.out.println("read over break....");
 					stopPlay = true;
@@ -279,10 +280,11 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private void playBack() {
 		videoSockBufferUsedLength = 0;
-		while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
+		while ((readLengthFromVideoSocket - videoSockBufferUsedLength) > 0) {
 			// remain socket  buf  length 将视频音频数据合并到缓冲区中
+			//Log.d(TAG, "readLengthFromVideoSocket=" + readLengthFromVideoSocket);
 			nalSizeTemp = play_back_mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
-			//Log.d(TAG, "### nalSizeTemp = " +nalSizeTemp);
+			//Log.d(TAG, "### play_back_mergeBuffer return value = " +nalSizeTemp + " looperFlag=" + looperFlag);
 			// 根据nalSizeTemp的值决定是否刷新界面
 			while (looperFlag) {
 				looperFlag = false;
@@ -300,7 +302,11 @@ public class MyVideoView extends ImageView implements Runnable {
 						msg.obj = timeStr;
 						handler.sendMessage(msg);
 						try {
-							Thread.sleep(1000/rate);
+							if(rate !=0) {
+								Thread.sleep(1000/rate);
+							} else {
+								Thread.sleep(1000);
+							}
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -389,10 +395,10 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 		}
 		looperFlag = true;
+		//System.out.println("monitor videoSockBufferUsedLength = " + videoSockBufferUsedLength);
 		return i;
 	}
-	
-	
+		
 	private int play_back_mergeBuffer(byte[] nalBuf, int nalBufUsed, byte[] socketBuf,
 			int sockBufferUsed, int videoSocketBufRemain) {
 		int i = 0;
@@ -413,19 +419,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					//Log.d(TAG, "### video start flag = " + rateStr + " rate = " + rate);
 				}
 			}			
-			if(isVideo == 1) {
-				if(socketBuf[i + sockBufferUsed] == -1
-						&& socketBuf[i + 1 + sockBufferUsed] == -40
-						&& socketBuf[i + 2 + sockBufferUsed] == -1
-						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
-						looperFlag = true;
-						return -2;
-					}else {
-						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
-						nalBufUsedLength++;
-						videoSockBufferUsedLength++;
-					}
-			} else if (isVideo == 2) {
+			if (isVideo == 2) {
 					if(socketBuf[i + sockBufferUsed] == 60) {
 						if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
 							//Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
@@ -451,7 +445,17 @@ public class MyVideoView extends ImageView implements Runnable {
 						videoSockBufferUsedLength++;
 					}
 			}else {
-				videoSockBufferUsedLength++;
+				if(socketBuf[i + sockBufferUsed] == -1
+						&& socketBuf[i + 1 + sockBufferUsed] == -40
+						&& socketBuf[i + 2 + sockBufferUsed] == -1
+						&& socketBuf[i + 3 + sockBufferUsed] == -32) { // video
+						looperFlag = true;
+						return -2;
+					}else {
+						nalBuf[i + nalBufUsed] = socketBuf[i + sockBufferUsed];
+						nalBufUsedLength++;
+						videoSockBufferUsedLength++;
+					}
 			}
 		}
 		looperFlag = true;
@@ -613,7 +617,7 @@ public class MyVideoView extends ImageView implements Runnable {
 					AudioFormat.ENCODING_PCM_16BIT);
 			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
 					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size,
+					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 5,
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
 		}
@@ -872,6 +876,61 @@ public class MyVideoView extends ImageView implements Runnable {
 				message.setData(b2);
 				message.what = PlayBackConstants.INIT_SEEK_BAR;
 				handler.sendMessage(message);
+				
+				for(int i=8+t1Length+t2Length;i<readLengthFromVideoSocket;i++) {
+					if ( videoSocketBuf[i] == 0 && videoSocketBuf[i + 1] == 0 && videoSocketBuf[i + 2] == 0 && 
+							videoSocketBuf[i + 3] == 1 && videoSocketBuf[i + 4] == 12) {
+						looperFlag = true;
+						if(i+13<=readLengthFromVideoSocket){
+							timeStr =  new String(videoSocketBuf, i + 13, 14);
+						}
+						if(i+6<=readLengthFromVideoSocket) {
+							isVideo = videoSocketBuf[i + 6];
+						}
+						if(isVideo == 2) {
+							if(videoSocketBuf[i] == 60) {
+								if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
+									//Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
+									audioTmpBufferUsed = audioBufferUsedLength;
+									audioBufferUsedLength = 0;
+									synchronized (audioTmpBuffer) {
+										System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
+										hasAudioData = true;
+										//audioTmpBuffer.notify();
+									}
+								}
+								int audioHeadIndex = readLengthFromVideoSocket - i;
+								if(audioHeadIndex>=32) {
+									System.arraycopy(videoSocketBuf,i, amrBuffer, audioBufferUsedLength, 32);
+									audioBufferUsedLength += 32;
+									i += 31;
+									videoSockBufferUsedLength+=32;
+								}else {
+									i += (audioHeadIndex-1);
+									videoSockBufferUsedLength+=audioHeadIndex;
+								}
+							}else {
+								videoSockBufferUsedLength++;
+							}
+						} else {
+							if(videoSocketBuf[i] == -1
+									&& videoSocketBuf[i + 1] == -40
+									&& videoSocketBuf[i + 2] == -1
+									&& videoSocketBuf[i + 3] == -32) { // video
+								looperFlag = true;
+								nalBuf[0] = -1;
+								nalBuf[1] = -40;
+								nalBuf[2] = -1;
+								nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
+								videoSockBufferUsedLength += 4;
+								nalBufUsedLength = 4;
+							}else {
+								nalBuf[nalBufUsedLength++] = videoSocketBuf[i];
+								videoSockBufferUsedLength++;
+							}
+						}
+					}
+				}
 			} else {//
 				tableBuffer = new byte[t2Length];
 				recvTableIndex = readLengthFromVideoSocket - (8 + t1Length); //第一次复制的数据长度
@@ -883,13 +942,13 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		
 		while(initPlayBackParaFlag) {
-			if(remainTable2Data>readLengthFromVideoSocket) {//还未接收完毕
+			if(remainTable2Data > readLengthFromVideoSocket) {//还未接收完毕
 				Log.d(TAG, "buffersize=" + tableBuffer.length + " recvTableIndex=" + recvTableIndex);
 				System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, readLengthFromVideoSocket);
 				remainTable2Data-=readLengthFromVideoSocket;
 				recvTableIndex+=readLengthFromVideoSocket;
 				break;
-			}else {
+			}else {/// 多次接收完毕
 				System.arraycopy(videoSocketBuf, 0, tableBuffer, recvTableIndex, remainTable2Data);
 				initPlayBackParaFlag = false;
 				Message message = handler.obtainMessage();
@@ -898,9 +957,68 @@ public class MyVideoView extends ImageView implements Runnable {
 				message.setData(b2);
 				message.what = PlayBackConstants.INIT_SEEK_BAR;
 				handler.sendMessage(message);
+				for(int i=remainTable2Data;i<readLengthFromVideoSocket;i++) {
+					if ( videoSocketBuf[i] == 0 && videoSocketBuf[i + 1] == 0 && videoSocketBuf[i + 2] == 0 && 
+							videoSocketBuf[i + 3] == 1 && videoSocketBuf[i + 4] == 12) {
+						looperFlag = true;
+						if(i+13<=readLengthFromVideoSocket){
+							timeStr =  new String(videoSocketBuf, i + 13, 14);
+						}
+						if(i+6<=readLengthFromVideoSocket) {
+							isVideo = videoSocketBuf[i + 6];
+						}
+						if(isVideo == 2) {
+							if(videoSocketBuf[i] == 60) {
+								if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
+									//Log.d(TAG, "### audioBufferUsedLength=" + audioBufferUsedLength);
+									audioTmpBufferUsed = audioBufferUsedLength;
+									audioBufferUsedLength = 0;
+									synchronized (audioTmpBuffer) {
+										System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
+										hasAudioData = true;
+										audioTmpBuffer.notify();
+									}
+								}
+								int audioHeadIndex = readLengthFromVideoSocket - i;
+								if(audioHeadIndex>=32) {
+									System.arraycopy(videoSocketBuf,i, amrBuffer, audioBufferUsedLength, 32);
+									audioBufferUsedLength += 32;
+									i += 31;
+									videoSockBufferUsedLength+=32;
+								}else {
+									i += (audioHeadIndex-1);
+									videoSockBufferUsedLength+=audioHeadIndex;
+								}
+							}else {
+								videoSockBufferUsedLength++;
+							}
+						} else {
+							if(videoSocketBuf[i] == -1
+									&& videoSocketBuf[i + 1] == -40
+									&& videoSocketBuf[i + 2] == -1
+									&& videoSocketBuf[i + 3] == -32) { // video
+								looperFlag = true;
+								nalBuf[0] = -1;
+								nalBuf[1] = -40;
+								nalBuf[2] = -1;
+								nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
+								videoSockBufferUsedLength += 4;
+								nalBufUsedLength = 4;
+							} else {
+								nalBuf[nalBufUsedLength++] = videoSocketBuf[i];
+								videoSockBufferUsedLength++;
+							}
+						}
+					}
+				}
+				
 				break;
 			}
 		}
 	}
 	
+	
+	public void setTime(String timeStr) {
+		this.timeStr = timeStr;
+	}
 }

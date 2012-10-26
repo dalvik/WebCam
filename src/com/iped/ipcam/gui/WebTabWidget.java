@@ -120,10 +120,12 @@ public class WebTabWidget extends TabActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		UdtTools.exit();
-		UdtTools.cleanUp();
 		ICamManager camManager = CamMagFactory.getCamManagerInstance();
 		camManager.clearCamList();
+		//UdtTools.exit();
+		UdtTools.freeConnection();
+		UdtTools.close();
+		UdtTools.cleanUp();
 		int sdk_Version = android.os.Build.VERSION.SDK_INT;
 		if (sdk_Version >= 8) {
 			Intent startMain = new Intent(Intent.ACTION_MAIN);

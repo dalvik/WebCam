@@ -368,7 +368,7 @@
         <string name="webcam_video_popup_menu_cancle">取消</string>
         
         <!-- error code tips infor -->
-        <string name="webcam_error_code_internel">内部错误</string>
+        <string name="webcam_error_code_internel">内部错误，请先检查网络状况</string>
         <string name="webcam_error_code_server_not_reached">服务器离线</string>
         <string name="webcam_error_code_timeout">网络超时</string>
         <string name="webcam_error_code_unlegal">设备编号未注册</string>

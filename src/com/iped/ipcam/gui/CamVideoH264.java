@@ -36,6 +36,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -249,16 +250,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				totalTextView.setText(DateUtil.formatTimeToDate6(during+startTime));
 				Log.d(TAG, "### initSeekBar " + StringUtils.makeTimeString(CamVideoH264.this, during/1000) + " " + during/1000 + " s");
 				playBackSeekBar.setEnabled(true);
-				playBackSeekBar.setProgress(1);
+				playBackSeekBar.setProgress(0);
 				playBackSeekBar.setMax((int)during/1000);
 				Bundle bundle = msg.getData();
 				if(bundle != null) {
 					table2 = bundle.getByteArray("TABLE2");
-					/*int in =table2.length;
-					for(int j = 0;j<in;j+=4) {
-						int seekPos = ByteUtil.byteToInt4(table2, j);
-						Log.d(TAG, "### index=" + j + " seekPos=" + seekPos);
-					}*/
 				}
 				break;
 			case PlayBackConstants.HIDE_SEEKBAR_LAYOUT:
@@ -282,6 +278,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case Constants.UPDATE_PLAY_BACK_TIME:
 				//Log.d(TAG, "##############" + playBackSeekBar.getProgress());
 				String time = (String)msg.obj;
+				Log.d(TAG, "time= " + time);
 				long currentDuringTime = DateUtil.formatTimeStrToLong(time) - startTime;// 当前播放时间
 				//Log.d(TAG, "### play time = " +time + " currentTime=" + currentDuringTime/1000 + " startTime=" + startTime);
 				if(currentDuringTime <= during){
@@ -660,6 +657,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
     protected void onDestroy() {
     	super.onDestroy();
+    	if(mWakeLock.isHeld() == true) {
+   		 	mWakeLock.release();
+        }
     	Log.d(TAG, "close---==== onDestroy");
     	myVideoView.onStop();
 		dismissProgressDlg();
@@ -678,9 +678,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			thread = null;
 		}
-    	 if(mWakeLock.isHeld() == true) {
-    		 mWakeLock.release();
-         }
+    	 
     }
 	
 	private void showProgressDlg(int textId) {
@@ -719,7 +717,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 		}	
 	};
-	//TODO
+
 	private class IpPlayReceiver extends BroadcastReceiver {
 
 		@Override
@@ -745,6 +743,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					startTime = bundle.getLong("STARTTIME");
 					playBackDeviceIndex = bundle.getInt("PLAYBACKDEVICEINDEX");
 					camManager.setSelectInde(playBackDeviceIndex);
+					//Toast.makeText(CamVideoH264.this, "monit", 3).show();
+					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 					new AsynMonitorSocketTask().execute(indexStr);
 				}
 			}
@@ -938,6 +938,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(table2 != null && table2.length>=index+4) {
 					int seekPos = ByteUtil.byteToInt4(table2, index);
 					Log.d(TAG, "### onStopTrackingTouch  seek value=" + seekBar.getProgress() + " timeIndex = " + progress + "  index=" + index + "  seek value = " + seekPos);
+					myVideoView.setTime(DateUtil.formatTimeToDate6(progress * 1000+startTime));
 					new AsynPlayBackTask().execute(seekPos);
 			}
 		}

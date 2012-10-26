@@ -67,5 +67,6 @@ public class UdtTools {
 	
 	public static native int cleanUp();
 	
+	public static native int freeConnection();
 	
 }

@@ -2,11 +2,6 @@ package com.iped.ipcam.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,16 +17,11 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
-import android.net.Uri;
-import android.os.Environment;
-import android.widget.Toast;
-
-import com.iped.ipcam.gui.R;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -226,7 +216,7 @@ public class FileUtil {
 				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
 				device.setUnDefine2(info[9].equals("null")?null:info[9]);
 				deviceList.add(device);
-				System.out.println("get device form file "  + device);
+				//System.out.println("get device form file "  + device);
 			}
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());
