@@ -168,7 +168,7 @@ public class UpdateManager {
 						UpdateInfo updateInfo = checkVersion();
 						msg.what = Constants.WEB_CAM_CHECK_VERSION;
 						msg.obj = updateInfo;
-						Log.d(TAG, "### " + updateInfo.toString());
+						//Log.d(TAG, "### " + updateInfo.toString());
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -241,7 +241,7 @@ public class UpdateManager {
 				}
 			}
 		}while(time<RETRY_TIME);
-		Log.d(TAG, "### " + responseBody);
+		//Log.d(TAG, "### " + responseBody);
 		//responseBody = responseBody.replace('', '?');
 		//if(responseBody.contains("result") && responseBody.contains("errorCode")) {
 			

@@ -773,7 +773,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			playBackFlag = params[0];
 			Device device = camManager.getSelectDevice();
 			int result = UdtTools.monitorSocket(device.getDeviceID());
-			Log.d(TAG, "monitor result = " + result + " device info =  " + device.toString());
+			//Log.d(TAG, "monitor result = " + result + " device info =  " + device.toString());
 			analyseResult(result);
 			return null;
 		}

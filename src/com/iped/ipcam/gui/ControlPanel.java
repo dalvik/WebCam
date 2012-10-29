@@ -53,7 +53,14 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		panelContainer = new LinearLayout(context);
 		panelContainer.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		this.addView(panelContainer);
-		
+		this.setPanelOpenedEvent(panelOpenedEvent);
+		if(lp.rightMargin<0) {// close status
+			new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
+			buttonHandle.setText(">");
+		} else { //open status
+			new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
+			buttonHandle.setText("<");
+		}
 	}
 
 	@Override
