@@ -36,7 +36,6 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -171,6 +170,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				//Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
 				break;
 			case Constants.SENDGETTHREEPORTMSG:
+				Button sendAudio = (Button) rightView.findViewById(R.id.send_audio);
+				sendAudio.setText(R.string.video_preview_send_audio_close);
 				break;
 			case Constants.SENDGETTHREEPORTTIMOUTMSG:
 				ToastUtils.showToast(CamVideoH264.this, R.string.connection_error);
@@ -205,10 +206,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				}
 				break;
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
-				
+				Button sendAudioButton = (Button) rightView.findViewById(R.id.send_audio);
+				UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOff, CamCmdListHelper.SetAudioTalkOff.length());
+				sendAudioButton.setText(R.string.video_preview_send_audio_open);
 				break;
 			case Constants.WEB_CAM_CHECK_PWD_STATE_MSG:
-				
+				ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_send_audio_open_tips);
 				break;
 			case Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG:
 				showProgressDlg(R.string.webcam_check_pwd_dialog_str);
@@ -393,6 +396,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		//right.setOnFocusChangeListener(this);
 		RightDown.setOnClickListener(this);
 		
+		Button sendAudio = (Button) view.findViewById(R.id.send_audio);
+		sendAudio.setOnClickListener(this);
+		
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
@@ -427,6 +433,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			listView.requestFocusFromTouch();
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
+			if(!myVideoView.getPlayStatus()) {
+				myVideoView.setStopPlay(true);
+				return;
+			}
 			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				myVideoView.setPlayBackFlag(false);
@@ -525,6 +535,60 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		case R.id.right_down:
 			startActivity(new Intent(this,ImageViewer.class));
+			break;
+		case R.id.send_audio:
+			Log.d(TAG, "### open oper flag = "  + f);
+			if(f) {
+				f = false;
+				final Button sendAudio = (Button) rightView.findViewById(R.id.send_audio);
+				if(sendAudio.getText().toString().equals(getText(R.string.video_preview_send_audio_open))) {
+					new Thread(new Runnable(){
+						public void run() {
+							int res = UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOn, CamCmdListHelper.SetAudioTalkOn.length());
+							Message m = mHandler.obtainMessage();
+							m.what = Constants.CONNECTERROR;
+							if(res > 0) {
+								int length = 20;
+								byte[] recv = new byte[length];
+								res = UdtTools.recvCmdMsg(recv, length);
+								if(res > 0) {
+									String result = new String(recv,0,res);
+									Log.d(TAG, "### open result = "  + result);
+									if("talk_ok".equalsIgnoreCase(result)) {
+										m.arg1 = R.string.video_preview_send_audio_open_success;
+										mHandler.sendEmptyMessage(Constants.SENDGETTHREEPORTMSG);
+										UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkVolume, CamCmdListHelper.SetAudioTalkVolume.length());
+										myVideoView.setOpenSendAudioFlag(true);
+									}else if("talk_busy".equalsIgnoreCase(result)){
+										m.arg1 = R.string.video_preview_send_audio_open_error_tips;
+									}else {
+										m.arg1 = R.string.video_preview_send_audio_open_error;
+									}
+								}else {
+									m.arg1 = R.string.video_preview_send_audio_open_error;
+								}
+							}else {
+								m.arg1 = R.string.video_preview_send_audio_open_error;
+							}
+							mHandler.sendMessage(m);
+							f = true;
+						}
+					}).start();
+				}else {
+					int res = UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOff, CamCmdListHelper.SetAudioTalkOff.length());
+					Message m = mHandler.obtainMessage();
+					m.what = Constants.CONNECTERROR;
+					if(res > 0) {
+						sendAudio.setText(R.string.video_preview_send_audio_open);
+						m.arg1 = R.string.video_preview_send_audio_close_success;
+						myVideoView.setOpenSendAudioFlag(false);
+					}else {
+						m.arg1 = R.string.video_preview_send_audio_close_error;
+					}
+					f = true;
+					mHandler.sendMessage(m);
+				}
+			}
 			break;
 		default:
 			break;
@@ -723,6 +787,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(WebCamActions.ACTION_IPPLAY.equals(intent.getAction())) {
+				if(!myVideoView.getPlayStatus()) {
+					myVideoView.setStopPlay(true);
+					return;
+				}
 				if(NetworkUtil.checkNetwokEnable(context)) {
 					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 					myVideoView.setPlayBackFlag(false);
@@ -877,7 +945,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Log.d(TAG, "### play back vodio index = " + playBackFlag);
 				if(playBackFlag != null && playBackFlag.length()>0) {
 					String item = CamCmdListHelper.SetCmd_Play_Back + playBackFlag;
-					int res = UdtTools.sendCmdMsgById(device.getDeviceID(), item, item.length());
+					int res = UdtTools.sendCmdMsg(item, item.length());
 					Log.d(TAG, "### send play flag res = " + res);
 					if(res>0) {
 						mHandler.sendEmptyMessage(Constants.CONNECTTING);
@@ -959,7 +1027,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		protected Void doInBackground(Integer... params) {
 			String item = CamCmdListHelper.SetCmd_Seek + params[0]+ "\0";
-			UdtTools.sendCmdMsgById( camManager.getSelectDevice().getDeviceID(), item, item.length());
+			UdtTools.sendCmdMsg( item, item.length());
 			//Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res);
 			return null;
 		}

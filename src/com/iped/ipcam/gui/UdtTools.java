@@ -27,7 +27,7 @@ public class UdtTools {
 	//decode pcm to amr
 	public static native int initAmrEncoder();
 	
-	public static native int EncoderPcm(short[] pcmBuffer, int pcmLength, short[] amrBuffer, int amrLength);
+	public static native int EncoderPcm(byte[] pcmBuffer, int pcmLength, byte[] amrBuffer, int amrLength);
 	
 	// change throughnet type
 	
@@ -47,7 +47,11 @@ public class UdtTools {
 	
 	//public static native int initialSocket(String camId, String random);
 	
+	public static native int sendCmdMsg(String cmd, int cmdLength);
+	
 	public static native int sendCmdMsgById(String camId, String cmd, int cmdLength);
+	
+	public static native int recvCmdMsg(byte[] buf, int bufLength);
 	
 	public static native int recvCmdMsgById(String camId, byte[] buf, int bufLength);
 	

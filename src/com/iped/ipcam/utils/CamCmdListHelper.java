@@ -40,6 +40,12 @@ public class CamCmdListHelper {
 	
 	public final static String SetCmd_Seek = "pb_set_status:SEEK:";
 	
+	public final static String SetAudioTalkOn = "AudioTalkOnn";
+	
+	public final static String SetAudioTalkOff = "AudioTalkOfff";
+	
+	public final static String SetAudioTalkVolume = "TalkVolume:100:11";
+	
 	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();
 	
 	//public static byte[] ptzHeader = new byte[]{0x8,(byte) 0xa0,0x0};

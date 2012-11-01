@@ -19,6 +19,7 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
@@ -29,6 +30,7 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
+import com.iped.ipcam.utils.ToastUtils;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -145,6 +147,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	byte[] pcmArr = new byte[pcmBufferLength];
 	
+	private boolean openSendAudioFlag = false;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -198,7 +202,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		videoSockBufferUsedLength = 0;
 		audioBufferUsedLength = 0;
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
-		int res = UdtTools.sendCmdMsgById(deviceId, tem, tem.length());
+		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			Log.d(TAG, "sendCmdMsgById result = " + res);
@@ -207,11 +211,19 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		int bufLength = 10;
 		byte[] b = new byte[bufLength];
-		res = UdtTools.recvCmdMsgById(deviceId,b, bufLength);
+		res = UdtTools.recvCmdMsg(b, bufLength);
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			onStop();
 			Log.d(TAG, "recvCmdMsgById result = " + res);
+			return;
+		}
+		String tlk = new String(b,0,3);
+		Log.d(TAG, "tlk===" + tlk);
+		if("tlk".equalsIgnoreCase(tlk)) {
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
+			UdtTools.freeConnection();
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -512,7 +524,8 @@ public class MyVideoView extends ImageView implements Runnable {
 	private void release() {
 		handler.removeCallbacks(calculateFrameTask);
 		handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-		//UdtTools.exit();
+		handler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
+		UdtTools.exit();
 	}
 
 	private void flushBitmap() {
@@ -650,6 +663,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 	}
 	
+	private int zeroIndex32 = 0;
+	
 	class RecvAudio implements Runnable {
 
 		private AudioTrack m_out_trk = null;
@@ -700,6 +715,18 @@ public class MyVideoView extends ImageView implements Runnable {
 						}
 					}
 				}*/
+				zeroIndex32 = 0;
+				for(int i = 0; i<recvDataLength; i++) {
+					if(audioBuffer[i]==0) {
+						zeroIndex32++;
+						if(zeroIndex32 == 32) {
+							stopRecvAudioFlag = true;
+							break;
+						}
+					}else {
+						zeroIndex32 = 0;
+					}
+				}
 				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
 				m_out_trk.write(pcmArr, 0, pcmBufferLength);
 			}
@@ -713,7 +740,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 
 	}
-
+	
 	private class WebCamAudioRecord implements Runnable {
 		
 		private static final int RECORDER_BPP = 16;
@@ -736,11 +763,11 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		protected AudioRecord audioRecord;
 
-		private short[] amrBuffer;
+		private byte[] amrBuffer;
 		
 		//private short[] pcmBuffer;
 		
-		private short[] micBuffer; //
+		private byte[] micBuffer; //
 		
 		private WebCamAudioRecord() {
 			Speex.initEcho(160, 160*10);
@@ -750,13 +777,14 @@ public class MyVideoView extends ImageView implements Runnable {
 			amrBufferLength = RECEAUDIOBUFFERSIZE/10;
 			sendAudioToCamLength = amrBufferLength * 2;
 			//pcmBuffer = new short[pcmBufferLength];
-			micBuffer = new short[pcmBufferLength];
-			amrBuffer = new short[amrBufferLength];
+			micBuffer = new byte[pcmBufferLength];
+			amrBuffer = new byte[amrBufferLength];
 			sendAudioBufferToCam = new byte[sendAudioToCamLength];
 		}
 		
 		public void run() {
 			startRecording();
+			writeAudioDataToFile();
 		}
 		
 		public void createAudioRecord(){
@@ -768,35 +796,32 @@ public class MyVideoView extends ImageView implements Runnable {
 		  
 		  private void startRecording(){
 			  audioRecord.startRecording();
-			  writeAudioDataToFile();
 		  }
 		  
 		  private void writeAudioDataToFile(){
 			  //byte data[] = new byte[miniRecoderBufSize];
               int read = 0;
-              while(!stopPlay){
+              while(!stopPlay && openSendAudioFlag){
                       read = audioRecord.read(micBuffer, 0, pcmBufferLength);
-                      //Log.d(TAG, "### recording recFlag " + recFlag + " read= " + read);
-                      if(AudioRecord.ERROR_INVALID_OPERATION != read){
-                    	  if(!recFlag) {
-                    		  synchronized (recfBuffer) {
-                    			  recFlag = true;
-                    			  Speex.cancellation(micBuffer, recfBuffer, amrBuffer);
-                    			  UdtTools.EncoderPcm(recfBuffer, pcmBufferLength, amrBuffer, amrBufferLength);
-                    			  ByteUtil.shortsToBytes(amrBuffer, amrBufferLength, sendAudioBufferToCam);
-                    			  recfBuffer.notify();
-                    		  }
-                    		  //UdtTools.sendAudioMsg(sendAudioBufferToCam, sendAudioToCamLength);
-                    	  }
-                   }
+                      //Log.d(TAG, "### recording recFlag " + recFlag + " read= " + read + " openSendAudioFlag=" + openSendAudioFlag);
+                      if(AudioRecord.ERROR_INVALID_OPERATION == read){
+                    	  Log.d(TAG, "### recorder over !");
+                    	  break;
+                      }
+                	  // Speex.cancellation(micBuffer, recfBuffer, amrBuffer);
+                      if(UdtTools.EncoderPcm(micBuffer, pcmBufferLength, amrBuffer, amrBufferLength)==0){
+                    	  UdtTools.sendAudioMsg(amrBuffer, amrBufferLength);
+                      }
+                      //ByteUtil.shortsToBytes(amrBuffer, amrBufferLength, sendAudioBufferToCam);
+                      //Log.d(TAG, "### send audio length = " + res);
               }
-              //Log.d(TAG, "### recording recFlag " + recFlag + " read===== " + read);
               stopRecording();
 		  }
 	
 		  private void stopRecording(){
-			  Log.d(TAG, "### stop recording.");
-			  Speex.stopEcho();
+			  Log.d(TAG, "### stop recording !");
+			  openSendAudioFlag = false;
+			 // Speex.stopEcho();
               if(null != audioRecord){
                       audioRecord.stop();
                       audioRecord.release();
@@ -1021,4 +1046,14 @@ public class MyVideoView extends ImageView implements Runnable {
 	public void setTime(String timeStr) {
 		this.timeStr = timeStr;
 	}
+
+	public void setOpenSendAudioFlag(boolean openSendAudioFlag) {
+		this.openSendAudioFlag = openSendAudioFlag;
+		System.out.println("openSendAudioFlag=" + openSendAudioFlag);
+		if(openSendAudioFlag) {
+			new Thread(new WebCamAudioRecord()).start();
+		}
+	}
+	
+	
 }
