@@ -34,16 +34,16 @@
 
                     <Button
                         android:id="@+id/mid_up"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_mid_up"
+                        android:text=" ↑ "
                         android:textSize="12dp" />
 
                     <Button
                         android:id="@+id/right_up"
-                        android:layout_width="fill_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
@@ -56,16 +56,16 @@
                     <Button
                         android:id="@+id/left"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_left"
+                        android:text="←"
                         android:textSize="12dp" />
 
                     <Button
                         android:id="@+id/mid"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="40dip"
+                        android:layout_height="40dip"
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="@string/video_preview_mid"
@@ -74,41 +74,37 @@
                     <Button
                         android:id="@+id/right"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_right"
+                        android:text="→"
                         android:textSize="12dp" />
                 </TableRow>
 
                 <TableRow>
 
                     <Button
-                        android:id="@+id/left_down"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:visibility="invisible"
-                        android:text="@string/video_preview_left_down"/>
+                        android:visibility="invisible"/>
 
                     <Button
                         android:id="@+id/mid_down"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_left_mid"
+                        android:text=" ↓ "
                         android:textSize="12dp" />
 
                     <Button
-                        android:id="@+id/right_down"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:visibility="invisible"
-                        android:text="@string/video_preview_right_down"/>
+                        android:visibility="invisible"/>
                 </TableRow>
  
                 <TableRow>
@@ -116,25 +112,26 @@
                     <Button
                         android:id="@+id/minus_zoom"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_minus_zoom" />
+                        android:text="-" />
 
                     <com.iped.ipcam.gui.BCVControlProgressBar
                         android:id="@+id/brightness_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_gravity="center"
                         android:layout_width="wrap_content"
+                        android:gravity="center"
                         android:layout_height="wrap_content" />
 
                     <Button
                         android:id="@+id/add_zoom"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_add_zoom" />
+                        android:text="+" />
                 </TableRow>
 
                 <TableRow>
@@ -142,25 +139,26 @@
                     <Button
                         android:id="@+id/minus_foucs"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_minus_foucs" />
+                        android:text="-" />
 
                     <com.iped.ipcam.gui.BCVControlProgressBar
                         android:id="@+id/contrast_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_gravity="center"
                         android:layout_width="wrap_content"
+                        android:gravity="center"
                         android:layout_height="wrap_content" />
 
                     <Button
                         android:id="@+id/add_foucs"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_add_foucs" />
+                        android:text="+" />
                 </TableRow>
                  
 
@@ -169,25 +167,54 @@
                     <Button
                         android:id="@+id/minus_apertrue"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_minus_apertrue" />
+                        android:text="-" />
 
                      <com.iped.ipcam.gui.BCVControlProgressBar
                         android:id="@+id/volume_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_gravity="center"
+                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
                     <Button
                         android:id="@+id/add_apertrue"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dip"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@string/video_preview_add_apertrue" />
+                        android:text="+" />
+                </TableRow>
+                
+                <TableRow >
+
+                     <Button
+                        android:id="@+id/left_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
+                        android:gravity="center"
+                        android:textSize="10dip"
+                        android:text="@string/video_preview_left_down"/>
+
+                      <Button
+                        android:id="@+id/right_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
+                        android:gravity="center"
+                        android:textSize="10dip"
+                        android:text="@string/video_preview_right_down"/>
+                      
+                     <Button
+                        android:id="@+id/send_audio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
+                        android:gravity="center"
+                        android:textSize="10dip"
+                        android:text="@string/video_preview_send_audio_open"/>
+                     
                 </TableRow>
             </TableLayout>
         </ScrollView>
