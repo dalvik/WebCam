@@ -151,6 +151,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private int playBackDeviceIndex = 0;
 	
+	private BCVInfo info = null;
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -199,7 +201,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case Constants.SEND_UPDATE_BCV_INFO_MSG:
 				Bundle bcvInfo = msg.getData();
 				if(bcvInfo != null) {
-					BCVInfo info = (BCVInfo) bcvInfo.get("UPDATEBCV");
+					info = (BCVInfo) bcvInfo.get("UPDATEBCV");
 					brightnessProgerss.setProgress(info.getBrightness()>0?info.getBrightness():0);
 					contrastProgressbar.setProgress(info.getContrast()>0?info.getContrast():0);
 					volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
@@ -506,6 +508,20 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			break;
 		case R.id.minus_apertrue:
+			final Button sendMinAudioVolume = (Button) rightView.findViewById(R.id.send_audio);
+			if(sendMinAudioVolume.getText().toString().equals(getText(R.string.video_preview_send_audio_close))) {
+				int vv = volumeProgressbar.getProgress();
+				if(--vv<1){
+					vv = 1;
+				}
+				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0] +"\n";
+				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
+				int re = UdtTools.sendCmdMsg(item, item.length());
+				if(re>0) {
+					volumeProgressbar.setProgress(vv);
+				}
+				return;
+			}
 			int value5 = volumeProgressbar.getProgress();
 			value5 -= 10;
 			if(value5 <=0) {
@@ -516,6 +532,20 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			break;
 		case R.id.add_apertrue:
+			final Button sendAddAudioVolume = (Button) rightView.findViewById(R.id.send_audio);
+			if(sendAddAudioVolume.getText().toString().equals(getText(R.string.video_preview_send_audio_close))) {
+				int vv = volumeProgressbar.getProgress();
+				if(++vv>3){
+					vv = 3;
+				}
+				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0] +"\n";
+				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
+				int resu = UdtTools.sendCmdMsg(item, item.length());
+				if(resu>0) {
+					volumeProgressbar.setProgress(vv);
+				}
+				return;
+			}
 			int value6 = volumeProgressbar.getProgress();
 			value6 += 10;
 			if(value6 >=100) {
@@ -557,8 +587,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 									if("talk_ok".equalsIgnoreCase(result)) {
 										m.arg1 = R.string.video_preview_send_audio_open_success;
 										mHandler.sendEmptyMessage(Constants.SENDGETTHREEPORTMSG);
-										UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkVolume, CamCmdListHelper.SetAudioTalkVolume.length());
+										String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[0][1] + ":" + CamCmdListHelper.audioTalk[0][0] +"\n";
+										UdtTools.sendCmdMsg(item, item.length());
+										Log.d(TAG, "### Speak Audio " + item);
 										myVideoView.setOpenSendAudioFlag(true);
+										volumeProgressbar.setMax(3);
+										volumeProgressbar.setProgress(1);
 									}else if("talk_busy".equalsIgnoreCase(result)){
 										m.arg1 = R.string.video_preview_send_audio_open_error_tips;
 									}else {
@@ -575,13 +609,19 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 						}
 					}).start();
 				}else {
-					int res = UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOff, CamCmdListHelper.SetAudioTalkOff.length());
+					String item = CamCmdListHelper.SetAudioTalkOff;
+					int res = UdtTools.sendCmdMsg(item , item.length());
 					Message m = mHandler.obtainMessage();
 					m.what = Constants.CONNECTERROR;
 					if(res > 0) {
 						sendAudio.setText(R.string.video_preview_send_audio_open);
 						m.arg1 = R.string.video_preview_send_audio_close_success;
 						myVideoView.setOpenSendAudioFlag(false);
+						if(info != null) {
+							volumeProgressbar.setMax(100);
+							System.out.println("info.getVolume()=" + info.getVolume());
+							volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
+						}
 					}else {
 						m.arg1 = R.string.video_preview_send_audio_close_error;
 					}

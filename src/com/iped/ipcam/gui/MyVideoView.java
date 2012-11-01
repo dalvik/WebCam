@@ -736,7 +736,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				m_out_trk = null;
 			}
 			UdtTools.exitAmrDecoder();
-			Log.d(TAG, "### audio exit amr decoder.");
+			Log.d(TAG, "### audio amr decoder exit.");
 		}
 
 	}

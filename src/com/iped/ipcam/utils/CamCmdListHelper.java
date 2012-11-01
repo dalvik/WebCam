@@ -44,7 +44,9 @@ public class CamCmdListHelper {
 	
 	public final static String SetAudioTalkOff = "AudioTalkOfff";
 	
-	public final static String SetAudioTalkVolume = "TalkVolume:100:11";
+	public final static String SetAudioTalkVolume = "TalkVolume:";//"TalkVolume:100:11";
+	
+	public final static String[][] audioTalk = {{"1","100"},{"2","110"},{"2","126"}};
 	
 	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();
 	
