@@ -283,7 +283,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case Constants.UPDATE_PLAY_BACK_TIME:
 				//Log.d(TAG, "##############" + playBackSeekBar.getProgress());
 				String time = (String)msg.obj;
-				Log.d(TAG, "time= " + time);
+				//Log.d(TAG, "time= " + time);
 				long currentDuringTime = DateUtil.formatTimeStrToLong(time) - startTime;// 当前播放时间
 				//Log.d(TAG, "### play time = " +time + " currentTime=" + currentDuringTime/1000 + " startTime=" + startTime);
 				if(currentDuringTime <= during){
@@ -619,7 +619,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 						myVideoView.setOpenSendAudioFlag(false);
 						if(info != null) {
 							volumeProgressbar.setMax(100);
-							System.out.println("info.getVolume()=" + info.getVolume());
 							volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
 						}
 					}else {

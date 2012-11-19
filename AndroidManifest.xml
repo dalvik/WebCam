@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iped.ipcam.gui"
-    android:versionCode="5"
-    android:versionName="V5.2.1" >
+    android:versionCode="6"
+    android:versionName="V6.0.0" >
 
-    <uses-sdk android:minSdkVersion="4" />
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="15"/>
     
 	
     <!--  android:name=".WebTabWidget" -->

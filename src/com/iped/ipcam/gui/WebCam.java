@@ -112,7 +112,7 @@ public class WebCam extends Activity implements OnClickListener{
 				saveUserInfo("", "", keepPwd.isChecked());
 			}*/
 			saveUserInfo(username, pwd, keepPwd.isChecked());
-			 boolean shutCutFlag = settings.getBoolean("CREATE_SHUT_CUT", false);
+			boolean shutCutFlag = settings.getBoolean("CREATE_SHUT_CUT", false);
 	        if(!shutCutFlag) {
 	        	createShutcut(this, "com.iped.ipcam.gui");
 	        }
