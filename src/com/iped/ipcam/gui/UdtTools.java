@@ -7,6 +7,7 @@ public class UdtTools {
 		System.loadLibrary("RecvFile");
 		System.loadLibrary("amr");
 		System.loadLibrary("pcm");
+		System.loadLibrary("xvid");
 	}
 	
 	public static  native int recvFile(String ip,String port, String remoteName,String localName);
@@ -73,4 +74,12 @@ public class UdtTools {
 	
 	public static native int freeConnection();
 	
+	//mpeg4 decoder
+	public static native int initXvidDecorer();
+	
+	public static native int xvidDecorer(byte[] src, int length, byte[] rgb);
+
+	public static native int[] initXvidHeader(byte[] src, int length);
+	
+	public static native void freeDecorer();
 }

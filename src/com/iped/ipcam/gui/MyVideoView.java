@@ -1,7 +1,11 @@
 package com.iped.ipcam.gui;
 
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,7 +23,6 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
@@ -30,7 +33,6 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
-import com.iped.ipcam.utils.ToastUtils;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -40,7 +42,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
+	private static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
 
 	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
 	
@@ -48,7 +50,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private Bitmap video;
 
-	byte[] nalBuf = new byte[NALBUFLENGTH];//
+	byte[] nalBuf = new byte[NALBUFLENGTH];//>100k
 
 	int nalSizeTemp = 0;
 
@@ -149,6 +151,12 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private boolean openSendAudioFlag = false;
 	
+	private boolean mpeg4Decoder = false;
+	
+	private int indexForPut = 0; // put索引 （下一个要写入的位置）
+	
+	private int indexForGet = 0; // get索引 （下一个要读取的位置）
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -171,6 +179,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		infoPaint = new Paint();
 		infoPaint.setColor(Color.BLUE);
 		infoPaint.setTextSize(18);
+		mpeg4Decoder = false;
 	}
 
 	@Override
@@ -209,7 +218,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			onStop();
 			return;
 		}
-		int bufLength = 10;
+		int bufLength = 100;
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsg(b, bufLength);
 		if (res < 0) {
@@ -219,7 +228,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			return;
 		}
 		String tlk = new String(b,0,3);
-		Log.d(TAG, "tlk===" + tlk);
+		Log.d(TAG, "tlk===" + tlk + " recv length after set trans port type = " + res);
 		if("tlk".equalsIgnoreCase(tlk)) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
@@ -228,6 +237,12 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
 		initBCV(info);
+		if(res > 6) {
+			mpeg4Decoder = true;
+		}
+		if(mpeg4Decoder) {
+			VIDEOSOCKETBUFLENGTH = 1024;
+		}
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
 			temWidth = 1;
@@ -235,7 +250,11 @@ public class MyVideoView extends ImageView implements Runnable {
 			//recvAudioThread = new Thread(recvAudio);
 			stopRecvAudioFlag = false;
 			//recvAudioThread.start();
-			new Thread(new RecvAudio()).start();
+			if(mpeg4Decoder) {
+				new Thread(new PaserMpeg4()).start();
+			}else {
+				new Thread(new RecvAudio()).start();
+			}
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
@@ -246,24 +265,46 @@ public class MyVideoView extends ImageView implements Runnable {
 					break;
 				}
 				videoSockBufferUsedLength = 0;
-				while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
-					// remain socket  buf  length
-					nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,	videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
-					// 根据nalSizeTemp的值决定是否刷新界面
-					while (looperFlag) {
-						looperFlag = false;
-						if (nalSizeTemp == -2) {
-							if (nalBufUsedLength > 0) {
-								frameCount++;
-								copyPixl();
+				if(mpeg4Decoder) {
+					int recvBufIndex = 0;
+					do{
+						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
+						if((indexForPut +1) % NALBUFLENGTH == indexForGet) {
+							Log.d(TAG, "### data buffer is full, please get data in time");
+							synchronized (nalBuf) {
+								try {
+									nalBuf.wait(10);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							}
-							nalBuf[0] = -1;
-							nalBuf[1] = -40;
-							nalBuf[2] = -1;
-							nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
-							videoSockBufferUsedLength += 4;
-							nalBufUsedLength = 4;
-							break;
+						}else {
+							 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
+							 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+						     recvBufIndex++;
+						    // Log.d(TAG, "### indexForPut = " + indexForPut);
+						}
+					}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
+				} else {
+					while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
+						// remain socket  buf  length
+						nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,	videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
+						// 根据nalSizeTemp的值决定是否刷新界面
+						while (looperFlag) {
+							looperFlag = false;
+							if (nalSizeTemp == -2) {
+								if (nalBufUsedLength > 0) {
+									frameCount++;
+									copyPixl();
+								}
+								nalBuf[0] = -1;
+								nalBuf[1] = -40;
+								nalBuf[2] = -1;
+								nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
+								videoSockBufferUsedLength += 4;
+								nalBufUsedLength = 4;
+								break;
+							}
 						}
 					}
 				}
@@ -1056,4 +1097,62 @@ public class MyVideoView extends ImageView implements Runnable {
 	}
 	
 	
+	class PaserMpeg4 implements Runnable {
+		
+		@Override
+		public void run() {
+			UdtTools.initXvidDecorer();
+			byte[] rgbDataBuf = null;
+			int length = 1 * 1024/15 * 1024;
+			byte[] tmp = new byte[length];
+			byte[] transBuf = new byte[length];
+			int readLength = 0;
+			int usedBytes = length;
+			int unusedBytes = 0;
+			int ableReadSize = 0;
+			while(!stopPlay) {
+				do{
+					if(indexForGet == indexForPut){
+						synchronized (tmp) {
+							Log.d(TAG, "### data buffer is empty! ---->");
+							try {
+								tmp.wait(200);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}  
+					} else {
+						tmp[ableReadSize] = nalBuf[indexForGet];
+						indexForGet = (indexForGet+1)%NALBUFLENGTH;  
+						ableReadSize++;
+					}
+				} while (ableReadSize<usedBytes);
+				readLength = ableReadSize;
+				System.arraycopy(tmp, 0, transBuf, unusedBytes, readLength);
+				if(rgbDataBuf == null) {
+					int[] headInfo = UdtTools.initXvidHeader(transBuf,(readLength + unusedBytes));
+					int imageWidth = headInfo[0];
+					int imageHeight = headInfo[1];
+					usedBytes = headInfo[2];
+					unusedBytes = (readLength - usedBytes);
+					System.arraycopy(transBuf, usedBytes, transBuf, 0, unusedBytes);
+					Log.d(TAG, "### imageWidht = " + imageWidth + " imageWidht = " + imageHeight + " used_bytes = " + usedBytes);
+					rgbDataBuf = new byte[imageWidth * imageHeight * 4];
+					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+					postInvalidate();
+				} else {
+					usedBytes = UdtTools.xvidDecorer(transBuf,(readLength + unusedBytes), rgbDataBuf);
+					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
+					if(video != null) {
+						video.copyPixelsFromBuffer(sh);
+						postInvalidate();
+					}
+					unusedBytes = (readLength + unusedBytes - usedBytes);
+					System.arraycopy(transBuf, usedBytes, transBuf, 0, unusedBytes);
+				}
+				ableReadSize = 0;
+			}
+			UdtTools.freeDecorer();
+		}
+	}
 }
