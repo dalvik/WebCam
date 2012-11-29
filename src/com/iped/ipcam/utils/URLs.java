@@ -1,7 +1,7 @@
 package com.iped.ipcam.utils;
 
 public class URLs {
-	public final static String HOST = "dalvik.co.cc";//192.168.1.213
+	public final static String HOST = "www.drovik.com";//192.168.1.213
 	public final static String HTTP = "http://";
 	public final static String HTTPS = "https://";
 	

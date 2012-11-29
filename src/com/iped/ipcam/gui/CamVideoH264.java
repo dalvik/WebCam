@@ -153,6 +153,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private BCVInfo info = null;
 	
+	private int x_offSet = 0;
+	
+	private int y_offSet = 0;
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -303,6 +307,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private void startThread() {
 		myVideoView.setDevice(camManager.getSelectDevice());
 		myVideoView.setOnLongClickListener(longClickListener);
+		myVideoView.setOnTouchListener(videoViewOnTouch);
 		myVideoView.onStart();
 		thread = new Thread(myVideoView);
 		thread.start();
@@ -863,7 +868,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		rightView.findViewById(R.id.mid_down).setEnabled(flag);
 		rightView.findViewById(R.id.left).setEnabled(flag);
 		rightView.findViewById(R.id.right).setEnabled(flag);
-		rightView.findViewById(R.id.mid).setEnabled(flag);
+		//rightView.findViewById(R.id.mid).setEnabled(flag);
 		rightView.findViewById(R.id.minus_zoom).setEnabled(flag);
 		rightView.findViewById(R.id.add_zoom).setEnabled(flag);
 		rightView.findViewById(R.id.minus_foucs).setEnabled(flag);
@@ -1072,15 +1077,26 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	}
 	
+	
 	private OnLongClickListener longClickListener = new OnLongClickListener() {
 		
 		@Override
 		public boolean onLongClick(View v) {
 			if(!myVideoView.getPlayStatus()) {
 				if(!popupMenu.isShowing()) {
-					popupMenu.showAtLocation(myVideoView, Gravity.CENTER, 0, 0);
+					popupMenu.showAtLocation(myVideoView, Gravity.NO_GRAVITY, x_offSet, y_offSet);
 				}
 			}
+			return false;
+		}
+	};
+	
+	private OnTouchListener videoViewOnTouch = new OnTouchListener() {
+		
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			x_offSet = (int)event.getX();
+			y_offSet = (int) event.getY();
 			return false;
 		}
 	};

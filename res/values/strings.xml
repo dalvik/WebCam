@@ -363,7 +363,7 @@
         <string name="webcam_check_version_dialog_cancle_button_str">以后再说</string>
         <string name="webcam_loading_new_str">正在下载新版本</string>
         <string name="webcam_loading_new_cancle_str">取消</string>
-         <string name="webcam_loading_str">下载</string>
+        <string name="webcam_loading_str">下载</string>
         
         <!-- take picture -->
         <string name="webcam_takepic_success_str">拍照成功</string>
