@@ -1,6 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
@@ -38,7 +37,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private Thread recvAudioThread = null;
 	
-	private final static int DELAY_RECONNECT = 1000 * 60 * 2;
+	private final static int DELAY_RECONNECT = 1000 * 60 * 2* 1000;
 	
 	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
@@ -112,7 +111,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	// private int temHeigth;
 
-	private Matrix m = new Matrix();
+	private Matrix matrix = new Matrix();
 
 	private boolean reverseFlag = false;
 
@@ -164,7 +163,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		textPaint = new Paint();
-		m.setScale(-1, 1);
+		matrix.setScale(-1, 1);
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 	}
 
@@ -172,8 +171,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		this.handler = handler;
 		textPaint = new Paint();
 		textPaint.setColor(Color.RED);
-		m.setScale(-1, 1);
-		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
+		matrix.setScale(-1, 1);
+		rect = new Rect(0, 0, 0, getHeight() - 10);
 		bgPaint = new Paint();
 		bgPaint.setColor(Color.WHITE);
 		infoPaint = new Paint();
@@ -188,12 +187,32 @@ public class MyVideoView extends ImageView implements Runnable {
 		if (video != null) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
-				rect = new Rect(0, 0, getWidth(), getHeight() - 10);
+				int tmpHeight = getHeight();
+				int imageviewWidth = video.getWidth();
+				int imageViewHeight = video.getHeight();
+				int left = 0;
+				int top = 0;
+				int right = 0;
+				int bottom  = 0;
+				if(temWidth>imageviewWidth) {
+					left = (temWidth - imageviewWidth)/2;
+					right = imageviewWidth;
+				} else {
+					right = temWidth;
+				}
+				
+				if(tmpHeight > imageViewHeight) {
+					top =  (tmpHeight - imageViewHeight)/2;
+					bottom = imageViewHeight;
+				} else {
+					bottom = tmpHeight;
+				}
+				rect = new Rect(left, top, right + left, bottom + top);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
-			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", 20, 25, textPaint);
+			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
 		}else {
-			String text = "More : hangzhouiped.taobao.com";
+			String text = "  More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
 				rect2 = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
@@ -239,9 +258,13 @@ public class MyVideoView extends ImageView implements Runnable {
 		initBCV(info);
 		if(res > 6) {
 			mpeg4Decoder = true;
+		}else {
+			mpeg4Decoder = false;
 		}
 		if(mpeg4Decoder) {
 			VIDEOSOCKETBUFLENGTH = 1024;
+		} else {
+			VIDEOSOCKETBUFLENGTH = 1024 + 31;
 		}
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
@@ -520,16 +543,16 @@ public class MyVideoView extends ImageView implements Runnable {
 			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			if (tmp != null) {
 				video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(),
-						tmp.getHeight(), m, true);
-				m.setRotate(180);
-				postInvalidate();
+						tmp.getHeight(), matrix, true);
+				matrix.setRotate(180);
+				postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 				if (!tmp.isRecycled()) {
 					tmp.recycle();
 				}
 			}
 		} else {
 			video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-			postInvalidate();
+			postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 		}
 	}
 
@@ -574,7 +597,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			video.recycle();
 			video = null;
 		}
-		postInvalidate();
+		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 	}
 
 	public void onStart() {
@@ -620,8 +643,8 @@ public class MyVideoView extends ImageView implements Runnable {
 						Bitmap tmp = BitmapFactory.decodeByteArray(bitmapTmpBuffer, 0, bitmapTmpBufferUsed);
 						if (tmp != null) {
 							video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(),
-									tmp.getHeight(), m, true);
-							m.setRotate(180);
+									tmp.getHeight(), matrix, true);
+							matrix.setRotate(180);
 							if (!tmp.isRecycled()) {
 								tmp.recycle();
 							}
@@ -1101,9 +1124,14 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		@Override
 		public void run() {
-			UdtTools.initXvidDecorer();
+			int res = UdtTools.initXvidDecorer();
+			if(res != 0) {
+				stopPlay = true;
+				Log.d(TAG, "xvid init decoder error " + res);
+				return ;
+			}
 			byte[] rgbDataBuf = null;
-			int length = 1 * 1024/15 * 1024;
+			int length = 1 * 1024 * 1024;
 			byte[] tmp = new byte[length];
 			byte[] transBuf = new byte[length];
 			int readLength = 0;
@@ -1126,7 +1154,7 @@ public class MyVideoView extends ImageView implements Runnable {
 						indexForGet = (indexForGet+1)%NALBUFLENGTH;  
 						ableReadSize++;
 					}
-				} while (ableReadSize<usedBytes);
+				} while (ableReadSize<usedBytes && !stopPlay);
 				readLength = ableReadSize;
 				System.arraycopy(tmp, 0, transBuf, unusedBytes, readLength);
 				if(rgbDataBuf == null) {
@@ -1145,7 +1173,8 @@ public class MyVideoView extends ImageView implements Runnable {
 					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
 					if(video != null) {
 						video.copyPixelsFromBuffer(sh);
-						postInvalidate();
+						postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+						frameCount++;
 					}
 					unusedBytes = (readLength + unusedBytes - usedBytes);
 					System.arraycopy(transBuf, usedBytes, transBuf, 0, unusedBytes);
