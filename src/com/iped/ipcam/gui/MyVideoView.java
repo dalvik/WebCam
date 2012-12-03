@@ -35,6 +35,8 @@ import com.iped.ipcam.utils.PlayBackConstants;
 
 public class MyVideoView extends ImageView implements Runnable {
 
+	private boolean DEBUG = true;
+	
 	private Thread recvAudioThread = null;
 	
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2* 1000;
@@ -172,7 +174,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		textPaint = new Paint();
 		textPaint.setColor(Color.RED);
 		matrix.setScale(-1, 1);
-		rect = new Rect(0, 0, 0, getHeight() - 10);
+		rect = new Rect(0, 0, w, h);
 		bgPaint = new Paint();
 		bgPaint.setColor(Color.WHITE);
 		infoPaint = new Paint();
@@ -266,6 +268,7 @@ public class MyVideoView extends ImageView implements Runnable {
 		} else {
 			VIDEOSOCKETBUFLENGTH = 1024 + 31;
 		}
+		temWidth =  0;
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		if(!playBackFlag) {
 			temWidth = 1;
@@ -293,7 +296,9 @@ public class MyVideoView extends ImageView implements Runnable {
 					do{
 						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
 						if((indexForPut +1) % NALBUFLENGTH == indexForGet) {
-							Log.d(TAG, "### data buffer is full, please get data in time");
+							if(BuildConfig.DEBUG && !DEBUG) {
+								Log.d(TAG, "### data buffer is full, please get data in time");
+							}
 							synchronized (nalBuf) {
 								try {
 									nalBuf.wait(10);
@@ -1138,11 +1143,34 @@ public class MyVideoView extends ImageView implements Runnable {
 			int usedBytes = length;
 			int unusedBytes = 0;
 			int ableReadSize = 0;
+			int index = 0;
+			boolean startFlag = false;
+			
+			boolean jpegHeadStartFlag =  false;
+			
+			boolean mpegHeadStartFlag =  false;
+			
+			int jpegDataStartIndex = 0;
+			
+			int mpegDataStartIndex = 0;
+			
+			int headFlagCount = 0;
+			
+			int jpegByteBufLength = 500 * 1024;
+			
+			byte[] jpegByteBuf = new byte[jpegByteBufLength]; 
+			
+			int jpegBufUsed = 0;
+			
+			int tmpJpgBufUsed = 0;
+			
 			while(!stopPlay) {
 				do{
 					if(indexForGet == indexForPut){
 						synchronized (tmp) {
-							Log.d(TAG, "### data buffer is empty! ---->");
+							if(BuildConfig.DEBUG && !DEBUG) {
+								Log.d(TAG, "### data buffer is empty! ---->");
+							}
 							try {
 								tmp.wait(200);
 							} catch (InterruptedException e) {
@@ -1150,11 +1178,88 @@ public class MyVideoView extends ImageView implements Runnable {
 							}
 						}  
 					} else {
-						tmp[ableReadSize] = nalBuf[indexForGet];
+						byte b = nalBuf[indexForGet];
+						if(startFlag) {//内部头的开始
+							if(headFlagCount >= 18) { 
+								startFlag = false;
+								//System.out.println("=====" + new String(tmp, ableReadSize-18, 18));
+							} else {
+								headFlagCount++;
+							}
+						}
+						
+						/**
+						 * 1、首先判断是否以0001c开头
+						 * 		a、是 则截取时间戳
+						 * 		b、否进行 2
+						 * 2、再判断是否是FFD8FFE0开头
+						 * 		a、是 则拷贝数据jpeg缓冲区
+						 * 		b、否 则拷贝数据至mpeg4 缓冲区
+						 * 
+						 */
+						if(b == 0 && index ==0) {
+							tmp[ableReadSize++] = b;
+						} else if (b == 0 && index ==1){
+							tmp[ableReadSize++] = b;
+						} else if (b == 0 && index == 2) {
+							tmp[ableReadSize++] = b;
+						} else if (b == 1 && index == 3) {
+							tmp[ableReadSize++] = b;
+						} else if (b == 12 && index == 4) {
+							tmp[ableReadSize++] = b;
+							startFlag = true;
+							headFlagCount = 0;
+						} else {
+							/*找到jpeg开始标记*/
+							if(b == -1 && jpegDataStartIndex == 0) {
+								jpegByteBuf[0] = -1;
+							} else if( b == -40 && jpegDataStartIndex == 1) {
+								jpegByteBuf[1] = -40;
+							}else if( b == -1 && jpegDataStartIndex == 2) {
+								jpegByteBuf[2] = -1;
+							}else if( b == -37 && jpegDataStartIndex == 3) {//jpeg start
+								jpegByteBuf[3] = -37;
+								jpegBufUsed = 4;
+								jpegHeadStartFlag = true;
+								mpegHeadStartFlag = false;
+								/*video = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
+								if(video != null) {
+									postInvalidate();
+								}*/
+								System.out.println("jpeg head =============");
+							}else if(b == 0 && mpegDataStartIndex == 0) {//mepg4
+								tmp[0] = 0;
+							} else if( b == 0 && mpegDataStartIndex == 1) {
+								tmp[1] = 0;
+							}else if( b == 1 && mpegDataStartIndex == 2) {
+								tmp[2] = 1;
+							}else if( b == -74 && mpegDataStartIndex == 3) {
+								tmp[3] = -74;
+								jpegBufUsed = 4;
+								mpegHeadStartFlag = true;
+								jpegHeadStartFlag = false;
+								ableReadSize++;
+								System.out.println("mpeg head =============");
+							} else {
+								if(jpegHeadStartFlag) {
+									jpegByteBuf[++jpegBufUsed] = b;
+									tmpJpgBufUsed = jpegBufUsed;
+								} else if(mpegHeadStartFlag) {
+									tmp[ableReadSize] = b;
+									index = -1;
+									ableReadSize++;
+								}
+								jpegDataStartIndex = -1;
+								mpegDataStartIndex = -1;
+							}
+							jpegDataStartIndex++;
+							mpegDataStartIndex++;
+						}
+						index++;
 						indexForGet = (indexForGet+1)%NALBUFLENGTH;  
-						ableReadSize++;
 					}
 				} while (ableReadSize<usedBytes && !stopPlay);
+				startFlag = false;
 				readLength = ableReadSize;
 				System.arraycopy(tmp, 0, transBuf, unusedBytes, readLength);
 				if(rgbDataBuf == null) {
