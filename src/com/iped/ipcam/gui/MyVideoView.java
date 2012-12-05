@@ -35,6 +35,7 @@ import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.VideoQueue;
+import com.sun.mail.util.QEncoderStream;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -1157,6 +1158,8 @@ public class MyVideoView extends ImageView implements Runnable {
 		
 		private int startFlagCount = 1;
 		
+		private Object lock = new Object();
+		
 		@Override
 		public void run() {
 			int res = UdtTools.initXvidDecorer();
@@ -1166,13 +1169,14 @@ public class MyVideoView extends ImageView implements Runnable {
 				return ;
 			}
 			byte[] rgbDataBuf = null;
-			int length = 1 * 1024 * 1024;
+			int length = 1 * 512 * 1024;
+			int bufNeedLength = length - 5;
 			byte[] mpegBuf = new byte[length];
 			byte[] transBuf = new byte[length];
 			int readLength = 0;
 			int usedBytes = length;
 			int unusedBytes = 0;
-			int ableReadSize = 0;
+			int mpegDataLength = 0;
 			boolean startFlag = false;
 			
 			int headFlagCount = 0;
@@ -1189,7 +1193,11 @@ public class MyVideoView extends ImageView implements Runnable {
 			
 			boolean imageDataStart = false;
 			
+			boolean isMpeg4 = false;
+			
 			queue = new VideoQueue();
+			
+			int mpegPakages = 4;
 			
 			while(!stopPlay) {
 				do{
@@ -1211,18 +1219,15 @@ public class MyVideoView extends ImageView implements Runnable {
 						byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
 						byte b4 = nalBuf[(indexForGet+4)%NALBUFLENGTH];
 						if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
-							if(startFlagCount++%5==0) {
-								startFlagCount = 1;
-								break;
-							}
-							mpegBuf[ableReadSize] = b0;
-							mpegBuf[ableReadSize + 1] = b1;
-							mpegBuf[ableReadSize + 2] = b2;
-							mpegBuf[ableReadSize + 3] = b3;
-							mpegBuf[ableReadSize + 4] = b4;
-							ableReadSize += 5;
+							mpegBuf[mpegDataLength] = b0;
+							mpegBuf[mpegDataLength + 1] = b1;
+							mpegBuf[mpegDataLength + 2] = b2;
+							mpegBuf[mpegDataLength + 3] = b3;
+							mpegBuf[mpegDataLength + 4] = b4;
+							mpegDataLength += 5;
 							indexForGet+=4;
 							startFlag = true;
+							isMpeg4 = true;
 							imageDataStart = false;
 							headFlagCount = 0;
 							if(BuildConfig.DEBUG && !DEBUG) {
@@ -1232,72 +1237,102 @@ public class MyVideoView extends ImageView implements Runnable {
 							jpegByteBuf[jpegBufUsed++] = -1;
 							startFlag = false;
 							imageDataStart = true;
+							isMpeg4 = false;
 							jpegBufUsed = 1;
 							Bitmap v = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
+							popuJpeg();
 							if(v != null) {
 								//postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-								frameCount++;
+								//frameCount++;
 								queue.addNewImage(new Image(v, time));
 							}
+						}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
+							if(startFlagCount++ %mpegPakages == 0){
+								startFlagCount = 1;
+								break;
+							}
+							imageDataStart = false;
+							isMpeg4 = false;
+							mpegBuf[mpegDataLength++] = b0;
+							mpegBuf[mpegDataLength++] = b1;
+							indexForGet+=2;
 						}else {
 							if(startFlag) {
+								mpegBuf[mpegDataLength++] = nalBuf[indexForGet];
+								headFlagCount++;
 								if(headFlagCount >= 18) { 
 									startFlag = false;
-									time = new String(mpegBuf, ableReadSize-18, 18);
+									time = new String(mpegBuf, mpegDataLength-18, 18);
+									queue.addNewTime(time);
 									if(BuildConfig.DEBUG && !DEBUG) {
 										Log.d(TAG, "###  time=" + time);
 									}
-								} else {
-									mpegBuf[ableReadSize++] = nalBuf[indexForGet];
-									headFlagCount++;
 								}
 							} else {
 								if(imageDataStart) {
 									jpegByteBuf[jpegBufUsed++] = b0;
 									tmpJpgBufUsed = jpegBufUsed;
 								}else {
-									mpegBuf[ableReadSize++] = b0;
+									mpegBuf[mpegDataLength++] = b0;
 								}
 							}
 						} 
 						indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
 					}
-				} while (ableReadSize<usedBytes && !stopPlay);
+				} while (!stopPlay ); //ableReadSize<usedBytes   && mpegDataLength<bufNeedLength
 				startFlag = false;
-				readLength = ableReadSize;
-				System.arraycopy(mpegBuf, 0, transBuf, unusedBytes, readLength);
 				if(rgbDataBuf == null) {
-					int[] headInfo = UdtTools.initXvidHeader(transBuf,(readLength + unusedBytes));
+					mpegPakages = 2;
+					int[] headInfo = UdtTools.initXvidHeader(mpegBuf, length);
 					int imageWidth = headInfo[0];
 					int imageHeight = headInfo[1];
 					usedBytes = headInfo[2];
-					unusedBytes = (readLength - usedBytes);
-					System.arraycopy(transBuf, usedBytes, transBuf, 0, unusedBytes);
+					unusedBytes = (mpegDataLength - usedBytes);
+					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
+					mpegDataLength = unusedBytes;
 					Log.d(TAG, "### imageWidht = " + imageWidth + " imageWidht = " + imageHeight + " used_bytes = " + usedBytes);
 					rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+					queue.removeTime();
 				} else {
-					usedBytes = UdtTools.xvidDecorer(transBuf,(readLength + unusedBytes), rgbDataBuf);
+					usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
 					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
 					if(video != null) {
-						Image image = queue.getFirstImage();
-						if(image != null && image.time.compareTo(time)<0) {
-							video = image.bitmap;
-							postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-							frameCount++;
-							queue.removeImage();
-						}
+						popuJpeg();
 						video.copyPixelsFromBuffer(sh);
 						postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 						frameCount++;
 					}
-					unusedBytes = (readLength + unusedBytes - usedBytes);
-					System.arraycopy(transBuf, usedBytes, transBuf, 0, unusedBytes);
+					unusedBytes = (mpegDataLength - usedBytes);
+					//System.out.println("unusedBytes=" + unusedBytes +  " usedBytes = " + usedBytes + " mpegDataLength=" + mpegDataLength);
+					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
+					mpegDataLength = unusedBytes;
 				}
-				ableReadSize = 0;
 			}
 			UdtTools.freeDecorer();
+		}
+		
+		public void popuJpeg() {
+			String oldTime = queue.removeTime();
+			Image image = queue.getFirstImage();
+			if(image != null ) {
+				//System.out.println("old = " + oldTime + " == " + image.time);
+				if(oldTime.compareTo(image.time) ==0) {
+					//System.out.println("jpeg");
+					queue.removeImage();
+					video = image.bitmap;
+					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+					frameCount++;
+					synchronized (lock) {
+						try {
+							lock.wait(80);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		}
 	}
 }
