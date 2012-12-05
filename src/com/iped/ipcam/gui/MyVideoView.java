@@ -1,5 +1,6 @@
 package com.iped.ipcam.gui;
 
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.pojo.Image;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
@@ -32,6 +34,7 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
+import com.iped.ipcam.utils.VideoQueue;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -281,6 +284,13 @@ public class MyVideoView extends ImageView implements Runnable {
 			}else {
 				new Thread(new RecvAudio()).start();
 			}
+			FileOutputStream fos = null;
+			/*try {
+				fos = new FileOutputStream("/mnt/sdcard/" + System.currentTimeMillis() +  ".bin");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
@@ -290,6 +300,13 @@ public class MyVideoView extends ImageView implements Runnable {
 					stopPlay = true;
 					break;
 				}
+				/*try {
+					fos.write(videoSocketBuf, 0, readLengthFromVideoSocket);
+					fos.flush();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}*/
 				videoSockBufferUsedLength = 0;
 				if(mpeg4Decoder) {
 					int recvBufIndex = 0;
@@ -1127,6 +1144,19 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	class PaserMpeg4 implements Runnable {
 		
+		/**
+		 * 1、首先判断是否以0001c开头
+		 * 		a、是 则截取时间戳
+		 * 		b、否进行 2
+		 * 2、再判断是否是FFD8FFE0开头
+		 * 		a、是 则拷贝数据jpeg缓冲区
+		 * 		b、否 则拷贝数据至mpeg4 缓冲区
+		 * 
+		 */
+		private VideoQueue queue = null;
+		
+		private int startFlagCount = 1;
+		
 		@Override
 		public void run() {
 			int res = UdtTools.initXvidDecorer();
@@ -1137,26 +1167,17 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 			byte[] rgbDataBuf = null;
 			int length = 1 * 1024 * 1024;
-			byte[] tmp = new byte[length];
+			byte[] mpegBuf = new byte[length];
 			byte[] transBuf = new byte[length];
 			int readLength = 0;
 			int usedBytes = length;
 			int unusedBytes = 0;
 			int ableReadSize = 0;
-			int index = 0;
 			boolean startFlag = false;
-			
-			boolean jpegHeadStartFlag =  false;
-			
-			boolean mpegHeadStartFlag =  false;
-			
-			int jpegDataStartIndex = 0;
-			
-			int mpegDataStartIndex = 0;
 			
 			int headFlagCount = 0;
 			
-			int jpegByteBufLength = 500 * 1024;
+			int jpegByteBufLength = 2 * 200 * 1024;
 			
 			byte[] jpegByteBuf = new byte[jpegByteBufLength]; 
 			
@@ -1164,104 +1185,87 @@ public class MyVideoView extends ImageView implements Runnable {
 			
 			int tmpJpgBufUsed = 0;
 			
+			String time = "";
+			
+			boolean imageDataStart = false;
+			
+			queue = new VideoQueue();
+			
 			while(!stopPlay) {
 				do{
-					if(indexForGet == indexForPut){
-						synchronized (tmp) {
+					if((indexForGet+5)%NALBUFLENGTH == indexForPut){
+						synchronized (mpegBuf) {
 							if(BuildConfig.DEBUG && !DEBUG) {
 								Log.d(TAG, "### data buffer is empty! ---->");
 							}
 							try {
-								tmp.wait(200);
+								mpegBuf.wait(200);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}  
 					} else {
-						byte b = nalBuf[indexForGet];
-						if(startFlag) {//内部头的开始
-							if(headFlagCount >= 18) { 
-								startFlag = false;
-								//System.out.println("=====" + new String(tmp, ableReadSize-18, 18));
-							} else {
-								headFlagCount++;
+						byte b0 = nalBuf[indexForGet];
+						byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
+						byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
+						byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
+						byte b4 = nalBuf[(indexForGet+4)%NALBUFLENGTH];
+						if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
+							if(startFlagCount++%5==0) {
+								startFlagCount = 1;
+								break;
 							}
-						}
-						
-						/**
-						 * 1、首先判断是否以0001c开头
-						 * 		a、是 则截取时间戳
-						 * 		b、否进行 2
-						 * 2、再判断是否是FFD8FFE0开头
-						 * 		a、是 则拷贝数据jpeg缓冲区
-						 * 		b、否 则拷贝数据至mpeg4 缓冲区
-						 * 
-						 */
-						if(b == 0 && index ==0) {
-							tmp[ableReadSize++] = b;
-						} else if (b == 0 && index ==1){
-							tmp[ableReadSize++] = b;
-						} else if (b == 0 && index == 2) {
-							tmp[ableReadSize++] = b;
-						} else if (b == 1 && index == 3) {
-							tmp[ableReadSize++] = b;
-						} else if (b == 12 && index == 4) {
-							tmp[ableReadSize++] = b;
+							mpegBuf[ableReadSize] = b0;
+							mpegBuf[ableReadSize + 1] = b1;
+							mpegBuf[ableReadSize + 2] = b2;
+							mpegBuf[ableReadSize + 3] = b3;
+							mpegBuf[ableReadSize + 4] = b4;
+							ableReadSize += 5;
+							indexForGet+=4;
 							startFlag = true;
+							imageDataStart = false;
 							headFlagCount = 0;
-						} else {
-							/*找到jpeg开始标记*/
-							if(b == -1 && jpegDataStartIndex == 0) {
-								jpegByteBuf[0] = -1;
-							} else if( b == -40 && jpegDataStartIndex == 1) {
-								jpegByteBuf[1] = -40;
-							}else if( b == -1 && jpegDataStartIndex == 2) {
-								jpegByteBuf[2] = -1;
-							}else if( b == -37 && jpegDataStartIndex == 3) {//jpeg start
-								jpegByteBuf[3] = -37;
-								jpegBufUsed = 4;
-								jpegHeadStartFlag = true;
-								mpegHeadStartFlag = false;
-								/*video = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
-								if(video != null) {
-									postInvalidate();
-								}*/
-								System.out.println("jpeg head =============");
-							}else if(b == 0 && mpegDataStartIndex == 0) {//mepg4
-								tmp[0] = 0;
-							} else if( b == 0 && mpegDataStartIndex == 1) {
-								tmp[1] = 0;
-							}else if( b == 1 && mpegDataStartIndex == 2) {
-								tmp[2] = 1;
-							}else if( b == -74 && mpegDataStartIndex == 3) {
-								tmp[3] = -74;
-								jpegBufUsed = 4;
-								mpegHeadStartFlag = true;
-								jpegHeadStartFlag = false;
-								ableReadSize++;
-								System.out.println("mpeg head =============");
-							} else {
-								if(jpegHeadStartFlag) {
-									jpegByteBuf[++jpegBufUsed] = b;
-									tmpJpgBufUsed = jpegBufUsed;
-								} else if(mpegHeadStartFlag) {
-									tmp[ableReadSize] = b;
-									index = -1;
-									ableReadSize++;
-								}
-								jpegDataStartIndex = -1;
-								mpegDataStartIndex = -1;
+							if(BuildConfig.DEBUG && !DEBUG) {
+								Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
 							}
-							jpegDataStartIndex++;
-							mpegDataStartIndex++;
-						}
-						index++;
-						indexForGet = (indexForGet+1)%NALBUFLENGTH;  
+						}else if(b0 == -1 &&  b1 == -40 &&  b2 == -1 && b3 == -37) {
+							jpegByteBuf[jpegBufUsed++] = -1;
+							startFlag = false;
+							imageDataStart = true;
+							jpegBufUsed = 1;
+							Bitmap v = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
+							if(v != null) {
+								//postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+								frameCount++;
+								queue.addNewImage(new Image(v, time));
+							}
+						}else {
+							if(startFlag) {
+								if(headFlagCount >= 18) { 
+									startFlag = false;
+									time = new String(mpegBuf, ableReadSize-18, 18);
+									if(BuildConfig.DEBUG && !DEBUG) {
+										Log.d(TAG, "###  time=" + time);
+									}
+								} else {
+									mpegBuf[ableReadSize++] = nalBuf[indexForGet];
+									headFlagCount++;
+								}
+							} else {
+								if(imageDataStart) {
+									jpegByteBuf[jpegBufUsed++] = b0;
+									tmpJpgBufUsed = jpegBufUsed;
+								}else {
+									mpegBuf[ableReadSize++] = b0;
+								}
+							}
+						} 
+						indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
 					}
 				} while (ableReadSize<usedBytes && !stopPlay);
 				startFlag = false;
 				readLength = ableReadSize;
-				System.arraycopy(tmp, 0, transBuf, unusedBytes, readLength);
+				System.arraycopy(mpegBuf, 0, transBuf, unusedBytes, readLength);
 				if(rgbDataBuf == null) {
 					int[] headInfo = UdtTools.initXvidHeader(transBuf,(readLength + unusedBytes));
 					int imageWidth = headInfo[0];
@@ -1272,11 +1276,18 @@ public class MyVideoView extends ImageView implements Runnable {
 					Log.d(TAG, "### imageWidht = " + imageWidth + " imageWidht = " + imageHeight + " used_bytes = " + usedBytes);
 					rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
-					postInvalidate();
+					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 				} else {
 					usedBytes = UdtTools.xvidDecorer(transBuf,(readLength + unusedBytes), rgbDataBuf);
 					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
 					if(video != null) {
+						Image image = queue.getFirstImage();
+						if(image != null && image.time.compareTo(time)<0) {
+							video = image.bitmap;
+							postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+							frameCount++;
+							queue.removeImage();
+						}
 						video.copyPixelsFromBuffer(sh);
 						postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 						frameCount++;
