@@ -77,7 +77,7 @@ public class VideoQueue {
 	}
 	
 	public MpegImage getMpegImage() {
-		return mpegImageList.peek();
+		return mpegImageList.poll();//.peek();
 	}
 	
 	public void removeMpegImage() {

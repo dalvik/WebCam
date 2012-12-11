@@ -1185,6 +1185,8 @@ public class MyVideoView extends ImageView implements Runnable {
 			
 			int mpegPakages = 3;
 			
+			new ShowImageThread().start();
+			
 			while(!stopPlay) {
 				do{
 					if((indexForGet+5)%NALBUFLENGTH == indexForPut){
@@ -1298,25 +1300,19 @@ public class MyVideoView extends ImageView implements Runnable {
 					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 				} else if(!stopPlay){
 					usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
-					String oldTime = queue.removeTime();
+					MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
+					queue.addMpegImage(mpegImage);
+					
+					/*String oldTime = queue.removeTime();
 					timeStr = oldTime.substring(0,14);
-					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength() + " timeStr = " + timeStr);
-					}
+					
 					if(popuJpeg(oldTime)){//显示jpeg，保存当前的mpeg
-						MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
-						queue.addMpegImage(mpegImage);
+						
 					}else {
 						MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
 						queue.addMpegImage(mpegImage);
-						byte[] tmpRgb = queue.getMpegImage().rgb;
-						ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
-						if(video != null) {
-							video.copyPixelsFromBuffer(sh);
-							postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-							frameCount++;
-						}
-					}
+						
+					}*/
 					unusedBytes = (mpegDataLength - usedBytes);
 					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
@@ -1327,6 +1323,45 @@ public class MyVideoView extends ImageView implements Runnable {
 			System.gc();
 		}
 		
+		private class ShowImageThread extends Thread {
+			
+			public ShowImageThread() {
+				
+			}
+			
+			public void run() {
+				while(!stopPlay) {
+					if(queue.getMpegLength()>0) {
+						String oldTime = queue.removeTime();
+						timeStr = oldTime.substring(0,14);
+						if(BuildConfig.DEBUG && DEBUG) {
+							Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength() + " timeStr = " + timeStr);
+						}
+						if(!popuJpeg(oldTime)){
+							byte[] tmpRgb = queue.getMpegImage().rgb;
+							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
+							if(video != null) {
+								video.copyPixelsFromBuffer(sh);
+								postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+								frameCount++;
+							}
+						}
+					}else {
+						synchronized (lock) {
+							if(BuildConfig.DEBUG && !DEBUG) {
+								Log.d(TAG, "### no image data ---->");
+							}
+							try {
+								lock.wait(10);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}  
+					}
+				}
+			}
+			
+		}
 		public void decodeYUV420SP(int[] rgba, byte[] yuv420sp, int width,  int height) {
 			final int frameSize = width * height;
 
