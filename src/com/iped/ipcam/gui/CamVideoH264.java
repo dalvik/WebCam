@@ -30,9 +30,13 @@ import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -117,6 +121,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private List<Device> list;
 	
+	private BCVControlProgressBar clearProgerss;
+	
 	private BCVControlProgressBar brightnessProgerss;
 	
 	private BCVControlProgressBar contrastProgressbar;
@@ -156,6 +162,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private int x_offSet = 0;
 	
 	private int y_offSet = 0;
+	
+	private RadioButton qvga = null;
+	
+	private RadioButton vga = null;
+	
+	private RadioButton qelp = null;
 	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -406,9 +418,19 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		Button sendAudio = (Button) view.findViewById(R.id.send_audio);
 		sendAudio.setOnClickListener(this);
 		
+		qvga = (RadioButton) view.findViewById(R.id.qvga_button_id);
+		qvga.setOnCheckedChangeListener(checkedChangeListener);
+		vga = (RadioButton) view.findViewById(R.id.vga_button_id);
+		vga.setOnCheckedChangeListener(checkedChangeListener);
+		qelp = (RadioButton) view.findViewById(R.id.qelp_button_id);
+		qelp.setOnCheckedChangeListener(checkedChangeListener);
+		
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
+		clearProgerss = (BCVControlProgressBar) view.findViewById(R.id.clear_progressbar);
+		clearProgerss.init(getText(R.string.video_preview_clear).toString());
+		clearProgerss.setProgress(0);
 		brightnessProgerss = (BCVControlProgressBar) view.findViewById(R.id.brightness_progressbar);
 		brightnessProgerss.init(getText(R.string.video_preview_brightness).toString());
 		brightnessProgerss.setProgress(0);
@@ -1101,4 +1123,24 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	};
 
+	private OnCheckedChangeListener checkedChangeListener = new OnCheckedChangeListener() {
+		
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView,
+				boolean isChecked) {
+			if(buttonView.getId() == R.id.qvga_button_id && isChecked) {
+				qvga.setChecked(isChecked);
+				vga.setChecked(!isChecked);
+				qelp.setChecked(!isChecked);
+			}else if(buttonView.getId() == R.id.vga_button_id && isChecked) {
+				qvga.setChecked(!isChecked);
+				vga.setChecked(isChecked);
+				qelp.setChecked(!isChecked);
+			} else if(buttonView.getId() == R.id.qelp_button_id && isChecked) {
+				qvga.setChecked(!isChecked);
+				vga.setChecked(!isChecked);
+				qelp.setChecked(isChecked);
+			}
+		}
+	};
 }

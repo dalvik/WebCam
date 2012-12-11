@@ -106,7 +106,71 @@
                         android:gravity="center"
                         android:visibility="invisible"/>
                 </TableRow>
+                
+                <TableRow>
+		                          
+                    <RadioButton 
+                       android:id="@+id/qvga_button_id"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:gravity="center"
+                       android:button="@null"
+                       android:paddingLeft="5dp"
+                       android:textSize="10dip"
+                       android:drawableBottom="@android:drawable/btn_radio"
+                       android:text="@string/video_preview_qvga_str"/>
+                  
+                    <RadioButton 
+                        android:id="@+id/vga_button_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:button="@null"
+                        android:paddingLeft="5dp"
+                        android:textSize="10dip"
+                        android:drawableBottom="@android:drawable/btn_radio"
+                        android:text="@string/video_preview_vga_str"/>
+                    
+                    <RadioButton 
+                        android:id="@+id/qelp_button_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:button="@null"
+                        android:textSize="10dip"
+                        android:paddingLeft="1dp"
+                        android:paddingRight="5dp"
+                        android:drawableBottom="@android:drawable/btn_radio"
+                        android:text="@string/video_preview_720p_str"/>
+                </TableRow>
  
+                <TableRow>
+
+                    <Button
+                        android:id="@+id/minus_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="-" />
+
+                    <com.iped.ipcam.gui.BCVControlProgressBar
+                        android:id="@+id/clear_progressbar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:gravity="center"
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/add_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dip"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="+" />
+                </TableRow>
+                
                 <TableRow>
 
                     <Button
