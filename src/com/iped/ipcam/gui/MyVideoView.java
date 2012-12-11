@@ -1,6 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
@@ -35,7 +34,6 @@ import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.VideoQueue;
-import com.sun.mail.util.QEncoderStream;
 
 public class MyVideoView extends ImageView implements Runnable {
 
@@ -55,7 +53,7 @@ public class MyVideoView extends ImageView implements Runnable {
 
 	private Bitmap video;
 
-	byte[] nalBuf = new byte[NALBUFLENGTH];//>100k
+	byte[] nalBuf = null;
 
 	int nalSizeTemp = 0;
 
@@ -274,6 +272,9 @@ public class MyVideoView extends ImageView implements Runnable {
 		}
 		temWidth =  0;
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
+		nalBuf = new byte[NALBUFLENGTH];//>100k
+		indexForPut = 0;
+		indexForGet = 0;
 		if(!playBackFlag) {
 			temWidth = 1;
 			//RecvAudio recvAudio = new RecvAudio();
@@ -285,13 +286,6 @@ public class MyVideoView extends ImageView implements Runnable {
 			}else {
 				new Thread(new RecvAudio()).start();
 			}
-			FileOutputStream fos = null;
-			/*try {
-				fos = new FileOutputStream("/mnt/sdcard/" + System.currentTimeMillis() +  ".bin");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
@@ -301,13 +295,6 @@ public class MyVideoView extends ImageView implements Runnable {
 					stopPlay = true;
 					break;
 				}
-				/*try {
-					fos.write(videoSocketBuf, 0, readLengthFromVideoSocket);
-					fos.flush();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}*/
 				videoSockBufferUsedLength = 0;
 				if(mpeg4Decoder) {
 					int recvBufIndex = 0;
@@ -1170,10 +1157,8 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 			byte[] rgbDataBuf = null;
 			int length = 1 * 512 * 1024;
-			int bufNeedLength = length - 5;
+			//int bufNeedLength = length - 5;
 			byte[] mpegBuf = new byte[length];
-			byte[] transBuf = new byte[length];
-			int readLength = 0;
 			int usedBytes = length;
 			int unusedBytes = 0;
 			int mpegDataLength = 0;
@@ -1197,7 +1182,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			
 			queue = new VideoQueue();
 			
-			int mpegPakages = 4;
+			int mpegPakages = 3;
 			
 			while(!stopPlay) {
 				do{
@@ -1239,12 +1224,28 @@ public class MyVideoView extends ImageView implements Runnable {
 							imageDataStart = true;
 							isMpeg4 = false;
 							jpegBufUsed = 1;
+							
+							//ByteBuffer sh = ByteBuffer.wrap(jpegByteBuf);
+							//System.out.println(sh.capacity());
+							//BitmapFactory.decodeByteArray(data, offset, jpegByteBufLength)
+							/*if(tmpJpgBufUsed>0) {
+								System.out.println(video.getWidth() + " " + (video.getWidth() * video.getHeight()) + " " + tmpJpgBufUsed);
+								int[] out = new int[video.getWidth() * video.getHeight()];
+								byte[] in = new byte[tmpJpgBufUsed];
+								System.arraycopy(jpegByteBuf, 0, in, 0, tmpJpgBufUsed);
+								decodeYUV420SP(out, in, video.getWidth(), video.getHeight());
+								//decodeYUV(out, jpegByteBuf, video.getWidth(), video.getHeight());
+								//UdtTools.decodeYUV420SP(jpegByteBuf, video.getWidth(), video.getHeight());
+							}*/
+							//Bitmap v = Bitmap.createBitmap(UdtTools.decodeYUV420SP(jpegByteBuf, video.getWidth(), video.getHeight()), video.getWidth(), video.getHeight(), Config.RGB_565);
 							Bitmap v = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
-							popuJpeg();
 							if(v != null) {
 								//postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 								//frameCount++;
 								queue.addNewImage(new Image(v, time));
+								if(BuildConfig.DEBUG && !DEBUG) {
+									Log.d(TAG, "### jpeg  time=" + time);
+								}
 							}
 						}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
 							if(startFlagCount++ %mpegPakages == 0){
@@ -1264,8 +1265,8 @@ public class MyVideoView extends ImageView implements Runnable {
 									startFlag = false;
 									time = new String(mpegBuf, mpegDataLength-18, 18);
 									queue.addNewTime(time);
-									if(BuildConfig.DEBUG && !DEBUG) {
-										Log.d(TAG, "###  time=" + time);
+									if(BuildConfig.DEBUG && DEBUG) {
+										Log.d(TAG, "### add new   time=" + time + "  time list length " + queue.getTimeListLength());
 									}
 								}
 							} else {
@@ -1283,7 +1284,7 @@ public class MyVideoView extends ImageView implements Runnable {
 				startFlag = false;
 				if(rgbDataBuf == null) {
 					mpegPakages = 2;
-					int[] headInfo = UdtTools.initXvidHeader(mpegBuf, length);
+					int[] headInfo = UdtTools.initXvidHeader(mpegBuf, length);//length的长度即为out_buffer的长度，所以length要足够长。
 					int imageWidth = headInfo[0];
 					int imageHeight = headInfo[1];
 					usedBytes = headInfo[2];
@@ -1294,12 +1295,11 @@ public class MyVideoView extends ImageView implements Runnable {
 					rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-					queue.removeTime();
-				} else {
+				} else if(!stopPlay){
 					usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
 					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
+					popuJpeg();
 					if(video != null) {
-						popuJpeg();
 						video.copyPixelsFromBuffer(sh);
 						postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 						frameCount++;
@@ -1311,15 +1311,112 @@ public class MyVideoView extends ImageView implements Runnable {
 				}
 			}
 			UdtTools.freeDecorer();
+			rgbDataBuf = null;
+			System.gc();
 		}
 		
+		public void decodeYUV420SP(int[] rgba, byte[] yuv420sp, int width,  int height) {
+			final int frameSize = width * height;
+
+			for (int j = 0, yp = 0; j < height; j++) {
+			    int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
+			    for (int i = 0; i < width; i++, yp++) {
+			        int y = (0xff & ((int) yuv420sp[yp])) - 16;
+			        if (y < 0)
+			            y = 0;
+			        if ((i & 1) == 0) {
+			        	System.out.println(uvp +  " ");
+			            v = (0xff & yuv420sp[uvp++]) - 128;
+			            u = (0xff & yuv420sp[uvp++]) - 128;
+			        }
+
+			        int y1192 = 1192 * y;
+			        int r = (y1192 + 1634 * v);
+			        int g = (y1192 - 833 * v - 400 * u);
+			        int b = (y1192 + 2066 * u);
+
+			        if (r < 0)
+			            r = 0;
+			        else if (r > 262143)
+			            r = 262143;
+			        if (g < 0)
+			            g = 0;
+			        else if (g > 262143)
+			            g = 262143;
+			        if (b < 0)
+			            b = 0;
+			        else if (b > 262143)
+			            b = 262143;
+
+			        // rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) &
+			        // 0xff00) | ((b >> 10) & 0xff);
+			        // rgba, divide 2^10 ( >> 10)
+			        rgba[yp] = ((r << 14) & 0xff000000) | ((g << 6) & 0xff0000)
+			                | ((b >> 2) | 0xff00);
+			    }
+			}
+		}
+
+		
+		public void decodeYUV(int[] out, byte[] fg, int width, int height) {
+			int sz = width * height;
+		    int i, j;
+		    int Y, Cr = 0, Cb = 0;
+		    for (j = 0; j < height; j++) {
+		        int pixPtr = j * width;
+		        final int jDiv2 = j >> 1;
+		        for (i = 0; i < width; i++) {
+		            Y = fg[pixPtr];
+		            if (Y < 0)
+		                Y += 255;
+		            if ((i & 0x1) != 1) {
+		                final int cOff = sz + jDiv2 * width + (i >> 1) * 2;
+		                Cb = fg[cOff];
+		                if (Cb < 0)
+		                    Cb += 127;
+		                else
+		                    Cb -= 128;
+		                Cr = fg[cOff + 1];
+		                if (Cr < 0)
+		                    Cr += 127;
+		                else
+		                    Cr -= 128;
+		            }
+		            int R = Y + Cr + (Cr >> 2) + (Cr >> 3) + (Cr >> 5);
+		            if (R < 0)
+		                R = 0;
+		            else if (R > 255)
+		                R = 255;
+		            int G = Y - (Cb >> 2) + (Cb >> 4) + (Cb >> 5) - (Cr >> 1)
+		                    + (Cr >> 3) + (Cr >> 4) + (Cr >> 5);
+		            if (G < 0)
+		                G = 0;
+		            else if (G > 255)
+		                G = 255;
+		            int B = Y + Cb + (Cb >> 1) + (Cb >> 2) + (Cb >> 6);
+		            if (B < 0)
+		                B = 0;
+		            else if (B > 255)
+		                B = 255;
+		            out[pixPtr++] = 0xff000000 + (B << 16) + (G << 8) + R;
+		        }
+		    }
+		}
 		public void popuJpeg() {
 			String oldTime = queue.removeTime();
+			if(BuildConfig.DEBUG && DEBUG) {
+				Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength());
+			}
+			if(queue.getImageListLength()<=0) {
+				return;
+			}
 			Image image = queue.getFirstImage();
 			if(image != null ) {
-				//System.out.println("old = " + oldTime + " == " + image.time);
+				if(BuildConfig.DEBUG && !DEBUG) {
+					Log.d(TAG, "### show time = " + oldTime + " == " + image.time);
+				}
 				if(oldTime.compareTo(image.time) ==0) {
-					//System.out.println("jpeg");
+					System.out.println("popu jpeg " + image.time);
 					queue.removeImage();
 					video = image.bitmap;
 					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
@@ -1331,6 +1428,9 @@ public class MyVideoView extends ImageView implements Runnable {
 							e.printStackTrace();
 						}
 					}
+				}
+				if(oldTime.compareTo(image.time) > 0) {
+					queue.clear();
 				}
 			}
 		}
