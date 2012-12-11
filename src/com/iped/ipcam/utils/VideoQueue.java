@@ -1,41 +1,48 @@
 package com.iped.ipcam.utils;
 
-import java.util.Comparator;
 import java.util.LinkedList;
 
 import com.iped.ipcam.pojo.Image;
 
 public class VideoQueue {
 
-	private LinkedList<Image> list = null;
+	private LinkedList<Image> jpegImageList = null;
 	
 	private LinkedList<String> timeList = null;
 	
 	public VideoQueue() {
-		list = new LinkedList<Image>();
+		jpegImageList = new LinkedList<Image>();
 		timeList = new LinkedList<String>();
 	}
 	
 	public void addNewImage(Image image) {
-		if(list.size()>=4) {
-			Image i = list.poll();
+		if(jpegImageList.size()>=4) {
+			Image i = jpegImageList.poll();
 			if(i.bitmap != null) {
 				i.bitmap.recycle();
 				i = null;
 			}
 		}
-		list.add(image);
+		jpegImageList.add(image);
 		//System.out.println("image cache list size ===>" + list.size() + " " + image);
 		//Collections.sort(list, new ImageComparator());
 	}
 	
 	public void addNewTime(String time) {
 		timeList.add(time);
-		//System.out.println("time list size ===>" + timeList.size() + " " + time);
+		//System.out.println("add new time and list size ===>" + timeList.size() + " " + time);
+	}
+	
+	public int getTimeListLength() {
+		return timeList.size();
+	}
+	
+	public int getImageListLength() {
+		return jpegImageList.size();
 	}
 	
 	public Image removeImage() {
-		return list.poll();
+		return jpegImageList.poll();
 	}
 	
 	public String removeTime() {
@@ -43,7 +50,7 @@ public class VideoQueue {
 	}
 	
 	public Image getFirstImage() {
-		return list.peek();
+		return jpegImageList.peek();
 	}
 	
 	public String getFirstTime() {
@@ -51,7 +58,7 @@ public class VideoQueue {
 	}
 	
 	public void clear() {
-		list.clear();
+		jpegImageList.clear();
 	}
 	
 	public void clearTime() {
