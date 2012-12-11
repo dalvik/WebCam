@@ -82,4 +82,7 @@ public class UdtTools {
 	public static native int[] initXvidHeader(byte[] src, int length);
 	
 	public static native void freeDecorer();
+	
+	public static native int[] decodeYUV420SP(byte[] data, int width, int height);
+	
 }

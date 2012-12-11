@@ -25,7 +25,8 @@ import android.widget.ImageView;
 
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.pojo.Image;
+import com.iped.ipcam.pojo.JpegImage;
+import com.iped.ipcam.pojo.MpegImage;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
@@ -915,7 +916,7 @@ public class MyVideoView extends ImageView implements Runnable {
 			frameCountTemp = frameCount;
 			if(frameCountTemp<=2) {
 				if(video != null) {
-					invalidate();
+					invalidate(rect);
 				}
 			}
 			frameCount = 0;
@@ -1242,7 +1243,7 @@ public class MyVideoView extends ImageView implements Runnable {
 							if(v != null) {
 								//postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 								//frameCount++;
-								queue.addNewImage(new Image(v, time));
+								queue.addJpegImage(new JpegImage(v, time));
 								if(BuildConfig.DEBUG && !DEBUG) {
 									Log.d(TAG, "### jpeg  time=" + time);
 								}
@@ -1297,15 +1298,26 @@ public class MyVideoView extends ImageView implements Runnable {
 					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 				} else if(!stopPlay){
 					usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
-					ByteBuffer sh = ByteBuffer.wrap(rgbDataBuf);
-					popuJpeg();
-					if(video != null) {
-						video.copyPixelsFromBuffer(sh);
-						postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-						frameCount++;
+					String oldTime = queue.removeTime();
+					timeStr = oldTime.substring(0,14);
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength() + " timeStr = " + timeStr);
+					}
+					if(popuJpeg(oldTime)){//显示jpeg，保存当前的mpeg
+						MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
+						queue.addMpegImage(mpegImage);
+					}else {
+						MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
+						queue.addMpegImage(mpegImage);
+						byte[] tmpRgb = queue.getMpegImage().rgb;
+						ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
+						if(video != null) {
+							video.copyPixelsFromBuffer(sh);
+							postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+							frameCount++;
+						}
 					}
 					unusedBytes = (mpegDataLength - usedBytes);
-					//System.out.println("unusedBytes=" + unusedBytes +  " usedBytes = " + usedBytes + " mpegDataLength=" + mpegDataLength);
 					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
 				}
@@ -1402,37 +1414,27 @@ public class MyVideoView extends ImageView implements Runnable {
 		        }
 		    }
 		}
-		public void popuJpeg() {
-			String oldTime = queue.removeTime();
-			if(BuildConfig.DEBUG && DEBUG) {
-				Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength());
-			}
+		public boolean popuJpeg(String oldTime) {
 			if(queue.getImageListLength()<=0) {
-				return;
+				return false;
 			}
-			Image image = queue.getFirstImage();
-			if(image != null ) {
+			JpegImage image = queue.getFirstImage();
+			if(BuildConfig.DEBUG && !DEBUG) {
+				Log.d(TAG, "### show time = " + oldTime + " == " + image.time);
+			}
+			if(oldTime.compareTo(image.time) ==0) {
 				if(BuildConfig.DEBUG && !DEBUG) {
-					Log.d(TAG, "### show time = " + oldTime + " == " + image.time);
+					Log.d(TAG, "### popu jpeg " + image.time);
 				}
-				if(oldTime.compareTo(image.time) ==0) {
-					System.out.println("popu jpeg " + image.time);
-					queue.removeImage();
-					video = image.bitmap;
-					postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-					frameCount++;
-					synchronized (lock) {
-						try {
-							lock.wait(80);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				if(oldTime.compareTo(image.time) > 0) {
-					queue.clear();
-				}
+				queue.removeImage();
+				video = image.bitmap;
+				postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+				frameCount++;
+				return true;
+			} else if(oldTime.compareTo(image.time) > 0) {
+				queue.clear();
 			}
+			return false;
 		}
 	}
 }

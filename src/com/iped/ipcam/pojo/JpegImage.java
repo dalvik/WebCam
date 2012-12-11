@@ -2,13 +2,13 @@ package com.iped.ipcam.pojo;
 
 import android.graphics.Bitmap;
 
-public class Image {
+public class JpegImage {
 
 	public Bitmap bitmap;
 	
 	public String time;
 	
-	public Image(Bitmap bitmap, String time) {
+	public JpegImage(Bitmap bitmap, String time) {
 		this.bitmap = bitmap;
 		this.time = time;
 	}

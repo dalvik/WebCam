@@ -2,35 +2,37 @@ package com.iped.ipcam.utils;
 
 import java.util.LinkedList;
 
-import com.iped.ipcam.pojo.Image;
+import com.iped.ipcam.pojo.JpegImage;
+import com.iped.ipcam.pojo.MpegImage;
 
 public class VideoQueue {
 
-	private LinkedList<Image> jpegImageList = null;
+	private LinkedList<JpegImage> jpegImageList = null;
 	
 	private LinkedList<String> timeList = null;
 	
+	private LinkedList<MpegImage> mpegImageList = null;
+	
 	public VideoQueue() {
-		jpegImageList = new LinkedList<Image>();
+		jpegImageList = new LinkedList<JpegImage>();
 		timeList = new LinkedList<String>();
+		mpegImageList = new LinkedList<MpegImage>();
 	}
 	
-	public void addNewImage(Image image) {
+	public void addJpegImage(JpegImage image) {
 		if(jpegImageList.size()>=4) {
-			Image i = jpegImageList.poll();
+			JpegImage i = jpegImageList.poll();
 			if(i.bitmap != null) {
 				i.bitmap.recycle();
 				i = null;
 			}
 		}
 		jpegImageList.add(image);
-		//System.out.println("image cache list size ===>" + list.size() + " " + image);
-		//Collections.sort(list, new ImageComparator());
 	}
+	
 	
 	public void addNewTime(String time) {
 		timeList.add(time);
-		//System.out.println("add new time and list size ===>" + timeList.size() + " " + time);
 	}
 	
 	public int getTimeListLength() {
@@ -41,7 +43,7 @@ public class VideoQueue {
 		return jpegImageList.size();
 	}
 	
-	public Image removeImage() {
+	public JpegImage removeImage() {
 		return jpegImageList.poll();
 	}
 	
@@ -49,7 +51,7 @@ public class VideoQueue {
 		return timeList.poll();
 	}
 	
-	public Image getFirstImage() {
+	public JpegImage getFirstImage() {
 		return jpegImageList.peek();
 	}
 	
@@ -65,6 +67,26 @@ public class VideoQueue {
 		timeList.clear();
 	}
 	
+	/** store mpeg4 **/
+	public void addMpegImage(MpegImage mpegImage) {
+		if(mpegImageList.size()>=4) {
+			MpegImage i = mpegImageList.remove();//.poll();
+			i.rgb = null;
+		}
+		mpegImageList.add(mpegImage);
+	}
+	
+	public MpegImage getMpegImage() {
+		return mpegImageList.peek();
+	}
+	
+	public void removeMpegImage() {
+		mpegImageList.remove();
+	}
+	
+	public int getMpegLength() {
+		return  mpegImageList.size();
+	}
 	/*private class ImageComparator implements Comparator<Image> {
 		
 		@Override
