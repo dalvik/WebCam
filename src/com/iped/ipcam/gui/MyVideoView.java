@@ -23,6 +23,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.iped.ipcam.engine.PlayMpegThread;
+import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.JpegImage;
@@ -36,7 +38,7 @@ import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.VideoQueue;
 
-public class MyVideoView extends ImageView implements Runnable {
+public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListener {
 
 	private boolean DEBUG = true;
 	
@@ -44,7 +46,7 @@ public class MyVideoView extends ImageView implements Runnable {
 	
 	private final static int DELAY_RECONNECT = 1000 * 60 * 2* 1000;
 	
-	private final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
+	public final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
 	private static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
 
@@ -160,6 +162,10 @@ public class MyVideoView extends ImageView implements Runnable {
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	
 	private int indexForGet = 0; // get索引 （下一个要读取的位置）
+	
+	private OnPutIndexListener listener;
+	
+	private PlayMpegThread mpegThread = null;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -283,7 +289,10 @@ public class MyVideoView extends ImageView implements Runnable {
 			stopRecvAudioFlag = false;
 			//recvAudioThread.start();
 			if(mpeg4Decoder) {
-				new Thread(new PaserMpeg4()).start();
+				//new Thread(new PaserMpeg4()).start();
+				mpegThread = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
+				mpegThread.setOnMpegPlayListener(this);
+				new Thread(mpegThread).start();
 			}else {
 				new Thread(new RecvAudio()).start();
 			}
@@ -301,9 +310,9 @@ public class MyVideoView extends ImageView implements Runnable {
 					int recvBufIndex = 0;
 					do{
 						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
-						if((indexForPut +1) % NALBUFLENGTH == indexForGet) {
+						if((indexForPut +1) % NALBUFLENGTH == mpegThread.getIndexForGet()) {
 							if(BuildConfig.DEBUG && !DEBUG) {
-								Log.d(TAG, "### data buffer is full, please get data in time");
+								Log.d(TAG, "### data buffer is full, please get data in time " + mpegThread.getIndexForGet() );
 							}
 							synchronized (nalBuf) {
 								try {
@@ -315,6 +324,9 @@ public class MyVideoView extends ImageView implements Runnable {
 						}else {
 							 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
 							 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+							 if(listener != null) {
+								 listener.updatePutIndex(indexForPut);
+							 }
 						     recvBufIndex++;
 						    // Log.d(TAG, "### indexForPut = " + indexForPut);
 						}
@@ -574,6 +586,9 @@ public class MyVideoView extends ImageView implements Runnable {
 		return false;
 	}
 	public void onStop() {
+		if(mpegThread != null) {
+			mpegThread.setStop(stopPlay);
+		}
 		if(!playBackFlag){
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
@@ -1471,5 +1486,28 @@ public class MyVideoView extends ImageView implements Runnable {
 			}
 			return false;
 		}
+	}
+	
+	public interface OnPutIndexListener {
+		public void updatePutIndex(int putIndex);
+	}
+	
+	public void setOnPutIndexListener(OnPutIndexListener listener) {
+		this.listener = listener;
+	}
+	
+	@Override
+	public void invalide(int frameCount, String timeStr) {
+		this.frameCount = frameCount;
+		this.timeStr = timeStr;
+		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+	}
+	
+	public void setImage(Bitmap video) {
+		this.video = video;
+	}
+	
+	public int getFrameCount() {
+		return frameCount;
 	}
 }
