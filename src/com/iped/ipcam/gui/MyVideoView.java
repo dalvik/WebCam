@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.pojo.BCVInfo;
@@ -167,6 +168,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private PlayMpegThread mpegThread = null;
 	
+	private DecodeJpegThread decodeJpegThread = null;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -295,13 +298,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				new Thread(mpegThread).start();
 			}else {
 				new Thread(new RecvAudio()).start();
+				decodeJpegThread = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
+				decodeJpegThread.setOnMpegPlayListener(this);
+				new Thread(decodeJpegThread).start();
 			}
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				//Log.d(TAG, "monitor readLengthFromVideoSocket=" +readLengthFromVideoSocket);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
-					System.out.println("read over break....");
+					System.out.println();
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.d(TAG, "### read over break....");
+					}
 					stopPlay = true;
 					break;
 				}
@@ -332,8 +341,32 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 						}
 					}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
 				} else {
-					while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
-						// remain socket  buf  length
+					int recvBufIndex = 0;
+					do{
+						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
+						if((indexForPut +1) % NALBUFLENGTH == decodeJpegThread.getIndexForGet()) {
+							if(BuildConfig.DEBUG && !DEBUG) {
+								Log.d(TAG, "### data buffer is full, please get data in time " + decodeJpegThread.getIndexForGet() );
+							}
+							synchronized (nalBuf) {
+								try {
+									nalBuf.wait(10);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+						}else {
+							 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
+							 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+							 if(listener != null) {
+								 listener.updatePutIndex(indexForPut);
+							 }
+						     recvBufIndex++;
+						    // Log.d(TAG, "### indexForPut = " + indexForPut);
+						}
+					}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
+					
+					/*while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
 						nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,	videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
 						// 根据nalSizeTemp的值决定是否刷新界面
 						while (looperFlag) {
@@ -352,7 +385,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 								break;
 							}
 						}
-					}
+					}*/
 				}
 			} 
 		}else { // 回放
@@ -587,7 +620,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	public void onStop() {
 		if(mpegThread != null) {
-			mpegThread.setStop(stopPlay);
+			mpegThread.onStop(stopPlay);
 		}
 		if(!playBackFlag){
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
@@ -1146,6 +1179,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	public interface OnPutIndexListener {
 		public void updatePutIndex(int putIndex);
+		public void onStop(boolean stopPlay);
 	}
 	
 	public void setOnPutIndexListener(OnPutIndexListener listener) {

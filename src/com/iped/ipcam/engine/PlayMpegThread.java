@@ -288,14 +288,15 @@ public class PlayMpegThread implements Runnable, OnPutIndexListener {
 	public interface OnMpegPlayListener {
 		public void invalide(int frameCount, String timeStr);
 	}
+	
 	public void setOnMpegPlayListener(OnMpegPlayListener listener) {
 		this.listener = listener;
 	}
 	
-	public void setStop(boolean stopPlay) {
+	@Override
+	public void onStop(boolean stopPlay) {
 		this.stopPlay = stopPlay;
 	}
-	
 	
 	public void decodeYUV420SP(int[] rgba, byte[] yuv420sp, int width,  int height) {
 		final int frameSize = width * height;
