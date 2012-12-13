@@ -24,6 +24,7 @@ import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
+import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.ByteUtil;
@@ -157,13 +158,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	
-	private int indexForGet = 0; // get索引 （下一个要读取的位置）
-	
 	private OnPutIndexListener listener;
 	
-	private PlayMpegThread mpegThread = null;
-	
-	private DecodeJpegThread decodeJpegThread = null;
+	private DecoderFactory decoderFactory = null;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -279,7 +276,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
 		indexForPut = 0;
-		indexForGet = 0;
 		if(!playBackFlag) {
 			temWidth = 1;
 			//RecvAudio recvAudio = new RecvAudio();
@@ -288,14 +284,14 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			//recvAudioThread.start();
 			if(mpeg4Decoder) {
 				//new Thread(new PaserMpeg4()).start();
-				mpegThread = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
-				mpegThread.setOnMpegPlayListener(this);
-				new Thread(mpegThread).start();
+				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
+				decoderFactory.setOnMpegPlayListener(this);
+				new Thread(decoderFactory).start();
 			}else {
 				new Thread(new DecodeAudioThread(this)).start();
-				decodeJpegThread = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
-				decodeJpegThread.setOnMpegPlayListener(this);
-				new Thread(decodeJpegThread).start();
+				decoderFactory = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
+				decoderFactory.setOnMpegPlayListener(this);
+				new Thread(decoderFactory).start();
 			}
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
@@ -310,78 +306,30 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 					break;
 				}
 				videoSockBufferUsedLength = 0;
-				if(mpeg4Decoder) {
-					int recvBufIndex = 0;
-					do{
-						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
-						if((indexForPut +1) % NALBUFLENGTH == mpegThread.getIndexForGet()) {
-							if(BuildConfig.DEBUG && !DEBUG) {
-								Log.d(TAG, "### data buffer is full, please get data in time " + mpegThread.getIndexForGet() );
-							}
-							synchronized (nalBuf) {
-								try {
-									nalBuf.wait(10);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-							}
-						}else {
-							 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
-							 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
-							 if(listener != null) {
-								 listener.updatePutIndex(indexForPut);
-							 }
-						     recvBufIndex++;
-						    // Log.d(TAG, "### indexForPut = " + indexForPut);
+				int recvBufIndex = 0;
+				do{
+					//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
+					if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
+						if(BuildConfig.DEBUG && !DEBUG) {
+							Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
 						}
-					}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
-				} else {
-					int recvBufIndex = 0;
-					do{
-						//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
-						if((indexForPut +1) % NALBUFLENGTH == decodeJpegThread.getIndexForGet()) {
-							if(BuildConfig.DEBUG && !DEBUG) {
-								Log.d(TAG, "### data buffer is full, please get data in time " + decodeJpegThread.getIndexForGet() );
-							}
-							synchronized (nalBuf) {
-								try {
-									nalBuf.wait(10);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-							}
-						}else {
-							 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
-							 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
-							 if(listener != null) {
-								 listener.updatePutIndex(indexForPut);
-							 }
-						     recvBufIndex++;
-						    // Log.d(TAG, "### indexForPut = " + indexForPut);
-						}
-					}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
-					
-					/*while (readLengthFromVideoSocket - videoSockBufferUsedLength > 0) {
-						nalSizeTemp = mergeBuffer(nalBuf, nalBufUsedLength, videoSocketBuf,	videoSockBufferUsedLength, (readLengthFromVideoSocket - videoSockBufferUsedLength));
-						// 根据nalSizeTemp的值决定是否刷新界面
-						while (looperFlag) {
-							looperFlag = false;
-							if (nalSizeTemp == -2) {
-								if (nalBufUsedLength > 0) {
-									frameCount++;
-									copyPixl();
-								}
-								nalBuf[0] = -1;
-								nalBuf[1] = -40;
-								nalBuf[2] = -1;
-								nalBuf[3] = -32; // 刷新界面之后，再将jpeg数据头加入nalbuffer中
-								videoSockBufferUsedLength += 4;
-								nalBufUsedLength = 4;
-								break;
+						synchronized (nalBuf) {
+							try {
+								nalBuf.wait(10);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
 							}
 						}
-					}*/
-				}
+					}else {
+						 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
+						 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+						 if(listener != null) {
+							 listener.updatePutIndex(indexForPut);
+						 }
+					     recvBufIndex++;
+					    // Log.d(TAG, "### indexForPut = " + indexForPut);
+					}
+				}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
 			} 
 		}else { // 回放
 			initPlayBackParaFlag = true;
@@ -614,8 +562,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		return false;
 	}
 	public void onStop() {
-		if(mpegThread != null) {
-			mpegThread.onStop(stopPlay);
+		if(decoderFactory != null) {
+			decoderFactory.onStop(stopPlay);
 		}
 		if(listener != null) {
 			listener.onStop(true);

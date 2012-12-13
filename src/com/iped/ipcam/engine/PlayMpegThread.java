@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.util.Log;
 
+import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.gui.MyVideoView;
 import com.iped.ipcam.gui.MyVideoView.OnPutIndexListener;
@@ -15,7 +16,7 @@ import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.pojo.MpegImage;
 import com.iped.ipcam.utils.VideoQueue;
 
-public class PlayMpegThread implements Runnable, OnPutIndexListener {
+public class PlayMpegThread extends DecoderFactory implements Runnable, OnPutIndexListener {
 
 	private VideoQueue queue = null;
 	
@@ -281,6 +282,7 @@ public class PlayMpegThread implements Runnable, OnPutIndexListener {
 		this.indexForPut = indexForPut;
 	}
 	
+	@Override
 	public int getIndexForGet() {
 		return indexForGet;
 	}
