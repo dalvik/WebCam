@@ -292,7 +292,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				mpegThread.setOnMpegPlayListener(this);
 				new Thread(mpegThread).start();
 			}else {
-				//new Thread(new RecvAudio()).start();
 				new Thread(new DecodeAudioThread(this)).start();
 				decodeJpegThread = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
 				decodeJpegThread.setOnMpegPlayListener(this);
@@ -786,83 +785,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	}
 	
-	private int zeroIndex32 = 0;
-	
-	class RecvAudio implements Runnable {
-
-		private AudioTrack m_out_trk = null;
-
-		public RecvAudio() {
-
-		}
-
-		@Override
-		public void run() {
-			int init = UdtTools.initAmrDecoder();
-			Log.d(TAG, "amr deocder init " + init);
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-			}
-			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
-					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 10,
-					AudioTrack.MODE_STREAM);
-			m_out_trk.play();
-			int recvDataLength = -1;
-			while (!stopRecvAudioFlag && !stopPlay) {
-				recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
-				//Log.d(TAG, "audio recv audio DataLength===" + recvDataLength);
-				if(recvDataLength<=0) {
-					Log.d(TAG, "### audio recv audio over");
-					stopRecvAudioFlag = true;
-					break;
-				}
-				/*if(recFlag) {
-					synchronized (recfBuffer) {
-						recFlag = false;
-					}
-					ByteUtil.bytesToShorts(audioBuffer,RECEAUDIOBUFFERSIZE, recfBuffer);//转换参考数据
-				}else {
-					synchronized (recfBuffer) {
-						try {
-							//Log.d(TAG, "### audio recv audio wait. ###");
-							recfBuffer.wait();
-						} catch (InterruptedException e) {
-							stopRecvAudioFlag = true;
-							e.printStackTrace();
-						}
-					}
-				}*/
-				zeroIndex32 = 0;
-				for(int i = 0; i<recvDataLength; i++) {
-					if(audioBuffer[i]==0) {
-						zeroIndex32++;
-						if(zeroIndex32 == 32) {
-							stopRecvAudioFlag = true;
-							break;
-						}
-					}else {
-						zeroIndex32 = 0;
-					}
-				}
-				UdtTools.amrDecoder(audioBuffer, recvDataLength, pcmArr, 0, Command.CHANEL);
-				m_out_trk.write(pcmArr, 0, pcmBufferLength);
-			}
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-			}
-			UdtTools.exitAmrDecoder();
-			Log.d(TAG, "### audio amr decoder exit.");
-		}
-
-	}
 	
 	private class WebCamAudioRecord implements Runnable {
 		
