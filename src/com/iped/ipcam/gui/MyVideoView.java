@@ -279,12 +279,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		indexForPut = 0;
 		if(!playBackFlag) {
 			temWidth = 1;
-			//RecvAudio recvAudio = new RecvAudio();
-			//recvAudioThread = new Thread(recvAudio);
 			stopRecvAudioFlag = false;
-			//recvAudioThread.start();
 			if(mpeg4Decoder) {
-				//new Thread(new PaserMpeg4()).start();
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
@@ -295,87 +291,47 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				new Thread(decoderFactory).start();
 			}
 			//new Thread(new WebCamAudioRecord()).start();
-			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
-				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
-				if (readLengthFromVideoSocket <= 0) { // 读取完成
-					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.d(TAG, "### read over break....");
-					}
-					stopPlay = true;
-					break;
-				}
-				videoSockBufferUsedLength = 0;
-				int recvBufIndex = 0;
-				do{
-					//Log.d(TAG, "### indexForPut = " + ((indexForPut +1) % NALBUFLENGTH));
-					if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
-						if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
-						}
-						synchronized (nalBuf) {
-							try {
-								nalBuf.wait(10);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
-					}else {
-						 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
-						 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
-						 if(listener != null) {
-							 listener.updatePutIndex(indexForPut);
-						 }
-					     recvBufIndex++;
-					    // Log.d(TAG, "### indexForPut = " + indexForPut);
-					}
-				}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
-			} 
 		}else { // 回放
 			initPlayBackParaFlag = true;
 			initTableInfo = true;
 			temWidth = 1;
 			decoderFactory = new PlayBackThread(this, nalBuf, timeStr, video, frameCount, handler);
 			decoderFactory.setOnMpegPlayListener(this);
-			new Thread(decoderFactory).start();
-			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
-				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
-				//Log.d(TAG, "playback readLengthFromVideoSocket=" +readLengthFromVideoSocket);
-				if (readLengthFromVideoSocket <= 0) { // 读取完成
-					System.out.println("read over break....");
-					stopPlay = true;
-					break;
-				}
-				/*if(playBackFlag && initPlayBackParaFlag) {
-					initSeekTable();
-				} else {
-					playBack();
-				}*/
-				videoSockBufferUsedLength = 0;
-				int recvBufIndex = 0;
-				do{
-					if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
-						if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
-						}
-						synchronized (nalBuf) {
-							try {
-								nalBuf.wait(10);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
-					}else {
-						 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
-						 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
-						 if(listener != null) {
-							 listener.updatePutIndex(indexForPut);
-						 }
-					     recvBufIndex++;
-					    // Log.d(TAG, "### indexForPut = " + indexForPut);
-					}
-				}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
-			} 	
+			new Thread(decoderFactory).start();	
 		}
+		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
+			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
+			if (readLengthFromVideoSocket <= 0) { // 读取完成
+				if(BuildConfig.DEBUG && !DEBUG) {
+					Log.d(TAG, "### read over break....");
+				}
+				stopPlay = true;
+				break;
+			}
+			videoSockBufferUsedLength = 0;
+			int recvBufIndex = 0;
+			do{
+				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
+					}
+					synchronized (nalBuf) {
+						try {
+							nalBuf.wait(10);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}else {
+					 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
+					 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+					 if(listener != null) {
+						 listener.updatePutIndex(indexForPut);
+					 }
+				     recvBufIndex++;
+				}
+			}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
+		} 
 		onStop();
 		System.out.println("onstop====" + stopPlay);
 	}
