@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
+import com.iped.ipcam.engine.PlayBackThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.factory.DecoderFactory;
@@ -49,7 +50,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
 	
-	private final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
+	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
 	private Bitmap video;
 
@@ -296,9 +297,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			//new Thread(new WebCamAudioRecord()).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
-				//Log.d(TAG, "monitor readLengthFromVideoSocket=" +readLengthFromVideoSocket);
 				if (readLengthFromVideoSocket <= 0) { // 读取完成
-					System.out.println();
 					if(BuildConfig.DEBUG && !DEBUG) {
 						Log.d(TAG, "### read over break....");
 					}
@@ -334,6 +333,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}else { // 回放
 			initPlayBackParaFlag = true;
 			initTableInfo = true;
+			temWidth = 1;
+			decoderFactory = new PlayBackThread(this, nalBuf, timeStr, video, frameCount, handler);
+			decoderFactory.setOnMpegPlayListener(this);
+			new Thread(decoderFactory).start();
 			while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 				readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 				//Log.d(TAG, "playback readLengthFromVideoSocket=" +readLengthFromVideoSocket);
@@ -342,11 +345,35 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 					stopPlay = true;
 					break;
 				}
-				if(playBackFlag && initPlayBackParaFlag) {
+				/*if(playBackFlag && initPlayBackParaFlag) {
 					initSeekTable();
 				} else {
 					playBack();
-				}
+				}*/
+				videoSockBufferUsedLength = 0;
+				int recvBufIndex = 0;
+				do{
+					if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
+						if(BuildConfig.DEBUG && !DEBUG) {
+							Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
+						}
+						synchronized (nalBuf) {
+							try {
+								nalBuf.wait(10);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}else {
+						 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
+						 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+						 if(listener != null) {
+							 listener.updatePutIndex(indexForPut);
+						 }
+					     recvBufIndex++;
+					    // Log.d(TAG, "### indexForPut = " + indexForPut);
+					}
+				}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
 			} 	
 		}
 		onStop();
