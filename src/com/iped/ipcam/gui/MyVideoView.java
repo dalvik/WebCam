@@ -1,10 +1,7 @@
 package com.iped.ipcam.gui;
 
-import java.nio.ByteBuffer;
-
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -23,13 +20,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.pojo.JpegImage;
-import com.iped.ipcam.pojo.MpegImage;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
@@ -37,7 +33,6 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
-import com.iped.ipcam.utils.VideoQueue;
 
 public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListener {
 
@@ -297,7 +292,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				mpegThread.setOnMpegPlayListener(this);
 				new Thread(mpegThread).start();
 			}else {
-				new Thread(new RecvAudio()).start();
+				//new Thread(new RecvAudio()).start();
+				new Thread(new DecodeAudioThread(this)).start();
 				decodeJpegThread = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
 				decodeJpegThread.setOnMpegPlayListener(this);
 				new Thread(decodeJpegThread).start();
@@ -622,6 +618,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(mpegThread != null) {
 			mpegThread.onStop(stopPlay);
 		}
+		if(listener != null) {
+			listener.onStop(true);
+		}
+		
 		if(!playBackFlag){
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
