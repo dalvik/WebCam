@@ -3,7 +3,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:orientation="vertical" 
-	    android:background="@drawable/jbshape">
+	    android:background="@drawable/welcome_shape">
 	   
 	    <TextView 
 	        android:id="@+id/web_version"
@@ -11,9 +11,19 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="15dip"
-	        android:layout_marginTop="15dip"
+	        android:layout_marginTop="25dip"
 	        android:gravity="right"/>
 	    
+	     <TextView 
+	        android:id="@+id/welcom_top_title"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentTop="true"
+	        android:layout_below="@+id/web_version"
+	        style="@style/style_welcome_top_title"
+	        android:text="@string/app_name"
+	        />
+	     
 	    <TableLayout android:layout_width="fill_parent"
 	        android:id="@+id/user_input"
 		    android:layout_height="wrap_content"
@@ -144,10 +154,10 @@
 	     </TableLayout>
 	   </TableLayout>
 
-	   <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
+	   <TextView 
+	        android:id="@+id/copy_right"
 	        android:text="@string/cory_right"
 	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="20dip"
+	        style="@style/style_welcome_bottom_copyright"
 	        android:gravity="center"/>
 </RelativeLayout>

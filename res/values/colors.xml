@@ -69,7 +69,7 @@
  <!-- 老花色 -->
     <color name="lightgoldenrodyellow">#FAFAD2</color>
  <!-- 亮金黄色 -->
-    <color name="linen">#FAF0E6</color>
+    <drawable name="linen">#FAF0E6</drawable>
  <!-- 亚麻色 -->
     <color name="antiquewhite">#FAEBD7</color>
  <!-- 古董白 -->
@@ -295,7 +295,11 @@
  <!-- 海军色 -->
     <color name="black">#000000</color>
  <!-- 黑色 -->
+	<drawable name="lawngreen">#7CFC00</drawable>
+ <!-- 草绿色 -->
+ 	<color name="transport">#00FFFFFF</color>
  
- <color name="transport">#00FFFFFF</color>
+  	<color name="welcome_top_title">#a0a0a0</color>
+  	<color name="welcome_bottom_tips">#a0a0a0</color>
 
 </resources>

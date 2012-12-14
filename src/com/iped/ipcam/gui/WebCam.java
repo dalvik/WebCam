@@ -12,10 +12,16 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -53,12 +59,14 @@ public class WebCam extends Activity implements OnClickListener{
         keepPwd = (CheckBox) findViewById(R.id.webview_keepuserpwd);
         loginButton = (Button) findViewById(R.id.webview_userLogin);
         Button userExit = (Button) findViewById(R.id.webview_user_exit);
+        findViewById(R.id.welcom_top_title).setAnimation(AnimationUtils.loadAnimation(this, R.anim.welcome_toptext_rotate));
+       // ImageView iv = (ImageView)findViewById(R.id.copy_right);
+        //iv.setImageBitmap(createTxtImage(getText(R.string.cory_right).toString(), 20));
         try {
         	PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
         	TextView tv = (TextView)findViewById(R.id.web_version);
         	tv.setText(packageInfo.versionName);
         } catch (NameNotFoundException e) {
-        	// TODO Auto-generated catch block
         	e.printStackTrace();
         }
         boolean flag = settings.getBoolean("KEEP_USER_INFO", false);
@@ -172,4 +180,15 @@ public class WebCam extends Activity implements OnClickListener{
 	   settings.edit().putBoolean("CREATE_SHUT_CUT", true).commit();
 	}
 	
+	public static Bitmap createTxtImage(String txt, int txtSize) {
+		Bitmap mbmpTest = Bitmap.createBitmap(txt.length() * txtSize + 4,
+				txtSize + 4, Config.ARGB_8888);
+		Canvas canvasTemp = new Canvas(mbmpTest);
+		Paint p = new Paint();
+		p.setAntiAlias(true);
+		p.setColor(Color.BLACK);
+		p.setTextSize(txtSize);
+		canvasTemp.drawText(txt, 2, txtSize - 2, p);
+		return mbmpTest;
+	}
 }
