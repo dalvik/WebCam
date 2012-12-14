@@ -2,7 +2,6 @@ package com.iped.ipcam.gui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -35,7 +34,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private boolean DEBUG = true;
 	
-	private final static int DELAY_RECONNECT = 1000 * 60 * 2* 1000;
+	private final static int DELAY_RECONNECT = 4* 1000;
 	
 	public final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
 
@@ -46,8 +45,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private Bitmap video;
 
 	private byte[] nalBuf = null;
-
-	private int nalBufUsedLength;
 
 	private byte[] videoSocketBuf ;
 
@@ -155,11 +152,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				}
 				rect = new Rect(left, top, right + left, bottom + top);
 			}
-			
+			canvas.save();
 			if(reverseFlag) {
-				//canvas.rotate(180,getWidth() /2, getHeight() /2);
+				canvas.rotate(180,getWidth() /2, getHeight() /2);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
+			canvas.restore();
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
 		}else {
 			String text = "  More : hangzhouiped.taobao.com";
@@ -176,7 +174,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void run() {
 		deviceId = device.getDeviceID();
 		devicenName = device.getDeviceName();
-		nalBufUsedLength = 0;
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		if (res < 0) {
@@ -373,7 +370,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
 		timeStr = "";
-		nalBufUsedLength = 0;
 	}
 	
 	
