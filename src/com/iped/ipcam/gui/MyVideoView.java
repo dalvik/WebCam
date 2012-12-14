@@ -156,11 +156,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				rect = new Rect(left, top, right + left, bottom + top);
 			}
 			
-			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
 			if(reverseFlag) {
-				canvas.rotate(180,getWidth() /2, getHeight() /2);
+				//canvas.rotate(180,getWidth() /2, getHeight() /2);
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
+			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
 		}else {
 			String text = "  More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
@@ -215,6 +215,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		temWidth = 1;
 		if(!playBackFlag) {
 			if(mpeg4Decoder) {
+				if(decoderFactory != null && !decoderFactory.isInterrupted()) {
+					Log.d(TAG, "############## interrupt.");
+					decoderFactory.isInterrupted();
+					decoderFactory = null;
+				}
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
@@ -264,24 +269,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		onStop();
 	}
 	
-	/*public void copyPixl() {
-		if (reverseFlag) {
-			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-			if (tmp != null) {
-				video = Bitmap.createBitmap(tmp, 0, 0, tmp.getWidth(),
-						tmp.getHeight(), matrix, true);
-				matrix.setRotate(180);
-				postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-				if (!tmp.isRecycled()) {
-					tmp.recycle();
-				}
-			}
-		} else {
-			video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
-			postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
-		}
-	}*/
-
 	public boolean takePic() {
 		if(null != video){
 			return FileUtil.takePicture(video, timeStr +".jpg");

@@ -46,6 +46,10 @@ public class CamCmdListHelper {
 	
 	public final static String SetAudioTalkVolume = "TalkVolume:";//"TalkVolume:100:11";
 	
+	public final static String SetVideoResol = "set_video_fmt:";
+	
+	public final static String[] resolArr = {"qvga", "vga", "720p"};
+	
 	public final static String[][] audioTalk = {{"1","100"},{"2","110"},{"2","126"}};
 	
 	public static Map<Integer, byte[]> ptzMap = new HashMap<Integer, byte[]>();

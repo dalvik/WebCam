@@ -3,6 +3,8 @@ package com.iped.ipcam.gui;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.MemoryInfo;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -329,7 +331,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			myVideoView.setStopPlay(true);
 		}
 		if(thread != null && !thread.isInterrupted()) {
-			Log.d(TAG, "############## interrupt.");
+			Log.d(TAG, "##############");
 			thread.isInterrupted();
 		}
 	}
@@ -1102,6 +1104,22 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	}
 	
+	private class AsynCheckResoluTask extends AsyncTask<String, String, Void> {
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			String item = CamCmdListHelper.SetVideoResol + params[0];
+			int res = UdtTools.sendCmdMsg( item, item.length());
+			ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE); 
+			MemoryInfo mi = new MemoryInfo();          
+			am.getMemoryInfo(mi);
+			if(res>0) {
+			}
+			new AsynMonitorSocketTask().execute("");
+			Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res + " " + mi.availMem );
+			return null;
+		}
+	}
 	
 	private OnLongClickListener longClickListener = new OnLongClickListener() {
 		
@@ -1135,14 +1153,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				qvga.setChecked(isChecked);
 				vga.setChecked(!isChecked);
 				qelp.setChecked(!isChecked);
+				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
 			}else if(buttonView.getId() == R.id.vga_button_id && isChecked) {
 				qvga.setChecked(!isChecked);
 				vga.setChecked(isChecked);
 				qelp.setChecked(!isChecked);
+				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
 			} else if(buttonView.getId() == R.id.qelp_button_id && isChecked) {
 				qvga.setChecked(!isChecked);
 				vga.setChecked(!isChecked);
 				qelp.setChecked(isChecked);
+				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
 			}
 		}
 	};
