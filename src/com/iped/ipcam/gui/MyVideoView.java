@@ -8,9 +8,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,6 +20,7 @@ import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
+import com.iped.ipcam.engine.TalkBackThread;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
@@ -43,29 +41,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
 
-	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
-	
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
 	private Bitmap video;
 
-	byte[] nalBuf = null;
+	private byte[] nalBuf = null;
 
-	int nalSizeTemp = 0;
+	private int nalBufUsedLength;
 
-	int nalBufUsedLength;
+	private byte[] videoSocketBuf ;
 
-	byte[] videoSocketBuf ;
+	private int readLengthFromVideoSocket = 0;
 
-	byte[] bitmapTmpBuffer = new byte[NALBUFLENGTH];
-	
-	int readLengthFromVideoSocket = 0;
-
-	int videoSockBufferUsedLength;
-
-	boolean firstStartFlag = false;
-
-	boolean looperFlag = false;
+	//private int videoSockBufferUsedLength;
 
 	private boolean stopPlay = true;
 	
@@ -104,8 +92,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private boolean reverseFlag = false;
 
 	private boolean playBackFlag = false;
-	
-	private boolean openSendAudioFlag = false;
 	
 	private boolean mpeg4Decoder = false;
 	
@@ -148,6 +134,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
 				int imageviewWidth = video.getWidth();
+				getMeasuredHeight();
 				int imageViewHeight = video.getHeight();
 				int left = 0;
 				int top = 0;
@@ -168,8 +155,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				}
 				rect = new Rect(left, top, right + left, bottom + top);
 			}
-			canvas.drawBitmap(video, null, rect, textPaint);
+			
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
+			if(reverseFlag) {
+				canvas.rotate(180,getWidth() /2, getHeight() /2);
+			}
+			canvas.drawBitmap(video, null, rect, textPaint);
 		}else {
 			String text = "  More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
@@ -186,7 +177,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		deviceId = device.getDeviceID();
 		devicenName = device.getDeviceName();
 		nalBufUsedLength = 0;
-		videoSockBufferUsedLength = 0;
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		if (res < 0) {
@@ -219,12 +209,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}else {
 			mpeg4Decoder = false;
 		}
-		temWidth =  0;
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
 		indexForPut = 0;
+		temWidth = 1;
 		if(!playBackFlag) {
-			temWidth = 1;
 			if(mpeg4Decoder) {
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
@@ -235,9 +224,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
 			}
-			//new Thread(new WebCamAudioRecord()).start();
 		}else { // »Ø·Å
-			temWidth = 1;
 			decoderFactory = new PlayBackThread(this, nalBuf, timeStr, video, frameCount, handler);
 			decoderFactory.setOnMpegPlayListener(this);
 			new Thread(decoderFactory).start();	
@@ -251,7 +238,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				stopPlay = true;
 				break;
 			}
-			videoSockBufferUsedLength = 0;
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
@@ -278,7 +264,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		onStop();
 	}
 	
-	public void copyPixl() {
+	/*public void copyPixl() {
 		if (reverseFlag) {
 			Bitmap tmp = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			if (tmp != null) {
@@ -294,7 +280,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			video = BitmapFactory.decodeByteArray(nalBuf, 0, nalBufUsedLength);
 			postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 		}
-	}
+	}*/
 
 	public boolean takePic() {
 		if(null != video){
@@ -302,7 +288,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 		return false;
 	}
+	
 	public void onStop() {
+		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
 		}
@@ -365,95 +353,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		return playBackFlag;
 	}
 	
-	private class WebCamAudioRecord implements Runnable {
-		
-		private static final int RECORDER_BPP = 16;
-		
-		private static final int frequency = 8000;
-		
-		private static final int EncodingBitRate = AudioFormat.ENCODING_PCM_16BIT;
-		 
-		protected int miniRecoderBufSize;
-		
-		private int pcmBufferLength = 0;
-		
-		private int amrBufferLength = 0;
-		
-		private int sendAudioToCamLength = 0;
-		
-		private byte[] sendAudioBufferToCam;
-		
-		private int index = 0;
-		
-		protected AudioRecord audioRecord;
-
-		private byte[] amrBuffer;
-		
-		//private short[] pcmBuffer;
-		
-		private byte[] micBuffer; //
-		
-		private WebCamAudioRecord() {
-			Speex.initEcho(160, 160*10);
-			UdtTools.initAmrEncoder();
-			createAudioRecord();
-			pcmBufferLength = RECEAUDIOBUFFERSIZE;
-			amrBufferLength = RECEAUDIOBUFFERSIZE/10;
-			sendAudioToCamLength = amrBufferLength * 2;
-			//pcmBuffer = new short[pcmBufferLength];
-			micBuffer = new byte[pcmBufferLength];
-			amrBuffer = new byte[amrBufferLength];
-			sendAudioBufferToCam = new byte[sendAudioToCamLength];
-		}
-		
-		public void run() {
-			startRecording();
-			writeAudioDataToFile();
-		}
-		
-		public void createAudioRecord(){
-		  miniRecoderBufSize = AudioRecord.getMinBufferSize(frequency,
-				  AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate);
-    		audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, frequency,
-    				AudioFormat.CHANNEL_CONFIGURATION_MONO, EncodingBitRate, miniRecoderBufSize*10);  
-    	 }
-		  
-		  private void startRecording(){
-			  audioRecord.startRecording();
-		  }
-		  
-		  private void writeAudioDataToFile(){
-			  //byte data[] = new byte[miniRecoderBufSize];
-              int read = 0;
-              while(!stopPlay && openSendAudioFlag){
-                      read = audioRecord.read(micBuffer, 0, pcmBufferLength);
-                      //Log.d(TAG, "### recording recFlag " + recFlag + " read= " + read + " openSendAudioFlag=" + openSendAudioFlag);
-                      if(AudioRecord.ERROR_INVALID_OPERATION == read){
-                    	  Log.d(TAG, "### recorder over !");
-                    	  break;
-                      }
-                	  // Speex.cancellation(micBuffer, recfBuffer, amrBuffer);
-                      if(UdtTools.EncoderPcm(micBuffer, pcmBufferLength, amrBuffer, amrBufferLength)==0){
-                    	  UdtTools.sendAudioMsg(amrBuffer, amrBufferLength);
-                      }
-                      //ByteUtil.shortsToBytes(amrBuffer, amrBufferLength, sendAudioBufferToCam);
-                      //Log.d(TAG, "### send audio length = " + res);
-              }
-              stopRecording();
-		  }
-	
-		  private void stopRecording(){
-			  Log.d(TAG, "### stop recording !");
-			  openSendAudioFlag = false;
-			 // Speex.stopEcho();
-              if(null != audioRecord){
-                      audioRecord.stop();
-                      audioRecord.release();
-                      audioRecord = null;
-              }
-      }
-	}
-	
 	public void setDevice(Device device) {
 		this.device = device;
 	}
@@ -486,7 +385,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 		Log.d(TAG, "### playBackFlag = " + playBackFlag);
-		firstStartFlag = true;
 		timeStr = "";
 		nalBufUsedLength = 0;
 	}
@@ -497,9 +395,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 
 	public void setOpenSendAudioFlag(boolean openSendAudioFlag) {
-		this.openSendAudioFlag = openSendAudioFlag;
 		if(openSendAudioFlag) {
-			new Thread(new WebCamAudioRecord()).start();
+			new Thread(new TalkBackThread()).start();
+		}else {
+			TalkBackThread.stopTalkBack();
 		}
 	}
 	

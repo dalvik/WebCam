@@ -30,13 +30,12 @@ import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -352,6 +351,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         registerReceiver(updeviceListReceiver, new IntentFilter(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler,screenWidth, screenHeight);
+        myVideoView.setOnClickListener(this);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
         playBackSeekBar = (MySeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
@@ -481,6 +481,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	@Override
 	public void onClick(View v) {
+		if(v.getId() == R.id.videoview) {
+			rightControlPanel.onClick();
+			return;
+		}
 		if(v.getId() == R.id.right_down){
 			startActivity(new Intent(this,ImageViewer.class));
 			return;
@@ -817,7 +821,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		}
 		if(m_Dialog != null) {
-			//System.out.println(m_Dialog + " ---" + camManager.getSelectDevice());
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
 			if(!m_Dialog.isShowing()) {
 				m_Dialog.show();
@@ -1106,10 +1109,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		public boolean onLongClick(View v) {
 			if(!myVideoView.getPlayStatus()) {
 				if(!popupMenu.isShowing()) {
-					popupMenu.showAtLocation(myVideoView, Gravity.NO_GRAVITY, x_offSet, y_offSet);
+					popupMenu.showAtLocation(myVideoView, Gravity.NO_GRAVITY, x_offSet-5, y_offSet-5);
 				}
 			}
-			return false;
+			return true;
 		}
 	};
 	

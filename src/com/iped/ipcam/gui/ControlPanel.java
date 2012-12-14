@@ -101,6 +101,10 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		void onPanelOpened(View panel);
 	}
 	
+	public void onClick() {
+		onClick(null);
+	}
+	
 	class AsynMove extends AsyncTask<Integer, Integer, Void> {
 
 		@Override
