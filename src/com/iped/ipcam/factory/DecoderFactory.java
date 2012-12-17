@@ -2,7 +2,7 @@ package com.iped.ipcam.factory;
 
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 
-public abstract class DecoderFactory extends Thread{
+public abstract class DecoderFactory implements Runnable {
 
 	public abstract int getIndexForGet();
 	
