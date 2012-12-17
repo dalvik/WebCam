@@ -98,6 +98,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private DecoderFactory decoderFactory = null;
 	
+	private boolean isAutoStop = true;
+	
+	public final static int UPDATE_RESULATION = 7002;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -214,6 +218,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			if(mpeg4Decoder) {
 				if(decoderFactory != null && !decoderFactory.isInterrupted()) {
 					Log.d(TAG, "############## interrupt.");
+					decoderFactory.onStop(true);
 					decoderFactory.isInterrupted();
 					decoderFactory = null;
 				}
@@ -225,6 +230,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				decoderFactory = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
+				Message msg =handler.obtainMessage();
+				msg.what = UPDATE_RESULATION;
+				msg.arg1 = -1;
+				handler.sendMessage(msg);
 			}
 		}else { // »Ø·Å
 			decoderFactory = new PlayBackThread(this, nalBuf, timeStr, video, frameCount, handler);
@@ -278,13 +287,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
 		}
-		if(listener != null) {
-			listener.onStop(true);
-		}
-		
 		if(!playBackFlag){
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
-			handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+			if(isAutoStop) {
+				handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
+			}
 		}
 		release();
 		flushBitmap();
@@ -294,8 +301,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		return stopPlay;
 	}
 
-	public void setStopPlay(boolean stopPlay) {
+	public void setStopPlay(boolean stopPlay, boolean isAutoStop) {
 		this.stopPlay = stopPlay;
+		this.isAutoStop = isAutoStop;
 	}
 
 	private void release() {
@@ -387,7 +395,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	public interface OnPutIndexListener {
 		public void updatePutIndex(int putIndex);
-		public void onStop(boolean stopPlay);
 	}
 	
 	public void setOnPutIndexListener(OnPutIndexListener listener) {
@@ -407,5 +414,41 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	public int getFrameCount() {
 		return frameCount;
+	}
+	
+	public void updateResulation(int imageWidth) {
+
+		if(imageWidth == 1280) {
+			Message msg =handler.obtainMessage();
+			msg.what = UPDATE_RESULATION;
+			msg.arg1 = 2;
+			handler.sendMessage(msg);
+		}else if(imageWidth == 640) {
+			Message msg =handler.obtainMessage();
+			msg.what = UPDATE_RESULATION;
+			msg.arg1 = 1;
+			handler.sendMessage(msg);
+		} else {
+			Message msg =handler.obtainMessage();
+			msg.what = UPDATE_RESULATION;
+			msg.arg1 = 0;
+			handler.sendMessage(msg);
+		}
+	}
+	
+	public void checkResulation(int resul) {
+		int resulation = 0;
+		if(resul == 0) {
+			resulation = 352 * 288;
+		} else if(resul == 1) {
+			resulation = 640 * 480;
+		} else if(resul == 2) {
+			resulation = 1280 * 720;
+		}
+		decoderFactory.checkResulation(resulation);
+	}
+	
+	public void updateRect() {
+		this.temWidth = 1;
 	}
 }

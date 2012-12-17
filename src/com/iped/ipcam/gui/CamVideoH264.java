@@ -309,7 +309,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, playBackSeekBar.getProgress() + 1));
 				break;
 			case 7001:
-				myVideoView.setStopPlay(true);
+				myVideoView.setStopPlay(true, false);
+				break;
+			case MyVideoView.UPDATE_RESULATION:
+				updateResulation(msg.arg1);
 				break;
 			default:
 				break;
@@ -328,7 +331,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void stopPlayThread() {
 		if(!myVideoView.isStopPlay()) {
-			myVideoView.setStopPlay(true);
+			myVideoView.setStopPlay(true, true);
 		}
 		if(thread != null && !thread.isInterrupted()) {
 			Log.d(TAG, "##############");
@@ -465,7 +468,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			listView.setSelection(index);
 			camManager.setSelectInde(index);
 			if(!myVideoView.getPlayStatus()) {
-				myVideoView.setStopPlay(true);
+				myVideoView.setStopPlay(true, false);
 				return;
 			}
 			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
@@ -859,7 +862,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		public void onReceive(Context context, Intent intent) {
 			if(WebCamActions.ACTION_IPPLAY.equals(intent.getAction())) {
 				if(!myVideoView.getPlayStatus()) {
-					myVideoView.setStopPlay(true);
+					myVideoView.setStopPlay(true, false);
 					return;
 				}
 				if(NetworkUtil.checkNetwokEnable(context)) {
@@ -1108,15 +1111,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		
 		@Override
 		protected Void doInBackground(String... params) {
-			String item = CamCmdListHelper.SetVideoResol + params[0];
+			String item = CamCmdListHelper.SetVideoResol + params[0] + "\n";
 			int res = UdtTools.sendCmdMsg( item, item.length());
-			ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE); 
-			MemoryInfo mi = new MemoryInfo();          
-			am.getMemoryInfo(mi);
-			if(res>0) {
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
 			}
-			new AsynMonitorSocketTask().execute("");
-			Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res + " " + mi.availMem );
 			return null;
 		}
 	}
@@ -1153,18 +1152,48 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				qvga.setChecked(isChecked);
 				vga.setChecked(!isChecked);
 				qelp.setChecked(!isChecked);
-				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
+				if(!myVideoView.isStopPlay()) {
+					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
+					myVideoView.checkResulation(0);
+				}
 			}else if(buttonView.getId() == R.id.vga_button_id && isChecked) {
 				qvga.setChecked(!isChecked);
 				vga.setChecked(isChecked);
 				qelp.setChecked(!isChecked);
-				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+				if(!myVideoView.isStopPlay()) {
+					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+					myVideoView.checkResulation(1);
+				}
 			} else if(buttonView.getId() == R.id.qelp_button_id && isChecked) {
 				qvga.setChecked(!isChecked);
 				vga.setChecked(!isChecked);
 				qelp.setChecked(isChecked);
-				new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
+				if(!myVideoView.isStopPlay()) {
+					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
+					myVideoView.checkResulation(2);
+				}
 			}
 		}
 	};
+	
+	private void updateResulation(int id) {
+		 if(id == 0) {
+			qvga.setChecked(true);
+			updateControlButtion(View.VISIBLE);
+		}else if(id == 1) {
+			vga.setChecked(true);
+			updateControlButtion(View.VISIBLE);
+		}else if(id == 2) {
+			qelp.setChecked(true);
+			updateControlButtion(View.VISIBLE);
+		} else {
+			updateControlButtion(View.GONE);
+		}
+	}
+	
+	private void updateControlButtion(int flag) {
+		qvga.setVisibility(flag);
+		vga.setVisibility(flag);
+		qelp.setVisibility(flag);
+	}
 }

@@ -1,5 +1,7 @@
 package com.iped.ipcam.engine;
 
+import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
+import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.gui.MyVideoView;
 import com.iped.ipcam.gui.MyVideoView.OnPutIndexListener;
@@ -11,7 +13,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
-public class DecodeAudioThread implements Runnable , OnPutIndexListener{
+public class DecodeAudioThread extends DecoderFactory implements OnPutIndexListener{
 
 	private AudioTrack m_out_trk = null;
 
@@ -103,6 +105,18 @@ public class DecodeAudioThread implements Runnable , OnPutIndexListener{
 
 	@Override
 	public void updatePutIndex(int putIndex) {
+		
+	}
+	
+	@Override
+	public int getIndexForGet() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	@Override
+	public void setOnMpegPlayListener(OnMpegPlayListener listener) {
+		// TODO Auto-generated method stub
 		
 	}
 }

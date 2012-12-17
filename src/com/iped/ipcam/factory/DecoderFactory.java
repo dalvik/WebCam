@@ -9,4 +9,8 @@ public abstract class DecoderFactory extends Thread{
 	public abstract void setOnMpegPlayListener(OnMpegPlayListener listener);
 	
 	public abstract void onStop(boolean stopPlay);
+	
+	public void checkResulation(int resulation) {
+		
+	}
 }
