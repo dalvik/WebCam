@@ -3,8 +3,6 @@ package com.iped.ipcam.gui;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.MemoryInfo;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -32,8 +30,6 @@ import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -424,11 +420,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		sendAudio.setOnClickListener(this);
 		
 		qvga = (RadioButton) view.findViewById(R.id.qvga_button_id);
-		qvga.setOnCheckedChangeListener(checkedChangeListener);
+		//qvga.setOnCheckedChangeListener(checkedChangeListener);
+		qvga.setOnClickListener(this);
 		vga = (RadioButton) view.findViewById(R.id.vga_button_id);
-		vga.setOnCheckedChangeListener(checkedChangeListener);
+		//vga.setOnCheckedChangeListener(checkedChangeListener);
+		vga.setOnClickListener(this);
 		qelp = (RadioButton) view.findViewById(R.id.qelp_button_id);
-		qelp.setOnCheckedChangeListener(checkedChangeListener);
+		//qelp.setOnCheckedChangeListener(checkedChangeListener);
+		qelp.setOnClickListener(this);
 		
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
@@ -664,6 +663,25 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					mHandler.sendMessage(m);
 				}
 			}
+			break;
+		//radion button
+		case R.id.qvga_button_id:
+			qvga.setChecked(true);
+			vga.setChecked(false);
+			qelp.setChecked(false);
+			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
+			break;
+		case R.id.vga_button_id:
+			qvga.setChecked(false);
+			vga.setChecked(true);
+			qelp.setChecked(false);
+			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+			break;
+		case R.id.qelp_button_id:
+			qvga.setChecked(false);
+			vga.setChecked(false);
+			qelp.setChecked(true);
+			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
 			break;
 		default:
 			break;
@@ -961,8 +979,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		}
 		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
-		String random = RandomUtil.generalRandom();
-		Log.d(TAG, "random = " + random);
+		//String random = RandomUtil.generalRandom();
+		//Log.d(TAG, "random = " + random);
 		int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
 		if(initRes<0) {
 			Log.d(TAG, "initialSocket init error!");
@@ -1142,48 +1160,21 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			return false;
 		}
 	};
-
-	private OnCheckedChangeListener checkedChangeListener = new OnCheckedChangeListener() {
-		
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView,
-				boolean isChecked) {
-			if(buttonView.getId() == R.id.qvga_button_id && isChecked) {
-				qvga.setChecked(isChecked);
-				vga.setChecked(!isChecked);
-				qelp.setChecked(!isChecked);
-				if(!myVideoView.isStopPlay()) {
-					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
-					myVideoView.checkResulation(0);
-				}
-			}else if(buttonView.getId() == R.id.vga_button_id && isChecked) {
-				qvga.setChecked(!isChecked);
-				vga.setChecked(isChecked);
-				qelp.setChecked(!isChecked);
-				if(!myVideoView.isStopPlay()) {
-					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
-					myVideoView.checkResulation(1);
-				}
-			} else if(buttonView.getId() == R.id.qelp_button_id && isChecked) {
-				qvga.setChecked(!isChecked);
-				vga.setChecked(!isChecked);
-				qelp.setChecked(isChecked);
-				if(!myVideoView.isStopPlay()) {
-					new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
-					myVideoView.checkResulation(2);
-				}
-			}
-		}
-	};
 	
 	private void updateResulation(int id) {
 		 if(id == 0) {
 			qvga.setChecked(true);
+			vga.setChecked(false);
+			qelp.setChecked(false);
 			updateControlButtion(View.VISIBLE);
 		}else if(id == 1) {
+			qvga.setChecked(false);
 			vga.setChecked(true);
+			qelp.setChecked(false);
 			updateControlButtion(View.VISIBLE);
 		}else if(id == 2) {
+			qvga.setChecked(false);
+			vga.setChecked(false);
 			qelp.setChecked(true);
 			updateControlButtion(View.VISIBLE);
 		} else {

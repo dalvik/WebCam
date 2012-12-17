@@ -216,11 +216,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		temWidth = 1;
 		if(!playBackFlag) {
 			if(mpeg4Decoder) {
-				if(decoderFactory != null) {
-					Log.d(TAG, "############## interrupt.");
-					decoderFactory.onStop(true);
+				/*if(decoderFactory != null) {
+					//decoderFactory.onStop(true);
 					decoderFactory = null;
-				}
+				}*/
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
@@ -282,6 +281,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	public void onStop() {
+		if(BuildConfig.DEBUG && DEBUG) {
+			Log.d(TAG, "### onStoped.");
+		}
 		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);

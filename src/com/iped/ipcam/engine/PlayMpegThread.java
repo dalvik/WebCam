@@ -2,7 +2,6 @@ package com.iped.ipcam.engine;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -114,7 +113,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			Log.d(TAG, "xvid init decoder error " + res);
 			return ;
 		}
-		new Thread(new ShowMpeg()).start();
+		ShowMpeg showMpeg = new ShowMpeg();
+		Thread thread = new Thread(showMpeg);
+		thread.start();
 		while(!stopPlay) {
 			do{
 				if((indexForGet+5)%NALBUFLENGTH == indexForPut){
@@ -125,7 +126,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						try {
 							mpegBuf.wait(200);
 						} catch (InterruptedException e) {
-							e.printStackTrace();
+							stopPlay = true;
+							Log.e(TAG, e.getLocalizedMessage());
+							break;
 						}
 					}  
 				}else {
@@ -230,7 +233,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				}
 			} else if(!stopPlay){
 				usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
-				if(checkResulationFlag) {
+				/*if(checkResulationFlag) {
 					checkResulationFlag = false;
 					mpegDataLength = 0;
 					mpegPakages = 3;
@@ -240,7 +243,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					rgbDataBuf = null;
 					canStartFlag = false;
 					continue;
-				}
+				}*/
 				if(usedBytes>999999) {//(XDIM * 100000) + used_bytes;
 					int newImageWidth = usedBytes / 1000000;
 					int useBytes = usedBytes%1000000;
@@ -272,6 +275,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				}
 			}
 		}
+		showMpeg.setInerrupt();
 		UdtTools.freeDecorer();
 		if(video != null && !video.isRecycled()) {
 			video.recycle();
@@ -280,36 +284,41 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		this.rgbDataBuf = null;
 		jpegByteBuf = null;
 		mpegBuf = null;
+		queue.clear();
+		stopPlay = true;
 		System.gc();
 		if(BuildConfig.DEBUG && DEBUG) {
-			Log.d(TAG, "### exit ...." + Runtime.getRuntime().freeMemory());
+			Log.d(TAG, "### play mpeg thread exit ....");
 		}
 	}
 	
 	private class ShowMpeg implements Runnable {
 		
 		public void run() {
-			while(!stopPlay) {
-				if(queue.getMpegLength()>0) {
-					String oldTime = queue.removeTime();
+			while(!Thread.currentThread().isInterrupted() && !stopPlay) {
+				String oldTime = queue.removeTime();
+				if(null != oldTime) {
 					timeStr = oldTime.substring(0,14);
 					if(BuildConfig.DEBUG && !DEBUG) {
 						Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength() + " timeStr = " + timeStr);
 					}
 					if(!popuJpeg(oldTime)){
-						byte[] tmpRgb = queue.getMpegImage().rgb;
-						ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
-						//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
-						if(video != null) {
-							video.copyPixelsFromBuffer(sh);
-							frameCount = myVideoView.getFrameCount();
-							frameCount++;
-							if(listener != null) {
-								listener.invalide(frameCount, timeStr);
+						MpegImage mpegImage = queue.getMpegImage();
+						if(mpegImage != null) {
+							byte[] tmpRgb = mpegImage.rgb;
+							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
+							//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
+							if(video != null) {
+								video.copyPixelsFromBuffer(sh);
+								frameCount = myVideoView.getFrameCount();
+								frameCount++;
+								if(listener != null) {
+									listener.invalide(frameCount, timeStr);
+								}
 							}
 						}
 					}
-				}else {
+				} else {
 					synchronized (lock) {
 						if(BuildConfig.DEBUG && !DEBUG) {
 							Log.d(TAG, "### no image data ---->");
@@ -317,7 +326,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						try {
 							lock.wait(10);
 						} catch (InterruptedException e) {
-							e.printStackTrace();
+							stopPlay = true;
+							Log.e(TAG, e.getLocalizedMessage());
+							break;
 						}
 					}  
 				}
@@ -339,35 +350,43 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				}
 			}
 			if(BuildConfig.DEBUG && DEBUG) {
-				Log.d(TAG, "### play mpeg thread exit!");
+				Log.d(TAG, "### show mpeg image thread exit!");
 			}
 		}
 		
 		public boolean popuJpeg(String oldTime) {
-			if(queue.getImageListLength()<=0) {
-				return false;
-			}
 			JpegImage image = queue.getFirstImage();
 			if(BuildConfig.DEBUG && !DEBUG) {
 				Log.d(TAG, "### show time = " + oldTime + " == " + image.time);
 			}
-			if(oldTime.compareTo(image.time) ==0) {
-				if(BuildConfig.DEBUG && DEBUG) {
-					Log.d(TAG, "### popu jpeg " + image.time);
+			if(null == image) {
+				return false;
+			}else {
+				if(oldTime.compareTo(image.time) ==0) {
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.d(TAG, "### popu jpeg " + image.time);
+					}
+					queue.removeImage();
+					video = image.bitmap;
+					myVideoView.setImage(video);
+					frameCount = myVideoView.getFrameCount();
+					frameCount++;
+					if(listener != null) {
+						listener.invalide(frameCount, timeStr);
+					}
+					return true;
+				} else if(oldTime.compareTo(image.time) > 0) {
+					queue.clear();
 				}
-				queue.removeImage();
-				video = image.bitmap;
-				myVideoView.setImage(video);
-				frameCount = myVideoView.getFrameCount();
-				frameCount++;
-				if(listener != null) {
-					listener.invalide(frameCount, timeStr);
-				}
-				return true;
-			} else if(oldTime.compareTo(image.time) > 0) {
-				queue.clear();
 			}
 			return false;
+		}
+		
+		public void setInerrupt() {
+			if(!Thread.currentThread().isInterrupted()){
+				Thread.currentThread().interrupt();
+			}
+			stopPlay = true;
 		}
 	}
 	
@@ -391,13 +410,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	@Override
 	public void onStop(boolean stopPlay) {
+		if(!Thread.currentThread().isInterrupted()){
+			Thread.currentThread().interrupt();
+		}
 		this.stopPlay = stopPlay;
 		if(BuildConfig.DEBUG && DEBUG) {
-			Log.d(TAG, "### stoped ....");
+			Log.d(TAG, "### onStop exec stoped ");
 		}
 	}
 	
-	@Override
+	/*@Override
 	public void checkResulation(int resulation) {
 		super.checkResulation(resulation);
 		if(rgbDataBuf.length != resulation) {
@@ -406,7 +428,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				Log.d(TAG, "### check resulation  " + resulation);
 			}
 		}
-	}
+	}*/
 	
 	private int caculateImageHeight(int newImageWidth) {
 		int newImageHeight = 0;

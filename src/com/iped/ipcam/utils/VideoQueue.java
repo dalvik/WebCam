@@ -44,19 +44,34 @@ public class VideoQueue {
 	}
 	
 	public JpegImage removeImage() {
-		return jpegImageList.poll();
+		if(getImageListLength()>0) {
+			return jpegImageList.poll();
+		}else {
+			return null;
+		}
 	}
 	
 	public String removeTime() {
-		return timeList.poll();
+		if(getTimeListLength()>0) {
+			return timeList.poll();
+		}else {
+			return null;
+		}
 	}
 	
 	public JpegImage getFirstImage() {
-		return jpegImageList.peek();
+		if(getImageListLength()>0) {
+			return jpegImageList.peek();
+		}else {
+			return null;
+		}
 	}
 	
 	public String getFirstTime() {
-		return timeList.peek();
+		if(getTimeListLength()>0) {
+			return timeList.peek();
+		}
+		return null;
 	}
 	
 	public void clear() {
@@ -77,11 +92,15 @@ public class VideoQueue {
 	}
 	
 	public MpegImage getMpegImage() {
-		return mpegImageList.poll();//.peek();
+		if(mpegImageList.size()>0) {
+			return mpegImageList.poll();//.peek();
+		} return null;
 	}
 	
 	public void removeMpegImage() {
-		mpegImageList.remove();
+		if(getMpegLength()>0) {
+			mpegImageList.remove();
+		}
 	}
 	
 	public int getMpegLength() {
