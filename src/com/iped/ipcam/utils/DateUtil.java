@@ -34,7 +34,7 @@ public class DateUtil {
 		try {
 			date = sdf.parse(dateStr);
 			sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			if(date.getYear()<=80) {
+			if(date.getYear()<70) {
 				return "";
 			}
 			return sdf.format(date);
@@ -62,7 +62,7 @@ public class DateUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date(time);
 		if(date.getYear()<=80) {
-			return "";
+			return sdf.format(new Date());
 		}
 		return sdf.format(date);
 	}
