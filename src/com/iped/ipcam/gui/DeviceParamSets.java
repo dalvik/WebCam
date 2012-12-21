@@ -56,6 +56,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 
 	private CamParasSetImp camParasSet = CamMagFactory.getCamParasSetInstance();
 
+	private Button paramBackButton = null;
+	
 	private Device device = null;
 
 	private EditText deviceNameEditText = null;
@@ -295,6 +297,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	}
 
 	private void lookupEditText() {
+		paramBackButton = (Button) findViewById(R.id.common_back);
 		deviceNameEditText = (EditText) findViewById(R.id.device_param_set_name);
 		deviceIdEditText = (EditText) findViewById(R.id.device_param_set_inentify);
 		versionEditText = (EditText) findViewById(R.id.device_param_set_version);
@@ -358,6 +361,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.common_back:
+			DeviceParamSets.this.finish();
+			break;
 		case R.id.device_params_apn_set_search_wireles_id:
 			handler.sendEmptyMessage(Constants.SENDSEARCHWIRELESSMSG);
 			searchWireless();
@@ -426,6 +432,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	}
 	
 	private void initializeEditText(Map<String, String> paraMap) {
+		paramBackButton.setOnClickListener(this);
 		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
 		deviceIdEditText.setEnabled(false);

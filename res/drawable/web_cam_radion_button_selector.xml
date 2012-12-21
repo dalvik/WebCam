@@ -5,6 +5,9 @@
           android:drawable="@drawable/web_cam_radion_button_checked" />
     <item android:state_checked="false" android:state_window_focused="false"
           android:drawable="@drawable/web_cam_radion_button_uncheck" />
+    <item android:state_checked="false" android:drawable="@drawable/web_cam_radion_button_uncheck" />
+    <item android:state_checked="true" android:drawable="@drawable/web_cam_radion_button_checked" />
+    
     <!-- 
     <item android:state_checked="true" android:state_pressed="true"
           android:drawable="@drawable/btn_radio_on_pressed" />
@@ -18,4 +21,5 @@
     <item android:state_checked="false" android:drawable="@drawable/btn_sort_check_off" />
     <item android:state_checked="true" android:drawable="@drawable/btn_sort_check_on" />
  	-->
+ 	
 </selector>

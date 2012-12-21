@@ -46,7 +46,7 @@
     <string name="device_manager_pwd_set_err">密码错误</string>
     <string name="device_manager_time_out_or_device_off_line">网络超时或设备离线</string>
     
-    <!-- right meun -->
+    <!-- right menu -->
     <string name="default_activity_str">视频</string>
     	<string name="connection">正在为您连接，请稍等片刻</string>
     	<string name="connection_error">对不起，连接失败，请检查网络状况，稍后重试。</string>
@@ -381,6 +381,10 @@
         <!-- long press video popmenu -->
         <string name="webcam_video_popup_menu_stop">停止</string>
         <string name="webcam_video_popup_menu_cancle">取消</string>
+        
+        <!-- operation popup tips dialog -->
+        <string name="tips_popup_dialog_title_str">操作提示</string>
+        <string name="tips_popup_dialog_message_str">视频切换成功，可能会有几秒延迟，请稍后</string>
         
         <!-- error code tips infor -->
         <string name="webcam_error_code_internel">内部错误，请先检查网络状况</string>

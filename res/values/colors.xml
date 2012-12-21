@@ -3,7 +3,7 @@
 
     <color name="lightdark">#666666</color>
 
-    <color name="white">#FFFFFF</color>
+    <color name="white">#FFFFFFFF</color>
  <!-- 白色 -->
     <color name="ivory">#FFFFF0</color>
  <!-- 象牙色 -->
@@ -302,4 +302,10 @@
   	<color name="welcome_top_title">#a0a0a0</color>
   	<color name="welcome_bottom_tips">#a0a0a0</color>
 
+  	<!-- deivce select color -->
+  	<drawable name="device_item_select">#ff006eda</drawable>
+  	<drawable name="device_item_unselect">#ffD5E2C9</drawable>
+  	
+  	<!-- progress bar bg -->
+  	<color name="web_cam_video_view_progress_bg">#B7B7B7</color>
 </resources>

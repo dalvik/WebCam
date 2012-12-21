@@ -53,4 +53,60 @@
         <item name="android:layout_marginBottom">50dp</item>
     </style>
     
+     <style name="style_tips_popup_window">
+	    <item name="android:windowEnterAnimation">@anim/tips_popup_scale</item>
+        <item name="android:windowExitAnimation">@anim/tips_popup_exit_alpha</item>
+        <!-- 
+        
+        <item name="android:activityOpenEnterAnimation">@anim/tips_popup_scale</item>
+        <item name="android:activityOpenExitAnimation">@anim/tips_popup_exit_alpha</item>
+        
+        <item name="android:activityCloseExitAnimation">@anim/rotate_exit_right</item> 
+        <item name="android:activityCloseEnterAnimation">@anim/rotate_enter_left</item>
+         -->
+	</style>
+	
+    <style name="style_param_set_activity">
+        <item name="android:activityOpenEnterAnimation">@anim/push_left_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/push_left_out</item>
+        <item name="android:activityCloseExitAnimation">@anim/push_left_in</item>
+        <item name="android:activityCloseEnterAnimation">@anim/push_left_out</item>
+    </style>
+    
+    <style name="style_web_cam_progress_bar" parent="@android:style/Animation.Dialog">
+        <item name="android:indeterminateDrawable">@anim/progress_animation_list</item>
+    </style>
+    
+    <style name="style_web_cam_radion_button">
+    	<item name="android:background">@drawable/web_cam_radion_button_selector</item>    
+    </style>
+    
+    
+    <style name="style_device_list">
+        <item name="android:background">@drawable/device_item_unselect</item>
+        <item name="android:divider">@drawable/list_line</item>
+        <item name="android:listSelector">@drawable/web_cam_device_list_selector</item>
+        <item name="android:cacheColorHint">#00000000</item>
+    </style>
+    
+    <style name="style_web_cam_param_title_font_set">
+        <item name="android:textSize">18.0sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    
+    <style name="style_web_cam_param_item_title_font_set">
+        <item name="android:textStyle">bold</item>
+         <item name="android:textSize">18.0sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    
+    <style name="style_web_cam_param_label_title_font_set">
+        <item name="android:textColor">@color/black</item>
+    </style>
+    
+    <style name="style_web_cam_spinner" parent="@android:style/Widget.Spinner">
+        <item name="android:background">@drawable/web_cam_device_list_selector</item>
+        <item name="android:clickable">true</item>
+    </style>
 </resources>

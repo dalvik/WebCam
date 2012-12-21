@@ -2,169 +2,213 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/darkgray">
+    android:background="@drawable/device_item_unselect">
     
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:orientation="vertical" >
 	
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:textColor="@color/white"
-	    	android:textSize="20dip"
-	    	android:text="@string/device_params_info_str"/>
+	    <include android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        layout="@layout/web_cam_param_set_title_bar"/>
 	    
-	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3dp"
-	    	android:background="?android:attr/listDivider"/>
-	    
-	    <!-- 设备信息 -->
-	    <TableLayout  android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:stretchColumns="1,3,5"
-	    	android:padding="3dip">
-	        <TableRow >
-	            <!-- device name -->
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_device_name_str"/>
-	            
-	            <EditText android:id="@+id/device_param_set_name" 
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:singleLine="true"/>
-	            
-	            <!-- device id -->
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_marginLeft="5dip"
-	    			android:text="@string/device_param_inentify_str"/>
-	            
-	            <EditText android:id="@+id/device_param_set_inentify" 
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:singleLine="true"/>
-	           
-	        </TableRow>
-
-	         <TableRow >
-	              <!-- device version -->
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_version_str"/>
-	            
-	            <EditText android:id="@+id/device_param_set_version" 
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:singleLine="true"/>
-	            
-	            <!-- valuable time can store on sdcard -->
-	             <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_marginLeft="5dip"
-	    			android:layout_weight="1"
-	    			android:text="@string/device_params_recorde_total_time_str"/>
-	            
-	            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:layout_weight="1"
-	    			android:singleLine="true"/>
-	         </TableRow>
-	          
-	        <!-- TF storeage -->
-	        <TableRow >
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:text="@string/device_params_inside_total_space_str"/>
-	            
-	            <EditText android:id="@+id/device_param_set_tfcard_tatal_space" 
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:singleLine="true"/>
-	            <!-- mobile storeage -->
-	            <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_marginLeft="5dip"
-	    			android:text="@string/device_params_outside_total_space_str"/>
-	            
-	            <EditText android:id="@+id/device_param_set_sdcard_tatal_space" 
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:singleLine="true"/>
-	            
-	        </TableRow>
-		    
-	    </TableLayout>
-	    
-	    <!-- 存储设备 -->
-	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="1"
-		    android:visibility="gone"
-		    android:orientation="horizontal" >
-	        
-	         <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_weight="1"
-	    			android:text="@string/device_params_storage_device_str"/>
-	             
-	             <RadioGroup android:id="@+id/device_param_set_storage_device_mode" 
-	                    android:layout_width="wrap_content"
-	    			    android:layout_height="wrap_content"
-	    			    android:layout_weight="1"
-	    				android:orientation="horizontal">
-	            
-	                <RadioButton android:layout_width="wrap_content"
-	    				android:layout_height="wrap_content"
-	    				android:layout_weight="1"
-	    				android:text="@string/device_params_recorde_type_inside_str"/>
-	                
-	                <RadioButton android:layout_width="wrap_content"
-	    				android:layout_height="wrap_content"
-	    				android:layout_weight="1"
-	    				android:text="@string/device_params_recorde_type_outsize_str"/>
-	                
-	            </RadioGroup>
-	            
-	             <!-- valuable time can store on sdcard -->
-	             <TextView android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:textColor="@color/white"
-	    			android:layout_weight="1"
-	    			android:text="@string/device_params_recorde_total_time_str"/>
-	            
-	            <EditText    
-	                android:layout_width="wrap_content"
-	    			android:layout_height="wrap_content"
-	    			android:editable="false"
-	    			android:layout_weight="1"
-	    			android:singleLine="true"/>
-	            
-	            <TextView android:layout_width="wrap_content"
+	    <LinearLayout
+            android:id="@+id/LinearLayout01"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:paddingBottom="5.0dip"
+            android:paddingLeft="10.0dip"
+            android:paddingRight="10.0dip"
+            android:paddingTop="5.0dip" >
+            
+	         <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/optons_bg"
+                android:orientation="vertical" >
+                
+	             <TextView android:layout_width="fill_parent"
 			    	android:layout_height="wrap_content"
-			    	android:layout_weight="1"
-			    	android:text=""/>
+			    	style="@style/style_web_cam_param_item_title_font_set"
+			    	android:text="@string/device_params_info_str"
+			    	android:paddingBottom="5.0dip"/>
 			    
+			    <ImageView
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:background="@drawable/line"  />
+	    
+			    <!-- 设备信息 -->
+			    <TableLayout  android:layout_width="fill_parent"
+			    	android:layout_height="wrap_content"
+			    	android:stretchColumns="1,3,5"
+			    	android:padding="3dip">
+			        <TableRow android:paddingBottom="5dip"
+			            android:paddingTop="5dip" >
+			            <!-- device name -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:text="@string/device_params_device_name_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_name" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			            
+			            <!-- device id -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:layout_marginLeft="5dip"
+			    			android:text="@string/device_param_inentify_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_inentify" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			           
+			        </TableRow>
+					 
+					<ImageView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/line"  />
+					 
+			         <TableRow android:paddingBottom="5dip"
+			            	    android:paddingTop="5dip">
+			              <!-- device version -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:text="@string/device_params_version_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_version" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			            
+			            <!-- valuable time can store on sdcard -->
+			             <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:layout_marginLeft="5dip"
+			    			android:text="@string/device_params_recorde_total_time_str"/>
+			            
+			            <EditText  android:id="@+id/device_param_set_valueable_recorde_time"   
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			         </TableRow>
+			          
+			         <ImageView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/line"  />
+			         
+			        <!-- TF storeage -->
+			        <TableRow android:paddingBottom="5dip"
+			            	  android:paddingTop="5dip">
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:text="@string/device_params_inside_total_space_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_tfcard_tatal_space" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			            <!-- mobile storeage -->
+			            <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_label_title_font_set"
+			    			android:layout_marginLeft="5dip"
+			    			android:text="@string/device_params_outside_total_space_str"/>
+			            
+			            <EditText android:id="@+id/device_param_set_sdcard_tatal_space" 
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			            
+			        </TableRow>
+				    
+			    </TableLayout>
+	         </LinearLayout>
 	    </LinearLayout>
 	    
+	              <!-- 存储设备 -->
+			    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="1"
+				    android:visibility="gone"
+				    android:orientation="horizontal" >
+			        
+			         <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_title_font_set"
+			    			android:layout_weight="1"
+			    			android:text="@string/device_params_storage_device_str"/>
+			             
+			             <RadioGroup android:id="@+id/device_param_set_storage_device_mode" 
+			                    android:layout_width="wrap_content"
+			    			    android:layout_height="wrap_content"
+			    			    android:layout_weight="1"
+			    				android:orientation="horizontal">
+			            
+			                <RadioButton android:layout_width="wrap_content"
+			    				android:layout_height="wrap_content"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_recorde_type_inside_str"/>
+			                
+			                <RadioButton android:layout_width="wrap_content"
+			    				android:layout_height="wrap_content"
+			    				android:layout_weight="1"
+			    				android:text="@string/device_params_recorde_type_outsize_str"/>
+			                
+			            </RadioGroup>
+			            
+			             <!-- valuable time can store on sdcard -->
+			             <TextView android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			style="@style/style_web_cam_param_title_font_set"
+			    			android:layout_weight="1"
+			    			android:text="@string/device_params_recorde_total_time_str"/>
+			            
+			            <EditText    
+			                android:layout_width="wrap_content"
+			    			android:layout_height="wrap_content"
+			    			android:editable="false"
+			    			android:layout_weight="1"
+			    			android:background="@drawable/web_cam_edit_bg"
+			    			android:singleLine="true"/>
+			            
+			            <TextView android:layout_width="wrap_content"
+					    	android:layout_height="wrap_content"
+					    	android:layout_weight="1"
+					    	android:text=""/>
+					    
+			    </LinearLayout>
+	    
+	   
+	    
 	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
+	    	android:layout_height="0px"
 	    	android:background="?android:attr/listDivider"/>
+	    
 	    
 	    <!-- 网卡设置 -->
 	     <LinearLayout
@@ -486,214 +530,287 @@
          </LinearLayout>
          
 	      <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
+	    	android:layout_height="0px"
 	    	android:background="?android:attr/listDivider"/>
 	    
-	     <!-- 录像设置 -->
-	     <LinearLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
+	       <LinearLayout
+            android:id="@+id/LinearLayout01"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:paddingBottom="8.0dip"
+            android:paddingLeft="10.0dip"
+            android:paddingRight="10.0dip"
+            android:paddingTop="5.0dip"
+             >
+            
+	         <LinearLayout
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
+                android:background="@drawable/optons_bg"
                 android:orientation="vertical" >
-		    	 
-	          <TextView android:layout_width="wrap_content"
-			    	android:layout_height="wrap_content"
-			    	android:textSize="20dip"
-			    	android:textColor="@color/white"
-			    	android:text="@string/device_params_video_record_set_str"/>
-	          
-		    	<TableLayout  android:layout_width="fill_parent"
-			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="1,3,5"
-			    	android:padding="3dip">
-	            
-		    	    <TableRow >
-		    	          <RadioButton
-		    	                android:id="@+id/device_params_video_record_set_one_id" 
-		    	                android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:checked="true"
-			    				android:text="@string/device_params_video_record_set_one_str"/>
-		    	          
-			               <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:layout_gravity="right|center"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
-			               
-		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_rate_one_id" 
-					            android:layout_width="wrap_content"
-					            android:prompt="@string/device_params_recorde_frame_speed_str"
-					            android:entries="@array/frame_rate_array"
-						    	android:layout_height="wrap_content"/>
-		    	          
-		    	          <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:layout_gravity="right|center"
-				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
-		    	          
-		    	          <Spinner android:id="@+id/device_params_set_recorde_frame_size_id" 
-				            android:layout_width="wrap_content"
+			    <!-- 录像设置 -->
+			     <LinearLayout
+		                xmlns:android="http://schemas.android.com/apk/res/android"
+		                android:layout_width="fill_parent"
+		                android:layout_height="wrap_content"
+		                android:orientation="vertical" >
+				    	 
+			          <TextView android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
-					    	android:entries="@array/monitor_frame_size"
-					    	android:prompt="@string/device_params_recorde_frame_size_str"/>
-		    	    </TableRow>
-		    	    
-		    	    <TableRow android:visibility="gone">
-		    	          <RadioButton android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:text="@string/device_params_video_record_set_two_str"
-			    				android:enabled="false"/>
-			                
-		    	          <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
-			               
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
+					    	style="@style/style_web_cam_param_item_title_font_set"
+					    	android:text="@string/device_params_video_record_set_str"
+					  		android:paddingBottom="5.0dip"/>
+			           
+			           <ImageView
+		                        android:layout_width="fill_parent"
+		                        android:layout_height="wrap_content"
+		                        android:background="@drawable/line" />
+			           
+				    	<TableLayout  android:layout_width="fill_parent"
 					    	android:layout_height="wrap_content"
-					    	android:clickable="false"
-					    	android:enabled="false"/>
-		    	          
-		    	           <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
-		    	          
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:clickable="false"
-					    	android:enabled="false"/>
-		    	    </TableRow>
-		    	    
-		    	    <TableRow android:visibility="gone">
-		    	          <RadioButton android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:layout_weight="1"
-			    				android:enabled="false"
-			    				android:text="@string/device_params_video_record_set_three_str"/>
-			                
-		    	          <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
-			               
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:clickable="false"
-					    	android:enabled="false"/>
-		    	          
-		    	           <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
-		    	          
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:clickable="false"
-					    	android:enabled="false"/>
-		    	    </TableRow>
-		    	</TableLayout>
-	         
-	    </LinearLayout>
+					    	android:stretchColumns="1,3"
+					    	android:padding="7dip">
+			            
+				    	    <TableRow  >
+				    	          <RadioButton
+				    	                android:id="@+id/device_params_video_record_set_one_id" 
+				    	                android:layout_width="fill_parent"
+					    				android:layout_height="fill_parent"
+					    				android:checked="true"
+					    				android:button="@null"
+                       				    android:textColor="@color/black"
+                       				    android:drawableLeft="@drawable/web_cam_radion_button_selector"
+					    				android:text="@string/device_params_video_record_set_one_str"
+					    				/>
+				    	          
+					               <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_label_title_font_set"
+						    			android:layout_gravity="right|center"
+						    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+					               
+				    	          <Spinner android:id="@+id/device_params_set_recorde_frame_rate_one_id" 
+							            android:layout_width="wrap_content"
+								    	android:layout_height="wrap_content"
+							            android:prompt="@string/device_params_recorde_frame_speed_str"
+							            android:entries="@array/frame_rate_array"
+							            android:layout_gravity="right|center"
+							            style="@style/style_web_cam_spinner"
+								    	/>
+				    	          
+				    	          <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_label_title_font_set"
+						    			android:layout_gravity="right|center"
+						    			android:text="@string/device_params_video_record_frame_size_set_str"
+						    			/>
+				    	          
+				    	          <Spinner android:id="@+id/device_params_set_recorde_frame_size_id" 
+							            android:layout_width="wrap_content"
+								    	android:layout_height="wrap_content"
+								    	android:entries="@array/monitor_frame_size"
+								    	android:prompt="@string/device_params_recorde_frame_size_str"
+								    	android:layout_gravity="right|center"
+								    	style="@style/style_web_cam_spinner"
+							    	/>
+				    	    </TableRow>
+				    	    
+				    	    <TableRow android:visibility="gone">
+				    	          <RadioButton android:layout_width="fill_parent"
+					    				android:layout_height="fill_parent"
+					    				android:layout_weight="1"
+					    				android:text="@string/device_params_video_record_set_two_str"
+					    				android:button="@null"
+                       				    android:drawableBottom="@drawable/web_cam_radion_button_selector"
+					    				android:enabled="false"/>
+					                
+				    	          <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_label_title_font_set"
+						    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+					               
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:clickable="false"
+							    	android:enabled="false"/>
+				    	          
+				    	           <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_label_title_font_set"
+						    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+				    	          
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:clickable="false"
+							    	android:enabled="false"/>
+				    	    </TableRow>
+				    	    
+				    	    <TableRow android:visibility="gone">
+				    	          <RadioButton android:layout_width="fill_parent"
+					    				android:layout_height="fill_parent"
+					    				android:layout_weight="1"
+					    				android:enabled="false"
+					    				android:button="@null"
+                       				    android:drawableBottom="@drawable/web_cam_radion_button_selector"
+					    				android:text="@string/device_params_video_record_set_three_str"/>
+					                
+				    	          <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_label_title_font_set"
+						    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+					               
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:clickable="false"
+							    	android:enabled="false"/>
+				    	          
+				    	           <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			android:textColor="@color/white"
+						    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+				    	          
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:clickable="false"
+							    	android:enabled="false"/>
+				    	    </TableRow>
+				    	</TableLayout>
+			         
+			    </LinearLayout>
+	          </LinearLayout>
+	      </LinearLayout>
+	      
+	     
 	    
 	    <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
+	    	android:layout_height="0px"
 	    	android:background="?android:attr/listDivider"/>
 	    
-	      <!-- 监控设置 -->
-	     <LinearLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
+	    	 <LinearLayout
+	            android:id="@+id/LinearLayout01"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:orientation="vertical"
+	            android:paddingBottom="5.0dip"
+	            android:paddingLeft="10.0dip"
+	            android:paddingRight="10.0dip"
+	            android:paddingTop="5.0dip" >
+            
+	         <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/optons_bg"
                 android:orientation="vertical" >
-		    	 
-	          <TextView android:layout_width="wrap_content"
-			    	android:layout_height="wrap_content"
-			    	android:textSize="20dip"
-			    	android:textColor="@color/white"
-			    	android:text="@string/device_params_monitor_set_str"/>
-	          
-		    	<TableLayout  android:layout_width="fill_parent"
-			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="1,3,5"
-			    	android:padding="3dip">
-	            
-		    	     <TableRow >
-		    	          <RadioButton 
-		    	              android:id="@+id/device_params_monitor_intelligent_mode_set_id" 
-		    	              android:layout_width="fill_parent"
-			    			  android:layout_height="fill_parent"
-			    			  android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
-		    	          
-			               <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/black"
-				    			android:visibility="gone"
-				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
-			               
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
+			     
+			     <!-- 监控设置 -->
+			     <LinearLayout
+		                xmlns:android="http://schemas.android.com/apk/res/android"
+		                android:layout_width="fill_parent"
+		                android:layout_height="wrap_content"
+		                android:orientation="vertical" >
+				    	 
+			          <TextView android:layout_width="wrap_content"
 					    	android:layout_height="wrap_content"
-					    	android:visibility="gone"
-					    	android:enabled="false"/>
-		    	          
-		    	          <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/black"
-				    			android:visibility="gone"
-				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
-		    	          
-		    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
-				            android:layout_width="wrap_content"
+					    	style="@style/style_web_cam_param_item_title_font_set"
+					    	android:text="@string/device_params_monitor_set_str"
+					    	android:paddingBottom="5.0dip"/>
+			           
+			           <ImageView
+		                        android:layout_width="fill_parent"
+		                        android:layout_height="wrap_content"
+		                        android:background="@drawable/line" />
+			           
+				    	<TableLayout  android:layout_width="fill_parent"
 					    	android:layout_height="wrap_content"
-					    	android:visibility="gone"
-					    	android:enabled="false"/>
-		    	    </TableRow>
-		    	    
-		    	    <TableRow >
-		    	          <RadioButton
-		    	                android:id="@+id/device_params_monitor_self_mode_set_id" 
-		    	                android:layout_width="fill_parent"
-			    				android:layout_height="fill_parent"
-			    				android:text="@string/device_params_monitor_self_mode_set_str"/>
-		    	          
-			               <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
-			               
-		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_rate_id" 
-				            android:layout_width="wrap_content"
-				            android:entries="@array/frame_rate_array"
-					    	android:layout_height="wrap_content"/>
-		    	          
-		    	          <TextView android:layout_width="wrap_content"
-				    			android:layout_height="wrap_content"
-				    			android:textColor="@color/white"
-				    			android:visibility="gone"
-				    			android:text="@string/device_params_video_record_frame_size_set_str"/>
-		    	          
-		    	          <Spinner android:id="@+id/device_params_monitor_one_frame_size_id" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:entries="@array/monitor_frame_size"
-					    	android:visibility="invisible"
-					    	android:clickable="false"/>
-		    	    </TableRow>
-		       </TableLayout>
-	     </LinearLayout>
+					    	android:stretchColumns="1,3,5"
+					    	android:padding="3dip">
+			            
+				    	     <TableRow >
+				    	          <RadioButton 
+				    	              android:id="@+id/device_params_monitor_intelligent_mode_set_id" 
+				    	              android:layout_width="fill_parent"
+					    			  android:layout_height="fill_parent"
+					    			  android:checked="true"
+					    			  android:textColor="@color/black"
+					    			  android:button="@null"
+                       				  android:drawableLeft="@drawable/web_cam_radion_button_selector"
+					    			  android:text="@string/device_params_monitor_intelligent_mode_set_str"/>
+				    	          
+					               <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			android:textColor="@color/black"
+						    			android:visibility="gone"
+						    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+					               
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:visibility="gone"
+							    	android:enabled="false"/>
+				    	          
+				    	          <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			android:textColor="@color/black"
+						    			android:visibility="gone"
+						    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+				    	          
+				    	          <Spinner android:id="@+id/device_params_recorde_frame_speed_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:visibility="gone"
+							    	android:enabled="false"/>
+				    	    </TableRow>
+				    	    
+				    	    <ImageView
+		                        android:layout_width="fill_parent"
+		                        android:layout_height="wrap_content"
+		                        android:background="@drawable/line" />
+				    	    
+				    	    <TableRow >
+				    	          <RadioButton
+				    	                android:id="@+id/device_params_monitor_self_mode_set_id" 
+				    	                android:layout_width="fill_parent"
+					    				android:layout_height="fill_parent"
+					    				android:button="@null"
+					    				android:textColor="@color/black"
+                       				    android:drawableLeft="@drawable/web_cam_radion_button_selector"
+					    				android:text="@string/device_params_monitor_self_mode_set_str"/>
+				    	          
+					               <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			style="@style/style_web_cam_param_title_font_set"
+						    			android:text="@string/device_params_video_record_frame_rate_set_str"/>
+					               
+				    	          <Spinner android:id="@+id/device_params_monitor_one_frame_rate_id" 
+						            android:layout_width="wrap_content"
+						            android:entries="@array/frame_rate_array"
+						            android:prompt="@string/device_params_recorde_frame_speed_str"
+							    	android:layout_height="wrap_content"
+							    	style="@style/style_web_cam_spinner"/>
+				    	          
+				    	          <TextView android:layout_width="wrap_content"
+						    			android:layout_height="wrap_content"
+						    			android:textColor="@color/white"
+						    			android:visibility="gone"
+						    			android:text="@string/device_params_video_record_frame_size_set_str"/>
+				    	          
+				    	          <Spinner android:id="@+id/device_params_monitor_one_frame_size_id" 
+						            android:layout_width="wrap_content"
+							    	android:layout_height="wrap_content"
+							    	android:entries="@array/monitor_frame_size"
+							    	android:visibility="invisible"
+							    	android:clickable="false"/>
+				    	    </TableRow>
+				       </TableLayout>
+			     </LinearLayout>
+			 </LinearLayout>
+		</LinearLayout>
 	     
-	     <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
-	    	android:background="?android:attr/listDivider"/>
 	    
 	      <!-- 其他设置 -->
 	     <LinearLayout
@@ -832,7 +949,7 @@
 		            <!-- time set -->
 			         <TextView android:layout_width="fill_parent"
 				    	android:layout_height="wrap_content"
-				    	android:textColor="@color/white"
+				    	style="@style/style_web_cam_param_title_font_set"
 				    	android:textSize="20dip"
 				    	android:text="@string/device_params_other_set_time_str"/>
 			         
@@ -884,49 +1001,68 @@
 		    	
 	     </LinearLayout>
 	     
-	      <TextView android:layout_width="fill_parent"
-	    	android:layout_height="3px"
-	    	android:background="?android:attr/listDivider"/>
-	      
-	       <!-- security_visit_password set -->
-           <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
-                android:layout_width="wrap_content"
-	    	 android:layout_height="wrap_content"
-	    	 android:layout_weight="1"
-	    	 android:text="@string/password_modify_security_botton_str"/>
-		    
-            <TextView android:layout_width="fill_parent"
-	    		android:layout_height="3px"
-	    		android:background="?android:attr/listDivider"/>
-	      
+	     
+
+	     <LinearLayout
+	            android:id="@+id/LinearLayout01"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:paddingBottom="0.0dip"
+	            android:paddingLeft="10.0dip"
+	            android:paddingRight="10.0dip"
+	            android:paddingTop="5.0dip"
+	            android:gravity="center" >
+            
+	         <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/optons_bg"
+                android:gravity="center"
+                android:orientation="vertical" >
+	             
               
-	        <TableLayout  android:layout_width="fill_parent"
-			    	android:layout_height="wrap_content"
-			    	android:stretchColumns="1,2"
-			    	android:padding="3dip">
-	            
-	               <!-- bottom button-->
-		           <TableRow >
-		               <Button 
-		                    android:id="@+id/device_params_set_factory_button_id"
-		                    android:text="@string/device_params_reset_set_factory_para_str" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"
-					    	android:visibility="gone"/>
-		               
-		                <Button android:id="@+id/device_params_set_commit_button_id"
-		                   android:text="@string/device_params_set_sure_str" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
-		                
-		                 <Button android:id="@+id/device_params_set_concle_button_id"
-		                   android:text="@string/device_params_set_cancle_str" 
-				            android:layout_width="wrap_content"
-					    	android:layout_height="wrap_content"/>
-		           </TableRow>
-		               
-		    </TableLayout>
-	       <TextView android:layout_width="fill_parent"
-	    	  android:layout_height="30dip"/>
+		        <TableLayout  android:layout_width="fill_parent"
+				    	android:layout_height="wrap_content"
+				    	android:stretchColumns="1,2,3"
+				    	android:padding="3dip">
+		            
+		               <!-- bottom button-->
+			           <TableRow >
+			               
+			                 <!-- security_visit_password set -->
+					         <Button android:id="@+id/device_params_other_modify_security_pwd_id" 
+					             android:layout_width="wrap_content"
+						    	 android:layout_height="wrap_content"
+						    	 android:layout_weight="1"
+						    	 android:background="@drawable/web_cam_login_button_selector"
+						    	 android:text="@string/password_modify_security_botton_str"/>
+			    
+			               <Button 
+			                    android:id="@+id/device_params_set_factory_button_id"
+			                    android:text="@string/device_params_reset_set_factory_para_str" 
+					            android:layout_width="wrap_content"
+						    	android:layout_height="wrap_content"
+						    	android:visibility="gone"/>
+			               
+			                <Button android:id="@+id/device_params_set_commit_button_id"
+			                   android:text="@string/device_params_set_sure_str" 
+					           android:layout_width="wrap_content"
+						       android:layout_height="wrap_content"
+						       android:layout_weight="1"
+						       android:background="@drawable/web_cam_login_button_selector"
+						    	/>
+			                
+			                 <Button android:id="@+id/device_params_set_concle_button_id"
+			                   android:text="@string/device_params_set_cancle_str" 
+					            android:layout_width="wrap_content"
+						    	android:layout_height="wrap_content"
+						    	android:background="@drawable/web_cam_login_button_selector"
+						    	android:layout_weight="1"/>
+			           </TableRow>
+			               
+			    </TableLayout>
+			   </LinearLayout>
+		   </LinearLayout>
 	</LinearLayout>
 </ScrollView>
