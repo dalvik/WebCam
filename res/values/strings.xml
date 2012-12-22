@@ -91,13 +91,13 @@
     	<string name="auto_search_tips_str">正在为您搜索，请稍等</string>	
     	<string name="manu_add_str">手工添加</string>	
     		<string name="device_manager_add_title_str">添加新设备</string>
-    		<string name="device_manager_add_str">设备名称</string>
-    		<string name="device_manager_add_hint_str">设备名称</string>
+    		<string name="device_manager_add_str">设备名称：</string>
+    		<string name="device_manager_add_hint_str">请输入设备名称</string>
     		<string name="device_manager_add_name_default_str"></string>
     		<string name="device_manager_local_net_para_str">局域网参数</string>
     		<string name="device_manager_new_addr_str">IP地址</string>
     		<string name="device_manager_new_addr_default_str">192.168.1.</string>
-    		<string name="device_manager_new_device_id">设备ID号</string>
+    		<string name="device_manager_new_device_id">设备ID号：</string>
     		<string name="device_manager_new_device_id_hint">请输入设备的ID号</string>
     		<string name="device_manager_new_device_id_not_null">设备ID号不能为空</string>
     		<string name="device_manager_new_device_id_not_number">设备ID号必须为数字</string>

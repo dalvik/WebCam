@@ -8,11 +8,14 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -21,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -89,7 +93,22 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	private ProgressDialog m_Dialog = null;
 	
 	private String password = "";
-
+	
+	private Button sureAddNewDeivce = null;
+	
+	private Button cancleAddNewDeivce = null;
+	
+	private CustomAlertDialog alertDialog = null;
+	
+	private EditText newDeivceId = null;
+	
+	private EditText newDeviceName = null;
+	
+	private Button sureAddNewDeivceResult = null;
+	
+	private Button cancleAddNewDeivceResult = null;
+	
+	
 	//private MonitorSocketThread monitorSocketThread = null;
 	
 	private static final String TAG = "DeviceManager";
@@ -348,7 +367,25 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				})
 				.create().show();
 			}
-	        
+	        break;
+		case R.id.web_cam_sure_add_new_device:
+			String cameraId = newDeivceId.getText().toString().trim();
+			if (cameraId == null || cameraId.length() <= 0) {
+				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_new_device_id_not_null);
+				return;
+			}
+			queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
+			new Thread(new QueryCamera(newDeviceName.getText().toString(), cameraId,"","","","", true)).start();
+			alertDialog.dismiss();
+			alertDialog = null;
+			break;
+		case R.id.web_cam_cancl_add_new_device_result:
+		case R.id.web_cam_cancl_add_new_device:
+			if(alertDialog != null && alertDialog.isShowing()) {
+				alertDialog.dismiss();
+				alertDialog = null;
+			}
+			break;
 		default:
 			break;
 		}
@@ -418,139 +455,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	}
 	
 	private void addNewDevice() {
-		final View addDeviceView = initAddNewDeviceView();
-		final CheckBox serchConfig = (CheckBox) addDeviceView
-				.findViewById(R.id.device_manager_search_device_checkbox);
-		serchConfig.setChecked(true);
-		updateComponentState(addDeviceView, serchConfig.isChecked());
-		serchConfig
-				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-					@Override
-					public void onCheckedChanged(CompoundButton buttonView,
-							boolean isChecked) {
-						updateComponentState(addDeviceView, isChecked);
-					}
-				});
-		dlg = new AlertDialog.Builder(DeviceManager.this)
-				.setTitle(
-						getResources().getString(
-								R.string.device_manager_add_title_str))
-				.setView(addDeviceView)
-				.setPositiveButton(
-						getResources().getString(
-								R.string.device_manager_add_sure_str),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								EditText ed = (EditText)addDeviceView.findViewById(R.id.device_manager_add_name_id);
-								deviceName = ed.getText().toString();
-								unCloseDialog(dlg, -1, false);
-								String newDiviceName = ((EditText) addDeviceView
-										.findViewById(R.id.device_manager_add_name_id))
-										.getText().toString().trim();
-								if (serchConfig.isChecked()) {
-									String cameraId = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_device_id_edittext))
-											.getText().toString().trim();
-									if (cameraId == null || cameraId.length() <= 0) {
-										unCloseDialog(dlg,R.string.device_manager_new_device_id_not_null,
-												false);
-										return;
-									}
-									if(!cameraId.matches("\\d+")) {
-										unCloseDialog(
-												dlg,
-												R.string.device_manager_new_device_id_not_number,
-												false);
-										return;
-									}
-									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
-									new Thread(new QueryCamera(newDiviceName, cameraId,"","","","", true))
-											.start();
-								} else {
-									String newDiviceIP = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_addr_id))
-											.getText().toString();
-									String newDiviceGateWay = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_gateway_addr_id))
-											.getText().toString();
-									String newDiviceDNS1 = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_dns1_id))
-											.getText().toString();
-									String newDiviceDNS2 = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_dns2_id))
-											.getText().toString();
-									String newDiviceMask = ((EditText) addDeviceView
-											.findViewById(R.id.device_manager_new_sub_net_addr_id))
-											.getText().toString();
-									if (newDiviceIP == null
-											|| newDiviceIP.length() <= 0) {
-										unCloseDialog(
-												dlg,
-												R.string.device_manager_add_not_null_str,
-												false);
-										return;
-									}
-									queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
-									new Thread(new QueryCamera(newDiviceName, newDiviceIP,newDiviceGateWay,newDiviceMask,newDiviceDNS1,newDiviceDNS2,
-											false)).start();
-								}
-							}
-						})
-				.setNegativeButton(
-						getResources().getString(
-								R.string.device_manager_add_cancle_str),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								unCloseDialog(dlg, -1, true);
-							}
-						}).create();
-		dlg.show();
-	}
-
-	private void updateComponentState(View addDeviceView, final boolean isChecked) {
-		LinearLayout paramSubnetLayout = (LinearLayout) addDeviceView.findViewById(R.id.subnet_param_layout);
-		LinearLayout deviceIdLayout = (LinearLayout) addDeviceView.findViewById(R.id.device_id_param_layout);
-		if(isChecked) {
-			paramSubnetLayout.setVisibility(View.GONE);
-			deviceIdLayout.setVisibility(View.VISIBLE);
-		} else {
-			paramSubnetLayout.setVisibility(View.VISIBLE);
-			deviceIdLayout.setVisibility(View.GONE);
-		}
-	}
-
-	private void unCloseDialog(AlertDialog dialog, int id, boolean flag) {
-		if (id > 0) {
-			Toast.makeText(DeviceManager.this, getResources().getString(id),
-					Toast.LENGTH_LONG).show();
-		}
-		try {
-			Field field = dlg.getClass().getSuperclass()
-					.getDeclaredField("mShowing");
-			field.setAccessible(true);
-			field.set(dialog, flag);
-			dialog.dismiss();
-		} catch (Exception e) {
-			Log.v(TAG, e.getMessage());
-		}
-	}
-
-	private View initAddNewDeviceView() {
-		LayoutInflater inflater = LayoutInflater.from(DeviceManager.this);
-		View addDeviceView = inflater
-				.inflate(R.layout.device_manager_add, null);
-		((EditText) addDeviceView
-				.findViewById(R.id.device_manager_new_dns1_id)).setText("");// Constants.TCPPORT+
-		EditText idNum = ((EditText) addDeviceView
-				.findViewById(R.id.device_manager_new_dns2_id));
-		idNum.setText(""); // Constants.UDPPORT+
-		idNum.requestFocusFromTouch();
-		idNum.requestFocus();
-		return addDeviceView;
+		alertDialog = new CustomAlertDialog(this, R.style.thems_customer_alert_dailog);
+		alertDialog.setTitle(getResources().getString(R.string.device_manager_add_title_str));
+		alertDialog.setContentView(R.layout.device_manager_add);
+		alertDialog.show();
+		sureAddNewDeivce = (Button) alertDialog.findViewById(R.id.web_cam_sure_add_new_device);
+		sureAddNewDeivce.setOnClickListener(this);
+		cancleAddNewDeivce = (Button) alertDialog.findViewById(R.id.web_cam_cancl_add_new_device);
+		cancleAddNewDeivce.setOnClickListener(this);
+		newDeivceId = (EditText) alertDialog.findViewById(R.id.device_manager_new_device_id_edittext);
+		newDeviceName = (EditText) alertDialog.findViewById(R.id.device_manager_add_name_id);
 	}
 
 	protected void onResume() {
@@ -654,35 +568,32 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		}
 	}
 
-	private AlertDialog ad  = null;
-	
 	private void showResult(final Device device) {
 		UdtTools.freeCmdSocket();
-		ad = new AlertDialog.Builder(DeviceManager.this)
-		.setTitle(getString(R.string.device_manager_new_device_title))
-		.setMessage(getString(R.string.device_manager_new_device_message))
-		.setPositiveButton(getString(R.string.system_settings_save_path_preview_sure_str), new DialogInterface.OnClickListener() {
+		alertDialog = new CustomAlertDialog(DeviceManager.this, R.style.thems_customer_alert_dailog);
+		alertDialog.setTitle(getResources().getString(R.string.device_manager_new_device_title));
+		alertDialog.setContentView(R.layout.layout_show_add_new_device_result);
+		alertDialog.show();
+		sureAddNewDeivceResult = (Button) alertDialog.findViewById(R.id.web_cam_sure_add_new_device_result);
+		cancleAddNewDeivceResult = (Button) alertDialog.findViewById(R.id.web_cam_cancl_add_new_device_result);
+		cancleAddNewDeivceResult.setOnClickListener(this);
+		sureAddNewDeivceResult.setOnClickListener(new OnClickListener() {
 			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(View v) {
 				if(camManager.addCam(device)) {
 					handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 					Message msg = handler.obtainMessage();
 					msg.arg1 = R.string.device_manager_new_device_add_success_str;
 					msg.what = Constants.SHOWTOASTMSG;
 					handler.sendMessage(msg);
-					unCloseDialog(dlg, -1, true); 
 				} else {
 					showToast(R.string.device_manager_add_device_is_exist);
 				}
+				alertDialog.dismiss();
+				alertDialog = null;
 			}
-		}).setNegativeButton(getString(R.string.system_settings_save_path_preview_cancle_str), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				ad.dismiss();
-			}
-		}).create();
-		ad.show();
+		});
 	}
 	
 	private Runnable monitorSocketTask = new Runnable() {
