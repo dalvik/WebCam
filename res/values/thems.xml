@@ -8,9 +8,13 @@
     <style name="thems_tips_popup_dailog" parent="@android:style/Theme.Dialog">
         <item name="android:windowAnimationStyle">@style/style_tips_popup_window</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:background">@drawable/optons_bg</item>
+        <item name="android:textColor">@color/black</item>
     </style>
     
     <style name="thems_param_set_activity">
         <item name="android:windowAnimationStyle">@style/style_param_set_activity</item>
     </style>
+    
+    
 </resources>

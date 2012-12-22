@@ -24,6 +24,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
@@ -52,7 +53,6 @@ import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.NetworkUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
-import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.StringUtils;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
@@ -309,6 +309,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				break;
 			case MyVideoView.UPDATE_RESULATION:
 				updateResulation(msg.arg1);
+				break;
+			case Constants.SHOW_POP_UP_TIPS_DIA_MSG:
+				PopupActivity popupActivity = new PopupActivity(CamVideoH264.this, R.style.thems_tips_popup_dailog);
+				popupActivity.show();
+				WindowManager.LayoutParams params = popupActivity.getWindow().getAttributes();
+				params.width = screenWidth*20/36;
+				params.height = screenHeight/2;
+				popupActivity.getWindow().setAttributes(params);
 				break;
 			default:
 				break;
@@ -841,7 +849,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private void showProgressDlg(int textId) {
 		if(m_Dialog == null) {
 			m_Dialog = new ProgressDialog(CamVideoH264.this);
-			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			//m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			m_Dialog.getWindow().getAttributes().windowAnimations = R.style.style_web_cam_progress_bar;
 		}
 		if(m_Dialog != null) {
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
@@ -1133,6 +1142,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			int res = UdtTools.sendCmdMsg( item, item.length());
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+			}
+			//startActivity(new Intent(CamVideoH264.this, PopupActivity.class));
+			if(res>0) {
+				mHandler.sendEmptyMessage(Constants.SHOW_POP_UP_TIPS_DIA_MSG);
 			}
 			return null;
 		}

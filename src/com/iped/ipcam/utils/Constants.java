@@ -156,6 +156,9 @@ public class Constants {
 	// update play back
 	public final static int UPDATE_PLAY_BACK_TIME = 5800;
 	
+	//send show popup tips dialog mes
+	public final static int SHOW_POP_UP_TIPS_DIA_MSG = 6800;
+	
 	//
 	public final static int BINDLOCALPORT1 = 60001;
 

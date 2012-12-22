@@ -34,7 +34,7 @@
         
         <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
         
-        <activity android:launchMode="singleInstance" android:name=".DeviceManager"/>
+        <activity android:launchMode="singleInstance" android:name=".DeviceManager" android:theme="@style/thems_param_set_activity"/>
         
         <activity android:launchMode="singleInstance" 
             android:name=".DeviceParamSets" 
@@ -55,6 +55,8 @@
         <activity android:name=".List1" android:theme="@android:style/Theme.Dialog"/>
         
         <activity android:name=".DirPreview" android:theme="@android:style/Theme.NoTitleBar"/>
+        
+        <activity android:name=".PopupActivity" android:theme="@style/thems_tips_popup_dailog"/>
         
     </application>
 

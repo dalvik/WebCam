@@ -384,7 +384,7 @@
         
         <!-- operation popup tips dialog -->
         <string name="tips_popup_dialog_title_str">操作提示</string>
-        <string name="tips_popup_dialog_message_str">视频切换成功，可能会有几秒延迟，请稍后</string>
+        <string name="tips_popup_dialog_message_str">视频切换成功，可能会有几秒延迟，请稍等</string>
         
         <!-- error code tips infor -->
         <string name="webcam_error_code_internel">内部错误，请先检查网络状况</string>
