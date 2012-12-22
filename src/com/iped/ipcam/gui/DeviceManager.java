@@ -1,45 +1,35 @@
 package com.iped.ipcam.gui;
 
-import java.lang.reflect.Field;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.factory.ICustomDialog;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.Constants;
@@ -78,8 +68,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	private ProgressDialog queryNewCameraDialog = null;
 	
-	private AlertDialog dlg = null;
-
 	private int lastSelected = 0;
 
 	private String deviceName = "";
@@ -235,7 +223,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				hideProgressDlg();
 				break;
 			case Constants.SEND_SHOW_INPUT_TWO_PASS_DIALOG_SMG:
-				DialogUtils.inputTwoPasswordDialog(DeviceManager.this, camManager.getSelectDevice(), handler, Constants.WEB_CAM_CHECK_PWD_MSG);
+				//DialogUtils.inputTwoPasswordDialog(DeviceManager.this, camManager.getSelectDevice(), handler, Constants.WEB_CAM_CHECK_PWD_MSG);
 				break;
 			case Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG:
 				DialogUtils.inputOnePasswordDialog(DeviceManager.this, handler, Constants.WEB_CAM_CHECK_PWD_MSG);
@@ -748,88 +736,53 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private void changeLoginPwd() {
 		final SharedPreferences settings = getSharedPreferences(WebCam.class.getName(), 0);
-		LayoutInflater factory = LayoutInflater.from(this);
-        final View MyDialogView = factory.inflate(R.layout.layout_modify_pwd_dialog, null);
-        dlg = new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.password_modify_title_str))
-        .setView(MyDialogView)
-        .setPositiveButton(getResources().getString(R.string.password_modify_str),
-        new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            	  final EditText oldPassword = (EditText) MyDialogView.findViewById(R.id.firstPassword);
-            	  final EditText newPassword = (EditText) MyDialogView.findViewById(R.id.secondPassword);
-            	  final EditText repeadNewPassword = (EditText) MyDialogView.findViewById(R.id.thirdPassword);
-            	  String oldPwd = oldPassword.getText().toString().trim();
-                  String newPwd1 = newPassword.getText().toString().trim();
-                  String newPwd2 = repeadNewPassword.getText().toString().trim();
-                  if(oldPwd== null || oldPwd.length()<=0){
-                	  AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
-                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
-                	  try {
-                  		DialogUtils.keepDialog(dialog, dlg);
-	                  	} catch  (Exception e) {
-	                  		Log.v(TAG, e.getMessage());
-	                  	}
-	                	return;
-                  } 
-                  if(!oldPwd.equalsIgnoreCase(settings.getString("PASSWORD", "admin"))) {
-                	  AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
-                	  ToastUtils.showToast(DeviceManager.this, R.string.old_input_password_error);
-                	  try {
-                		  DialogUtils.keepDialog(dialog, dlg);
-	                  	} catch  (Exception e) {
-	                  		Log.v(TAG, e.getMessage());
-	                  	}
-	                	return;
-            	  }
-                  if( newPwd1 == null || newPwd1.length()<=0 ){
-                	  AnimUtil.animEff(DeviceManager.this, newPassword, R.anim.shake_anim);
-                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
-                	  try {
-                		  DialogUtils.keepDialog(dialog, dlg);
-	                  	} catch  (Exception e) {
-	                  		Log.v(TAG, e.getMessage());
-	                  	}
-	                	return;
-                  }
-                  if(newPwd2 == null ||  newPwd2.length()<=0) {
-                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
-                	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
-	                  try {
-	                	  DialogUtils.keepDialog(dialog, dlg);
-	                	} catch  (Exception e) {
-	                		Log.v(TAG, e.getMessage());
-	                	}
-	                	return;
-                  } 
-                  if(!newPwd1.equalsIgnoreCase(newPwd2)) {
-                	  ToastUtils.showToast(DeviceManager.this, R.string.password_not_equal);
-                      try {
-                    	  DialogUtils.keepDialog(dialog, dlg);
-                    	} catch  (Exception e) {
-                    		Log.v(TAG, e.getMessage());
-                    	}
-                 } else {
-                	 settings.edit().putString("PASSWORD", newPwd1).commit();
-                	 ToastUtils.showToast(DeviceManager.this, R.string.password_modify_success_str);
-                	 try {
-                		 DialogUtils.dismissDialog(dialog, dlg);
-	                  	} catch  (Exception e) {
-	                  		Log.v(TAG, e.getMessage());
-	                  	}
+		final ICustomDialog customDialog = new CustomAlertDialog(this, R.style.thems_customer_alert_dailog);
+		customDialog.setContentView(R.layout.layout_modify_pwd_dialog);
+        customDialog.setTitle(getResources().getString(R.string.password_modify_title_str));
+        customDialog.show();
+        customDialog.findViewById(R.id.web_cam_sure_modify).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				 final EditText oldPassword = (EditText) customDialog.findViewById(R.id.firstPassword);
+           	  final EditText newPassword = (EditText) customDialog.findViewById(R.id.secondPassword);
+           	  final EditText repeadNewPassword = (EditText) customDialog.findViewById(R.id.thirdPassword);
+           	  String oldPwd = oldPassword.getText().toString().trim();
+                 String newPwd1 = newPassword.getText().toString().trim();
+                 String newPwd2 = repeadNewPassword.getText().toString().trim();
+                 if(oldPwd== null || oldPwd.length()<=0){
+               	  	AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
+               	  	ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+	                return;
+                 } 
+                 if(!oldPwd.equalsIgnoreCase(settings.getString("PASSWORD", "admin"))) {
+               	  	AnimUtil.animEff(DeviceManager.this, oldPassword, R.anim.shake_anim);
+               	  	ToastUtils.showToast(DeviceManager.this, R.string.old_input_password_error);
+	                return;
+           	  	}
+                 if( newPwd1 == null || newPwd1.length()<=0 ){
+	               	  AnimUtil.animEff(DeviceManager.this, newPassword, R.anim.shake_anim);
+	               	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+		              return;
                  }
-            }
-        }).setNegativeButton(getResources().getString(R.string.cancle_login_str), 
-        new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            	 try {
-            		 DialogUtils.dismissDialog(dialog, dlg);
-             	} catch  (Exception e) {
-             		Log.v(TAG, e.getMessage());
-             	}
-            	
-            }
-        })
-        .create();
-        dlg.show();
+                 if(newPwd2 == null ||  newPwd2.length()<=0) {
+	               	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+	               	  ToastUtils.showToast(DeviceManager.this, R.string.password_is_null);
+		              return;
+                 } 
+                 if(!newPwd1.equalsIgnoreCase(newPwd2)) {
+               	  	ToastUtils.showToast(DeviceManager.this, R.string.password_not_equal);
+                } else {
+               	 	settings.edit().putString("PASSWORD", newPwd1).commit();
+               	 	ToastUtils.showToast(DeviceManager.this, R.string.password_modify_success_str);
+               	 	customDialog.dismiss();
+                }
+			}
+        });
+        customDialog.findViewById(R.id.web_cam_cancl_modify).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				customDialog.dismiss();
+			}
+        });
 	}
 }

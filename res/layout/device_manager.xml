@@ -18,6 +18,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_weight="1"
+                android:background="@drawable/web_cam_button_selector"
+                android:padding="12dip"
                 android:text="@string/auto_serch_str" />
 
             <Button android:id="@+id/manul_add_button"
@@ -25,6 +27,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_weight="1"
+                android:background="@drawable/web_cam_button_selector"
+                android:padding="12dip"
                 android:text="@string/manu_add_str" />
 
             <Button android:id="@+id/device_manager_button"
@@ -32,6 +36,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_weight="1"
+                android:background="@drawable/web_cam_button_selector"
+                android:padding="12dip"
                 android:text="@string/device_params_sets_str" />
             
             <Button android:id="@+id/clear_all_button"
@@ -39,15 +45,26 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_weight="1"
+                android:padding="12dip"
+                android:background="@drawable/web_cam_button_selector"
                 android:text="@string/clear_all_str" />
     </LinearLayout>
 
+       <!--
+        android:background="@drawable/device_item_unselect"
+        android:divider="@drawable/list_line"
+        android:listSelector="@drawable/device_list_selector"
+        android:cacheColorHint="#00000000"
+          -->
     <ListView android:id="@+id/android:list"
+        style="@style/style_device_list"
         android:layout_above="@+id/user_oper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/lightdark"
-        android:cacheColorHint="@color/lightdark"/>
+        android:fadingEdge="none"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="true"
+        />
 
     <TextView android:id="@id/android:empty"  
               android:layout_width="fill_parent"  
