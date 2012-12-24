@@ -28,6 +28,8 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	
 	private LinearLayout panelContainer;
 	
+	private boolean isMoving = false;
+	
 	
 	public ControlPanel(Context context, View videoView, int width, int height) {
 		super(context);
@@ -44,10 +46,12 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		this.setOrientation(LinearLayout.HORIZONTAL);
 		
 		buttonHandle = new Button(context);
-		buttonHandle.setText("<");
-		LayoutParams textParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
+		//buttonHandle.setText("<");
+		//buttonHandle.setBackgroundResource(R.drawable.web_cam_device_list_open_selector);
+		LayoutParams textParams = new LayoutParams(25, LayoutParams.WRAP_CONTENT);
+		textParams.gravity = Gravity.CENTER;
 		buttonHandle.setLayoutParams(textParams);
-		buttonHandle.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER);
+		buttonHandle.setGravity(Gravity.CENTER);
 		buttonHandle.setOnClickListener(this);
 		this.addView(buttonHandle);
 		panelContainer = new LinearLayout(context);
@@ -55,11 +59,16 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		this.addView(panelContainer);
 		this.setPanelOpenedEvent(panelOpenedEvent);
 		if(lp.rightMargin<0) {// close status
-			new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
-			buttonHandle.setText(">");
+			if(!isMoving) {
+				new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
+			}
+			//buttonHandle.setText(">");
+			buttonHandle.setBackgroundResource(R.drawable.web_cam_device_list_close_selector);
 		} else { //open status
+			
 			new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
-			buttonHandle.setText("<");
+			//buttonHandle.setText("<");
+			buttonHandle.setBackgroundResource(R.drawable.web_cam_device_list_open_selector);
 		}
 	}
 
@@ -67,11 +76,17 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 	public void onClick(View v) {
 		LayoutParams lp = (LayoutParams)ControlPanel.this.getLayoutParams();
 		if(lp.rightMargin<0) {// close status
-			new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
-			buttonHandle.setText(">");
+			if(!isMoving) {
+				new AsynMove().execute(new Integer[]{ MOVE_WIDTH });
+				buttonHandle.setBackgroundResource(R.drawable.web_cam_device_list_close_selector);
+			}
+			//buttonHandle.setText(">");
 		} else { //open status
-			new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
-			buttonHandle.setText("<");
+			if(!isMoving) {
+				new AsynMove().execute(new Integer[]{ -MOVE_WIDTH });
+				buttonHandle.setBackgroundResource(R.drawable.web_cam_device_list_open_selector);
+			}
+			//buttonHandle.setText("<");
 		}
 	}
 
@@ -110,12 +125,14 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		@Override
 		protected Void doInBackground(Integer... params) {
 			int times;
+			isMoving = true;
 			if(nRightMargin % Math.abs(params[0]) == 0) {
 				times = nRightMargin / Math.abs(params[0]);
 			} else {
 				times = nRightMargin / Math.abs(params[0]) + 1;
 			}
 			for(int i = 0; i < times; i++) {
+				
 				publishProgress(params);
 				try {
 					Thread.sleep(Math.abs(params[0]));
@@ -123,6 +140,7 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 					e.printStackTrace();
 				}
 			}
+			isMoving = false;
 			return null;
 		}
 
