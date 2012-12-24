@@ -195,6 +195,7 @@ public class PackageUtil {
 		}
 		for (int i = 8; i < length; i++) {
 			if (files[i] == 0) {
+				index = i;
 				break;
 			}
 			index = i;
