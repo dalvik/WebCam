@@ -1,6 +1,9 @@
 package com.iped.ipcam.utils;
 
 import java.util.LinkedList;
+import java.util.Queue;
+
+import android.util.Log;
 
 import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.pojo.MpegImage;
@@ -12,6 +15,8 @@ public class VideoQueue {
 	private LinkedList<String> timeList = null;
 	
 	private LinkedList<MpegImage> mpegImageList = null;
+	
+	private Object lock = new Object();
 	
 	public VideoQueue() {
 		jpegImageList = new LinkedList<JpegImage>();
@@ -32,7 +37,9 @@ public class VideoQueue {
 	
 	
 	public void addNewTime(String time) {
-		timeList.add(time);
+		synchronized (lock) {
+			timeList.offer(time);
+		}
 	}
 	
 	public int getTimeListLength() {
@@ -51,70 +58,99 @@ public class VideoQueue {
 		}
 	}
 	
-	public String removeTime() {
-		if(getTimeListLength()>0) {
-			return timeList.poll();
-		}else {
+	public String pollTime() {
+		try{
+			synchronized (lock) {
+				return timeList.poll();
+			}
+		}catch(Exception e) {
+			Log.d("VideoQueue", "### 111 " + e.getMessage());
 			return null;
 		}
 	}
 	
 	public JpegImage getFirstImage() {
 		if(getImageListLength()>0) {
-			return jpegImageList.peek();
+			try{
+				synchronized (lock) {
+					return jpegImageList.peek();
+				}
+			}catch(Exception e) {
+				Log.d("VideoQueue", "### 2222 " + e.getLocalizedMessage());
+				return null;
+			}
 		}else {
 			return null;
 		}
 	}
 	
 	public String getFirstTime() {
-		if(getTimeListLength()>0) {
-			return timeList.peek();
+		synchronized (lock) {
+			if(getTimeListLength()>0) {
+				try{
+					return timeList.peek();
+				}catch(Exception e) {
+					Log.d("VideoQueue", "### 3333 " + e.getLocalizedMessage());
+					return null;
+				}
+			}
 		}
 		return null;
 	}
 	
 	public void clear() {
-		jpegImageList.clear();
+		synchronized (lock) {
+			jpegImageList.clear();
+		}
 	}
 	
 	public void clearTime() {
-		timeList.clear();
+		synchronized (lock) {
+			timeList.clear();
+		}
 	}
 	
 	/** store mpeg4 **/
 	public void addMpegImage(MpegImage mpegImage) {
-		if(mpegImageList.size()>=4) {
-			MpegImage i = mpegImageList.remove();//.poll();
-			i.rgb = null;
+		synchronized (lock) {
+			if(mpegImageList.size()>=4) {
+				try{
+					MpegImage i = mpegImageList.poll();
+					i.rgb = null;
+				} catch(Exception e) {
+					Log.d("VideoQueue", "### 4444 " + e.getLocalizedMessage());
+				}
+			}
+			mpegImageList.offer(mpegImage);
 		}
-		mpegImageList.add(mpegImage);
 	}
 	
 	public MpegImage getMpegImage() {
-		if(mpegImageList.size()>0) {
-			return mpegImageList.poll();//.peek();
-		} return null;
+		synchronized (lock) {
+			if(getMpegLength()>0) {
+				try{
+					return mpegImageList.poll();//.peek();
+				}catch(Exception e) {
+					Log.d("VideoQueue", "### 5555 " + e.getLocalizedMessage());
+				}
+			}
+		}
+		return null;
 	}
 	
 	public void removeMpegImage() {
-		if(getMpegLength()>0) {
-			mpegImageList.remove();
+		synchronized (lock) {
+			if(getMpegLength()>0) {
+				try{
+					mpegImageList.remove();
+				}catch(Exception e) {
+					Log.d("VideoQueue", "### 6666 " + e.getLocalizedMessage());
+				}
+			}
 		}
 	}
 	
 	public int getMpegLength() {
 		return  mpegImageList.size();
 	}
-	/*private class ImageComparator implements Comparator<Image> {
-		
-		@Override
-		public int compare(Image image1, Image image2) {
-			if(image1.time.compareTo(image2.time)>=0){
-				return -1000;
-			}
-			return 1000;
-		}
-		
-	}*/
 }
