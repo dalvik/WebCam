@@ -31,7 +31,7 @@
 		    android:stretchColumns="0,4"
 		    android:shrinkColumns="2,3">
 	        
-	        <TableRow>
+	        <TableRow android:paddingBottom="5dip">
 	            <TextView
 			        android:text=""
 			        android:gravity="center"/>
@@ -50,6 +50,8 @@
 			        android:singleLine="true"
 			        android:editable="false"
 			        android:text="admin"
+			        android:background="@drawable/web_cam_edit_bg"
+			        android:padding="5dip"
 			        android:focusable="false"
 			        android:gravity="left"/>
 			      
@@ -61,7 +63,7 @@
 			        android:gravity="center"/>
 	        </TableRow>
 	        
-	        <TableRow>
+	        <TableRow android:paddingBottom="5dip">
 	            <TextView
 			        android:text=""
 			        android:gravity="center"/>
@@ -78,7 +80,9 @@
 			        android:layout_width="wrap_content"
 			        android:singleLine="true"
 			        android:password="true"
+			        android:background="@drawable/web_cam_edit_bg"
 			        android:hint="@string/password_hint"
+			        android:padding="5dip"
 			        android:gravity="left"/>
 			      
 			      <TextView
@@ -133,6 +137,7 @@
 		            android:padding="10dip"
 		            android:width="70dip"
 		            android:layout_marginRight="5dip"
+		            android:background="@drawable/web_cam_login_button_selector"
 		            android:text="@string/user_login">
 		        </Button>
 		        
@@ -143,6 +148,7 @@
 		            android:padding="10dip"
 		            android:width="70dip"
 		            android:layout_marginLeft="5dip"
+		            android:background="@drawable/web_cam_login_button_selector"
 		            android:text="@string/user_exit">
 		        </Button>
 		        

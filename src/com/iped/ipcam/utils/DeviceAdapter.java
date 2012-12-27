@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +70,12 @@ public class DeviceAdapter extends BaseAdapter {
 		}
 		if(position == checkedIndex) {
 			viewHolder.selectDevice.setChecked(true);
+			viewHolder.name.setTextColor(Color.BLACK);
+			viewHolder.id.setTextColor(Color.BLACK);
 		}else {
 			viewHolder.selectDevice.setChecked(false);
+			viewHolder.name.setTextColor(Color.GRAY);
+			viewHolder.id.setTextColor(Color.GRAY);
 		}
 		
 		viewHolder.name.setText(res.getText(R.string.device_manager_add_id_str)  + " " + format(position + 1)+" :");

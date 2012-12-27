@@ -21,7 +21,6 @@
         android:id="@+id/play_back_bottom"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff5a5a5a"
         android:orientation="horizontal">
 
         <TextView
@@ -39,15 +38,18 @@
             android:textSize="10sp"
             android:textStyle="bold" />
 
-       <!-- <SeekBar -->
+       <!-- <SeekBar 
+       
+            android:progressDrawable="@drawable/web_cam_seekbar_selector"
+			android:thumb="@drawable/web_cam_thumb" -->
        <com.iped.ipcam.gui.MySeekBar
             android:id="@+id/play_back_seek_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dip"
             android:layout_height="36dip"
-            android:background="#ff5a5a5a"
             android:paddingBottom="4dip"
             android:layout_weight="1"
+            android:background="@android:color/transparent"
             android:paddingLeft="8dip"
             android:paddingRight="8dip" />
 

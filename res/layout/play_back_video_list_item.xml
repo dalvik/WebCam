@@ -12,7 +12,7 @@
         android:maxLength="15"
         android:singleLine="true"
         android:padding="3dip"
-        android:textColor="#FFFFFFFF"/>
+        android:textColor="@color/black"/>
 
 	<LinearLayout android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
@@ -31,14 +31,14 @@
 		        android:layout_height="fill_parent"
 		        android:layout_weight="1"
 		        android:singleLine="true"
-		        android:textColor="#FFFFFFFF"/>
+		        android:textColor="@color/black"/>
 		
 		    <TextView android:id="@+id/video_preview_end_time"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
 		        android:layout_weight="1"
 		        android:singleLine="true"
-		        android:textColor="#FFFFFFFF" />
+		        android:textColor="@color/black" />
     
 		</LinearLayout>
 	
@@ -55,7 +55,7 @@
 				android:layout_weight="1" 
 			    android:singleLine="true"
 				android:textSize="10dip"
-				android:textColor="#FFFFFFFF"/>
+				android:textColor="@color/black"/>
 				
 			<TextView android:id="@+id/play_back_video_size"
 				android:layout_width="fill_parent"
@@ -63,7 +63,7 @@
 				android:layout_weight="1" 
 			    android:singleLine="true"
 				android:textSize="10dip"
-				android:textColor="#FFFFFFFF"/>
+				android:textColor="@color/black"/>
 			
 		</LinearLayout>
 	</LinearLayout>

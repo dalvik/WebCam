@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,10 +23,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -96,7 +95,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private static WakeLock mWakeLock;
 	
-	private ProgressDialog m_Dialog = null;
+	private CustomProgressDialog m_Dialog = null;
 	
 	public static String currIpAddress = null;
 	
@@ -847,10 +846,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
     }
 	
 	private void showProgressDlg(int textId) {
+		
 		if(m_Dialog == null) {
-			m_Dialog = new ProgressDialog(CamVideoH264.this);
-			//m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			m_Dialog.getWindow().getAttributes().windowAnimations = R.style.style_web_cam_progress_bar;
+			//m_Dialog = new ProgressDialog(this);
+			m_Dialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog);  
 		}
 		if(m_Dialog != null) {
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
@@ -863,6 +862,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private void hideProgressDlg() {
 		if(m_Dialog != null && m_Dialog.isShowing()) {
 			m_Dialog.dismiss();
+			m_Dialog = null;
 		}
 	}
 	

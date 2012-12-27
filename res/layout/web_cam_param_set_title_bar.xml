@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topBar"
+    android:layout_width="fill_parent"
+    android:layout_height="22.0dip"
+    android:background="@drawable/title_bg"
+    android:orientation="horizontal" >
+
+    <Button
+        android:id="@+id/common_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10.0dip"
+        android:background="@drawable/web_cam_param_set_button_back_selector" />
+
+    <TextView
+        android:id="@+id/top_title"
+        style="@style/style_web_cam_param_title_font_set"
+        android:text="@string/device_params_sets_str"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="50.0dip"
+        android:layout_marginRight="50.0dip"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true" />
+
+</RelativeLayout>

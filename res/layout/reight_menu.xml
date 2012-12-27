@@ -39,7 +39,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text=""
-                        android:background="@drawable/web_cam_opera_minus_selector"
+                        android:background="@drawable/web_cam_right_menu_up_button_selector"
                         android:textSize="12dp" />
 
                     <Button
@@ -61,7 +61,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text=""
-                        android:background="@drawable/web_cam_opera_minus_selector"
+                        android:background="@drawable/web_cam_right_menu_left_button_selector"
                         android:textSize="12dp" />
 
                     <Button
@@ -81,7 +81,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text=""
-                        android:background="@drawable/web_cam_opera_minus_selector"
+                        android:background="@drawable/web_cam_right_menu_right_button_selector"
                         android:textSize="12dp" />
                 </TableRow>
 
@@ -101,7 +101,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text=""
-                        android:background="@drawable/web_cam_opera_minus_selector"
+                        android:background="@drawable/web_cam_right_menu_down_button_selector"
                         android:textSize="12dp" />
 
                     <Button

@@ -162,7 +162,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
 			canvas.restore();
-			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 20, rect.top + 25, textPaint);
+			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 15, rect.top + 20, textPaint);
 		}else {
 			String text = "  More : hangzhouiped.taobao.com";
 			if(rect2 == null) {

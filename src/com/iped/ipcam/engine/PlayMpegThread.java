@@ -1,7 +1,6 @@
 package com.iped.ipcam.engine;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -55,8 +54,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	private byte[] nalBuf = null;
 	
 	private boolean imageDataStart = false;
-	
-	///queue = new VideoQueue();
 	
 	private int mpegPakages = 3;
 	
@@ -120,9 +117,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			do{
 				if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 					synchronized (mpegBuf) {
-						if(BuildConfig.DEBUG && DEBUG) {
-							Log.d(TAG, "### data buffer is empty! ---->");
-						}
+						/*if(BuildConfig.DEBUG && DEBUG) {
+							Log.d(TAG, "### data buffer is empty! ---->" + indexForPut + " " + indexForGet);
+						}*/
 						try {
 							mpegBuf.wait(200);
 						} catch (InterruptedException e) {
@@ -270,6 +267,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
 					queue.addMpegImage(mpegImage);
 					unusedBytes = (mpegDataLength - usedBytes);
+					if(unusedBytes<=0) {
+						unusedBytes = 0;
+					}
 					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
 				}
@@ -284,7 +284,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		this.rgbDataBuf = null;
 		jpegByteBuf = null;
 		mpegBuf = null;
-		queue.clear();
 		stopPlay = true;
 		System.gc();
 		if(BuildConfig.DEBUG && DEBUG) {
@@ -296,14 +295,14 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		
 		public void run() {
 			while(!Thread.currentThread().isInterrupted() && !stopPlay) {
-				String oldTime = queue.removeTime();
+				String oldTime = queue.pollTime();
 				if(null != oldTime) {
 					timeStr = oldTime.substring(0,14);
-					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.d(TAG, "### remove new   time=" + oldTime + "  time list length " + queue.getTimeListLength() + " timeStr = " + timeStr);
-					}
 					if(!popuJpeg(oldTime)){
 						MpegImage mpegImage = queue.getMpegImage();
+						if(BuildConfig.DEBUG && !DEBUG) {
+							Log.d(TAG, "### show mpegImage = " + mpegImage );
+						}
 						if(mpegImage != null) {
 							byte[] tmpRgb = mpegImage.rgb;
 							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
@@ -356,9 +355,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		
 		public boolean popuJpeg(String oldTime) {
 			JpegImage image = queue.getFirstImage();
-			if(BuildConfig.DEBUG && !DEBUG) {
-				Log.d(TAG, "### show time = " + oldTime + " == " + image.time);
-			}
 			if(null == image) {
 				return false;
 			}else {
@@ -377,6 +373,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					return true;
 				} else if(oldTime.compareTo(image.time) > 0) {
 					queue.clear();
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.d(TAG, "### queue clear");
+					}
 				}
 			}
 			return false;

@@ -34,13 +34,13 @@
         
         <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
         
-        <activity android:launchMode="singleInstance" android:name=".DeviceManager" android:theme="@style/thems_param_set_activity"/>
+        <activity android:launchMode="singleInstance" android:name=".DeviceManager" />
         
         <activity android:launchMode="singleInstance" 
             android:name=".DeviceParamSets" 
             android:configChanges="keyboardHidden|orientation" 
             android:screenOrientation="landscape" 
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            android:theme="@style/thems_param_set_activity">
         	<intent-filter>
         	    <action android:name="android.intent.action.QUERY_CONFIG_ACTION"/>
         	    <category android:name="android.intent.category.DEFAULT"/>

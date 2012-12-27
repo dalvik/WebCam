@@ -64,9 +64,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	private ICamManager camManager = null;
 
-	private ProgressDialog progressDialog = null;
+	private CustomProgressDialog progressDialog = null;
 
-	private ProgressDialog queryNewCameraDialog = null;
+	private CustomProgressDialog queryNewCameraDialog = null;
 	
 	private int lastSelected = 0;
 
@@ -78,7 +78,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private Device device;
 	
-	private ProgressDialog m_Dialog = null;
+	private CustomProgressDialog m_Dialog = null;
 	
 	private String password = "";
 	
@@ -362,7 +362,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				ToastUtils.showToast(DeviceManager.this, R.string.device_manager_new_device_id_not_null);
 				return;
 			}
-			queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
+			//queryNewCameraDialog = ProgressDialog.show(DeviceManager.this, getString(R.string.device_manager_add_query_title_str), getString(R.string.device_manager_add_query_message_str));
+			queryNewCameraDialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog); 
+			queryNewCameraDialog.setTitile(getString(R.string.device_manager_add_query_title_str));
+			queryNewCameraDialog.setMessage(getString(R.string.device_manager_add_query_message_str));
 			new Thread(new QueryCamera(newDeviceName.getText().toString(), cameraId,"","","","", true)).start();
 			alertDialog.dismiss();
 			alertDialog = null;
@@ -384,9 +387,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		if(progressDialog != null) {
 			dismissProgress();
 		}
-		progressDialog = new ProgressDialog(DeviceManager.this);
-		progressDialog.setTitle(getResources().getString(R.string.auto_search_tips_str));
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		//progressDialog = new ProgressDialog(DeviceManager.this);
+		progressDialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog); 
+		progressDialog.setMessage(getResources().getString(R.string.auto_search_tips_str));
+		//progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		//progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
@@ -394,10 +398,12 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	public void dismissProgress() {
 		if (progressDialog != null && progressDialog.isShowing()) {
 			progressDialog.dismiss();
+			progressDialog = null;
 		}
 		
 		if(queryNewCameraDialog != null){
 			queryNewCameraDialog.dismiss();
+			queryNewCameraDialog = null;
 		}
 	}
 
@@ -700,8 +706,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private void showProgressDlg(int textId) {
 		if(m_Dialog == null) {
-			m_Dialog = new ProgressDialog(DeviceManager.this);
-			m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			//m_Dialog = new ProgressDialog(DeviceManager.this);
+			m_Dialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog);
+			//m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			m_Dialog.setCancelable(false);
 		}
 		m_Dialog.setMessage(getResources().getString(textId, device.getDeviceID()));
@@ -713,6 +720,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	private void hideProgressDlg() {
 		if(m_Dialog != null && m_Dialog.isShowing()) {
 			m_Dialog.dismiss();
+			m_Dialog = null;
 		}
 	}
 

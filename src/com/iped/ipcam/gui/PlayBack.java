@@ -1,12 +1,12 @@
 package com.iped.ipcam.gui;
 
-import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
@@ -18,7 +18,6 @@ import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +36,7 @@ import android.widget.Toast;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.engine.IVideoManager;
+import com.iped.ipcam.factory.ICustomDialog;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.Constants;
@@ -74,10 +74,6 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	
 	private Button endSearchTime = null;
 	 
-	private View myDialogView = null;
-	
-	private AlertDialog dlg = null;
-	
 	private Calendar startCalendar = null;
 
 	private Calendar endCalendar = null;
@@ -258,16 +254,15 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	}
 	
 	private void vodeoSearchDia(final Device device) {
-        LayoutInflater factory = LayoutInflater.from(PlayBack.this);
-        myDialogView = factory.inflate(R.layout.play_back_video_search_dlg, null);
-        initSearchDlg(device);
-        dlg = new AlertDialog.Builder(PlayBack.this)
-        .setTitle(getResources().getString(R.string.play_back_auto_search_video_str))
-        .setView(myDialogView)//
-        .setPositiveButton(getResources().getString(R.string.play_back_auto_search_button_str), //
-        new DialogInterface.OnClickListener() {//
-			public void onClick(DialogInterface dialog, int whichButton) {
-            	Date startDate = DateUtil.formatTimeToDate2(getStartTime());
+		 final ICustomDialog customDialog = new CustomAlertDialog(this, R.style.thems_customer_alert_dailog);
+        customDialog.setContentView(R.layout.play_back_video_search_dlg);
+        initSearchDlg(device, customDialog);
+        customDialog.setTitle(getResources().getString(R.string.play_back_auto_search_video_str));
+        customDialog.show();
+        customDialog.findViewById(R.id.web_cam_sure_play_back).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Date startDate = DateUtil.formatTimeToDate2(getStartTime());
             	Date endDate = DateUtil.formatTimeToDate2(getEndTime());
             	//String s = getStartTime();
             	//String w = getEndTime();
@@ -278,45 +273,22 @@ public class PlayBack extends ListActivity implements OnClickListener {
             		 videoAdapter.notifyDataSetChanged();
             		 videoManager.videoSearchInit(camManager.getDevice(selectIndexDevcie), startDate, endDate);
             		 videoManager.startSearchThread(handler);
-            		 try {
-            			 Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
-            			 field.setAccessible( true );
-            			 field.set(dialog, true);
-            			 dialog.dismiss();
-            		 } catch  (Exception e) {
-            			 Log.v(TAG, e.getMessage());
-            		 }
+            		 customDialog.dismiss();
             	 }else {
             		 Toast.makeText(PlayBack.this, getResources().getString(R.string.play_back_start_above_start_time_str), Toast.LENGTH_SHORT).show();
-            		 try {
-            			 Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
-            			 field.setAccessible( true );
-            			 field.set(dialog, false);
-            			 dialog.dismiss();
-            		 } catch  (Exception e) {
-            			 Log.v(TAG, e.getMessage());
-            		 }
             	 }
-            }
-        }).setNegativeButton(getResources().getString(R.string.play_back_auto_cancle_button_str), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            	 try {
-             	    Field field  =  dlg.getClass().getSuperclass().getDeclaredField("mShowing");
-             	    field.setAccessible( true );
-             	    field.set(dialog, true);
-             	    dialog.dismiss();
-             	} catch  (Exception e) {
-             		Log.v(TAG, e.getMessage());
-             	}
-            }
-        }
-        )
-        .create();
-        dlg.show();
+			}
+        });
+        customDialog.findViewById(R.id.web_cam_cancl_play_back).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				customDialog.dismiss();
+			}
+        });
 	}
 
 	
-	private void initSearchDlg(Device device) {
+	private void initSearchDlg(Device device, Dialog myDialogView) {
 		startCalendar  = Calendar.getInstance();
 		startCalendar.set(Calendar.YEAR, startCalendar.get(Calendar.YEAR)-1);
 		endCalendar = Calendar.getInstance();

@@ -20,7 +20,7 @@
     <string name="user_exit_title">退出确认</string>
     <string name="user_exit_message">您确定退出吗</string>
     <string name="user_exit_sure">退出</string>
-    <string name="user_exit_cancle">取消</string> 
+    <string name="user_exit_continue">继续</string> 
     
     <!-- modify password  -->
     <string name="password_modify_security_botton_str">更改访问密码</string>

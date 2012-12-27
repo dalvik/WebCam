@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="@color/darkgray" >
+    android:background="@drawable/device_item_unselect" >
 
     <TableLayout
         android:id="@+id/user_oper"
@@ -18,27 +18,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:padding="10dip"
+                android:background="@drawable/web_cam_button_selector"
                 android:text="@string/play_back_auto_search_video_str" />
 
             <Button android:id="@+id/play_back_clear_all"
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="10dip"
+                android:background="@drawable/web_cam_button_selector"
                 android:text="@string/play_back_auto_clear_all_str" />
         </TableRow>
     </TableLayout>
 
     <ListView android:id="@+id/android:list"
         android:layout_above="@+id/user_oper"
+        style="@style/style_device_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/lightdark"
-        android:cacheColorHint="@color/lightdark"/>
+        />
 
     <TextView android:id="@id/android:empty"  
               android:layout_width="fill_parent"  
               android:layout_height="fill_parent"  
-              android:textColor="@color/yellow"
+              android:textColor="@color/blue"
               android:gravity="center"
               android:text="@string/video_preview_no_video_str"/>  
 </RelativeLayout>

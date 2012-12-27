@@ -1,5 +1,7 @@
 package com.iped.ipcam.gui;
 
+import com.iped.ipcam.gui.R.color;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.Gravity;
@@ -53,7 +55,12 @@ public class ControlPanel extends LinearLayout implements OnClickListener{
 		buttonHandle.setLayoutParams(textParams);
 		buttonHandle.setGravity(Gravity.CENTER);
 		buttonHandle.setOnClickListener(this);
-		this.addView(buttonHandle);
+		LinearLayout buttonLayout = new LinearLayout(context);
+		LinearLayout.LayoutParams params = new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.FILL_PARENT);
+		buttonLayout.setBackgroundResource(R.color.white);
+		buttonLayout.setLayoutParams(params);
+		buttonLayout.addView(buttonHandle);
+		this.addView(buttonLayout);
 		panelContainer = new LinearLayout(context);
 		panelContainer.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		this.addView(panelContainer);

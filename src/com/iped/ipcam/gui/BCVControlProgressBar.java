@@ -3,6 +3,7 @@ package com.iped.ipcam.gui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ProgressBar;
@@ -49,6 +50,7 @@ public class BCVControlProgressBar extends ProgressBar {
 		this.paint.getTextBounds(this.text, 0, this.text.length(), rect);
 		int x = getWidth() /2 - rect.centerX();
 		int y = getHeight() /2 - rect.centerY();
+		canvas.drawColor(getResources().getColor(R.color.web_cam_video_view_progress_bg), Mode.SRC_OVER);
 		canvas.drawText(this.text, x, y, paint);
 	}
 	
