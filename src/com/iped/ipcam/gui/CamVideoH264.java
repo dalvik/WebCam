@@ -38,6 +38,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.iped.ipcam.bitmapfun.ImageGrid;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.pojo.BCVInfo;
@@ -497,7 +498,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			return;
 		}
 		if(v.getId() == R.id.right_down){
-			startActivity(new Intent(this,ImageViewer.class));
+			startActivity(new Intent(this,ImageGrid.class));
 			return;
 		}
 		if(myVideoView.isStopPlay()) {
@@ -606,7 +607,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			break;
 		case R.id.right_down:
-			startActivity(new Intent(this,ImageViewer.class));
+			//startActivity(new Intent(this,ImageViewer.class));
+			startActivity(new Intent(this,ImageGrid.class));
 			break;
 		case R.id.send_audio:
 			Log.d(TAG, "### open oper flag = "  + f);
@@ -781,7 +783,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		case R.id.right_down:
 			if(f) {
 				f = false;
-				startActivity(new Intent(this,ImageViewer.class));
+				//startActivity(new Intent(this,ImageViewer.class));
+				startActivity(new Intent(this, ImageGrid.class));
 				f = true;
 			}
 			//FileUtil.openImage(this);

@@ -211,8 +211,15 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				int imageHeight = headInfo[1];
 				usedBytes = headInfo[2];
 				unusedBytes = (mpegDataLength - usedBytes);
+				if(unusedBytes<=0) {
+					unusedBytes = 0;
+				}
 				System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 				mpegDataLength = unusedBytes;
+				if(imageWidth<=0) {
+					Log.d(TAG, "### imageWidth = " + imageWidth + "  xvid find header fail");
+					continue;
+				}
 				System.gc();
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);

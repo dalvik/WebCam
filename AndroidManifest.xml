@@ -4,7 +4,7 @@
     android:versionCode="6"
     android:versionName="V6.0.0" >
 
-    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="15"/>
+    <uses-sdk android:minSdkVersion="5" android:targetSdkVersion="15"/>
     
 	
     <!--  android:name=".WebTabWidget" -->
@@ -30,6 +30,17 @@
 
         <activity android:name=".LeftVideoView"/>
         
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageGridActivity"/>
+        
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageGrid"/>
+        
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetailActivity" android:configChanges="orientation|keyboardHidden"
+             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+        
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetail" android:configChanges="orientation|keyboardHidden"
+             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+         
+         
         <activity android:name=".ImageViewer" />
         
         <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
@@ -60,15 +71,15 @@
         
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET"/> 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
- 	<uses-permission android:name="android.permission.DEVICE_POWER" /> 
  	<uses-permission android:name="android.permission.RESTART_PACKAGES"/>  
  	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
  	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
  	<uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
  	<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
+ 	<uses-permission android:name="android.permission.DEVICE_POWER"/>
  	
 </manifest>

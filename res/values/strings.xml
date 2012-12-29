@@ -405,4 +405,9 @@
     <string name="blank_str">More : hangzhouiped.taobao.com</string>
     <string name="version">12.0.8205</string>
     <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>
+    
+    
+    <string name="clear_cache_menu">Clear Caches</string>
+    <string name="clear_cache_complete_toast">Caches have been cleared</string>
+    <string name="imageview_description">Image Thumbnail</string>
 </resources>
