@@ -413,11 +413,13 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			Toast.makeText(PlayBack.this, getResources().getString(R.string.play_back_auto_clear_no_files_str), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		new AlertDialog.Builder(PlayBack.this).setTitle(getResources().getString(R.string.play_back_clear_dlg_title_str))
-		.setMessage(getResources().getString(R.string.play_back_clear_dlg_message_str))
-		.setPositiveButton(getResources().getString(R.string.play_back_clear_dlg_sure_str), new DialogInterface.OnClickListener() {
+		final ICustomDialog customDialog = new CustomAlertDialog(this, R.style.thems_customer_alert_dailog);
+        customDialog.setContentView(R.layout.clear_tips_pop_dialog_layout);
+        customDialog.setTitle(getString(R.string.play_back_clear_dlg_title_str));
+        customDialog.show();
+        customDialog.findViewById(R.id.web_cam_sure_button).setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(View v) {
 				IVideoManager videoManager = CamMagFactory.getVideoManagerInstance();
 				Video videoStart = videoAdapter.getItem(0);
 				Video videoEnd = videoAdapter.getItem(count-1);
@@ -426,9 +428,15 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				Message msg = handler.obtainMessage();
 				handler.sendMessage(msg);
 				handler.sendEmptyMessage(Constants.CLEARFILES);
+				customDialog.dismiss();
 			}
-		})
-		.setNegativeButton(getResources().getString(R.string.play_back_auto_cancle_button_str), null).create().show();
+        });
+        customDialog.findViewById(R.id.web_cam_cancl_button).setOnClickListener(new OnClickListener() {
+        	@Override
+			public void onClick(View v) {
+        		customDialog.dismiss();
+        	}
+        });
 	}
 	
 	@Override

@@ -29,8 +29,10 @@ import android.widget.ListView;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.engine.IVideoManager;
 import com.iped.ipcam.factory.ICustomDialog;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
@@ -338,22 +340,25 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			break;
 		case R.id.clear_all_button:
 			if(camManager.getCamList().size()>0) {
-				new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.clear_all_device_title_str))
-				.setMessage(getResources().getString(R.string.clear_all_device_message_str))
-				.setPositiveButton(getResources().getString(R.string.clear_all_device_ok_str),
-						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+				final ICustomDialog customDialog = new CustomAlertDialog(this, R.style.thems_customer_alert_dailog);
+		        customDialog.setContentView(R.layout.delete_device_dialog_layout);
+		        customDialog.setTitle(getString(R.string.clear_all_device_title_str));
+		        customDialog.show();
+		        customDialog.findViewById(R.id.web_cam_sure_button).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
 						camManager.clearCamList();
 						adapter.setChecked(0);
 						handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
+						customDialog.dismiss();
 					}
-				}).setNegativeButton(getResources().getString(R.string.clear_all_device_cancle_str), 
-						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						
-					}
-				})
-				.create().show();
+		        });
+		        customDialog.findViewById(R.id.web_cam_cancl_button).setOnClickListener(new OnClickListener() {
+		        	@Override
+					public void onClick(View v) {
+		        		customDialog.dismiss();
+		        	}
+		        });
 			}
 	        break;
 		case R.id.web_cam_sure_add_new_device:
