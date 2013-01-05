@@ -26,26 +26,37 @@
         </activity>
         
         <!-- android:theme="@style/main_exit_themes"android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
-        <activity android:launchMode="singleInstance" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  android:name=".WebTabWidget" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:launchMode="singleInstance" 
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  
+            android:name=".WebTabWidget" 
+            android:configChanges="keyboardHidden|orientation"/>
 
         <activity android:name=".LeftVideoView"/>
         
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageGridActivity"/>
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageGridActivity"
+            android:configChanges="keyboardHidden|orientation"/>
         
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageGrid"/>
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageGrid"
+            android:configChanges="keyboardHidden|orientation"/>
         
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetailActivity" android:configChanges="orientation|keyboardHidden"
-             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetailActivity" 
+             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+             android:configChanges="keyboardHidden|orientation"/>
         
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetail" android:configChanges="orientation|keyboardHidden"
+        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetail" 
+            android:configChanges="orientation|keyboardHidden"
              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
          
          
         <activity android:name=".ImageViewer" />
         
-        <activity android:launchMode="singleInstance" android:name=".CamVideoH264" android:configChanges="orientation|keyboard"/>
+        <activity android:launchMode="singleInstance" 
+            android:name=".CamVideoH264" 
+            android:configChanges="orientation|keyboard"/>
         
-        <activity android:launchMode="singleInstance" android:name=".DeviceManager" />
+        <activity android:launchMode="singleInstance" 
+            android:name=".DeviceManager" 
+            android:configChanges="keyboardHidden|orientation"/>
         
         <activity android:launchMode="singleInstance" 
             android:name=".DeviceParamSets" 
@@ -59,9 +70,13 @@
         	</intent-filter>    
         </activity>
         
-        <activity android:launchMode="singleInstance" android:name=".PlayBack"/>
+        <activity android:launchMode="singleInstance" 
+            android:name=".PlayBack"
+            android:configChanges="keyboardHidden|orientation"/>
         
-        <activity android:launchMode="singleInstance" android:name=".SystemSettings"/>
+        <activity android:launchMode="singleInstance" 
+            android:name=".SystemSettings"
+            android:configChanges="keyboardHidden|orientation"/>
         
         <activity android:name=".List1" android:theme="@android:style/Theme.Dialog"/>
         

@@ -106,7 +106,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
 		});
         // Enable some additional newer visibility and ActionBar features to create a more
         // immersive photo viewing experience
-        if (Utils.hasHoneycomb()) {
+        /*if (Utils.hasHoneycomb()) {
             final ActionBar actionBar = getActionBar();
 
             // Hide title text and set home as up
@@ -129,7 +129,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
             // Start low profile mode and hide ActionBar
             mPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
             actionBar.hide();
-        }
+        }*/
 
         // Set the current item based on the extra passed in to this activity
         final int extraCurrentItem = getIntent().getIntExtra(EXTRA_IMAGE, -1);

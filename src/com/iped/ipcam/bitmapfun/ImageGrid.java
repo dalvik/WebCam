@@ -127,12 +127,8 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 	
 	@Override
     public void onItemClick(AdapterView<?> arg0, View v, int index, long id) {
-    	/*final Intent i = new Intent(this, ImageDetail.class);
-        i.putExtra(ImageDetail.EXTRA_IMAGE, index);
-        startActivity(i);*/
-    	
     	final Intent i = new Intent(this, ImageDetailActivity.class);
-        i.putExtra(ImageDetailActivity.EXTRA_IMAGE, (int) id);
+        i.putExtra(ImageDetailActivity.EXTRA_IMAGE, index);
         i.putExtra(ImageDetailActivity.LIST_SIZE, imageList.size());
         if (Utils.hasJellyBean()) {
             // makeThumbnailScaleUpAnimation() looks kind of ugly here as the loading spinner may
