@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/web_cam_login_button_selector"
-            android:text="@string/clear_all_device_ok_str" />
+            android:text="@string/clear_all_device_cancle_str" />
 
         <TextView
             android:layout_width="wrap_content"

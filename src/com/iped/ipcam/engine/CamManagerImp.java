@@ -30,6 +30,7 @@ public class CamManagerImp implements ICamManager {
 	private String TAG = "CamManagerImp";
 	
 	public CamManagerImp() {
+		
 	}
 	
 	@Override

@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/web_cam_login_button_selector"
-            android:text="@string/device_manager_add_sure_str" />
+            android:text="@string/login_str" />
 
         <Button
             android:id="@+id/web_cam_cancl_first_login"

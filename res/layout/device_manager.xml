@@ -50,26 +50,14 @@
                 android:text="@string/clear_all_str" />
     </LinearLayout>
 
-       <!--
-        android:background="@drawable/device_item_unselect"
-        android:divider="@drawable/list_line"
-        android:listSelector="@drawable/device_list_selector"
-        android:cacheColorHint="#00000000"
-          -->
-    <ListView android:id="@+id/android:list"
+    <com.iped.ipcam.view.PullToRefreshListView 
+        android:id="@+id/android:list"
         style="@style/style_device_list"
         android:layout_above="@+id/user_oper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:fadingEdge="none"
         android:footerDividersEnabled="false"
         android:headerDividersEnabled="true"
         />
-
-    <TextView android:id="@id/android:empty"  
-              android:layout_width="fill_parent"  
-              android:layout_height="fill_parent"  
-              android:textColor="@color/blue"
-              android:gravity="center"
-              android:text="@string/no_device_online"/>  
+	
 </RelativeLayout>

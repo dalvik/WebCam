@@ -16,7 +16,7 @@ import android.widget.ImageView;
 
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
-import com.iped.ipcam.engine.PlayBackThread;
+import com.iped.ipcam.engine.PlayBackJpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
@@ -88,7 +88,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private boolean reverseFlag = false;
 
-	private boolean playBackFlag = false;
+	private boolean playBackFlag = false; //回放标记
 	
 	private boolean mpeg4Decoder = false;
 	
@@ -214,7 +214,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		nalBuf = new byte[NALBUFLENGTH];//>100k
 		indexForPut = 0;
 		temWidth = 1;
-		if(!playBackFlag) {
+		if(!playBackFlag) {//不是回放
 			if(mpeg4Decoder) {
 				/*if(decoderFactory != null) {
 					//decoderFactory.onStop(true);
@@ -234,7 +234,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				handler.sendMessage(msg);
 			}
 		}else { // 回放
-			decoderFactory = new PlayBackThread(this, nalBuf, timeStr, video, frameCount, handler);
+			decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 			decoderFactory.setOnMpegPlayListener(this);
 			new Thread(decoderFactory).start();	
 		}
@@ -288,11 +288,13 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
 		}
-		if(!playBackFlag){
+		if(!playBackFlag){//不是回放
 			handler.removeMessages(Constants.WEB_CAM_RECONNECT_MSG);
 			if(isAutoStop) {
 				handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 			}
+		}else {
+			
 		}
 		release();
 		flushBitmap();

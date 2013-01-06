@@ -137,7 +137,8 @@
     	<string name="device_edit_str">取消</string>	
     	<string name="device_del_str">删除</string>	
     	<string name="device_preview_str">预览</string>	
-    	<string name="no_device_online">没有在线设备</string>
+    	<string name="no_device_online">没有在线设备，下拉刷新</string>
+    	<string name="full_device_online">加载完毕，下拉刷新</string>
     	<string name="device_type_str">类型：</string>
     	<string name="device_ip_str">IP：</string>
     	<string name="device_cmd_port_str">CMD：</string>
@@ -405,6 +406,13 @@
     <string name="blank_str">More : hangzhouiped.taobao.com</string>
     <string name="version">12.0.8205</string>
     <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>
+    
+    <!-- pull to flush -->
+    <string name="pull_to_refresh_pull_label">下拉可以刷新</string>
+    <string name="pull_to_refresh_release_label">松开可以刷新</string>
+    <string name="pull_to_refresh_refreshing_label">加载中...</string>
+    <string name="pull_to_refresh_tap_label">下拉可以刷新</string>
+    <string name="pull_to_refresh_update">最近更新：</string>
     
     
     <string name="clear_cache_menu">Clear Caches</string>

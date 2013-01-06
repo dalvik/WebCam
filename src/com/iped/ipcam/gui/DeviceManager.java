@@ -1,9 +1,8 @@
 package com.iped.ipcam.gui;
 
-import android.app.AlertDialog;
+import java.util.Date;
+
 import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -19,20 +18,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
-import com.iped.ipcam.engine.IVideoManager;
 import com.iped.ipcam.factory.ICustomDialog;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
@@ -43,13 +43,21 @@ import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ToastUtils;
 import com.iped.ipcam.utils.WebCamActions;
+import com.iped.ipcam.view.PullToRefreshListView;
+import com.iped.ipcam.view.PullToRefreshListView.OnRefreshListener;
 
 public class DeviceManager extends ListActivity implements OnClickListener, OnItemLongClickListener {
 
-	private ListView listView = null;
+	private PullToRefreshListView listView = null;
 
 	private DeviceAdapter adapter = null;
 
+	private View deiceListViewFooter;
+	
+	private TextView deviceListViewFootMore;
+	
+	private ProgressBar deviceListViewFootProgress;
+	
 	private final int MENU_EDIT = Menu.FIRST;
 
 	private final int MENU_DEL = Menu.FIRST + 1;
@@ -109,6 +117,15 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			switch (message.what) {
 			case Constants.HIDETEAUTOSEARCH:
 				dismissProgress();
+				listView.onRefreshComplete(getString(R.string.pull_to_refresh_update) + new Date().toLocaleString());
+				listView.setSelection(0);
+				if(camManager.getCamList().size() >0) {
+					//deviceListViewFootMore.setText(getText(R.string.full_device_online));
+					deiceListViewFooter.setVisibility(View.GONE);
+				} else {
+					deiceListViewFooter.setVisibility(View.VISIBLE);
+					deviceListViewFootMore.setText(getText(R.string.no_device_online));
+				}
 				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				break;
 			case Constants.UPDATEDEVICELIST:
@@ -152,29 +169,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
             	Log.d(TAG, "======>" + pwd);
             	startActivity(intent);
 				break;
-			case Constants.SEND_SHOW_ONE_PWD_FIELD_PREVIEW_MSG:
-				
-				break;
-			/*case Constants.SEND_SHOW_TWO_PWD_FIELD_PREVIEW_MSG:
-				Device device = camManager.getSelectDevice();
-				pwd = (String) message.obj;
-				device.setUnDefine2(pwd);
-				int checkPwd = PackageUtil.checkPwd(device.getUnDefine2());
-				if(checkPwd == 1) {
-					camManager.updateCam(device);
-					FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
-					WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-					Intent intent2 = new Intent();
-					Bundle bundle2 = new Bundle();
-					bundle2.putString("PLVIDEOINDEX",""); 
-					bundle2.putSerializable("IPPLAY", device);
-					intent2.putExtras(bundle2);
-					intent2.setAction(Constants.ACTION_IPPLAY);
-					sendBroadcast(intent2);
-				} else {
-					ToastUtils.showToast(DeviceManager.this, R.string.device_manager_pwd_set_err);
-				}
-				break;*/
 			case Constants.SEND_ADD_NEW_DEVICE_BY_IP_MSG:
 				String pass = (String) message.obj;
 				deviceTmp.setUnDefine2(pass);
@@ -255,13 +249,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		deviceParaSetButton = (Button) findViewById(R.id.device_manager_button);
 		clearCamButton = (Button) findViewById(R.id.clear_all_button);
 		camManager = CamMagFactory.getCamManagerInstance();
-		adapter = new DeviceAdapter(camManager.getCamList(), this);
-		camManager.getCamList().addAll(FileUtil.fetchDeviceFromFile(this));
+		initDeviceListView();
+		
 		//adapter = new DeviceAdapter(, this);
-		listView = getListView();
-		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(itemClickListener);
-		listView.setOnItemLongClickListener(this);
 		registerForContextMenu(getListView());
 		autoSearchButton.setOnClickListener(this);
 		manulAddButton.setOnClickListener(this);
@@ -269,6 +259,44 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		clearCamButton.setOnClickListener(this);
 	}
 
+	private void initDeviceListView() {
+		adapter = new DeviceAdapter(camManager.getCamList(), this);
+		camManager.getCamList().addAll(FileUtil.fetchDeviceFromFile(this));
+		listView = (PullToRefreshListView)getListView();
+		deiceListViewFooter = getLayoutInflater().inflate(R.layout.layout_list_view_footer, null);
+		deviceListViewFootMore = (TextView) deiceListViewFooter.findViewById(R.id.list_view_foot_more);
+		deviceListViewFootProgress = (ProgressBar) deiceListViewFooter.findViewById(R.id.list_view_foot_progress);
+		listView.addFooterView(deiceListViewFooter);
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(itemClickListener);
+		listView.setOnItemLongClickListener(this);
+		listView.setOnScrollListener(new OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				listView.onScrollStateChanged(view, scrollState);
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				listView.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+				if(camManager.getCamList().size() <=0) {
+					listView.onScrollStateChanged(view, SCROLL_STATE_TOUCH_SCROLL );
+				}
+			}
+		});
+		listView.setOnRefreshListner(new OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				camManager.startThread(handler);
+			}
+		});
+		if(camManager.getCamList().size() >0) {
+			deiceListViewFooter.setVisibility(View.GONE);
+		} 
+	}
+	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -279,7 +307,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		} catch (Exception e) {
 			return;
 		}
-		Device device = camManager.getDevice(info.position);
+		Device device = camManager.getDevice(info.position-1);
+		if(device == null) {
+			return;
+		}
 		menu.setHeaderTitle(device.getDeviceName());
 		menu.add(0, MENU_PREVIEW, 1, getString(R.string.device_preview_str));
 		menu.add(0, MENU_DEL, 2, getString(R.string.device_del_str));
@@ -296,7 +327,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			break;
 
 		case MENU_DEL:
-			int seletIndex = infor.position;
+			int seletIndex = infor.position-1;
 			if (seletIndex>0) {
 				adapter.setChecked(seletIndex-1);
 			}
@@ -426,11 +457,14 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View arg1, int index,
 				long arg3) {
+			if(index == 0) {
+				return;
+			}
 			listView.requestFocusFromTouch();
 			lastSelected = index;
 			listView.setSelection(index);
-			camManager.setSelectInde(index);
-			adapter.setChecked(index);
+			camManager.setSelectInde(index-1);
+			adapter.setChecked(index-1);
 			adapter.notifyDataSetChanged();	
 		}
 	};
@@ -438,11 +472,14 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view,
 			int position, long id) {
+		if(position == 0) {
+			return true;
+		}
 		listView.requestFocusFromTouch();
 		lastSelected = position;
 		listView.setSelection(position);
-		camManager.setSelectInde(position);
-		adapter.setChecked(position);
+		camManager.setSelectInde(position-1);
+		adapter.setChecked(position-1);
 		adapter.notifyDataSetChanged();	
 		return false;
 	}

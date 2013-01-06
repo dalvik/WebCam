@@ -23,7 +23,7 @@ import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.VideoQueue;
 
-public class PlayBackThread extends DecoderFactory implements Runnable, OnPutIndexListener  {
+public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPutIndexListener  {
 
 	private byte[] nalBuf = null;;
 	
@@ -99,7 +99,7 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 	
 	private boolean andioStartFlag = false;
 	
-	public PlayBackThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
+	public PlayBackJpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
 		this.video = video;
@@ -115,12 +115,12 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 	public void run() {
 		stopPlay = false;
 		initTableHeadCount = 0;
-		new Thread(new PlayJpegThread()).start();
-		new Thread(new PalyBackAudio()).start();
+		//new Thread(new PlayJpegThread()).start();
+		//new Thread(new PalyBackAudio()).start();
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (jpegBuf) {
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### data buffer is empty! ---->");
 					}
 					try {
@@ -167,7 +167,7 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 					indexForGet+=4;
 					insideHeaderFlag = true;
 					insideHeadCount = 0;
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
 					}
 				}else if(b0 == -1 &&  b1 == -40 &&  b2 == -1 && b3 == -32) {
@@ -179,7 +179,7 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 					jpegBuf[3] = b3;
 					indexForGet += 3;
 					jpegDataLength = 4;
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### jpeg start flag ->" + video);
 					}
 				} else {
@@ -192,7 +192,11 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 						if(insideHeadCount >= 26) { 
 							insideHeaderFlag = false;	
 							timeStr = new String(timeByte, 4, 14);
-							rate = 1000*1000/Integer.parseInt(new String(timeByte, 18, 8));
+							try {
+								rate = 1000*1000/Integer.parseInt(new String(timeByte, 18, 8));
+							} catch (Exception e) {
+								rate = 2;
+							}
 						}
 					}else {
 						if(isVideo == 1){ //video
@@ -337,6 +341,7 @@ public class PlayBackThread extends DecoderFactory implements Runnable, OnPutInd
 	@Override
 	public void onStop(boolean stopPlay) {
 		this.stopPlay = stopPlay;
+		Log.d(TAG, "### play back set stop");
 	}
 	
 	@Override

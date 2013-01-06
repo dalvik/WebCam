@@ -50,15 +50,15 @@
          
         <activity android:name=".ImageViewer" />
         
-        <activity android:launchMode="singleInstance" 
+        <activity
             android:name=".CamVideoH264" 
             android:configChanges="orientation|keyboard"/>
         
-        <activity android:launchMode="singleInstance" 
+        <activity 
             android:name=".DeviceManager" 
             android:configChanges="keyboardHidden|orientation"/>
         
-        <activity android:launchMode="singleInstance" 
+        <activity 
             android:name=".DeviceParamSets" 
             android:configChanges="keyboardHidden|orientation" 
             android:screenOrientation="landscape" 
@@ -70,7 +70,7 @@
         	</intent-filter>    
         </activity>
         
-        <activity android:launchMode="singleInstance" 
+        <activity  
             android:name=".PlayBack"
             android:configChanges="keyboardHidden|orientation"/>
         
