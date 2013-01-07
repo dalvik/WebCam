@@ -223,6 +223,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
+				new Thread(new DecodeAudioThread(this)).start();
 			}else {
 				new Thread(new DecodeAudioThread(this)).start();
 				decoderFactory = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
