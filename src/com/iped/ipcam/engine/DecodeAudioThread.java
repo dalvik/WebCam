@@ -16,7 +16,7 @@ public class DecodeAudioThread extends DecoderFactory{
 
 	private String TAG = "DecodeAudioThread";
 	
-	private boolean DEBUG = true;
+	private boolean DEBUG = false;
 	
 	private boolean stopPlay = false;
 	
@@ -36,6 +36,7 @@ public class DecodeAudioThread extends DecoderFactory{
 	private byte[] recvAudioBuf = null; 
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	private int indexForGet = 0;
+	
 	
 	public DecodeAudioThread(MyVideoView myVideoView) {
 		recvAudioBuf = new byte[recvAudioBufLen];
@@ -65,6 +66,9 @@ public class DecodeAudioThread extends DecoderFactory{
 							Log.d(TAG, "### audio buffer is full! ---->");
 						} catch (InterruptedException e) {
 							stopPlay = true;
+							if(thread != null && !thread.isInterrupted()) {
+								thread.interrupt();
+							}
 							e.printStackTrace();
 						}
 					}
@@ -123,15 +127,16 @@ public class DecodeAudioThread extends DecoderFactory{
 			m_out_trk.play();
 			zeroIndex32 = 0;
 			do{
-				if((indexForGet+1) % recvAudioBufLen == indexForPut){
+				if(indexForGet % recvAudioBufLen == indexForPut){
 					synchronized (pcmArr) {
-						if(BuildConfig.DEBUG && !DEBUG) {
+						if(BuildConfig.DEBUG && DEBUG) {
 							Log.d(TAG, "### audio buffer is empty! ---->");
 						}
 						try {
 							pcmArr.wait(300);
 						} catch (InterruptedException e) {
 							stopPlay = true;
+							release();
 							e.printStackTrace();
 						}
 					}  
@@ -156,13 +161,17 @@ public class DecodeAudioThread extends DecoderFactory{
 					indexForGet = (indexForGet + 1)%recvAudioBufLen;  
 				}
 			} while(!stopPlay);
+			release();
+		}
+		
+		private void release()  {
 			if (m_out_trk != null) {
 				m_out_trk.stop();
 				m_out_trk.release();
 				m_out_trk = null;
 			}
 			UdtTools.exitAmrDecoder();
-			if(BuildConfig.DEBUG && DEBUG) {
+			if(BuildConfig.DEBUG && !DEBUG) {
 				Log.d(TAG, "### audio amr decoder exit.");
 			}
 		}
