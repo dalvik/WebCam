@@ -84,6 +84,12 @@
         
         <activity android:name=".PopupActivity" android:theme="@style/thems_tips_popup_dailog"/>
         
+         <activity
+            android:name=".LogoutDialog"
+            android:configChanges="keyboardHidden|orientation"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.HalfTranslucent" />
+         
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/> 
