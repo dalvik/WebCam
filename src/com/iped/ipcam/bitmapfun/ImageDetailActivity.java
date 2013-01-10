@@ -87,50 +87,6 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
         mPager.setAdapter(mAdapter);
         mPager.setPageMargin((int) getResources().getDimension(R.dimen.image_detail_pager_margin));
         mPager.setOffscreenPageLimit(2);
-        mPager.setOnPageChangeListener(new OnPageChangeListener() {
-			
-			@Override
-			public void onPageSelected(int index) {
-				curPage = index;
-			}
-			
-			@Override
-			public void onPageScrolled(int index, float arg1, int index2) {
-				//System.out.println("onPageScrolled = " + index + " " + index2);
-			}
-			
-			@Override
-			public void onPageScrollStateChanged(int index) {
-				//System.out.println("onPageScrollStateChanged = " + index);
-			}
-		});
-        // Enable some additional newer visibility and ActionBar features to create a more
-        // immersive photo viewing experience
-        /*if (Utils.hasHoneycomb()) {
-            final ActionBar actionBar = getActionBar();
-
-            // Hide title text and set home as up
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-
-            // Hide and show the ActionBar as the visibility changes
-            mPager.setOnSystemUiVisibilityChangeListener(
-                    new View.OnSystemUiVisibilityChangeListener() {
-                        @Override
-                        public void onSystemUiVisibilityChange(int vis) {
-                            if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
-                                actionBar.hide();
-                            } else {
-                                actionBar.show();
-                            }
-                        }
-                    });
-
-            // Start low profile mode and hide ActionBar
-            mPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-            actionBar.hide();
-        }*/
-
         // Set the current item based on the extra passed in to this activity
         final int extraCurrentItem = getIntent().getIntExtra(EXTRA_IMAGE, -1);
         if (extraCurrentItem != -1) {
@@ -190,7 +146,8 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
      * memory at once but create/destroy them on the fly.
      */
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
-        private final int mSize;
+        
+    	private final int mSize;
 
         public ImagePagerAdapter(FragmentManager fm, int size) {
             super(fm);

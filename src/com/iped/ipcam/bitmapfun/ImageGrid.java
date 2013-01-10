@@ -22,23 +22,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,7 +52,7 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 	 
 	private static final String TAG = "ImageGridActivity";
 
-	private ImageAdapter imageAdapter;
+	private ImageGridAdapter imageAdapter;
 	
 	private GridView gridView = null;
 	
@@ -84,7 +78,7 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 		cacheParams.setMemCacheSizePercent(this, 0.25f);
 	    mImageFetcher.setLoadingImage(R.drawable.empty_photo);
 	    mImageFetcher.addImageCache(getSupportFragmentManager(), cacheParams);
-		imageAdapter = new ImageAdapter(ImageGrid.this);
+		imageAdapter = new ImageGridAdapter(ImageGrid.this, mImageFetcher, imageList);
 		gridView.setAdapter(imageAdapter);
 		loadImageFiles();
 		gridView.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -127,7 +121,7 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 	
 	@Override
     public void onItemClick(AdapterView<?> arg0, View v, int index, long id) {
-    	final Intent i = new Intent(this, ImageDetailActivity.class);
+    	/*final Intent i = new Intent(this, ImageDetailActivity.class);
         i.putExtra(ImageDetailActivity.EXTRA_IMAGE, index);
         i.putExtra(ImageDetailActivity.LIST_SIZE, imageList.size());
         if (Utils.hasJellyBean()) {
@@ -139,7 +133,10 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
             startActivity(i, options.toBundle());
         } else {
             startActivity(i);
-        }
+        }*/
+		Intent i = new Intent(this, FlingGalleryActivity.class);
+		 i.putExtra(ImageDetailActivity.EXTRA_IMAGE, index);
+		startActivity(i);
     }
     
     @Override
@@ -163,108 +160,12 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
         imageList.clear();
     }
     
-	private class ImageAdapter extends BaseAdapter {
-
-		private Context context;
-		
-		private int mNumColumns = 0;
-		
-		private int mItemHeight = 0;
-		 
-		private int mActionBarHeight = 0;
-		
-		private GridView.LayoutParams mImageViewLayoutParams;
-
-		public ImageAdapter(Context context) {
-			this.context = context;
-			mImageViewLayoutParams = new GridView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-			TypedValue tv = new TypedValue();
-            if (context.getTheme().resolveAttribute(
-                    android.R.attr.actionBarSize, tv, true)) {
-                mActionBarHeight = TypedValue.complexToDimensionPixelSize(
-                        tv.data, context.getResources().getDisplayMetrics());
-            }
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			 final ImageInfo info = imageList.get(position);
-			/* if (position < mNumColumns) {
-                if (convertView == null) {
-                    convertView = new View(context);
-                }
-                // Set empty view with height of ActionBar
-                convertView.setLayoutParams(new AbsListView.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, mActionBarHeight));
-                return convertView;
-            }*/
-
-            // Now handle the main ImageView thumbnails
-            ImageView imageView;
-            if (convertView == null) { // if it's not recycled, instantiate and initialize
-                imageView = new ImageView(context);
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setLayoutParams(mImageViewLayoutParams);
-            } else { // Otherwise re-use the converted view
-                imageView = (ImageView) convertView;
-            }
-
-            // Check the height matches our calculated column width
-            if (imageView.getLayoutParams().height != mItemHeight) {
-                imageView.setLayoutParams(mImageViewLayoutParams);
-            }
-            imageView.setBackgroundResource(R.drawable.empty_photo);
-
-            // Finally load the image asynchronously into the ImageView, this also takes care of
-            // setting a placeholder image while the background thread runs
-            mImageFetcher.loadImage(info.path, imageView);
-            //mImageFetcher.processBitmap(info.path);
-            return imageView;
-		}
-
-		@Override
-		public int getCount() {
-			return imageList.size();
-		}
-
-		@Override
-		public ImageInfo getItem(int position) {
-			return imageList.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position < mNumColumns ? 0 : position - mNumColumns;
-		}
-		
-		public void setNumColumns(int numColumns) {
-	            mNumColumns = numColumns;
-        }
-
-        public int getNumColumns() {
-            return mNumColumns;
-        }
-        
-        @Override
-        public int getViewTypeCount() {
-            // Two types of views, the normal ImageView and the top row of empty views
-            return 1;
-        }
-        
-        public void setItemHeight(int height) {
-            if (height == mItemHeight) {
-                return;
-            }
-            mItemHeight = height;
-            mImageViewLayoutParams =
-                    new GridView.LayoutParams(LayoutParams.MATCH_PARENT, mItemHeight);
-            mImageFetcher.setImageSize(height);
-            notifyDataSetChanged();
-        }
-	}
-	
 	public static String getFilePath(int position) {
 		return imageList.get(position).path;
+	}
+	
+	public static List<ImageInfo> getImageList() {
+		return imageList;
 	}
 	
 	private void loadImageFiles() {

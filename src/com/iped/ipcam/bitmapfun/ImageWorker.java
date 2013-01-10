@@ -56,6 +56,10 @@ public abstract class ImageWorker {
     private static final int MESSAGE_FLUSH = 2;
     private static final int MESSAGE_CLOSE = 3;
 
+    private OnLoadImageListener loadImageListener;
+    
+    private String path;
+    
     protected ImageWorker(Context context) {
         mResources = context.getResources();
     }
@@ -85,6 +89,9 @@ public abstract class ImageWorker {
         if (bitmap != null) {
             // Bitmap found in memory cache
             imageView.setImageBitmap(bitmap);
+            if(loadImageListener != null) {
+            	loadImageListener.updateResolution(String.valueOf(data), bitmap.getWidth(), bitmap.getHeight());
+            }
         } else if (cancelPotentialWork(data, imageView)) {
             final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
             final AsyncDrawable asyncDrawable =
@@ -312,6 +319,9 @@ public abstract class ImageWorker {
                     Log.d(TAG, "onPostExecute - setting bitmap");
                 }
                 setImageBitmap(imageView, bitmap);
+                if(loadImageListener != null) {
+                	loadImageListener.updateResolution(String.valueOf(data), bitmap.getWidth(), bitmap.getHeight());
+                }
             }
         }
 
@@ -450,5 +460,14 @@ public abstract class ImageWorker {
 
     public void closeCache() {
         new CacheAsyncTask().execute(MESSAGE_CLOSE);
+    }
+    
+    public void setOnLoadImageListener(OnLoadImageListener loadImageListener) {
+    	this.loadImageListener = loadImageListener;
+    }
+    
+    public interface OnLoadImageListener {
+    	
+    	public void updateResolution(String path, int w, int h);
     }
 }

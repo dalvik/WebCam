@@ -10,16 +10,18 @@ package com.iped.ipcam.gui;
 public final class R {
     public static final class anim {
         public static final int alpha_enter=0x7f040000;
-        public static final int progress_animation_list=0x7f040001;
-        public static final int push_left_in=0x7f040002;
-        public static final int push_left_out=0x7f040003;
-        public static final int shake_anim=0x7f040004;
-        public static final int tips_popup_exit_alpha=0x7f040005;
-        public static final int tips_popup_scale=0x7f040006;
-        public static final int translucent_zoom_exit=0x7f040007;
-        public static final int translucent_zoom_in=0x7f040008;
-        public static final int translucent_zoom_out=0x7f040009;
-        public static final int welcome_toptext_rotate=0x7f04000a;
+        public static final int in_from_right=0x7f040001;
+        public static final int out_to_left=0x7f040002;
+        public static final int progress_animation_list=0x7f040003;
+        public static final int push_left_in=0x7f040004;
+        public static final int push_left_out=0x7f040005;
+        public static final int shake_anim=0x7f040006;
+        public static final int tips_popup_exit_alpha=0x7f040007;
+        public static final int tips_popup_scale=0x7f040008;
+        public static final int translucent_zoom_exit=0x7f040009;
+        public static final int translucent_zoom_in=0x7f04000a;
+        public static final int translucent_zoom_out=0x7f04000b;
+        public static final int welcome_toptext_rotate=0x7f04000c;
     }
     public static final class array {
         public static final int compress_quar_array=0x7f080003;
