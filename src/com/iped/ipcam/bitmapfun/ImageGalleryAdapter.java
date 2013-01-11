@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
 import com.iped.ipcam.pojo.ImageInfo;
@@ -34,11 +35,12 @@ public class ImageGalleryAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		 final ImageInfo info = imageList.get(position);
+		 System.out.println("postion = " + position +  " " + info.path);
         // Now handle the main ImageView thumbnails
         ImageView imageView;
         if (convertView == null) { // if it's not recycled, instantiate and initialize
             imageView = new ImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setScaleType(ScaleType.MATRIX);
             imageView.setLayoutParams(mImageViewLayoutParams);
         } else { // Otherwise re-use the converted view
             imageView = (ImageView) convertView;
