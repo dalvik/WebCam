@@ -41,6 +41,8 @@ public class ImageInfo {
     //public Bitmap icon;
     public String path;
 
+    public String thumbnail;
+    
     public ImageView imageView;
     
     /**

@@ -18,15 +18,21 @@ package com.iped.ipcam.bitmapfun;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -64,23 +70,41 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 	
 	private ImageFetcher mImageFetcher;
 	
+	private int columnWidth = 0 ;
+	
+	private Handler handler = new Handler() {
+		public void handleMessage(android.os.Message msg) {
+			imageAdapter.notifyDataSetChanged();
+		};
+	};
+	
     @Override
 	public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	mImageThumbSize = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_size);
+    	columnWidth = mImageThumbSize;
     	mImageThumbSpacing = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_spacing);
     	setContentView(R.layout.layout_all_image);
 		gridView = (GridView) findViewById(R.id.all_image_gridview);
 		ImageCacheParams cacheParams = new ImageCacheParams(this, IMAGE_CACHE_DIR);
-
 	    // Set memory cache to 25% of mem class
-		mImageFetcher = new ImageFetcher(this, mImageThumbSize);
+		final DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int height = displayMetrics.heightPixels;
+        final int width = displayMetrics.widthPixels;
+        final int longest = (height > width ? height : width) ;
+        
+		mImageFetcher = new ImageFetcher(this, longest);
 		cacheParams.setMemCacheSizePercent(this, 0.25f);
 	    mImageFetcher.setLoadingImage(R.drawable.empty_photo);
 	    mImageFetcher.addImageCache(getSupportFragmentManager(), cacheParams);
 		imageAdapter = new ImageGridAdapter(ImageGrid.this, mImageFetcher, imageList);
 		gridView.setAdapter(imageAdapter);
-		loadImageFiles();
+		new Thread(new Runnable() {
+			public void run() {
+				loadImageFiles();
+			}
+		}).start();
 		gridView.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
@@ -89,7 +113,7 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
                             final int numColumns = (int) Math.floor(
                             		gridView.getWidth() / (mImageThumbSize + mImageThumbSpacing));
                             if (numColumns > 0) {
-                                final int columnWidth =
+                                columnWidth =
                                         (gridView.getWidth() / numColumns) - mImageThumbSpacing;
                                 imageAdapter.setNumColumns(numColumns);
                                 imageAdapter.setItemHeight(columnWidth);
@@ -181,6 +205,11 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 					e.printStackTrace();
 				}
 			}
+			String fileThumbnail = sdDir + FileUtil.parentPath + FileUtil.picThumbnail;
+			File thumbnailFile = new File(fileThumbnail);
+			if(!thumbnailFile.exists()) {
+				thumbnailFile.mkdirs();
+			}
 			File[] files = file.listFiles(new FileFilter() {
 				
 				@Override
@@ -193,15 +222,49 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 				}
 			});
             for(int i = 0; i < files.length; i++){
-            	//paths[i] = files[i].getPath();
-            	ImageInfo imageInfo = new ImageInfo();
-            	imageInfo.path = files[i].getPath();
-            	imageInfo.title = files[i].getName();
-            	Uri uri = Uri.parse("file://"+files[i].getPath());
-            	imageInfo.setActivity(uri, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-            	imageList.add(imageInfo);
+            	if(files[i].isFile()) {
+	            	//paths[i] = files[i].getPath();
+	            	ImageInfo imageInfo = new ImageInfo();
+	            	imageInfo.path = files[i].getPath();
+	            	imageInfo.title = files[i].getName();
+	            	imageInfo.thumbnail = fileThumbnail + imageInfo.title;
+	            	System.out.println(imageInfo.thumbnail + "  " + imageInfo.title);
+	            	File thumbnail = new File(imageInfo.thumbnail);
+	            	if(!thumbnail.exists()) {
+	            		BitmapFactory.Options options = new BitmapFactory.Options();
+	            	    options.inJustDecodeBounds = true;
+	            	    Bitmap bitmap = BitmapFactory.decodeFile(imageInfo.path, options); //此时返回bm为空
+	            	    options.inJustDecodeBounds = false;
+	            	    int be = (int)(options.outWidth / (float)columnWidth);
+	            	    if (be <= 0)
+	            	    	be = 1;
+	            	    options.inSampleSize = be;
+	            	    bitmap=BitmapFactory.decodeFile(imageInfo.path,options);
+	            	    FileOutputStream out = null;
+						try {
+							out = new FileOutputStream(thumbnail);
+							if(bitmap!= null && bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out)){
+								out.flush();
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							if(out != null ){
+								try {
+									out.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+	
+	            	}
+            		Uri uri = Uri.parse("file://"+files[i].getPath());
+            		imageInfo.setActivity(uri, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            		imageList.add(imageInfo);
+            		handler.sendEmptyMessage(1);
+            	}
             }
-            imageAdapter.notifyDataSetChanged();
 		}
 	}
 	static class ViewHolder {

@@ -238,6 +238,8 @@ public class FileUtil {
 	
 	public static String picForder = "Image" + File.separator;
 	
+	public static String picThumbnail = "thumbs" + File.separator;
+	
 	private static String lastImageName  = "";
 	
 	public static boolean takePicture(Bitmap video, String fileName) {

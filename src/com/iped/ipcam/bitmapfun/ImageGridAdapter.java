@@ -10,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.iped.ipcam.gui.R;
 import com.iped.ipcam.pojo.ImageInfo;
 
 public class ImageGridAdapter extends BaseAdapter {
@@ -54,8 +53,7 @@ public class ImageGridAdapter extends BaseAdapter {
         //imageView.setBackgroundResource(R.drawable.empty_photo);
         // Finally load the image asynchronously into the ImageView, this also takes care of
         // setting a placeholder image while the background thread runs
-        mImageFetcher.loadImage(info.path, imageView);
-        //mImageFetcher.processBitmap(info.path);
+        mImageFetcher.loadImage(info.thumbnail, imageView);
         return imageView;
 	}
 
@@ -98,4 +96,5 @@ public class ImageGridAdapter extends BaseAdapter {
         mImageFetcher.setImageSize(height);
         notifyDataSetChanged();
     }
+
 }

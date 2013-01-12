@@ -35,7 +35,6 @@ public class ImageGalleryAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		 final ImageInfo info = imageList.get(position);
-		 System.out.println("postion = " + position +  " " + info.path);
         // Now handle the main ImageView thumbnails
         ImageView imageView;
         if (convertView == null) { // if it's not recycled, instantiate and initialize
