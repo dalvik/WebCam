@@ -1,6 +1,7 @@
 package com.iped.ipcam.bitmapfun;
 
 import com.iped.ipcam.bitmapfun.ImageWorker.OnLoadImageListener;
+import com.iped.ipcam.gui.R;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -20,6 +21,8 @@ public class FlingGalleryActivity extends FragmentActivity implements OnLoadImag
     public static final String EXTRA_IMAGE = "extra_image";
     
     public static final String LIST_SIZE = "list_size";
+
+    public static final String CATA_LOG = "cata_log";
     
 	private FlingGallery mGallery;
 	
@@ -41,7 +44,8 @@ public class FlingGalleryActivity extends FragmentActivity implements OnLoadImag
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
-        final int longest = (height > width ? height : width) / 2;
+        System.out.println("screen w = " + width + " h = " + height + " densityDpi=  " + displayMetrics.densityDpi + " scaledDensity = " + displayMetrics.scaledDensity + " density = " + displayMetrics.density + " "+ displayMetrics.xdpi + " " + displayMetrics.ydpi);
+        final int longest = (height > width ? height : width)/2 ;
 
         ImageCache.ImageCacheParams cacheParams = new ImageCache.ImageCacheParams(this, IMAGE_CACHE_DIR);
         cacheParams.setMemCacheSizePercent(this, 0.25f); // Set memory cache to 25% of mem class
@@ -52,7 +56,8 @@ public class FlingGalleryActivity extends FragmentActivity implements OnLoadImag
         mImageFetcher.setImageFadeIn(false);
         mImageFetcher.setOnLoadImageListener(this);
         mGallery = new FlingGallery(this, displayMetrics);
-        mGallery.setPaddingWidth(100);
+        int pagerMargin = getResources().getDimensionPixelSize(R.dimen.image_detail_pager_margin);
+        mGallery.setPaddingWidth(pagerMargin);
         imageAdapter = new ImageGalleryAdapter(FlingGalleryActivity.this, mImageFetcher, ImageGrid.getImageList());
         final int extraCurrentItem = getIntent().getIntExtra(EXTRA_IMAGE, -1);
         mGallery.setAdapter(imageAdapter, extraCurrentItem);
@@ -67,7 +72,7 @@ public class FlingGalleryActivity extends FragmentActivity implements OnLoadImag
 		//layoutParams.setMargins(10, 10, 10, 10);
 		layoutParams.weight = 1.0f;
         layout.addView(mGallery, layoutParams);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(layout);
     }	
     
@@ -79,13 +84,13 @@ public class FlingGalleryActivity extends FragmentActivity implements OnLoadImag
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
     	super.onConfigurationChanged(newConfig);
-    	/* final DisplayMetrics displayMetrics = new DisplayMetrics();
-         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-         final int height = displayMetrics.heightPixels;
+    	final DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        /*  final int height = displayMetrics.heightPixels;
          final int width = displayMetrics.widthPixels;
          final int longest = (height > width ? height : width) / 2;
-         mImageFetcher.setImageSize(longest);
-         mGallery.updateMetrics(displayMetrics);*/
+         mImageFetcher.setImageSize(longest);*/
+         mGallery.updateMetrics(displayMetrics);
     }
     
 }

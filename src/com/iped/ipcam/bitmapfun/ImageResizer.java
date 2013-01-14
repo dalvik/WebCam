@@ -139,14 +139,28 @@ public class ImageResizer extends ImageWorker {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
+        options.inScaled = false;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inDither = true;
         BitmapFactory.decodeFile(filename, options);
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
+        //options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        // Calculate inSampleSize
+        //System.out.println("real bitmap width = " + options.outWidth + " " + options.outHeight);
+        int sampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        //int sampleSize = computeSampleSize(options, 1024, 1024);
+        Log.d(TAG, "### SampleSize = " + sampleSize);
+        if(sampleSize<1) {
+        	options.inSampleSize = 1; 
+        }else {
+        	options.inSampleSize = sampleSize;
+        }
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filename, options);
+        Bitmap b = BitmapFactory.decodeFile(filename, options);
+        //System.out.println("return bitmap widht = " + b.getWidth() + " " + b.getHeight());
+        return b;
     }
 
     /**
@@ -167,7 +181,12 @@ public class ImageResizer extends ImageWorker {
         BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        int sampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        if(sampleSize<1) {
+        	options.inSampleSize = 1; 
+        }else {
+        	options.inSampleSize = sampleSize;
+        }
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
@@ -209,7 +228,7 @@ public class ImageResizer extends ImageWorker {
             // be more aggressive with sample down the image (=larger
             // inSampleSize).
 
-            final float totalPixels = width * height;
+            /*final float totalPixels = width * height;
 
             // Anything more than 2x the requested pixels we'll sample down
             // further.
@@ -217,8 +236,73 @@ public class ImageResizer extends ImageWorker {
 
             while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
                 inSampleSize++;
-            }
+            }*/
         }
         return inSampleSize;
+    }
+    
+    /*
+     * Compute the sample size as a function of minSideLength
+     * and maxNumOfPixels.
+     * minSideLength is used to specify that minimal width or height of a
+     * bitmap.
+     * maxNumOfPixels is used to specify the maximal size in pixels that is
+     * tolerable in terms of memory usage.
+     *
+     * The function returns a sample size based on the constraints.
+     * Both size and minSideLength can be passed in as IImage.UNCONSTRAINED,
+     * which indicates no care of the corresponding constraint.
+     * The functions prefers returning a sample size that
+     * generates a smaller bitmap, unless minSideLength = IImage.UNCONSTRAINED.
+     *
+     * Also, the function rounds up the sample size to a power of 2 or multiple
+     * of 8 because BitmapFactory only honors sample size this way.
+     * For example, BitmapFactory downsamples an image by 2 even though the
+     * request is 3. So we round up the sample size to avoid OOM.
+     */
+    public static int computeSampleSize(BitmapFactory.Options options,
+            int minSideLength, int maxNumOfPixels) {
+        int initialSize = computeInitialSampleSize(options, minSideLength,
+                maxNumOfPixels);
+
+        int roundedSize;
+        if (initialSize <= 8 ) {
+            roundedSize = 1;
+            while (roundedSize < initialSize) {
+                roundedSize <<= 1;
+            }
+        } else {
+            roundedSize = (initialSize + 7) / 8 * 8;
+        }
+
+        return roundedSize;
+    }
+    
+    private static final int UNCONSTRAINED = -1;
+
+    public static int computeInitialSampleSize(BitmapFactory.Options options,
+            int minSideLength, int maxNumOfPixels) {
+        double w = options.outWidth;
+        double h = options.outHeight;
+
+        int lowerBound = (maxNumOfPixels == UNCONSTRAINED) ? 1 :
+                (int) Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
+        int upperBound = (minSideLength == UNCONSTRAINED) ? 128 :
+                (int) Math.min(Math.floor(w / minSideLength),
+                Math.floor(h / minSideLength));
+
+        if (upperBound < lowerBound) {
+            // return the larger one when there is no overlapping zone.
+            return lowerBound;
+        }
+
+        if ((maxNumOfPixels == UNCONSTRAINED) &&
+                (minSideLength == UNCONSTRAINED)) {
+            return 1;
+        } else if (minSideLength == UNCONSTRAINED) {
+            return lowerBound;
+        } else {
+            return upperBound;
+        }
     }
 }

@@ -4,10 +4,9 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.support.v4.view.MotionEventCompat;
-import android.text.BoringLayout.Metrics;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -90,6 +89,8 @@ public class FlingGallery extends FrameLayout {
     private int currentImageIndex = 0;//当前的展现的view
     
     private int selectIndexTmp = 0;
+    
+    private int orientation = 1;
     
 	public FlingGallery(Context context, DisplayMetrics dm) {
 		super(context);
@@ -316,45 +317,12 @@ public class FlingGallery extends FrameLayout {
     		RectF rectF = new RectF(0, 0, initImageWidth, initImageHeight);
     		m.mapRect(rectF);
             if (mode == DRAG) {
-            	if(rectF.top !=0.0 || rectF.bottom != (float)dm.heightPixels) {
+            	if(rectF.left !=0.0 || rectF.right != (float)dm.widthPixels) {
             		matrix.set(savedMatrix);
             		float dx = (event.getX() - prev.x);
             		if(Math.abs(dx)>5f){
             			float dy = event.getY() - prev.y;
             			matrix.postTranslate(dx, dy);
-            		}
-            		if(rectF.left ==0.0 || rectF.right == (float)dm.widthPixels) {
-            			if (mIsDragging == false) {
-            				// Stop animation
-            				mIsTouched = true;
-            				// Reconfigure scroll
-            				mIsDragging = true;
-            				mFlingDirection = 0;
-            				mScrollTimestamp = System.currentTimeMillis();
-            				mCurrentOffset = mViews[mCurrentViewNumber]
-            						.getCurrentOffset();
-            			}
-            			float maxVelocity = mGalleryWidth / (mAnimationDuration / 1000.0f);
-            			long timestampDelta = System.currentTimeMillis() - mScrollTimestamp;
-            			float maxScrollDelta = maxVelocity * (timestampDelta / 1000.0f);
-            			float currentScrollDelta = prev.x - event.getX();
-            			
-            			if (currentScrollDelta < maxScrollDelta * -1)
-            				currentScrollDelta = maxScrollDelta * -1;
-            			if (currentScrollDelta > maxScrollDelta)
-            				currentScrollDelta = maxScrollDelta;
-            			int scrollOffset = Math.round(mCurrentOffset
-            					+ currentScrollDelta);
-            			
-            			// We can't scroll more than the width of our own frame layout
-            			if (scrollOffset >= mGalleryWidth)
-            				scrollOffset = mGalleryWidth;
-            			if (scrollOffset <= mGalleryWidth * -1)
-            				scrollOffset = mGalleryWidth * -1;
-            			
-            			mViews[0].setOffset(scrollOffset, 0, mCurrentViewNumber);
-            			mViews[1].setOffset(scrollOffset, 0, mCurrentViewNumber);
-            			mViews[2].setOffset(scrollOffset, 0, mCurrentViewNumber);
             		}
             	}else {
         			if (mIsDragging == false) {
@@ -520,8 +488,9 @@ public class FlingGallery extends FrameLayout {
 				if (newPosition >= getFirstPosition()&& newPosition <= getLastPosition()) {
 					mExternalView = (ImageView)mAdapter.getView(newPosition,mExternalView, mInternalLayout);
 					//TODO
-					//matrix = new Matrix();
-					//mExternalView.setImageMatrix(matrix);
+					if(orientation == 1) {
+						mExternalView.setImageMatrix(matrix);
+					}
 				} else {
 					mExternalView = mInvalidLayout;
 				}
@@ -601,8 +570,8 @@ public class FlingGallery extends FrameLayout {
 			mTargetDistance = mTargetOffset - mInitialOffset;
 
 			// Configure base animation properties
-			//this.setDuration(mAnimationDuration);
-			//this.setInterpolator(mDecelerateInterpolater);
+			this.setDuration(mAnimationDuration);
+			this.setInterpolator(mDecelerateInterpolater);
 			// Start/continued animation
 			mIsAnimationInProgres = true;
 		}
@@ -657,6 +626,7 @@ public class FlingGallery extends FrameLayout {
 	}
 
 	public void updateResolution(String path, int w, int h) {
+		System.out.println("updateResolution = "+ w + " " + h + " " + path);
 		if(isInitFlingGallery) {
 			ImageInfo imageInfo = (ImageInfo)mAdapter.getItem(currentImageIndex);
 			if(imageInfo.path.equalsIgnoreCase(path)) {
@@ -665,9 +635,6 @@ public class FlingGallery extends FrameLayout {
 				initImageHeight = h;
 				minZoom();
 				center();
-				matrix = new Matrix();
-				mViews[mCurrentViewNumber].mExternalView.setImageMatrix(matrix);
-				matrix.postScale(minScaleR, minScaleR);
 				mViews[mCurrentViewNumber].mExternalView.setImageMatrix(matrix);
 			}
 		}else {
@@ -675,9 +642,6 @@ public class FlingGallery extends FrameLayout {
 			initImageHeight = h;
 			minZoom();
 			center();
-			matrix = new Matrix();
-			mViews[mCurrentViewNumber].mExternalView.setImageMatrix(matrix);
-			matrix.postScale(minScaleR, minScaleR);
 			mViews[mCurrentViewNumber].mExternalView.setImageMatrix(matrix);
 		}
 		/*int deltX = 0;
@@ -698,15 +662,45 @@ public class FlingGallery extends FrameLayout {
 	
 	public void updateMetrics(DisplayMetrics dm) {
 		this.dm = dm;
+		mCurrentViewNumber = 0;
+		mViews[0].recycleView(currentImageIndex);
+		mViews[1].recycleView(getNextPosition(currentImageIndex));
+		mViews[2].recycleView(getPrevPosition(currentImageIndex));
+		
+		// Position views at correct starting offsets
+		mViews[0].setOffset(0, 0, mCurrentViewNumber);
+		mViews[1].setOffset(0, 0, mCurrentViewNumber);
+		mViews[2].setOffset(0, 0, mCurrentViewNumber);
 	}
 	
 	private void minZoom() {
-        minScaleR = Math.min((float) dm.widthPixels / (float) initImageWidth, (float) dm.heightPixels / (float) initImageHeight);
+		if(initImageWidth>dm.widthPixels || initImageHeight>dm.heightPixels) {
+			minScaleR = Math.min((float) initImageWidth / (float)dm.widthPixels , (float) initImageHeight / (float)dm.heightPixels );
+		}else {
+			minScaleR = Math.min((float) dm.widthPixels / (float) initImageWidth, (float) dm.heightPixels / (float) initImageHeight);
+		}
+		System.out.println("minScaleR=" + minScaleR);
         curScaleR = minScaleR;
+        matrix.reset();
+       /* int deltX = 0;
+		int deltY = 0;
+		if(initImageWidth<=dm.widthPixels) {
+			deltX = (dm.widthPixels - (int)initImageWidth)/2;
+		}
+		if(initImageHeight<=dm.heightPixels) {
+			deltY = (dm.heightPixels - (int)initImageHeight)/2;
+		}*/
+		//System.out.println("bitmap width = " + initImageWidth + " height = " + initImageHeight + " w = " + dm.widthPixels + " h = " + dm.heightPixels );
+		//System.out.println("minScaleR = " + minScaleR + " detlx = " + deltX + " delty = " + deltY);
         //MAX_SCALE = Math.max((float) initImageWidth / (float) dm.widthPixels, (float) initImageHeight / (float) dm.heightPixels);;
         //if (minScaleR != 1.0f) {
-            matrix.postScale(minScaleR, minScaleR);
+           // matrix.setTranslate(deltX, deltY);
         //}
+        if(minScaleR<1.0f) {
+        	matrix.postScale(1.0f, 1.0f);
+        }else {
+        	matrix.postScale(minScaleR, minScaleR);
+        }
     }
 	
     private void CheckView() {
@@ -759,8 +753,11 @@ public class FlingGallery extends FrameLayout {
                 deltaX = screenWidth - rect.right;
             }
         }
-       // Log.d("System.out", "deltaX= " + deltaX + " deltaY=" + deltaY);
-        matrix.postTranslate(deltaX, deltaY);
+       //Log.d("System.out", "deltaX= " + deltaX + " deltaY=" + deltaY);
+       matrix.postTranslate(deltaX, deltaY);
     }
 
+	public void setOrientation(int orientation) {
+		this.orientation = orientation;
+	}
 }
