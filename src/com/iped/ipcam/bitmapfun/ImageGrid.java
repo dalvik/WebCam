@@ -209,6 +209,12 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
 			File thumbnailFile = new File(fileThumbnail);
 			if(!thumbnailFile.exists()) {
 				thumbnailFile.mkdirs();
+				File noMedia = new File(sdDir + FileUtil.parentPath + FileUtil.picThumbnail + ".nomedia");
+				try {
+					noMedia.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			File[] files = file.listFiles(new FileFilter() {
 				

@@ -117,7 +117,12 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			switch (message.what) {
 			case Constants.HIDETEAUTOSEARCH:
 				dismissProgress();
+				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				listView.onRefreshComplete(getString(R.string.pull_to_refresh_update) + new Date().toLocaleString());
+				break;
+			case Constants.UPDATEDEVICELIST:
+				adapter.notifyDataSetChanged();
+				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				listView.setSelection(0);
 				if(camManager.getCamList().size() >0) {
 					//deviceListViewFootMore.setText(getText(R.string.full_device_online));
@@ -126,11 +131,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					deiceListViewFooter.setVisibility(View.VISIBLE);
 					deviceListViewFootMore.setText(getText(R.string.no_device_online));
 				}
-				//FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
-				break;
-			case Constants.UPDATEDEVICELIST:
-				adapter.notifyDataSetChanged();
-				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				handler.sendEmptyMessageDelayed(Constants.SEND_UPDATE_DEVICE_LIST_MSG, 200);
 				break;
 			case Constants.DEFAULTUSERSELECT:
@@ -402,6 +402,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			queryNewCameraDialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog); 
 			queryNewCameraDialog.setTitile(getString(R.string.device_manager_add_query_title_str));
 			queryNewCameraDialog.setMessage(getString(R.string.device_manager_add_query_message_str));
+			queryNewCameraDialog.show();
 			new Thread(new QueryCamera(newDeviceName.getText().toString(), cameraId,"","","","", true)).start();
 			alertDialog.dismiss();
 			alertDialog = null;

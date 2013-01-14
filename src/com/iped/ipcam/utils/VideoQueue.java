@@ -52,7 +52,9 @@ public class VideoQueue {
 	
 	public JpegImage removeImage() {
 		if(getImageListLength()>0) {
-			return jpegImageList.poll();
+			synchronized (lock) {
+				return jpegImageList.poll();
+			}
 		}else {
 			return null;
 		}
