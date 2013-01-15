@@ -1,7 +1,6 @@
 package com.iped.ipcam.utils;
 
 import java.util.LinkedList;
-import java.util.Queue;
 
 import android.util.Log;
 

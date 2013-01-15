@@ -136,7 +136,7 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 					frameCount = myVideoView.getFrameCount();
 					frameCount++;
 					if(listener != null) {
-						listener.invalide(frameCount, image.time);
+						listener.invalide(image.time);
 					}
 				}else {
 					synchronized (lock) {

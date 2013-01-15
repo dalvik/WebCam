@@ -77,7 +77,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private Bitmap video;
 	
-	private int frameCount;
+	//private int frameCount;
 	
 	private MyVideoView myVideoView;
 	
@@ -93,7 +93,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
 		this.video = video;
-		this.frameCount = frameCount;
+		//this.frameCount = frameCount;
 		queue = new VideoQueue();
 		this.myVideoView = myVideoView;
 		myVideoView.setOnPutIndexListener(this);
@@ -110,6 +110,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			Log.d(TAG, "xvid init decoder error " + res);
 			return ;
 		}
+		flag = true;
 		ShowMpeg showMpeg = new ShowMpeg();
 		Thread thread = new Thread(showMpeg);
 		thread.start();
@@ -158,20 +159,13 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						jpegBufUsed = 1;
 						jpegTimeTmp  = time;
 					}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
-						if(startFlagCount++ %mpegPakages == 0 && canStartFlag){
+						//System.out.println("startFlagCount = " + startFlagCount);
+						if(startFlagCount++ % mpegPakages == 0 && canStartFlag){ //
 							startFlagCount = 1;
 							break;
 						}
 						if(imageDataStart) {
 							imageDataStart = false;
-							//ignore jpeg
-							/*Bitmap v = BitmapFactory.decodeByteArray(jpegByteBuf, 0, tmpJpgBufUsed);
-							if(v != null) {
-								queue.addJpegImage(new JpegImage(v, jpegTimeTmp));
-								if(BuildConfig.DEBUG && DEBUG) {
-									Log.d(TAG, "### add jpeg  time=" + jpegTimeTmp);
-								}
-							}*/
 						}
 						isMpeg4 = false;
 						mpegBuf[mpegDataLength++] = b0;
@@ -186,7 +180,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 								time = new String(mpegBuf, mpegDataLength-18, 18);
 								queue.addNewTime(time);
 								if(BuildConfig.DEBUG && !DEBUG) {
-									Log.d(TAG, "### add new   time=" + time + "  time list length " + queue.getTimeListLength());
+									Log.d(TAG, "### current image  time= " + time);
 								}
 							}
 						} else {
@@ -205,7 +199,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			} while(!stopPlay);
 			startFlag = false;
 			if(rgbDataBuf == null && !stopPlay) {
-				mpegPakages = 2;
 				int[] headInfo = UdtTools.initXvidHeader(mpegBuf, length);//length的长度即为out_buffer的长度，所以length要足够长。
 				int imageWidth = headInfo[0];
 				int imageHeight = headInfo[1];
@@ -235,19 +228,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					flag = false;
 					myVideoView.updateResulation(imageWidth);
 				}
+				mpegPakages = 2;
 			} else if(!stopPlay){
-				usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf);
-				/*if(checkResulationFlag) {
-					checkResulationFlag = false;
-					mpegDataLength = 0;
-					mpegPakages = 3;
-					indexForGet = indexForPut;
-					Arrays.fill(rgbDataBuf,(byte) 0);
-					Arrays.fill(mpegBuf,(byte) 0);
-					rgbDataBuf = null;
-					canStartFlag = false;
-					continue;
-				}*/
+				usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
 				if(usedBytes>999999) {//(XDIM * 100000) + used_bytes;
 					int newImageWidth = usedBytes / 1000000;
 					int useBytes = usedBytes%1000000;
@@ -280,6 +263,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
 				}
+				//System.out.println("unusedBytes = " + unusedBytes + " mpegDataLength = " + mpegDataLength + " usedBytes= " + usedBytes);
+				unusedBytes = (mpegDataLength - usedBytes);
+				if(usedBytes + unusedBytes >=length) {
+					unusedBytes = length - usedBytes;
+				}
+				if(unusedBytes<=0) {
+					unusedBytes = 0;
+				}
+				System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
+				mpegDataLength = unusedBytes;
 			}
 		}
 		showMpeg.setInerrupt();
@@ -305,9 +298,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				String oldTime = queue.pollTime();
 				if(null != oldTime) {
 					timeStr = oldTime.substring(0,14);
-					if(!popuJpeg(oldTime)){
+					//if(!popuJpeg(oldTime)){
 						MpegImage mpegImage = queue.getMpegImage();
-						if(BuildConfig.DEBUG && !DEBUG) {
+						if(BuildConfig.DEBUG && DEBUG) {
 							Log.d(TAG, "### show mpegImage = " + mpegImage );
 						}
 						if(mpegImage != null) {
@@ -316,19 +309,19 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
 							if(video != null) {
 								video.copyPixelsFromBuffer(sh);
-								frameCount = myVideoView.getFrameCount();
-								frameCount++;
+								//frameCount = myVideoView.getFrameCount();
+								//frameCount++;
 								if(listener != null) {
-									listener.invalide(frameCount, timeStr);
+									listener.invalide( timeStr);
 								}
 							}
 						}
-					}
+					//}
 				} else {
 					synchronized (lock) {
-						if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### no image data ---->");
-						}
+						/*if(BuildConfig.DEBUG && !DEBUG) {
+							Log.d(TAG, "### queue no image  ---->");
+						}*/
 						try {
 							lock.wait(10);
 						} catch (InterruptedException e) {
@@ -372,10 +365,10 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					queue.removeImage();
 					video = image.bitmap;
 					myVideoView.setImage(video);
-					frameCount = myVideoView.getFrameCount();
-					frameCount++;
+					//frameCount = myVideoView.getFrameCount();
+					//frameCount++;
 					if(listener != null) {
-						listener.invalide(frameCount, timeStr);
+						listener.invalide(timeStr);
 					}
 					return true;
 				} else if(oldTime.compareTo(image.time) > 0) {
@@ -407,7 +400,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	}
 	
 	public interface OnMpegPlayListener {
-		public void invalide(int frameCount, String timeStr);
+		public void invalide(String timeStr);
 	}
 	
 	public void setOnMpegPlayListener(OnMpegPlayListener listener) {

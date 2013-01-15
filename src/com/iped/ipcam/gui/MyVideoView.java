@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackJpegThread;
+import com.iped.ipcam.engine.PlayBackMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
@@ -36,9 +37,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private final static int DELAY_RECONNECT = 4* 1000;
 	
-	public final static int NALBUFLENGTH = 320 * 480 *2; // 600*800*2
+	public final static int NALBUFLENGTH = 320 * 50; // 320 * 480 *2
 
-	private static int VIDEOSOCKETBUFLENGTH = 1024 + 31;//  342000;
+	private static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
 
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -68,6 +69,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private int frameCountTemp;
 
+	private int dataRate;
+	
+	private int dataRateTemp;
+	
 	private String deviceId = "";
 
 	private String devicenName = "";
@@ -101,6 +106,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private boolean isAutoStop = true;
 	
 	public final static int UPDATE_RESULATION = 7002;
+	
+	private Thread audioPlayerThread = null;
+	
+	private DecodeAudioThread audioThread = null;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -162,7 +171,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			}
 			canvas.drawBitmap(video, null, rect, textPaint);
 			canvas.restore();
-			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s", rect.left + 15, rect.top + 20, textPaint);
+			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
 			String text = "  More : hangzhouiped.taobao.com";
 			if(rect2 == null) {
@@ -176,6 +185,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 
 	public void run() {
+		System.out.println("Debug mode " + BuildConfig.DEBUG );
 		deviceId = device.getDeviceID();
 		devicenName = device.getDeviceName();
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
@@ -207,6 +217,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		initBCV(info);
 		if(res > 6) {
 			mpeg4Decoder = true;
+			//NALBUFLENGTH = 600*800*2; // 
 		}else {
 			mpeg4Decoder = false;
 		}
@@ -214,6 +225,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		nalBuf = new byte[NALBUFLENGTH];//>100k
 		indexForPut = 0;
 		temWidth = 1;
+		frameCount  = 0;
+		dataRate = 0;
 		if(!playBackFlag) {//不是回放
 			if(mpeg4Decoder) {
 				/*if(decoderFactory != null) {
@@ -223,9 +236,13 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
-				new Thread(new DecodeAudioThread(this)).start();
+				audioThread = new DecodeAudioThread(this);
+				audioPlayerThread = new Thread(audioThread);
+				audioPlayerThread.start();
 			}else {
-				new Thread(new DecodeAudioThread(this)).start();
+				audioThread = new DecodeAudioThread(this);
+				audioPlayerThread = new Thread(audioThread);
+				audioPlayerThread.start();
 				decoderFactory = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
@@ -235,12 +252,18 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				handler.sendMessage(msg);
 			}
 		}else { // 回放
-			decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+			if(mpeg4Decoder) {
+				decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+			}else {
+				decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+			}
 			decoderFactory.setOnMpegPlayListener(this);
 			new Thread(decoderFactory).start();	
 		}
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
+			dataRate += readLengthFromVideoSocket;
+			//Log.d(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
 			if (readLengthFromVideoSocket <= 0) { // 读取完成
 				if(BuildConfig.DEBUG && !DEBUG) {
 					Log.d(TAG, "### read over break....");
@@ -251,9 +274,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
-					if(BuildConfig.DEBUG && !DEBUG) {
+					/*if(BuildConfig.DEBUG && !DEBUG) {
 						Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
-					}
+					}*/
 					synchronized (nalBuf) {
 						try {
 							nalBuf.wait(10);
@@ -285,6 +308,13 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### onStoped.");
 		}
+		if(audioThread != null) {
+			audioThread.onStop(true);
+		}
+		if(audioPlayerThread != null && audioPlayerThread.isInterrupted()) {
+			audioPlayerThread.interrupt();
+		}
+		
 		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
@@ -358,12 +388,14 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		@Override
 		public void run() {
 			frameCountTemp = frameCount;
+			dataRateTemp = dataRate;
 			if(frameCountTemp<=2) {
 				if(video != null) {
-					invalidate(rect);
+					invalidate(rect.left, rect.top, rect.right, rect.bottom);
 				}
 			}
 			frameCount = 0;
+			dataRate = 0;
 			handler.postDelayed(calculateFrameTask, 1000);
 		}
 	};
@@ -406,8 +438,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	@Override
-	public void invalide(int frameCount, String timeStr) {
-		this.frameCount = frameCount;
+	public void invalide(String timeStr) {
+		frameCount++;
 		this.timeStr = timeStr;
 		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 	}
@@ -421,7 +453,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	public void updateResulation(int imageWidth) {
-
 		if(imageWidth == 1280) {
 			Message msg =handler.obtainMessage();
 			msg.what = UPDATE_RESULATION;

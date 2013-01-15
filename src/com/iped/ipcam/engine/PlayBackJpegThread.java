@@ -31,8 +31,6 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	private Bitmap video;
 	
-	private int frameCount;
-	
 	private MyVideoView myVideoView;
 	
 	private boolean stopPlay = false;
@@ -103,7 +101,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
 		this.video = video;
-		this.frameCount = frameCount;
+		//this.frameCount = frameCount;
 		this.myVideoView = myVideoView;
 		this.handler = handler;
 		myVideoView.setOnPutIndexListener(this);
@@ -115,8 +113,10 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 	public void run() {
 		stopPlay = false;
 		initTableHeadCount = 0;
-		//new Thread(new PlayJpegThread()).start();
-		//new Thread(new PalyBackAudio()).start();
+		Thread playJpegThread = new Thread(new PlayJpegThread());
+		playJpegThread.start();
+		Thread playAudioThread = new Thread(new PalyBackAudio());
+		playAudioThread.start();
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (jpegBuf) {
@@ -137,9 +137,9 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 				byte b4 = nalBuf[(indexForGet+4)%NALBUFLENGTH];
 				if(initTableInfo) {
 					headerInfoByte[initTableHeadCount++] = b0;
-					if(initTableHeadCount==8) {
+					if(initTableHeadCount==8) {// 前八个字节是索引表的信息
 						t1Length =  ByteUtil.byteToInt4(headerInfoByte,0);
-						t2Length =  ByteUtil.byteToInt4(headerInfoByte,4);
+						t2Length =  ByteUtil.byteToInt4(headerInfoByte,4);//索引表的长度
 						if(t2Length<=0 || t2Length>=maxHeadLength) {
 							initTableInfo = false;
 						}
@@ -179,7 +179,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 					jpegBuf[3] = b3;
 					indexForGet += 3;
 					jpegDataLength = 4;
-					if(BuildConfig.DEBUG && DEBUG) {
+					if(BuildConfig.DEBUG && !DEBUG) {
 						Log.d(TAG, "### jpeg start flag ->" + video);
 					}
 				} else {
@@ -228,8 +228,12 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 				indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
 			}
 		} while(!stopPlay);
-		synchronized (audioTmpBuffer) {
-			audioTmpBuffer.notify();
+		if(playJpegThread != null && !playJpegThread.isInterrupted()) {
+			playJpegThread.interrupt();
+		}
+		
+		if(playAudioThread != null && !playAudioThread.isInterrupted()) {
+			playAudioThread.interrupt();
 		}
 	}
 	
@@ -274,11 +278,17 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 						try {
 							audioTmpBuffer.wait();
 						} catch (InterruptedException e) {
+							stopPlay = true;
+							release();
 							e.printStackTrace();
 						}
 					}
 					}
-				}
+			}
+			release();
+		}
+		
+		private void release() {
 			if (m_out_trk != null) {
 				m_out_trk.stop();
 				m_out_trk.release();
@@ -299,14 +309,14 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 				if(queue.getImageListLength()>0) {
 					JpegImage image = queue.removeImage();
 					myVideoView.setImage(image.bitmap);
-					frameCount = myVideoView.getFrameCount();
-					frameCount++;
+					//frameCount = myVideoView.getFrameCount();
+					//frameCount++;
 					Message msg = handler.obtainMessage();
 					msg.what = Constants.UPDATE_PLAY_BACK_TIME;
 					msg.obj = image.time;
 					handler.sendMessage(msg);
 					if(listener != null) {
-						listener.invalide(frameCount, image.time);
+						listener.invalide(image.time);
 					}
 					try {
 						if(rate !=0) {
@@ -315,6 +325,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 							Thread.sleep(1000);
 						}
 					} catch (InterruptedException e) {
+						stopPlay = true;
 						e.printStackTrace();
 					}
 				}else {
@@ -325,6 +336,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 						try {
 							lock.wait(5);
 						} catch (InterruptedException e) {
+							stopPlay = true;
 							e.printStackTrace();
 						}
 					}  

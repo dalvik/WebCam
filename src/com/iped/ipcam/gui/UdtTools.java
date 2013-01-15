@@ -77,7 +77,7 @@ public class UdtTools {
 	//mpeg4 decoder
 	public static native int initXvidDecorer();
 	
-	public static native int xvidDecorer(byte[] src, int length, byte[] rgb);
+	public static native int xvidDecorer(byte[] src, int length, byte[] rgb, int flag);
 
 	public static native int[] initXvidHeader(byte[] src, int length);
 	
