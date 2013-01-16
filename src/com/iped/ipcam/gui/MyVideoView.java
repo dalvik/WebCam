@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackJpegThread;
-import com.iped.ipcam.engine.PlayBackMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
@@ -37,9 +36,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private final static int DELAY_RECONNECT = 4* 1000;
 	
-	public final static int NALBUFLENGTH = 1024*55;//32 * 48; //320 * 480 * 2
+	public final static int NALBUFLENGTH = 1024*20;//32 * 48; //320 * 480 * 2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 10240;//  342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
 
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -253,12 +252,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			}
 		}else { // »Ø·Å
 			if(mpeg4Decoder) {
-				decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				//decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 			}else {
 				decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				new Thread(decoderFactory).start();	
 			}
 			decoderFactory.setOnMpegPlayListener(this);
-			new Thread(decoderFactory).start();	
 		}
 		int index = 0;
 		int headCount = 1;
@@ -311,17 +310,17 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				    	}else if(b0 == 0x0c && index ==4) {
 				    		startFlag = true;
 				    		headFlagCount = 0;
-				    			
+				    		sleepFlag = true;	
 				    	} else {
 				    		index = 0;
 				    		if(startFlag) {
-				    			headFlagCount++;
-				    			//tim[headFlagCount] = b0;
+				    			tim[headFlagCount++] = b0;
 								if(headFlagCount >= 18) { 
 									startFlag = false;
 									//String time = new String(tim, 0, headFlagCount);
-									//System.out.println("### new time========= " + time);
+									//System.out.println("### recv ========= " + time);
 									if(sleepFlag) {
+										sleepFlag = false; 
 						    			synchronized (nalBuf) {
 						    				try {
 						    					nalBuf.wait();

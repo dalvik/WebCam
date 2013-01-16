@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.iped.ipcam.factory.DecoderFactory;
@@ -122,7 +123,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							if(BuildConfig.DEBUG && !DEBUG) {
 								Log.d(TAG, "### no data ....");
 							}
-							//myVideoView.notifyed();
 							mpegBuf.wait(20);
 						} catch (InterruptedException e) {
 							stopPlay = true;
@@ -138,6 +138,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
 					byte b4 = nalBuf[(indexForGet+4)%NALBUFLENGTH];
 					if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
+						//System.out.println("notify");
 						myVideoView.notifyed();
 						canStartFlag = true;
 						mpegBuf[mpegDataLength] = b0;
@@ -161,12 +162,11 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						isMpeg4 = false;
 						jpegBufUsed = 1;
 						jpegTimeTmp  = time;
-						System.out.println("jpeg code = " + jpegTimeTmp);
+						//System.out.println("jpeg code = " + jpegTimeTmp);
 					}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
 						//System.out.println("startFlagCount = " + startFlagCount);
 						if(startFlagCount++ % mpegPakages == 0 && canStartFlag){ //
 							startFlagCount = 1;
-							System.out.println("####");
 							break;
 						}
 						if(imageDataStart) {
@@ -184,6 +184,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 								startFlag = false;
 								time = new String(mpegBuf, mpegDataLength-18, 18);
 								queue.addNewTime(time);
+								//System.out.println("### time ========= " + time);
 								/*if(BuildConfig.DEBUG && !DEBUG) {
 									//Log.d(TAG, "### recv time= " + time);
 									//System.out.println("### recv time= " + time);
@@ -237,6 +238,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				mpegPakages = 2;
 			}else if(!stopPlay){
 				usedBytes = UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
+				//System.out.println("### decode ========= " + (SystemClock.currentThreadTimeMillis() - curr));
 				//UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
 				if(usedBytes>999999) {//(XDIM * 100000) + used_bytes;
 					int newImageWidth = usedBytes / 1000000;
@@ -269,6 +271,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						unusedBytes = 0;
 					}
 					System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
+					//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
 					mpegDataLength = unusedBytes;
 				}
 				//System.out.println("unusedBytes = " + unusedBytes + " mpegDataLength = " + mpegDataLength + " usedBytes= " + usedBytes);
@@ -281,7 +284,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				}
 				System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
 				mpegDataLength = unusedBytes;
-				System.out.println(usedBytes + " usedBytes -- after " + time);
 			}
 			//mpegDataLength = 0;
 		}
