@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -165,6 +167,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private RadioButton vga = null;
 	
 	private RadioButton qelp = null;
+	
+	private ConnectivityManager connectivityManager;
 	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -389,6 +393,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	    }
 		mHandler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
 		popupMenu = new VideoPopupMenu(this, mHandler, videoPopMenuItem);
+		connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		IntentFilter connectFilter = new IntentFilter();
+		intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		registerReceiver(connectionReceiver, connectFilter);
+		
 	}
 
 	private void registerListener(View view) {
@@ -845,7 +854,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			thread = null;
 		}
-    	 
+    	
+		unregisterReceiver(connectionReceiver);
     }
 	
 	private void showProgressDlg(int textId) {
@@ -1203,4 +1213,28 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		vga.setVisibility(flag);
 		qelp.setVisibility(flag);
 	}
+	
+	private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			NetworkInfo mobNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			NetworkInfo wifiNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			if (mobNetInfo.isConnected() || wifiNetInfo.isConnected()) {//update
+				Log.i(TAG, "internet connect");
+				if(myVideoView.isActivated()) {
+					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+					myVideoView.setPlayBackFlag(false);
+					updateCompoent(true);
+					mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
+					new AsynMonitorSocketTask().execute("");
+				}
+			} else {
+				Log.i(TAG, "internet unconnect");
+				stopPlayThread();
+			}
+
+		}
+
+	};
 }

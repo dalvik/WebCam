@@ -69,11 +69,11 @@ public class WebCam extends Activity implements OnClickListener{
         } catch (NameNotFoundException e) {
         	e.printStackTrace();
         }
-        boolean flag = settings.getBoolean("KEEP_USER_INFO", false);
+        boolean flag = settings.getBoolean("KEEP_USER_INFO", true);
         keepPwd.setChecked(flag);
         if(flag) {
         	userName.setText(settings.getString("USERNAME", "admin"));
-        	password.setText(settings.getString("PASSWORD", ""));
+        	password.setText(settings.getString("PASSWORD", "admin"));
         }else {
         	password.setText("");
         }

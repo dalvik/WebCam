@@ -37,9 +37,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private final static int DELAY_RECONNECT = 4* 1000;
 	
-	public final static int NALBUFLENGTH = 320 * 50; // 320 * 480 *2
+	public final static int NALBUFLENGTH = 1024*55;//32 * 48; //320 * 480 * 2
 
-	private static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 10240;//  342000;
 
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -260,6 +260,14 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			decoderFactory.setOnMpegPlayListener(this);
 			new Thread(decoderFactory).start();	
 		}
+		int index = 0;
+		int headCount = 1;
+		boolean sleepFlag = false;
+		
+		boolean startFlag = true;
+		int headFlagCount = 0;
+		byte[] tim = new byte[50];
+		
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 			dataRate += readLengthFromVideoSocket;
@@ -274,23 +282,64 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
-					/*if(BuildConfig.DEBUG && !DEBUG) {
-						Log.d(TAG, "### data buffer is full, please get data in time " + decoderFactory.getIndexForGet() );
-					}*/
 					synchronized (nalBuf) {
 						try {
 							nalBuf.wait(10);
 						} catch (InterruptedException e) {
+							stopPlay = true;
+							onStop();
 							e.printStackTrace();
 						}
 					}
 				}else {
-					 nalBuf[indexForPut]=videoSocketBuf[recvBufIndex];  
-					 indexForPut = (indexForPut+1)%NALBUFLENGTH;  
-					 if(listener != null) {
-						 listener.updatePutIndex(indexForPut);
-					 }
-				     recvBufIndex++;
+					byte b0 = videoSocketBuf[recvBufIndex];
+					nalBuf[indexForPut]= b0;  
+					indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+					if(listener != null) {
+						listener.updatePutIndex(indexForPut);
+					}
+				    recvBufIndex++;
+				    if(mpeg4Decoder) {
+				    	if(b0 == 0x00 && index ==0){
+				    		index++;
+				    	}else if(b0 == 0x00 && index == 1) {
+				    		index++;
+				    	}else if(b0 == 0x00 && index == 2) {
+				    		index++;
+				    	} else if(b0 == 0x01 && index == 3) {
+				    		index++;
+				    	}else if(b0 == 0x0c && index ==4) {
+				    		startFlag = true;
+				    		headFlagCount = 0;
+				    			
+				    	} else {
+				    		index = 0;
+				    		if(startFlag) {
+				    			headFlagCount++;
+				    			//tim[headFlagCount] = b0;
+								if(headFlagCount >= 18) { 
+									startFlag = false;
+									//String time = new String(tim, 0, headFlagCount);
+									//System.out.println("### new time========= " + time);
+									if(sleepFlag) {
+						    			synchronized (nalBuf) {
+						    				try {
+						    					nalBuf.wait();
+						    				} catch (InterruptedException e) {
+						    					stopPlay = true;
+						    					onStop();
+						    					e.printStackTrace();
+						    				}
+						    			}
+						    		}/*else {
+						    			if(headCount++ % 3==0) {
+						    				sleepFlag = true;
+						    			}
+						    		}*/
+								}
+							}
+				    	}
+				    }
 				}
 			}while(readLengthFromVideoSocket>recvBufIndex && !stopPlay);
 		} 
@@ -311,7 +360,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(audioThread != null) {
 			audioThread.onStop(true);
 		}
-		if(audioPlayerThread != null && audioPlayerThread.isInterrupted()) {
+		if(audioPlayerThread != null && !audioPlayerThread.isInterrupted()) {
 			audioPlayerThread.interrupt();
 		}
 		
@@ -486,4 +535,15 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void updateRect() {
 		this.temWidth = 1;
 	}
+	
+	public void notifyed() {
+		synchronized (nalBuf) {
+			nalBuf.notify();
+		}
+	}
+
+	public boolean isAutoStop() {
+		return isAutoStop;
+	}
+	
 }
