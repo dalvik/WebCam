@@ -616,8 +616,8 @@ public final class R {
         public static final int RelativeLayout_Item=0x7f0b000e;
         public static final int SecondaryProgress=0x01010000;
         public static final int add_apertrue=0x7f0b00b0;
-        public static final int add_clear=0x7f0b00a7;
         public static final int add_foucs=0x7f0b00ad;
+        public static final int add_quality=0x7f0b00a7;
         public static final int add_zoom=0x7f0b00aa;
         public static final int all_image_gridview=0x7f0b0064;
         public static final int app_icon=0x7f0b0062;
@@ -739,8 +739,8 @@ public final class R {
         public static final int mid_down=0x7f0b00a1;
         public static final int mid_up=0x7f0b009c;
         public static final int minus_apertrue=0x7f0b00ae;
-        public static final int minus_clear=0x7f0b00a5;
         public static final int minus_foucs=0x7f0b00ab;
+        public static final int minus_quality=0x7f0b00a5;
         public static final int minus_zoom=0x7f0b00a8;
         public static final int pager=0x7f0b0060;
         public static final int path_title=0x7f0b0005;

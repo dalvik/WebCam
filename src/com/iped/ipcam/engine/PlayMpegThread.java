@@ -128,9 +128,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							break;
 						}
 						try {
-							if(BuildConfig.DEBUG && DEBUG) {
+							/*if(BuildConfig.DEBUG && DEBUG) {
 								Log.d(TAG, "### no data ....");
-							}
+							}*/
 							mpegBuf.wait(20);
 						} catch (InterruptedException e) {
 							stopPlay = true;
@@ -303,10 +303,10 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	private void onStop() {
 		stopPlay = true;
 		UdtTools.freeDecorer();
-		if(video != null && !video.isRecycled()) {
+		/*if(video != null && !video.isRecycled()) {
 			video.recycle();
 			video = null;
-		}
+		}*/
 		this.rgbDataBuf = null;
 		jpegByteBuf = null;
 		mpegBuf = null;

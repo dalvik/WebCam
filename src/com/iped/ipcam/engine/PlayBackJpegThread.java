@@ -97,6 +97,8 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	private boolean andioStartFlag = false;
 	
+	private int timeOutCount = 1;
+	
 	public PlayBackJpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -120,8 +122,15 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (jpegBuf) {
-					if(BuildConfig.DEBUG && DEBUG) {
+					/*if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### data buffer is empty! ---->");
+					}*/
+					if(timeOutCount++ % 800 == 0) {
+						stopPlay = true;
+						if(BuildConfig.DEBUG && DEBUG) {
+							Log.d(TAG, "### play back jpeg timeout exit ----------->");
+						}
+						break;
 					}
 					try {
 						jpegBuf.wait(50);
@@ -130,6 +139,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 				}  
 			}else {
+				timeOutCount = 1;
 				byte b0 = nalBuf[indexForGet];
 				byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 				byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
@@ -140,6 +150,7 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 					if(initTableHeadCount==8) {// 前八个字节是索引表的信息
 						t1Length =  ByteUtil.byteToInt4(headerInfoByte,0);
 						t2Length =  ByteUtil.byteToInt4(headerInfoByte,4);//索引表的长度
+						System.out.println("t2Length=" + t2Length);
 						if(t2Length<=0 || t2Length>=maxHeadLength) {
 							initTableInfo = false;
 						}
@@ -167,9 +178,9 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 					indexForGet+=4;
 					insideHeaderFlag = true;
 					insideHeadCount = 0;
-					if(BuildConfig.DEBUG && DEBUG) {
+					/*if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
-					}
+					}*/
 				}else if(b0 == -1 &&  b1 == -40 &&  b2 == -1 && b3 == -32) {
 					video = BitmapFactory.decodeByteArray(jpegBuf, 0, jpegDataLength);
 					queue.addJpegImage(new JpegImage(video, timeStr));
@@ -179,9 +190,9 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 					jpegBuf[3] = b3;
 					indexForGet += 3;
 					jpegDataLength = 4;
-					if(BuildConfig.DEBUG && !DEBUG) {
+					/*if(BuildConfig.DEBUG && !DEBUG) {
 						Log.d(TAG, "### jpeg start flag ->" + video);
-					}
+					}*/
 				} else {
 					if(insideHeaderFlag) {
 						///System.out.println(insideHeadCount + " " + b0);

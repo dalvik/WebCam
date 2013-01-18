@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,7 +37,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private final static int DELAY_RECONNECT = 4* 1000;
 	
-	public final static int NALBUFLENGTH = 1024*20;//32 * 48; //320 * 480 * 2
+	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
 
 	private final static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
 
@@ -109,6 +110,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private Thread audioPlayerThread = null;
 	
 	private DecodeAudioThread audioThread = null;
+	
+	private boolean realTimeFlag = false;
 	
 	public MyVideoView(Context context) {
 		super(context);
@@ -195,7 +198,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			onStop();
 			return;
 		}
-		int bufLength = 100;
+		int bufLength = 50;
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsg(b, bufLength);
 		if (res < 0) {
@@ -213,13 +216,16 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
-		initBCV(info);
-		if(res > 6) {
+		if(res == 14) {
 			mpeg4Decoder = true;
-			//NALBUFLENGTH = 600*800*2; // 
+			NALBUFLENGTH = 1024*20; //
+			info.setQuality(b[13]);
 		}else {
+			NALBUFLENGTH = 320 * 480 * 2;
 			mpeg4Decoder = false;
 		}
+		new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
 		indexForPut = 0;
@@ -228,10 +234,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
 			if(mpeg4Decoder) {
-				/*if(decoderFactory != null) {
-					//decoderFactory.onStop(true);
-					decoderFactory = null;
-				}*/
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
@@ -250,7 +252,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				msg.arg1 = -1;
 				handler.sendMessage(msg);
 			}
+			realTimeFlag= true;
 		}else { // 回放
+			realTimeFlag = false;
 			if(mpeg4Decoder) {
 				//decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 			}else {
@@ -298,7 +302,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 						listener.updatePutIndex(indexForPut);
 					}
 				    recvBufIndex++;
-				    if(mpeg4Decoder) {
+				    if(realTimeFlag) {
 				    	if(b0 == 0x00 && index ==0){
 				    		index++;
 				    	}else if(b0 == 0x00 && index == 1) {
@@ -359,8 +363,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(audioThread != null) {
 			audioThread.onStop(true);
 		}
-		if(audioPlayerThread != null && !audioPlayerThread.isInterrupted()) {
+		
+		if(audioPlayerThread != null && audioPlayerThread.isAlive()) {
 			audioPlayerThread.interrupt();
+			audioPlayerThread = null;
 		}
 		
 		TalkBackThread.stopTalkBack();
@@ -545,4 +551,20 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		return isAutoStop;
 	}
 	
+	private class AsynCheckResoluTask extends AsyncTask<String, String, Void> {
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			String item = CamCmdListHelper.SetVideoResol + params[0] + "\n";
+			int res = UdtTools.sendCmdMsg( item, item.length());
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+			}
+			//startActivity(new Intent(CamVideoH264.this, PopupActivity.class));
+			if(res>0) {
+				//handler.sendEmptyMessage(Constants.SHOW_POP_UP_TIPS_DIA_MSG);
+			}
+			return null;
+		}
+	}
 }

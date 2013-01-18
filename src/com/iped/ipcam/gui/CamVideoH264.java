@@ -2,6 +2,7 @@ package com.iped.ipcam.gui;
 
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -12,6 +13,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -170,6 +172,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private ConnectivityManager connectivityManager;
 	
+	private boolean seekingFlag = false;
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -305,7 +309,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				long currentDuringTime = DateUtil.formatTimeStrToLong(time) - startTime;// 当前播放时间
 				//Log.d(TAG, "### play time = " +time + " currentTime=" + currentDuringTime/1000 + " startTime=" + startTime);
 				if(currentDuringTime <= during){
-					playBackSeekBar.setProgress((int)(currentDuringTime/1000));
+					if(!seekingFlag) {
+						playBackSeekBar.setProgress((int)(currentDuringTime/1000));
+					}
 				}
 				//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, playBackSeekBar.getProgress() + 1));
 				break;
@@ -1138,16 +1144,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
+			seekingFlag = true;
 			//Log.d(TAG, "### onStartTrackingTouch = " + seekBar.getProgress());
 		}
 	
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
+			seekingFlag = false;
 			int progress = seekBar.getProgress()/15;
 			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress *15));
 			//currentTextView.setText(DateUtil.formatTimeToDate6(progress * 1000+startTime));
 			int index = progress * 4;
-			System.out.println("progress=" + progress +" " + index  + " " + table2.length);
+			//Log.d(TAG, "progress=" + progress +" " + index  + " table2.length = " + table2.length);
 			if(table2 != null && table2.length>=index+4) {
 					int seekPos = ByteUtil.byteToInt4(table2, index);
 					Log.d(TAG, "### onStopTrackingTouch  seek value=" + seekBar.getProgress() + " timeIndex = " + progress + "  index=" + index + "  seek value = " + seekPos);

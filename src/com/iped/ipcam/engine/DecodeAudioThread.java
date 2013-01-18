@@ -16,7 +16,7 @@ public class DecodeAudioThread extends DecoderFactory{
 
 	private String TAG = "DecodeAudioThread";
 	
-	private boolean DEBUG = false;
+	private boolean DEBUG = true;
 	
 	private boolean stopPlay = false;
 	
@@ -169,9 +169,10 @@ public class DecodeAudioThread extends DecoderFactory{
 				m_out_trk.stop();
 				m_out_trk.release();
 				m_out_trk = null;
+				Log.d(TAG, "### audio track release.");
 			}
 			UdtTools.exitAmrDecoder();
-			if(BuildConfig.DEBUG && !DEBUG) {
+			if(BuildConfig.DEBUG && DEBUG) {
 				Log.d(TAG, "### audio amr decoder exit.");
 			}
 		}
