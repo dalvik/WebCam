@@ -52,6 +52,8 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 	
 	private Object lock = new Object();
 	
+	private int timeOutCount = 1;
+	
 	public DecodeJpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -65,12 +67,23 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 	@Override
 	public void run() {
 		stopPlay = false;
-		new Thread(new PlayJpegThread()).start();
+		Thread playAudioThread = new Thread(new PlayJpegThread());
+		playAudioThread.start();
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (jpegBuf) {
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### data buffer is empty! ---->");
+					}
+					if(timeOutCount++ % 150 == 0) {
+						stopPlay = true;
+						if(playAudioThread != null && !playAudioThread.isInterrupted()) {
+							playAudioThread.interrupt();
+						}
+						if(BuildConfig.DEBUG && DEBUG) {
+							Log.d(TAG, "### timeout exit ----------->");
+						}
+						break;
 					}
 					try {
 						jpegBuf.wait(200);
@@ -79,12 +92,14 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 					}
 				}  
 			}else {
+				timeOutCount = 1;
 				byte b0 = nalBuf[indexForGet];
 				byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 				byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
 				byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
 				byte b4 = nalBuf[(indexForGet+4)%NALBUFLENGTH];
 				if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
+					myVideoView.notifyed();
 					indexForGet+=4;
 					insideHeadCount = 0;
 					insideHeaderFlag = true;
@@ -146,6 +161,8 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 						try {
 							lock.wait(5);
 						} catch (InterruptedException e) {
+							stopPlay = true;
+							queue.clear();
 							e.printStackTrace();
 						}
 					}  
