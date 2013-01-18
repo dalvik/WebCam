@@ -42,7 +42,7 @@ public class TalkBackThread implements Runnable {
 	
 	private static boolean stopPlay = false;
 	
-	private boolean openSendAudioFlag = false;
+	private boolean openSendAudioFlag = true;
 	
 	private boolean DEBUG = true;
 	
@@ -78,8 +78,9 @@ public class TalkBackThread implements Runnable {
 	}
 	
 	 private void writeAudioDataToFile(){
-         int read = 0;
-         while(!stopPlay && openSendAudioFlag){
+        int read = 0;
+     	Log.d(TAG, "### start recorder!");
+        while(!stopPlay && openSendAudioFlag){
              read = audioRecord.read(micBuffer, 0, pcmBufferLength);
              if(AudioRecord.ERROR_INVALID_OPERATION == read){
            	  Log.d(TAG, "### recorder over !");
