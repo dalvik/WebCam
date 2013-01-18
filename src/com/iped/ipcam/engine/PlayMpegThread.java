@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.iped.ipcam.factory.DecoderFactory;
@@ -90,6 +89,8 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private static boolean flag = true;
 	
+	private int timeOutCount = 1;
+	
 	public PlayMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -119,8 +120,15 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			do{
 				if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 					synchronized (mpegBuf) {
+						if(timeOutCount++ % 1500 == 0) {
+							stopPlay = true;
+							if(BuildConfig.DEBUG && DEBUG) {
+								Log.d(TAG, "### timeout exit ----------->");
+							}
+							break;
+						}
 						try {
-							if(BuildConfig.DEBUG && !DEBUG) {
+							if(BuildConfig.DEBUG && DEBUG) {
 								Log.d(TAG, "### no data ....");
 							}
 							mpegBuf.wait(20);
@@ -132,6 +140,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						}
 					}  
 				}else {
+					timeOutCount = 1;
 					byte b0 = nalBuf[indexForGet];
 					byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 					byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
@@ -316,7 +325,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					timeStr = oldTime.substring(0,14);
 					//if(!popuJpeg(oldTime)){
 						MpegImage mpegImage = queue.getMpegImage();
-						if(BuildConfig.DEBUG && DEBUG) {
+						if(BuildConfig.DEBUG && !DEBUG) {
 							Log.d(TAG, "### show mpegImage = " + mpegImage );
 						}
 						if(mpegImage != null) {
