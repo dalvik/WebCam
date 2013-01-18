@@ -1,6 +1,5 @@
 package com.iped.ipcam.gui;
 
-import android.app.ActivityManager;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -9,8 +8,6 @@ import android.view.KeyEvent;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
-import com.iped.ipcam.engine.CamMagFactory;
-import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.engine.UpdateManager;
 import com.iped.ipcam.mail.ExceptionHandler;
 import com.iped.ipcam.utils.Constants;

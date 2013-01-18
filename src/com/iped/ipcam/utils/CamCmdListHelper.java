@@ -21,6 +21,7 @@ public class CamCmdListHelper {
 	public final static String SetCmd_PlayNetFiles = "ReplayRecord:";
 	public final static String SetCmd_SearchWireless = "search_wifi:0 ";
 	public final static String SetCmdPTZ = "Rs485Cmd:";
+	public final static String SetCmp_Set_Quality = "set_video_quality:";
 	public final static String SetCmp_Set_Brightness = "set_brightness:";
 	public final static String SetCmp_Set_Contrast = "set_contrast:";
 	public final static String SetCmp_Set_Volume = "set_volume:";

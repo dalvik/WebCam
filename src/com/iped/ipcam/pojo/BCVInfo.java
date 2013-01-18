@@ -12,6 +12,8 @@ public class BCVInfo implements Serializable {
 	
 	private int volume;
 
+	private int quality = -1;
+	
 	public BCVInfo() {
 		super();
 	}
@@ -47,11 +49,18 @@ public class BCVInfo implements Serializable {
 		this.volume = volume;
 	}
 
+	public int getQuality() {
+		return quality;
+	}
+
+	public void setQuality(int quality) {
+		this.quality = quality;
+	}
+
 	@Override
 	public String toString() {
 		return "BCVInfo [brightness=" + brightness + ", contrast=" + contrast
-				+ ", volume=" + volume + "]";
+				+ ", volume=" + volume + ", quality=" + quality + "]";
 	}
-	
 	
 }

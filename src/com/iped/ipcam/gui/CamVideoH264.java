@@ -219,6 +219,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Bundle bcvInfo = msg.getData();
 				if(bcvInfo != null) {
 					info = (BCVInfo) bcvInfo.get("UPDATEBCV");
+					clearProgerss.setProgress(info.getQuality()>0?info.getQuality():0);
 					brightnessProgerss.setProgress(info.getBrightness()>0?info.getBrightness():0);
 					contrastProgressbar.setProgress(info.getContrast()>0?info.getContrast():0);
 					volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
@@ -372,7 +373,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         rightView = factory.inflate(R.layout.reight_menu, null);
         listView = (ListView)rightView.findViewById(R.id.video_preview_list);
         registerListener(rightView);
-        updateCompoent(false);
+        updateComponent(false);
         int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
         int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
         rightView.measure(w, h);
@@ -449,9 +450,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		/**/
 		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
 		buttonMinusZoom.setOnClickListener(this);
+		///»­ÃæÖÊÁ¿
 		clearProgerss = (BCVControlProgressBar) view.findViewById(R.id.clear_progressbar);
 		clearProgerss.init(getText(R.string.video_preview_clear).toString());
 		clearProgerss.setProgress(0);
+		Button buttonAddQuality = (Button) view.findViewById(R.id.add_quality); 
+		buttonAddQuality.setOnClickListener(this);
+		Button buttonMinusQuality = (Button) view.findViewById(R.id.minus_quality); 
+		buttonMinusQuality.setOnClickListener(this);
+		
 		brightnessProgerss = (BCVControlProgressBar) view.findViewById(R.id.brightness_progressbar);
 		brightnessProgerss.init(getText(R.string.video_preview_brightness).toString());
 		brightnessProgerss.setProgress(0);
@@ -490,7 +497,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				myVideoView.setPlayBackFlag(false);
-				updateCompoent(true);
+				updateComponent(true);
 				mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
 				new AsynMonitorSocketTask().execute("");
 			} else {
@@ -516,6 +523,26 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 		//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
 		switch(v.getId()) {
+		case R.id.add_quality:
+			int value0 = clearProgerss.getProgress();
+			value0 += 10;
+			if(value0 >=100) {
+				value0 = 100;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Quality, value0+"")>0){
+				clearProgerss.setProgress(value0);
+			}
+			break;
+		case R.id.minus_quality:
+			int value1 = clearProgerss.getProgress();
+			value1 -= 10;
+			if(value1 <=0) {
+				value1 = 0;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Quality, value1+"")>0){
+				clearProgerss.setProgress(value1);
+			}
+			break;
 		case R.id.mid:
 			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
 			break;
@@ -908,7 +935,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(NetworkUtil.checkNetwokEnable(context)) {
 					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 					myVideoView.setPlayBackFlag(false);
-					updateCompoent(true);
+					updateComponent(true);
 					mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
 					new AsynMonitorSocketTask().execute("");
 				} else {
@@ -919,7 +946,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(bundle != null) {
 					String indexStr = bundle.getString("PLVIDEOINDEX");
 					myVideoView.setPlayBackFlag(true);
-					updateCompoent(false);
+					updateComponent(false);
 					mHandler.sendEmptyMessage(PlayBackConstants.SHOW_SEEKBAR_LAYOUT);
 					during = bundle.getLong("TOTALTIME");
 					startTime = bundle.getLong("STARTTIME");
@@ -933,7 +960,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	}
 	
-	private void updateCompoent(boolean flag) {
+	private void updateComponent(boolean flag) {
 		rightView.findViewById(R.id.mid_up).setEnabled(flag); 
 		rightView.findViewById(R.id.mid_down).setEnabled(flag);
 		rightView.findViewById(R.id.left).setEnabled(flag);
@@ -945,6 +972,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		rightView.findViewById(R.id.add_foucs).setEnabled(flag);
 		rightView.findViewById(R.id.minus_apertrue).setEnabled(flag);
 		rightView.findViewById(R.id.add_apertrue).setEnabled(flag);
+		rightView.findViewById(R.id.add_quality).setEnabled(flag);
+		rightView.findViewById(R.id.minus_quality).setEnabled(flag);
+		
 	}
 	
 	class AsynMonitorSocketTask extends AsyncTask<String, Integer, Void> {
@@ -1117,6 +1147,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress *15));
 			//currentTextView.setText(DateUtil.formatTimeToDate6(progress * 1000+startTime));
 			int index = progress * 4;
+			System.out.println("progress=" + progress +" " + index  + " " + table2.length);
 			if(table2 != null && table2.length>=index+4) {
 					int seekPos = ByteUtil.byteToInt4(table2, index);
 					Log.d(TAG, "### onStopTrackingTouch  seek value=" + seekBar.getProgress() + " timeIndex = " + progress + "  index=" + index + "  seek value = " + seekPos);
@@ -1225,7 +1256,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(myVideoView.isActivated()) {
 					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 					myVideoView.setPlayBackFlag(false);
-					updateCompoent(true);
+					updateComponent(true);
 					mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
 					new AsynMonitorSocketTask().execute("");
 				}

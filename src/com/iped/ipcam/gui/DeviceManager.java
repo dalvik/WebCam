@@ -250,7 +250,21 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		clearCamButton = (Button) findViewById(R.id.clear_all_button);
 		camManager = CamMagFactory.getCamManagerInstance();
 		initDeviceListView();
-		
+		/*SharedPreferences settings = getSharedPreferences(WebCam.class.getName(), 0);
+		boolean init = settings.getBoolean("INIT_DEVICE", true);
+		if(init) {
+			settings.edit().putBoolean("INIT_DEVICE", false);
+			Device test = new Device();
+			test.setDeviceName("≤‚ ‘÷’∂À1");
+			test.setDeviceID("28167951");
+			test.setUnDefine2("1234");
+			camManager.addCam(test);
+			Device test2 = new Device();
+			test2.setDeviceName("≤‚ ‘÷’∂À2");
+			test2.setDeviceID("88888888");
+			test2.setUnDefine2("1234");
+			camManager.addCam(test2);
+		}*/
 		//adapter = new DeviceAdapter(, this);
 		registerForContextMenu(getListView());
 		autoSearchButton.setOnClickListener(this);
