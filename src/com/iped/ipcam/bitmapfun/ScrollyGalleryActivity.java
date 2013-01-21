@@ -95,6 +95,18 @@ public class ScrollyGalleryActivity extends FragmentActivity implements OnLoadIm
     @Override
 	public void updateResolution(String path, int w, int h) {
     	imageScrollLayout.updateResolution(path, w, h);
+    	/*if(w>h) {//land
+    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    	}else if(w<h) {//port
+    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    	}*/
+    	/*final DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int height = displayMetrics.heightPixels;
+        final int width = displayMetrics.widthPixels;
+        final int longest = (height > width ? height : width) / 2;
+        mImageFetcher.setImageSize(longest);
+        imageScrollLayout.updateMetrics(displayMetrics);*/
 	}
     
     @Override
@@ -102,11 +114,12 @@ public class ScrollyGalleryActivity extends FragmentActivity implements OnLoadIm
     	super.onConfigurationChanged(newConfig);
     	final DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        /*  final int height = displayMetrics.heightPixels;
-         final int width = displayMetrics.widthPixels;
-         final int longest = (height > width ? height : width) / 2;
-         mImageFetcher.setImageSize(longest);*/
+        final int height = displayMetrics.heightPixels;
+        final int width = displayMetrics.widthPixels;
+        final int longest = (height > width ? height : width) / 2;
+        mImageFetcher.setImageSize(longest);
         imageScrollLayout.updateMetrics(displayMetrics);
+        System.out.println("onConfigurationChanged");
     }
     
 }
