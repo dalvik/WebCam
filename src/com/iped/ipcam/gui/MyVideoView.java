@@ -216,11 +216,18 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
-		if(res == 14) {
-			mpeg4Decoder = true;
-			NALBUFLENGTH = 1024*20; //
+		if(res >= 14) {
+			String type = new String(b, 7, 5);
+			Log.d(TAG, "### video type = " + type);
+			if("mpeg4".equalsIgnoreCase(type)) {
+				mpeg4Decoder = true;
+				NALBUFLENGTH = 1024*20; //
+			}else {
+				NALBUFLENGTH = 320 * 480 * 2;
+				mpeg4Decoder = false;
+			}
 			info.setQuality(b[13]);
-		}else {
+		} else {
 			NALBUFLENGTH = 320 * 480 * 2;
 			mpeg4Decoder = false;
 		}
