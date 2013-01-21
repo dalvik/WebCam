@@ -92,7 +92,7 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
-        final int longest = (height > width ? height : width) ;
+        final int longest = (height > width ? height : width) * 2/3;
         
 		mImageFetcher = new ImageFetcher(this, longest);
 		cacheParams.setMemCacheSizePercent(this, 0.25f);
@@ -158,8 +158,9 @@ public class ImageGrid extends FragmentActivity implements OnItemClickListener {
         } else {
             startActivity(i);
         }*/
-		Intent i = new Intent(this, FlingGalleryActivity.class);
-		 i.putExtra(ImageDetailActivity.EXTRA_IMAGE, index);
+		//Intent i = new Intent(this, FlingGalleryActivity.class);
+		Intent i = new Intent(this, ScrollyGalleryActivity.class);
+		i.putExtra(ImageDetailActivity.EXTRA_IMAGE, index);
 		startActivity(i);
     }
     

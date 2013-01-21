@@ -1,0 +1,45 @@
+<com.iped.ipcam.bitmapfun.ScrollLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_scrolllayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <ImageView
+            android:id="@+id/preImageView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:scaleType="matrix"
+            android:contentDescription="@string/imageview_description" />
+    </FrameLayout>
+    
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <ImageView
+            android:id="@+id/nextImageView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:scaleType="matrix"
+            android:contentDescription="@string/imageview_description" />
+    </FrameLayout>
+
+</com.iped.ipcam.bitmapfun.ScrollLayout>

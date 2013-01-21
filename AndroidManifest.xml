@@ -51,6 +51,10 @@
             android:configChanges="keyboardHidden|orientation"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
          
+         <activity android:name="com.iped.ipcam.bitmapfun.ScrollyGalleryActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+                  
         <activity android:name=".ImageViewer" android:configChanges="keyboardHidden|orientation" />
         
         <activity
