@@ -757,6 +757,9 @@ System.out.println("mNextScreen=" + mNextScreen);
         point.set(x / 2, y / 2);
     }
 	
+	public int getCurrentItem() {
+		return imageAdapterIndex;
+	}
 	
 	public void setOrientation(int orientation) {
 		this.orientation = orientation;

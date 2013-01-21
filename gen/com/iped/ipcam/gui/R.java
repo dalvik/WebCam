@@ -631,7 +631,7 @@ public final class R {
         public static final int cancle_btn_exit=0x7f0b0086;
         public static final int change_login_pwd=0x7f0b00d3;
         public static final int clear_all_button=0x7f0b001e;
-        public static final int clear_cache=0x7f0b00d4;
+        public static final int clear_cache=0x7f0b00d5;
         public static final int clear_progressbar=0x7f0b00a9;
         public static final int common_back=0x7f0b00c5;
         public static final int container=0x7f0b007f;
@@ -763,6 +763,7 @@ public final class R {
         public static final int search_device_id_list=0x7f0b0094;
         public static final int secondPassword=0x7f0b006a;
         public static final int send_audio=0x7f0b00b6;
+        public static final int set_wallpaper=0x7f0b00d4;
         public static final int start_date_buttion=0x7f0b0095;
         public static final int start_time_buttion=0x7f0b0096;
         public static final int sure_btn_exit=0x7f0b0085;
@@ -1076,7 +1077,7 @@ public final class R {
         public static final int file_cannotopen=0x7f07010c;
         public static final int full_device_online=0x7f07007d;
         public static final int hello=0x7f070000;
-        public static final int imageview_description=0x7f070146;
+        public static final int imageview_description=0x7f070148;
         public static final int input_password=0x7f07001a;
         public static final int keep_user_pass=0x7f070006;
         public static final int login_dialog_str=0x7f070019;
@@ -1122,6 +1123,8 @@ public final class R {
         public static final int pull_to_refresh_update=0x7f070143;
         public static final int repeat_input_password=0x7f07001b;
         public static final int repeat_new_input_password=0x7f070016;
+        public static final int set_wall_paper_menu=0x7f070146;
+        public static final int set_wall_paper_menu_toast=0x7f070147;
         public static final int sms_to_email_title_str=0x7f070135;
         public static final int system_settings_device_bin_addr_hint_str=0x7f070114;
         public static final int system_settings_device_bin_addr_str=0x7f070113;

@@ -414,8 +414,10 @@
     <string name="pull_to_refresh_tap_label">下拉可以刷新</string>
     <string name="pull_to_refresh_update">最近更新：</string>
     
+    <string name="clear_cache_menu">清除缓存</string>
+    <string name="clear_cache_complete_toast">缓存清除成功</string>
+    <string name="set_wall_paper_menu">设为壁纸</string>
+    <string name="set_wall_paper_menu_toast">设为壁纸成功</string>
     
-    <string name="clear_cache_menu">Clear Caches</string>
-    <string name="clear_cache_complete_toast">Caches have been cleared</string>
     <string name="imageview_description">Image Thumbnail</string>
 </resources>

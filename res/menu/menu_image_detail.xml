@@ -15,11 +15,15 @@
   limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
+    <item
+        android:id="@+id/set_wallpaper"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:showAsAction="never"
+        android:title="@string/set_wall_paper_menu"/>
+    
     <item
         android:id="@+id/clear_cache"
         android:icon="@android:drawable/ic_menu_delete"
         android:showAsAction="never"
         android:title="@string/clear_cache_menu"/>
-
 </menu>

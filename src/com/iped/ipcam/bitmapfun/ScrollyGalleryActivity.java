@@ -1,12 +1,21 @@
 package com.iped.ipcam.bitmapfun;
 
+import java.io.IOException;
+import java.util.GregorianCalendar;
+
+import android.app.WallpaperManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.iped.ipcam.bitmapfun.ImageWorker.OnLoadImageListener;
 import com.iped.ipcam.gui.R;
@@ -122,4 +131,34 @@ public class ScrollyGalleryActivity extends FragmentActivity implements OnLoadIm
         System.out.println("onConfigurationChanged");
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.set_wallpaper:
+                //NavUtils.navigateUpFromSameTask(this);
+            	Bitmap b = mImageFetcher.processBitmap(ImageGrid.getFilePath(imageScrollLayout.getCurrentItem()));
+            	System.out.println("b= " + b);
+            	if(b == null) {
+            		return false;
+            	}
+				try {
+					WallpaperManager.getInstance(ScrollyGalleryActivity.this).setBitmap(b);
+					Toast.makeText(this, R.string.set_wall_paper_menu_toast,Toast.LENGTH_SHORT).show();
+				} catch (IOException e) {
+					Log.d("ImageDetailActivity", "### " + e.getLocalizedMessage());
+				}
+                return true;
+            case R.id.clear_cache:
+                mImageFetcher.clearCache();
+                Toast.makeText(this, R.string.clear_cache_complete_toast,Toast.LENGTH_SHORT).show();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
