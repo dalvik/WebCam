@@ -431,41 +431,42 @@ System.out.println("mNextScreen=" + mNextScreen);
     		m.set(matrix);
     		RectF rectF = new RectF(0, 0, initImageWidth, initImageHeight);
     		m.mapRect(rectF);
-    		System.out.println(rectF.left + " " + rectF.right);
-    		if(rectF.left==0.0f) {
-    			if(dx > 0) {
-    				mTouchState = TOUCH_STATE_SCROLLING;
-    				mode = NONE;
-    			} else {
-    				if(rectF.right==dm.widthPixels){
-    	    			mTouchState = TOUCH_STATE_SCROLLING;
-    	    			mode = NONE;
-        			} else {
-        				mTouchState = TOUCH_STATE_REST;
-        				mode = DRAG;
-        			}
-    			}
-    		}else {
-    			if(rectF.left<0.0f){
+    		if(mode == DRAG) {
+    			if(rectF.left==0.0f) {
     				if(dx > 0) {
-    					mTouchState = TOUCH_STATE_REST;
-        				mode = DRAG;
-        			} else {
-        				if(rectF.right==dm.widthPixels) {
-        					mTouchState = TOUCH_STATE_SCROLLING;
-        					mode = NONE;
-        				}else {
-        					mTouchState = TOUCH_STATE_REST;
-        					mode = DRAG;
-        				}
-        			}
-    			} else {
-					/*if(rectF.bottom > dm.heightPixels) {
+    					mTouchState = TOUCH_STATE_SCROLLING;
+    					mode = NONE;
+    				} else {
+    					if(rectF.right==dm.widthPixels){
+    						mTouchState = TOUCH_STATE_SCROLLING;
+    						mode = NONE;
+    					} else {
+    						mTouchState = TOUCH_STATE_REST;
+    						mode = DRAG;
+    					}
+    				}
+    			}else {
+    				if(rectF.left<0.0f){
+    					if(dx > 0) {
+    						mTouchState = TOUCH_STATE_REST;
+    						mode = DRAG;
+    					} else {
+    						if(rectF.right==dm.widthPixels) {
+    							mTouchState = TOUCH_STATE_SCROLLING;
+    							mode = NONE;
+    						}else {
+    							mTouchState = TOUCH_STATE_REST;
+    							mode = DRAG;
+    						}
+    					}
+    				} else {
+    					/*if(rectF.bottom > dm.heightPixels) {
 						matrix.set(savedMatrix);
 		        		matrix.postTranslate(prev.x, dy);
 					}*/
-					mTouchState = TOUCH_STATE_SCROLLING;
-					mode = NONE;
+    					mTouchState = TOUCH_STATE_SCROLLING;
+    					mode = NONE;
+    				}
     			}
     		}
 			if(mode == DRAG) {//rectF.top !=0.0 || rectF.bottom != (float)dm.heightPixels && 
