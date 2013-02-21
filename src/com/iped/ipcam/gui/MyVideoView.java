@@ -113,6 +113,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean realTimeFlag = false;
 	
+	private boolean fullScreenFlag = false;
+	
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -137,7 +139,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint.setTextSize(18);
 		mpeg4Decoder = false;
 	}
-
+//TODO
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -152,20 +154,58 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				int top = 0;
 				int right = 0;
 				int bottom  = 0;
-				if(temWidth>imageviewWidth) {
-					left = (temWidth - imageviewWidth)/2;
-					right = imageviewWidth;
-				} else {
-					right = temWidth;
+				if(fullScreenFlag) {
+					int targetWidth = 0;
+					int targetHeinght = 0;
+					if(temWidth<=tmpHeight) {
+						targetWidth = temWidth;
+						targetHeinght = (int)((float)temWidth/imageviewWidth*imageViewHeight);
+						/*if(temWidth<=imageviewWidth) {
+							targetHeinght = (int)((float)temWidth/imageviewWidth*imageViewHeight);
+						}else {
+							targetHeinght = (int)((float)imageviewWidth/temWidth*imageViewHeight);
+						}*/
+					}else {
+						/*if(tmpHeight<=imageViewHeight) {
+							targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
+							targetHeinght = (int)((float)tmpHeight/imageViewHeight*tmpHeight);
+						}else {
+							targetWidth = (int)((float)imageViewHeight/tmpHeight*imageviewWidth);
+							targetHeinght = (int)((float)imageViewHeight/tmpHeight*tmpHeight);
+						}*/
+						targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
+						targetHeinght = tmpHeight;
+					}
+					System.out.println("temWidth=" + temWidth + " "+ targetWidth + " tmpHeight= " + tmpHeight + " " + targetHeinght);
+					if(temWidth>targetWidth) {
+						left = (temWidth - targetWidth)/2;
+						right = targetWidth;
+					} else {
+						right = temWidth;
+					}
+					if(tmpHeight > targetHeinght) {
+						top =  (tmpHeight - targetHeinght)/2;
+						bottom = targetHeinght;
+					} else {
+						bottom = targetHeinght;
+					}
+					rect = new Rect(left, top, right + left, bottom + top);				
+				}else {
+					if(temWidth>imageviewWidth) {
+						left = (temWidth - imageviewWidth)/2;
+						right = imageviewWidth;
+					} else {
+						right = temWidth;
+					}
+					
+					if(tmpHeight > imageViewHeight) {
+						top =  (tmpHeight - imageViewHeight)/2;
+						bottom = imageViewHeight;
+					} else {
+						bottom = tmpHeight;
+					}
+					rect = new Rect(left, top, right + left, bottom + top);
 				}
-				
-				if(tmpHeight > imageViewHeight) {
-					top =  (tmpHeight - imageViewHeight)/2;
-					bottom = imageViewHeight;
-				} else {
-					bottom = tmpHeight;
-				}
-				rect = new Rect(left, top, right + left, bottom + top);
 			}
 			canvas.save();
 			if(reverseFlag) {
@@ -556,6 +596,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	public boolean isAutoStop() {
 		return isAutoStop;
+	}
+	
+	public void zoomCanvas() {
+		if (video != null) {
+			if (temWidth == getWidth()) {
+				if(fullScreenFlag) {
+					fullScreenFlag = false;
+				}else {
+					fullScreenFlag = true;
+				}
+				updateRect();
+			}
+		}
 	}
 	
 	private class AsynCheckResoluTask extends AsyncTask<String, String, Void> {

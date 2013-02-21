@@ -2,7 +2,7 @@ package com.iped.ipcam.gui;
 
 import java.util.List;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -13,7 +13,6 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,6 +40,7 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.iped.ipcam.bitmapfun.ImageGrid;
 import com.iped.ipcam.engine.CamMagFactory;
@@ -174,6 +174,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private boolean seekingFlag = false;
 	
+	private long firtick = 0l;
+
+	private long sectick = 0l;
+
+	private long distance = 0l;
+
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -516,7 +522,23 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	public void onClick(View v) {
 		if(v.getId() == R.id.videoview) {
-			rightControlPanel.onClick();
+			if(firtick == 0l){
+				firtick = System.currentTimeMillis();//前一次点击的时间
+			}else if(sectick == 0l){
+				sectick = System.currentTimeMillis();
+				distance = sectick - firtick;
+				if(distance > 0l && distance < 500l){
+					// 时间范围自由设定，如果为true表明是连续点击；
+					firtick = 0l;
+					sectick = 0l;
+					myVideoView.zoomCanvas();
+				}else{
+					//不是连续点击
+					firtick = System.currentTimeMillis();//重新获取前一次点击的时间
+					sectick = 0l;
+					rightControlPanel.onClick();
+				} 
+			}
 			return;
 		}
 		if(v.getId() == R.id.right_down){
@@ -845,6 +867,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	protected void onResume() {
 		super.onResume();
+		previewDeviceAdapter = new VideoPreviewDeviceAdapter(camManager.getCamList(), CamVideoH264.this);
+		listView.setAdapter(previewDeviceAdapter);
+		ToastUtils.setListViewHeightBasedOnChildren(listView);
+		//Toast.makeText(CamVideoH264.this, "onResume", Toast.LENGTH_LONG).show();
 	}
 	
 	@Override
@@ -922,9 +948,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION.equals(intent.getAction())) {
-				previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, CamVideoH264.this);
+				previewDeviceAdapter = new VideoPreviewDeviceAdapter(camManager.getCamList(), CamVideoH264.this);
 				listView.setAdapter(previewDeviceAdapter);
 				ToastUtils.setListViewHeightBasedOnChildren(listView);
+				//Toast.makeText(CamVideoH264.this, "aaa", Toast.LENGTH_LONG).show();
 			}
 		}	
 	};
