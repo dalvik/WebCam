@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.iped.ipcam.gui.R;
 import com.iped.ipcam.gui.UdtTools;
@@ -18,6 +19,7 @@ import com.iped.ipcam.pojo.Video;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.ErrorCode;
+import com.iped.ipcam.utils.MessageUtils;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.RandomUtil;
 
@@ -104,7 +106,7 @@ public class VideoManagerImp implements IVideoManager {
 		@Override
 		public void run() {
 			id = device.getDeviceID();
-			int res = UdtTools.checkCmdSocketEnable(id);
+			int res = -1;//UdtTools.checkCmdSocketEnable(id);
 			Log.d(TAG, "### UdtTools checkCmdSocketEnable result = " + res + " device id = " + id);
 			if(res>0) { // socket is valid
 				//handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -117,7 +119,7 @@ public class VideoManagerImp implements IVideoManager {
 			}else {
 				String random = RandomUtil.generalRandom();
 				//Log.d(TAG, "random = " + random);
-				int result = UdtTools.monitorCmdSocket(id, random);
+				String result = UdtTools.monitorCmdSocket(id, random);
 				Log.d(TAG, "monitor result = " + result);
 				analyseResult(result, device);
 			}
@@ -172,8 +174,8 @@ public class VideoManagerImp implements IVideoManager {
 			handler.sendEmptyMessage(Constants.UPDATEVIDEOLIST);
 		}
 		
-		private void analyseResult(int result, Device device) {
-			switch (result) {
+		private void analyseResult(String result, Device device) {
+			/*switch (result) {
 			case ErrorCode.STUN_ERR_INTERNAL:
 				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.webcam_error_code_internel);
 				return;
@@ -194,11 +196,16 @@ public class VideoManagerImp implements IVideoManager {
 				return;
 			default:
 				break;
+			}*/
+			if("OK".equalsIgnoreCase(result)) {
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(fetchVideoRunnable);
+			}else{
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG, -1);
+				MessageUtils.sendErrorMessage(handler, result);
 			}
-			HandlerThread handlerThread = new HandlerThread("test1");
-			handlerThread.start();
-			Handler mHandler = new Handler(handlerThread.getLooper());
-			mHandler.post(fetchVideoRunnable);
 		}
 		
 		private Runnable fetchVideoRunnable = new Runnable() {
@@ -295,7 +302,7 @@ public class VideoManagerImp implements IVideoManager {
 		@Override
 		public void run() {
 			id = device.getDeviceID();
-			int res = UdtTools.checkCmdSocketEnable(id);
+			int res = -1;//UdtTools.checkCmdSocketEnable(id);
 			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
 			if(res>0) { // socket is valid
 				HandlerThread handlerThread = new HandlerThread("test1");
@@ -305,7 +312,7 @@ public class VideoManagerImp implements IVideoManager {
 			}else {
 				String random = RandomUtil.generalRandom();
 				//Log.d(TAG, "random = " + random);
-				int result = UdtTools.monitorCmdSocket(id, random);
+				String result = UdtTools.monitorCmdSocket(id, random);
 				Log.d(TAG, "monitor result = " + result);
 				analyseResult(result, device);
 			}
@@ -346,8 +353,8 @@ public class VideoManagerImp implements IVideoManager {
 			}*/
 		}
 		
-		private void analyseResult(int result, Device device) {
-			switch (result) {
+		private void analyseResult(String result, Device device) {
+			/*switch (result) {
 			case ErrorCode.STUN_ERR_INTERNAL:
 				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,R.string.webcam_error_code_internel);
 				return;
@@ -368,11 +375,16 @@ public class VideoManagerImp implements IVideoManager {
 				return;
 			default:
 				break;
+			}*/
+			if("OK".equalsIgnoreCase(result)) {
+				HandlerThread handlerThread = new HandlerThread("test1");
+				handlerThread.start();
+				Handler mHandler = new Handler(handlerThread.getLooper());
+				mHandler.post(deleteVideoRunnable);
+			} else {
+				sendMessage(Constants.DISSMISVIDEOSEARCHDLG,-1);
+				MessageUtils.sendErrorMessage(handler, result);
 			}
-			HandlerThread handlerThread = new HandlerThread("test1");
-			handlerThread.start();
-			Handler mHandler = new Handler(handlerThread.getLooper());
-			mHandler.post(deleteVideoRunnable);
 		}
 		
 		private void sendMessage(int msgId, int strId) {

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.pojo.WifiConfig;
 
 import android.util.Log;
@@ -21,7 +22,9 @@ public class ParaUtil {
 			if(splitFlagIndex > 0 ) {
 				String key = s.substring(0, splitFlagIndex).trim();
 				String value = s.substring(splitFlagIndex + 1).trim();
-				Log.d(TAG, "put para   " + key  + "=" + value);
+				if(BuildConfig.DEBUG) {
+					Log.d(TAG, "put para   " + key  + "=" + value);
+				}
 				paraMap.put(key, value);
 			}
 		}
@@ -33,7 +36,9 @@ public class ParaUtil {
 		for(String s:keySet) {
 			sb.append(s + "=" + paraMap.get(s) + "\n");
 		}
-		Log.d(TAG, sb.toString());
+		if(BuildConfig.DEBUG) {
+			Log.d(TAG, sb.toString());
+		}
 		return sb.toString();
 	}
 	

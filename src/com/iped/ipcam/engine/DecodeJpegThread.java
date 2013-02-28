@@ -147,11 +147,13 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 			while(!stopPlay) {
 				if(queue.getImageListLength()>0) {
 					JpegImage image = queue.removeImage();
-					myVideoView.setImage(image.bitmap);
-					frameCount = myVideoView.getFrameCount();
-					frameCount++;
-					if(listener != null) {
-						listener.invalide(image.time);
+					if(image != null) {
+						myVideoView.setImage(image.bitmap);
+						frameCount = myVideoView.getFrameCount();
+						frameCount++;
+						if(listener != null) {
+							listener.invalide(image.time);
+						}
 					}
 				}else {
 					synchronized (lock) {

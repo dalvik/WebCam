@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.CamCmdListHelper;
@@ -68,7 +69,9 @@ public class CamParasSetImp implements ICamParasSet {
 					return;
 				}
 				String recvConfigStr = new String(recvBuf,0, recvLength);
-				Log.d(TAG, "### recvConfigStr " + recvConfigStr);
+				if(BuildConfig.DEBUG) {
+					Log.d(TAG, "### recvConfigStr " + recvConfigStr);
+				}
 				int rs = 0;
 				if("PSWD_NOT_SET".equals(recvConfigStr)) {
 					rs = -1;
@@ -77,7 +80,9 @@ public class CamParasSetImp implements ICamParasSet {
 					rs = -2;
 					Log.d(TAG, "CamParasSetImp PSWD_FAIL");
 				} else {
-					ParaUtil.putParaByString(recvConfigStr, paraMap);
+					if(recvConfigStr != null && recvConfigStr.length()>=5) {
+						ParaUtil.putParaByString(recvConfigStr.substring(4), paraMap);
+					}
 				}
 				Message msg = handler.obtainMessage();
 				msg.what = Constants.HIDEQUERYCONFIGDLG;

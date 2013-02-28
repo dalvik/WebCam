@@ -2,7 +2,6 @@ package com.iped.ipcam.gui;
 
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -52,8 +51,8 @@ import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DialogUtils;
-import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
+import com.iped.ipcam.utils.MessageUtils;
 import com.iped.ipcam.utils.NetworkUtil;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
@@ -83,6 +82,8 @@ import com.iped.ipcam.view.VideoPopupMenu;
 public class CamVideoH264 extends Activity implements OnClickListener, OnTouchListener {
 	
 	//private VideoView videoView = null;
+	
+	private static final int UPDATE_COMPONENT = 1302281010;
 	
 	private MyVideoView myVideoView = null;
 	
@@ -335,6 +336,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				params.height = screenHeight/2;
 				popupActivity.getWindow().setAttributes(params);
 				break;
+			case Constants.CONNECTERRORINFO:
+				String info = (String)msg.obj;
+				Toast.makeText(CamVideoH264.this, info, Toast.LENGTH_SHORT).show();
+				break;
+			case UPDATE_COMPONENT:
+				String mode = (String)msg.obj;
+				updateComponentByMode(mode);
+				break;
 			default:
 				break;
 			}
@@ -351,9 +360,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void stopPlayThread() {
-		if(!myVideoView.isStopPlay()) {
-			myVideoView.setStopPlay(true, true);
-		}
+		myVideoView.setStopPlay(true, true);
 		if(thread != null && !thread.isInterrupted()) {
 			Log.d(TAG, "##############");
 			thread.isInterrupted();
@@ -1015,10 +1022,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		protected Void doInBackground(String... params) {
 			stopPlayThread();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			playBackFlag = params[0];
 			Device device = camManager.getSelectDevice();
-			int result = UdtTools.monitorSocket(device.getDeviceID());
-			//Log.d(TAG, "monitor result = " + result + " device info =  " + device.toString());
+			String result = UdtTools.monitorSocket(device.getDeviceID());
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "monitor result = " + result);
+			}
 			analyseResult(result);
 			return null;
 		}
@@ -1034,8 +1048,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	 	}	
 	}
 	
-	private void analyseResult(int result) {
-		switch (result) {
+	private void analyseResult(String result) {
+		/*switch (result) {
 		case ErrorCode.STUN_ERR_INTERNAL:
 			sendErrorMessage(R.string.webcam_error_code_internel);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -1062,17 +1076,22 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			return;
 		default:
 			break;
-		}
+		}*/
 		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
 		//String random = RandomUtil.generalRandom();
 		//Log.d(TAG, "random = " + random);
-		int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
-		if(initRes<0) {
-			Log.d(TAG, "initialSocket init error!");
+		if("OK".equalsIgnoreCase(result)) {
+			int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
+			if(initRes<0) {
+				Log.d(TAG, "initialSocket init error!");
+				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+				MessageUtils.sendErrorMessage(mHandler,R.string.webcam_connect_init_error);
+			}else {
+				checkPwdState();
+			}
+		} else {
+			MessageUtils.sendErrorMessage(mHandler,result);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			sendErrorMessage(R.string.webcam_connect_init_error);
-		}else {
-			checkPwdState();
 		}
 	}
 	
@@ -1094,20 +1113,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
 			}
 		} else if(resu == 2){
-			sendErrorMessage(R.string.device_manager_pwd_set_err);
+			MessageUtils.sendErrorMessage(mHandler,R.string.device_manager_pwd_set_err);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		} else {
-			sendErrorMessage(R.string.device_manager_time_out_or_device_off_line);
+			MessageUtils.sendErrorMessage(mHandler, R.string.device_manager_time_out_or_device_off_line);
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		}
 	}
 	
-	private void sendErrorMessage(int errorStrId) {
-		Message msg = mHandler.obtainMessage();
-		msg.what = Constants.CONNECTERROR;
-		msg.arg1 = errorStrId;
-		mHandler.sendMessage(msg);
-	}
 	
 	private class AsynCheckPwdTask extends AsyncTask<Integer, Integer, Void> {
 		@Override
@@ -1119,7 +1132,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				device.setUnDefine2(newPwd);
 				camManager.updateCam(device);
 				FileUtil.persistentDevice(CamVideoH264.this,camManager.getCamList());
-				Log.d(TAG, "### play back vodio index = " + playBackFlag);
+				String deviceMode = PackageUtil.getConfigMode(device);
+				Log.d(TAG, "### play back vodio index = " + playBackFlag + "  device mode = " + deviceMode);
+				Message msg = mHandler.obtainMessage();
+				msg.what = UPDATE_COMPONENT;
+				msg.obj = deviceMode;
+				mHandler.sendMessage(msg);
 				if(playBackFlag != null && playBackFlag.length()>0) {
 					String item = CamCmdListHelper.SetCmd_Play_Back + playBackFlag;
 					int res = UdtTools.sendCmdMsg(item, item.length());
@@ -1127,18 +1145,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					if(res>0) {
 						mHandler.sendEmptyMessage(Constants.CONNECTTING);
 					}else {
-						sendErrorMessage(R.string.device_manager_time_out_or_device_off_line);
+						MessageUtils.sendErrorMessage(mHandler,R.string.device_manager_time_out_or_device_off_line);
 					}
 				}else {
 					mHandler.sendEmptyMessage(Constants.CONNECTTING);
 				}
 			} else if(checkPwd == -1) {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				sendErrorMessage(R.string.device_manager_pwd_set_err);
+				MessageUtils.sendErrorMessage(mHandler,R.string.device_manager_pwd_set_err);
 				mHandler.sendEmptyMessage(Constants.SEND_SHOW_INPUT_ONE_PASS_DIALOG_SMG);
 			} else {
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-				sendErrorMessage(R.string.device_manager_time_out_or_device_off_line);
+				MessageUtils.sendErrorMessage(mHandler,R.string.device_manager_time_out_or_device_off_line);
 			}
 			return null;
 		}
@@ -1299,8 +1317,78 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				Log.i(TAG, "internet unconnect");
 				stopPlayThread();
 			}
-
 		}
-
 	};
+	
+	private void updateComponentByMode(String mode) {
+		if(mode == null) {
+			return;
+		}
+		if(BuildConfig.DEBUG){
+			Log.d(TAG, "### device mode =  " + mode);
+		}
+		if(mode.length()==0 || "IP1001".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP1001]
+			 * # 没有高清分辨率 
+			 * # 没有分辨率切换功能
+			 * # 没有降噪强度
+			 * # 没有画质调节
+			 * # 没有cif分辨率（355*288）
+			 */
+			updateQuality(false);// 画质调节
+			updateAudioTalk(true);
+			updateYuntai(true);
+		}else if("IP1001S".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP1001S]
+			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
+			 * # 没有cif分辨率
+			 */
+			updateCIF(false);
+			updateAudioTalk(true);
+			updateYuntai(true);
+		}else if("IP2001".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP2001]
+			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
+			 * # 没有监控模式选择
+			 */
+			updateAudioTalk(true);
+			updateYuntai(true);
+		}else if("IP2002C".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP2002C]
+			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
+			 * # 没有监控模式选择
+			 * # 没有语音对讲
+			 * # 没有云台功能
+			 * # 没有wifi
+			 */
+			updateAudioTalk(false);
+			updateYuntai(false);
+			updateCIF(false);
+		}
+			
+	}
+	
+	private void updateAudioTalk(boolean flag) {
+		rightView.findViewById(R.id.send_audio).setEnabled(flag);
+	}
+	
+	private void updateQuality(boolean flag) {
+		rightView.findViewById(R.id.add_quality).setEnabled(flag);
+		rightView.findViewById(R.id.minus_quality).setEnabled(flag);
+	}
+	
+	private void updateYuntai(boolean flag) {
+		rightView.findViewById(R.id.mid_up).setEnabled(flag);
+		rightView.findViewById(R.id.mid_down).setEnabled(flag);
+		rightView.findViewById(R.id.left).setEnabled(flag);
+		rightView.findViewById(R.id.right).setEnabled(flag);
+	}
+	
+	private void updateCIF(boolean flag) {
+		qvga.setEnabled(flag);
+	}
 }

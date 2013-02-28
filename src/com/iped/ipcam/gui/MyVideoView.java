@@ -39,7 +39,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 4096;//  342000;
 
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -252,7 +252,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if("tlk".equalsIgnoreCase(tlk)) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
-			UdtTools.freeConnection();
+			UdtTools.exit();
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -317,18 +317,34 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		boolean startFlag = true;
 		int headFlagCount = 0;
 		byte[] tim = new byte[50];
-		
+		int timeoutCounter = 0;
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 			dataRate += readLengthFromVideoSocket;
 			//Log.d(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
 			if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
-				if(BuildConfig.DEBUG && !DEBUG) {
-					Log.d(TAG, "### read over break....");
+				timeoutCounter++;
+				if(readLengthFromVideoSocket == -1) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.e(TAG, "### read over break....");
+					}
+					break;
 				}
-				stopPlay = true;
-				break;
+				if(timeoutCounter>15) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.e(TAG, "### read over break....");
+					}
+					break;
+				}else {
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.e(TAG, "### recv data timeout....");
+					}
+					continue;
+				}
 			}
+			timeoutCounter = 0;
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
@@ -407,14 +423,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### onStoped.");
 		}
-		if(audioThread != null) {
-			audioThread.onStop(true);
-		}
-		
-		if(audioPlayerThread != null && audioPlayerThread.isAlive()) {
-			audioPlayerThread.interrupt();
-			audioPlayerThread = null;
-		}
+		stopAudio();
 		
 		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
@@ -432,6 +441,17 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		flushBitmap();
 	}
 
+	private void stopAudio() {
+		if(audioThread != null) {
+			audioThread.onStop(true);
+		}
+		
+		if(audioPlayerThread != null && !audioPlayerThread.isInterrupted()) {
+			audioPlayerThread.interrupt();
+			audioPlayerThread = null;
+		}
+	}
+	
 	public boolean isStopPlay() {
 		return stopPlay;
 	}
@@ -439,6 +459,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void setStopPlay(boolean stopPlay, boolean isAutoStop) {
 		this.stopPlay = stopPlay;
 		this.isAutoStop = isAutoStop;
+		stopAudio();
 	}
 
 	private void release() {

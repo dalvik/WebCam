@@ -206,6 +206,8 @@
     	<string name="device_params_monitor_set_str">监控设置：</string>
     	<string name="device_params_monitor_self_mode_set_str">自定义模式(帧率可调，画面同录像一致)</string>
     	<string name="device_params_monitor_intelligent_mode_set_str">智能模式(根据网络性能，自动调节画面和帧率)</string>
+    	<string name="device_params_monitor_intelligent_mode_fluency_str">更流畅</string>
+    	<string name="device_params_monitor_intelligent_mode_distinct_str">更清晰(仅对摄像机固件版本6.6以上有效)</string>
     	<!-- 其他设置 -->
     	<string name="device_params_other_set_str">其他设置：</string>
     	<string name="device_params_other_set_sound_str">声音设置：</string>

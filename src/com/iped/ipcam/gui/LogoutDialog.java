@@ -36,11 +36,9 @@ public class LogoutDialog extends Activity implements OnClickListener {
     public void onClick(View v) {
     	switch(v.getId()) {
     	case R.id.sure_btn_exit:
-    		UdtTools.close();
     		ICamManager camManager = CamMagFactory.getCamManagerInstance();
     		camManager.clearCamList();
     		//UdtTools.exit();
-    		UdtTools.freeConnection();
     		UdtTools.close();
     		UdtTools.cleanUp();
     		int sdk_Version = android.os.Build.VERSION.SDK_INT;

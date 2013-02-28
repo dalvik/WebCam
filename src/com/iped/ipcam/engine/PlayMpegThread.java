@@ -122,6 +122,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					synchronized (mpegBuf) {
 						if(timeOutCount++ % 1500 == 0) {
 							stopPlay = true;
+							myVideoView.onStop();
 							if(BuildConfig.DEBUG && DEBUG) {
 								Log.d(TAG, "### timeout exit ----------->");
 							}

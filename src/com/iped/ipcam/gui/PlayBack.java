@@ -120,6 +120,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				//hideProgress();
 				ProgressUtil.showProgress(R.string.video_clear_ing, PlayBack.this);
 				break;
+			case Constants.CONNECTERRORINFO:
+				String info = (String)msg.obj;
+				Toast.makeText(PlayBack.this, info, Toast.LENGTH_SHORT).show();
+				break;
 			default:
 				break;
 			}

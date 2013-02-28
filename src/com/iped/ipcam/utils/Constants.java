@@ -47,6 +47,8 @@ public class Constants {
 
 	public final static int CONNECTERROR = 2020;
 
+	public final static int CONNECTERRORINFO = 2025;
+	
 	public final static int RECONNECT = 2030;
 
 	public final static int DELETEFILES = 2040;
