@@ -227,10 +227,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 
 	public void run() {
-		System.out.println("Debug mode " + BuildConfig.DEBUG );
 		deviceId = device.getDeviceID();
 		devicenName = device.getDeviceName();
-		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
+		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2());
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
 		if (res < 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -241,7 +240,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		int bufLength = 50;
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsg(b, bufLength);
-		if (res < 0) {
+		if (res <= 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			onStop();
 			Log.d(TAG, "recvCmdMsgById result = " + res);
@@ -327,19 +326,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				if(readLengthFromVideoSocket == -1) {
 					stopPlay = true;
 					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.e(TAG, "### read over break....");
+						Log.e(TAG, "### thread recv video data over break....");
 					}
 					break;
 				}
 				if(timeoutCounter>15) {
 					stopPlay = true;
 					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.e(TAG, "### read over break....");
+						Log.e(TAG, "### recv video data over break....");
 					}
 					break;
 				}else {
 					if(BuildConfig.DEBUG && !DEBUG) {
-						Log.e(TAG, "### recv data timeout....");
+						Log.e(TAG, "### recv video data timeout....");
 					}
 					continue;
 				}
@@ -636,7 +635,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		
 		@Override
 		protected Void doInBackground(String... params) {
-			String item = CamCmdListHelper.SetVideoResol + params[0] + "\n";
+			String item = CamCmdListHelper.SetVideoResol + params[0];
 			int res = UdtTools.sendCmdMsg( item, item.length());
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );

@@ -48,22 +48,40 @@ public class DecodeAudioThread extends DecoderFactory{
 		Thread thread = new Thread(new PlaySoundThread());
 		thread.start();
 		int recvDataLength = -1;
+		int timeoutCounter = 0;
 		while (!stopPlay) {
 			recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
 			if(recvDataLength<=0) {
-				if(BuildConfig.DEBUG && DEBUG) {
-					Log.d(TAG, "### audio recv audio over");
+				timeoutCounter++;
+				if(recvDataLength == -1) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.d(TAG, "### thread recv audio over");
+					}
+					break;
 				}
-				stopPlay = true;
-				break;
+				if(timeoutCounter>15) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.e(TAG, "### recv audio data over break....");
+					}
+					break;
+				}else {
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.e(TAG, "### recv audio data timeout....");
+					}
+					continue;
+				}
 			}
+			timeoutCounter = 0;
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % recvAudioBufLen == indexForGet) {
 					synchronized (recvAudioBuf) {
 						try {
 							recvAudioBuf.wait(10);
-							Log.d(TAG, "### audio buffer is full! ---->");
+							recvBufIndex = recvDataLength; 
+							Log.d(TAG, "### audio data buffer is full! ---->");
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							if(thread != null && !thread.isInterrupted()) {

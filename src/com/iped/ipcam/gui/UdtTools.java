@@ -9,15 +9,7 @@ public class UdtTools {
 		System.loadLibrary("pcm");
 		System.loadLibrary("xvid");
 	}
-	public static String getTime() {
-		System.out.println("-------qqqq");
-		return "aaaa--------";
-	}
-	//public static void myCallBackFunc(String msg) {
-		
-		//System.out.println("myCallBackFunc ==>" + msg);
-	//}
-	
+
 	// recv video and audio
 	public static native int initSocket(String remoteIp, int localVideoPort, int remoteVideoPort, int localAudioPort, int remoteAudioPort, int videoBufferLength, int audioBufferLength);
 	public static native int recvVideoData(byte[] buf, int bufferLength);
@@ -48,11 +40,7 @@ public class UdtTools {
 	public static native String monitorCmdSocket(String camId, String random);
 	
 	public static native int freeCmdSocket();
-	
-	//public static native int freeConnectionById(String camId);
-	
-	//public static native int checkCmdSocketEnable(String camId);
-	
+		
 	public static native int sendCmdMsg(String cmd, int cmdLength);
 	
 	public static native int sendCmdMsgById(String camId, String cmd, int cmdLength);

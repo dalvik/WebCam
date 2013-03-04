@@ -219,7 +219,7 @@ public class PackageUtil {
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
 		Log.d(TAG, "### check pwd state length " + recvLength);
-		if(recvLength<0) {
+		if(recvLength<=0) {
 			return -2; // time out
 		}
 		String recvStr = new String(recvBuf,0, recvLength);
@@ -233,7 +233,7 @@ public class PackageUtil {
 	}
 
 	public static int checkPwd(String id, String  pwd) {
-		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd + "\0");
+		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd);
 		int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 		Log.d(TAG, "checkPwd = " + res);
 		if(res < 0) {
@@ -243,7 +243,7 @@ public class PackageUtil {
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
 		Log.d(TAG, "### check pwd recv length " + recvLength);
-		if(recvLength<0) {
+		if(recvLength<=0) {
 			return -2; // time out
 		}
 		String recvStr = new String(recvBuf,0, recvLength);
@@ -259,14 +259,14 @@ public class PackageUtil {
 		String id = device.getDeviceID();
 		int res = UdtTools.sendCmdMsgById(id,common, common.length());
 		Log.d(TAG, "setPwd = " + res);
-		if(res <0) {
+		if(res <=0) {
 			return -2; // time out
 		}
 		int bufLength = 100;
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsgById(id, recvBuf, bufLength);
 		Log.d(TAG, "### check set pwd recv length " + recvLength);
-		if(recvLength<0) {
+		if(recvLength<=0) {
 			return -2; // time out
 		}
 		String recvStr = new String(recvBuf,0, recvLength);
@@ -300,22 +300,22 @@ public class PackageUtil {
 	}
 
 	public static int setBCV(String id, String comm, String value) {
-		String BCVCommon = (comm + value +"\0");
+		String BCVCommon = (comm + value);
 		return UdtTools.sendCmdMsg(BCVCommon, BCVCommon.length());
 	}
 	
 	public static String getConfigMode(Device device) {
-	   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0";
+	   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2();
 	   int res = UdtTools.sendCmdMsgById(device.getDeviceID(), cmdStr, cmdStr.length());
 	   Log.d(TAG, "### get web cam config result = " + res);
-	   if(res < 0) {
+	   if(res <= 0) {
 		   return null;
 		}
 		int bufLength = 1500;
 		byte[] recvBuf = new byte[bufLength];
 		int recvLength = UdtTools.recvCmdMsgById(device.getDeviceID(), recvBuf, bufLength);
 		Log.d(TAG, "### check pwd recv length " + recvLength);
-		if(recvLength<0) {
+		if(recvLength<=0) {
 			return null;
 		}
 		String recvConfigStr = new String(recvBuf,0, recvLength);

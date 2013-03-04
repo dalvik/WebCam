@@ -628,7 +628,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(--vv<1){
 					vv = 1;
 				}
-				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0] +"\n";
+				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0];
 				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
 				int re = UdtTools.sendCmdMsg(item, item.length());
 				if(re>0) {
@@ -652,7 +652,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(++vv>3){
 					vv = 3;
 				}
-				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0] +"\n";
+				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0];
 				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
 				int resu = UdtTools.sendCmdMsg(item, item.length());
 				if(resu>0) {
@@ -686,7 +686,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			if(f) {
 				f = false;
 				final Button sendAudio = (Button) rightView.findViewById(R.id.send_audio);
-				if(sendAudio.getText().toString().equals(getText(R.string.video_preview_send_audio_open))) {
+				if(sendAudio.getText().toString().equals(getText(R.string.video_preview_send_audio_open))) {// open
 					new Thread(new Runnable(){
 						public void run() {
 							int res = UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOn, CamCmdListHelper.SetAudioTalkOn.length());
@@ -702,7 +702,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 									if("talk_ok".equalsIgnoreCase(result)) {
 										m.arg1 = R.string.video_preview_send_audio_open_success;
 										mHandler.sendEmptyMessage(Constants.SENDGETTHREEPORTMSG);
-										String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[0][1] + ":" + CamCmdListHelper.audioTalk[0][0] +"\n";
+										String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[0][1] + ":" + CamCmdListHelper.audioTalk[0][0];
 										UdtTools.sendCmdMsg(item, item.length());
 										Log.d(TAG, "### Speak Audio " + item);
 										myVideoView.setOpenSendAudioFlag(true);
@@ -723,7 +723,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 							f = true;
 						}
 					}).start();
-				}else {
+				}else { //close
 					String item = CamCmdListHelper.SetAudioTalkOff;
 					int res = UdtTools.sendCmdMsg(item , item.length());
 					Message m = mHandler.obtainMessage();
@@ -1190,7 +1190,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
 			seekingFlag = true;
-			//Log.d(TAG, "### onStartTrackingTouch = " + seekBar.getProgress());
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "### onStartTrackingTouch = " + seekBar.getProgress());
+			}
 		}
 	
 		@Override
@@ -1200,7 +1202,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress *15));
 			//currentTextView.setText(DateUtil.formatTimeToDate6(progress * 1000+startTime));
 			int index = progress * 4;
-			//Log.d(TAG, "progress=" + progress +" " + index  + " table2.length = " + table2.length);
+			if(BuildConfig.DEBUG){
+				Log.d(TAG, "progress=" + progress +" " + index  + " table2.length = " + table2.length);
+			}
 			if(table2 != null && table2.length>=index+4) {
 					int seekPos = ByteUtil.byteToInt4(table2, index);
 					Log.d(TAG, "### onStopTrackingTouch  seek value=" + seekBar.getProgress() + " timeIndex = " + progress + "  index=" + index + "  seek value = " + seekPos);
@@ -1224,9 +1228,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		
 		@Override
 		protected Void doInBackground(Integer... params) {
-			String item = CamCmdListHelper.SetCmd_Seek + params[0]+ "\0";
-			UdtTools.sendCmdMsg( item, item.length());
-			//Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res);
+			String item = CamCmdListHelper.SetCmd_Seek + params[0];
+			int res = UdtTools.sendCmdMsg( item, item.length());
+			if(BuildConfig.DEBUG)
+			Log.d(TAG, "### Seek cmd = " + item + " seek result = " + res);
 			return null;
 		}
 	}
@@ -1235,7 +1240,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		
 		@Override
 		protected Void doInBackground(String... params) {
-			String item = CamCmdListHelper.SetVideoResol + params[0] + "\n";
+			String item = CamCmdListHelper.SetVideoResol + params[0];
 			int res = UdtTools.sendCmdMsg( item, item.length());
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
@@ -1321,13 +1326,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	};
 	
 	private void updateComponentByMode(String mode) {
-		if(mode == null) {
-			return;
-		}
 		if(BuildConfig.DEBUG){
 			Log.d(TAG, "### device mode =  " + mode);
 		}
-		if(mode.length()==0 || "IP1001".equalsIgnoreCase(mode)) {
+		if(mode == null || mode.length()==0 || "IP1001".equalsIgnoreCase(mode)) {
 			/*
 			 * [IP1001]
 			 * # 没有高清分辨率 
@@ -1339,6 +1341,19 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			updateQuality(false);// 画质调节
 			updateAudioTalk(true);
 			updateYuntai(true);
+		}else if("IP2001".equalsIgnoreCase(mode) || "IP2001C".equalsIgnoreCase(mode) || "IP2001A".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP2001]
+			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
+			 * # 没有监控模式选择
+			 * # 没有QVGA分辨率
+			 * 
+			 */
+			updateAudioTalk(true);
+			updateYuntai(true);
+			updateCIF(false);
+			updateHD(true);
+			updateVGA(true);
 		}else if("IP1001S".equalsIgnoreCase(mode)) {
 			/*
 			 * [IP1001S]
@@ -1348,28 +1363,35 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			updateCIF(false);
 			updateAudioTalk(true);
 			updateYuntai(true);
-		}else if("IP2001".equalsIgnoreCase(mode)) {
+		}else if("IP2002A".equalsIgnoreCase(mode) || "IP2002C".equalsIgnoreCase(mode)) {
 			/*
-			 * [IP2001]
+			 * [IP2002A]
 			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
 			 * # 没有监控模式选择
-			 */
-			updateAudioTalk(true);
-			updateYuntai(true);
-		}else if("IP2002C".equalsIgnoreCase(mode)) {
-			/*
-			 * [IP2002C]
-			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
-			 * # 没有监控模式选择
+			 * # 没有QVGA分辨率
 			 * # 没有语音对讲
 			 * # 没有云台功能
 			 * # 没有wifi
 			 */
 			updateAudioTalk(false);
 			updateYuntai(false);
+			updateCIF(true);
+			updateHD(true);
+			updateVGA(true);
+		}else if("IP1001SC".equalsIgnoreCase(mode) || "IP1001SA".equalsIgnoreCase(mode)) {
+			/*
+			 * [IP1001SC]
+			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
+			 * # 没有监控模式选择
+			 * # 没有高清分辨率
+			 * # 没有QVGA分辨率
+			 */
+			updateAudioTalk(true);
+			updateYuntai(true);
+			updateHD(false);
+			updateVGA(true);
 			updateCIF(false);
-		}
-			
+		}	
 	}
 	
 	private void updateAudioTalk(boolean flag) {
@@ -1390,5 +1412,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void updateCIF(boolean flag) {
 		qvga.setEnabled(flag);
+	}
+	
+	private void updateHD(boolean flag) {
+		qelp.setEnabled(flag);
+	}
+	
+	private void updateVGA(boolean flag) {
+		vga.setEnabled(flag);
 	}
 }

@@ -51,7 +51,7 @@ public class CamParasSetImp implements ICamParasSet {
 		
 		@Override
 		public void run() {
-			   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2()+"\0";
+			   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2();
 			   int res = UdtTools.sendCmdMsgById(device.getDeviceID(), cmdStr, cmdStr.length());
 			   Log.d(TAG, "### get web cam config result = " + res);
 			   if(res < 0) {
@@ -63,7 +63,7 @@ public class CamParasSetImp implements ICamParasSet {
 				byte[] recvBuf = new byte[bufLength];
 				int recvLength = UdtTools.recvCmdMsgById(device.getDeviceID(), recvBuf, bufLength);
 				Log.d(TAG, "### check pwd recv length " + recvLength);
-				if(recvLength<0) {
+				if(recvLength<=0) {
 					//return -2; // time out
 					handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 					return;

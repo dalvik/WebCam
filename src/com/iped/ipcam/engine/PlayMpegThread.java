@@ -124,7 +124,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							stopPlay = true;
 							myVideoView.onStop();
 							if(BuildConfig.DEBUG && DEBUG) {
-								Log.d(TAG, "### timeout exit ----------->");
+								Log.d(TAG, "### play mpeg thread timeout exit ----------->");
 							}
 							break;
 						}
@@ -136,7 +136,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							showMpeg.setInerrupt();
-							Log.e(TAG, e.getLocalizedMessage());
+							Log.e(TAG, "play mpeg thread InterruptedException");
 							break;
 						}
 					}  

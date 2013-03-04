@@ -170,7 +170,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (mpegBuf) {
 					if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### data buffer is empty! ---->");
+						Log.d(TAG, "### mpeg video data buffer is empty! ---->");
 					}
 					try {
 						mpegBuf.wait(50);

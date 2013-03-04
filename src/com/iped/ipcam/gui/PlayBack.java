@@ -183,7 +183,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		case DELETE:
 			String index = video.getIndex();
 			IVideoManager videoManager = CamMagFactory.getVideoManagerInstance();
-			videoManager.deleteFiles(handler, index, index+" ", video.getAddress());
+			videoManager.deleteFiles(handler, index, index, video.getAddress());
 			handler.sendEmptyMessage(Constants.DELETEFILES);
 			break;
 		case PLAYBACK:
@@ -426,7 +426,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				Video videoStart = videoAdapter.getItem(0);
 				Video videoEnd = videoAdapter.getItem(count-1);
 				
-				videoManager.deleteFiles(handler, videoStart.getIndex(), videoEnd.getIndex() + " ", videoStart.getAddress());
+				videoManager.deleteFiles(handler, videoStart.getIndex(), videoEnd.getIndex(), videoStart.getAddress());
 				Message msg = handler.obtainMessage();
 				handler.sendMessage(msg);
 				handler.sendEmptyMessage(Constants.CLEARFILES);

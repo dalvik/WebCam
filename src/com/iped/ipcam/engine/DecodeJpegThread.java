@@ -73,7 +73,7 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (jpegBuf) {
 					if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### data buffer is empty! ---->");
+						Log.d(TAG, "### video data buffer is empty! ---->");
 					}
 					if(timeOutCount++ % 150 == 0) {
 						stopPlay = true;
@@ -81,7 +81,7 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 							playAudioThread.interrupt();
 						}
 						if(BuildConfig.DEBUG && DEBUG) {
-							Log.d(TAG, "### timeout exit ----------->");
+							Log.d(TAG, "### jpeg thread timeout exit ----------->");
 						}
 						break;
 					}

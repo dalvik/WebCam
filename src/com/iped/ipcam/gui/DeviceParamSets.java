@@ -201,7 +201,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							device.setDeviceRemoteCmdPort(port1);
 							int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 							if(checkPwd == 1) {
-								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
+								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2(), ip, port1);
 								paraMap = new LinkedHashMap<String,String>();
 								ParaUtil.putParaByString(cmd, paraMap);
 								initializeEditText(paraMap);
@@ -268,7 +268,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 					int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 					if(checkPwd == 1) {
 						camManager.updateCam(device);
-						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
+						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd, ip, port1);
 						paraMap = new LinkedHashMap<String,String>();
 						ParaUtil.putParaByString(cmd, paraMap);
 						initializeEditText(paraMap);
@@ -422,7 +422,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			}, calendar2.get(Calendar.HOUR_OF_DAY), calendar2.get(Calendar.MINUTE), true).show();
 			break;
 		case R.id.device_params_other_set_system_time_id:
-			String command = CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0";
+			String command = CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis());
 			int res = UdtTools.sendCmdMsgById(device.getDeviceID(), command, command.length());
 			if(res>0) {
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
@@ -567,18 +567,22 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		monitorSetFlag = 0;
 		if(paraMap.containsKey("model")) {
 			String model = paraMap.get("model");
-			if("IP2001".equalsIgnoreCase(model) || "IP2002C".equalsIgnoreCase(model)) {
+			if("IP2001".equalsIgnoreCase(model) 
+					|| "IP2002A".equalsIgnoreCase(model) || "IP2002C".equalsIgnoreCase(model)
+					|| "IP1001SA".equalsIgnoreCase(model)|| "IP1001SC".equalsIgnoreCase(model)
+					|| "IP2001C".equalsIgnoreCase(model)
+					) {
 				monitorSetFlag = 1;
 			} else if("IP1001S".equalsIgnoreCase(model)) {
 				monitorSetFlag = 2;
 			}
 			System.out.println("model=" + model);
 		}
-		System.out.println("monitorSetFlag=" + monitorSetFlag);
 		if(monitorSetFlag == 1){
 			intelligenMonitorRadioGrop.setVisibility(View.GONE);
 			selfIntelMonitor.setEnabled(false);
 			selfSetMonitor.setEnabled(false);
+			selfSetMonitorOneRate.setEnabled(false);
 		} else if(monitorSetFlag == 2) {
 			intelligenMonitorRadioGrop.setVisibility(View.GONE);
 		}
