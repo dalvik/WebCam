@@ -1,7 +1,6 @@
 package com.iped.ipcam.engine;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -444,9 +443,9 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				m_out_trk = null;
 			}
 			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+					TalkBackThread.frequency, AudioFormat.CHANNEL_CONFIGURATION_MONO,
 					AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
+			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, TalkBackThread.frequency,
 					AudioFormat.CHANNEL_CONFIGURATION_MONO,
 					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 5,
 					AudioTrack.MODE_STREAM);

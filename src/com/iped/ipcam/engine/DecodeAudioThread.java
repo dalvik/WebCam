@@ -36,10 +36,11 @@ public class DecodeAudioThread extends DecoderFactory{
 	private byte[] recvAudioBuf = null; 
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	private int indexForGet = 0;
-	
+	private MyVideoView myVideoView;
 	
 	public DecodeAudioThread(MyVideoView myVideoView) {
 		recvAudioBuf = new byte[recvAudioBufLen];
+		this.myVideoView = myVideoView;
 	}
 	
 	
@@ -51,10 +52,12 @@ public class DecodeAudioThread extends DecoderFactory{
 		int timeoutCounter = 0;
 		while (!stopPlay) {
 			recvDataLength = UdtTools.recvAudioMsg(RECEAUDIOBUFFERSIZE, audioBuffer, RECEAUDIOBUFFERSIZE);
+			//Log.d(TAG, "### recv audio DataLength = " + recvDataLength);
 			if(recvDataLength<=0) {
 				timeoutCounter++;
 				if(recvDataLength == -1) {
 					stopPlay = true;
+					myVideoView.callBackStop();
 					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### thread recv audio over");
 					}
@@ -138,8 +141,8 @@ public class DecodeAudioThread extends DecoderFactory{
 				m_out_trk = null;
 			}
 			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					8000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
+					TalkBackThread.frequency, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, TalkBackThread.frequency,
 					AudioFormat.CHANNEL_CONFIGURATION_MONO,	AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 10,
 					AudioTrack.MODE_STREAM);
 			m_out_trk.play();
@@ -180,6 +183,7 @@ public class DecodeAudioThread extends DecoderFactory{
 				}
 			} while(!stopPlay);
 			release();
+			myVideoView.callBackStop();
 		}
 		
 		private void release()  {

@@ -76,7 +76,7 @@
     	<string name="video_preview_send_audio_open">打开对讲</string>
     	<string name="video_preview_send_audio_open_success">打开对讲成功</string>
     	<string name="video_preview_send_audio_open_error_tips">连接人数过多，无法对讲</string>
-    	<string name="video_preview_send_audio_open_tips">备正在双向对讲，无法连接</string>
+    	<string name="video_preview_send_audio_open_tips">设备正在双向对讲，无法连接</string>
     	<string name="video_preview_send_audio_open_error">打开对讲失败</string>
     	<string name="video_preview_send_audio_close">关闭对讲</string>
     	<string name="video_preview_send_audio_close_success">关闭对讲成功</string>

@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class TalkBackThread implements Runnable {
 
-	private static final int frequency = 8000;
+	public static final int frequency = 8000;
 	
 	private static final int EncodingBitRate = AudioFormat.ENCODING_PCM_16BIT;
 	

@@ -310,7 +310,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			decoderFactory.setOnMpegPlayListener(this);
 		}
 		int index = 0;
-		int headCount = 1;
 		boolean sleepFlag = false;
 		
 		boolean startFlag = true;
@@ -325,19 +324,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				timeoutCounter++;
 				if(readLengthFromVideoSocket == -1) {
 					stopPlay = true;
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.e(TAG, "### thread recv video data over break....");
 					}
 					break;
 				}
 				if(timeoutCounter>15) {
 					stopPlay = true;
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.e(TAG, "### recv video data over break....");
 					}
 					break;
 				}else {
-					if(BuildConfig.DEBUG && !DEBUG) {
+					if(BuildConfig.DEBUG && DEBUG) {
 						Log.e(TAG, "### recv video data timeout....");
 					}
 					continue;
@@ -349,7 +348,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
 					synchronized (nalBuf) {
 						try {
-							nalBuf.wait(10);
+							nalBuf.wait(20);
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							onStop();
@@ -383,24 +382,20 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				    			tim[headFlagCount++] = b0;
 								if(headFlagCount >= 18) { 
 									startFlag = false;
-									//String time = new String(tim, 0, headFlagCount);
-									//System.out.println("### recv ========= " + time);
 									if(sleepFlag) {
 										sleepFlag = false; 
 						    			synchronized (nalBuf) {
 						    				try {
-						    					nalBuf.wait();
+						    					//Log.d(TAG, "3333");
+						    					nalBuf.wait(10000);
+						    					//Log.d(TAG, "444");
 						    				} catch (InterruptedException e) {
 						    					stopPlay = true;
 						    					onStop();
 						    					e.printStackTrace();
 						    				}
 						    			}
-						    		}/*else {
-						    			if(headCount++ % 3==0) {
-						    				sleepFlag = true;
-						    			}
-						    		}*/
+						    		}
 								}
 							}
 				    	}
@@ -645,6 +640,17 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				//handler.sendEmptyMessage(Constants.SHOW_POP_UP_TIPS_DIA_MSG);
 			}
 			return null;
+		}
+	}
+	
+	public void callBackStop() {
+		if(BuildConfig.DEBUG) {
+			Log.d(TAG, "### audio thread exit call back stop video thread");
+		}
+		//isAutoStop = true;
+		if(!stopPlay) {
+			stopPlay = true;
+			onStop();
 		}
 	}
 }

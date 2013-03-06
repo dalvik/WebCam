@@ -17,12 +17,9 @@
 package com.iped.ipcam.bitmapfun;
 
 import android.annotation.TargetApi;
-import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore.Images;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -38,7 +35,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.iped.ipcam.bitmapfun.ImageCache.ImageCacheParams;
 import com.iped.ipcam.gui.BuildConfig;
