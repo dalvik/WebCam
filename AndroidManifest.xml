@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iped.ipcam.gui"
-    android:versionCode="701"
-    android:versionName="V7.0.1" >
+    android:versionCode="702"
+    android:versionName="V7.0.2" >
 
     <uses-sdk android:minSdkVersion="5" android:targetSdkVersion="15"/>
     
@@ -91,12 +91,19 @@
         
         <activity android:name=".PopupActivity" android:theme="@style/thems_tips_popup_dailog"/>
         
-         <activity
+        <activity
             android:name=".LogoutDialog"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
             android:theme="@style/Theme.HalfTranslucent" />
          
+        <meta-data android:name="BaiduMobAd_STAT_ID" android:value="baaed4bb33" />
+		<meta-data android:name="BaiduMobAd_CHANNEL" android:value="Baidu Market" />
+		<meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
+		<meta-data android:name="BaiduMobAd_SEND_STRATEGY" android:value="APP_START" />
+		<meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
+		<meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="true" />
+		
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/> 
@@ -110,5 +117,7 @@
  	<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
  	<uses-permission android:name="android.permission.DEVICE_POWER"/>
  	<uses-permission android:name = "android.permission.SET_WALLPAPER"/>
+ 	<uses-permission android:name="android.permission.READ_PHONE_STATE" /> 
+ 	
  	
 </manifest>

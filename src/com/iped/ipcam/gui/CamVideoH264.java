@@ -41,6 +41,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.bitmapfun.ImageGrid;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
@@ -874,10 +875,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	protected void onResume() {
 		super.onResume();
+		StatService.onResume(this);
 		previewDeviceAdapter = new VideoPreviewDeviceAdapter(camManager.getCamList(), CamVideoH264.this);
 		listView.setAdapter(previewDeviceAdapter);
 		ToastUtils.setListViewHeightBasedOnChildren(listView);
 		//Toast.makeText(CamVideoH264.this, "onResume", Toast.LENGTH_LONG).show();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
 	}
 	
 	@Override

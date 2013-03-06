@@ -31,6 +31,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.engine.IVideoManager;
@@ -445,5 +446,17 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		ProgressUtil.dismissProgress();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
 	}
 }

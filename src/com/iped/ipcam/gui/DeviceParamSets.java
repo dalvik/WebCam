@@ -34,6 +34,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.CamParasSetImp;
 import com.iped.ipcam.engine.ICamManager;
@@ -360,10 +361,6 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		intelligenMonitorRadioGrop = (RadioGroup) findViewById(R.id.device_params_monitor_intelligent_mode_radiogroup_id);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
 
 	@Override
 	public void onClick(View v) {
@@ -1089,4 +1086,15 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		return "";
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
 }

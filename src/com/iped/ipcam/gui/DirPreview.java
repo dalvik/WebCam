@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.utils.FilePathAdapter;
 import com.iped.ipcam.utils.FileUtil;
 
@@ -147,4 +148,15 @@ public class DirPreview extends ListActivity implements OnClickListener {
 		DirPreview.this.finish();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
 }

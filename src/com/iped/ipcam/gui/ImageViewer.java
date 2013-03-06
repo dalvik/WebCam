@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.pojo.ImageInfo;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.ImageZoom;
@@ -146,6 +147,18 @@ public class ImageViewer extends Activity implements OnClickListener  {
 		Integer index = (Integer) v.getTag();
 		startActivity(imageList.get(index).intent);
 		
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
 	}
 	
 	private void addItemToContainer(int pageindex, int pagecount) {

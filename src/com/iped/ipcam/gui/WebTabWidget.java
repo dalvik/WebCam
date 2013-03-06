@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.UpdateManager;
 import com.iped.ipcam.mail.ExceptionHandler;
 import com.iped.ipcam.utils.Constants;
@@ -112,5 +113,17 @@ public class WebTabWidget extends TabActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
 	}
 }

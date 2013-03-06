@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.factory.ICustomDialog;
@@ -525,11 +526,18 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	protected void onResume() {
 		super.onResume();
+		StatService.onResume(this);
 		handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 		handler.sendMessageDelayed(
 				handler.obtainMessage(Constants.DEFAULTUSERSELECT), 50);
 	};
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
+	
 	private void showToast(int id) {
 		ToastUtils.showToast(this, id);
 	}

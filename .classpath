@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="E:/sky/android_jar/mail_jar/android-support-v4.jar"/>
+	<classpathentry kind="lib" path="libs/Baidu_Mobstat_Android_SDK.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
