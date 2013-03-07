@@ -884,6 +884,8 @@ public final class R {
     public static final class string {
         public static final int accor_an_import_exception_str=0x7f070138;
         /**  用户登录 
+ 用户登录 
+ 用戶登錄 
          */
         public static final int app_name=0x7f070001;
         public static final int auto_search_tips_str=0x7f07004c;
@@ -891,6 +893,8 @@ public final class R {
         public static final int blank_str=0x7f07013e;
         public static final int cancle_login_str=0x7f070020;
         /**  更改登录密码 
+ 更改登录密码 
+ 更改登錄密碼 
          */
         public static final int change_login_pass_str=0x7f07000b;
         public static final int clear_all_device_cancle_str=0x7f070078;
@@ -904,6 +908,8 @@ public final class R {
         public static final int connection_error=0x7f070027;
         public static final int cory_right=0x7f070140;
         /**  right menu 
+ right menu 
+ right menu 
          */
         public static final int default_activity_str=0x7f070025;
         public static final int device_audio_port_str=0x7f070083;
@@ -964,6 +970,8 @@ public final class R {
         public static final int device_params_apn_set_search_wireless_str=0x7f0700a9;
         public static final int device_params_apn_set_search_wireless_success_str=0x7f0700ab;
         /**  接入点设置 
+ 接入点设置 
+ 接入點設置 
          */
         public static final int device_params_apn_set_str=0x7f0700a6;
         public static final int device_params_apn_set_wireless_list_str=0x7f0700aa;
@@ -979,11 +987,15 @@ public final class R {
         public static final int device_params_monitor_intelligent_mode_set_str=0x7f0700b5;
         public static final int device_params_monitor_self_mode_set_str=0x7f0700b4;
         /**  监控设置 
+ 监控设置 
+ 監控設置 
          */
         public static final int device_params_monitor_set_str=0x7f0700b3;
         public static final int device_params_monitor_speed_str=0x7f0700d4;
         public static final int device_params_network_intelligent_mode_str=0x7f070093;
         /**  网卡设置 
+ 网卡设置 
+ 網卡設置 
          */
         public static final int device_params_network_set_str=0x7f070092;
         public static final int device_params_network_wire_mode_str=0x7f070094;
@@ -1000,6 +1012,8 @@ public final class R {
         public static final int device_params_other_set_sound_open_str=0x7f0700ba;
         public static final int device_params_other_set_sound_str=0x7f0700b9;
         /**  其他设置 
+ 其他设置 
+ 其他設置 
          */
         public static final int device_params_other_set_str=0x7f0700b8;
         public static final int device_params_other_set_system_error_str=0x7f0700c7;
@@ -1045,6 +1059,8 @@ public final class R {
         public static final int device_params_video_record_frame_size_set_str=0x7f0700af;
         public static final int device_params_video_record_set_one_str=0x7f0700b0;
         /**  录制设置 
+ 录制设置 
+ 錄製設置 
          */
         public static final int device_params_video_record_set_str=0x7f0700ad;
         public static final int device_params_video_record_set_three_str=0x7f0700b2;
@@ -1053,6 +1069,8 @@ public final class R {
         public static final int device_params_wireless_getway_address_str=0x7f0700a2;
         public static final int device_params_wireless_ip_address_str=0x7f0700a1;
         /**  无线设置 
+ 无线设置 
+ 無線設置 
          */
         public static final int device_params_wireless_network_set_str=0x7f07009e;
         public static final int device_params_wireless_set_dns1_str=0x7f0700a4;
@@ -1063,6 +1081,8 @@ public final class R {
         public static final int device_params_wireuse_getway_address_str=0x7f07009a;
         public static final int device_params_wireuse_ip_address_str=0x7f070099;
         /**  有线设置 
+ 有线设置 
+ 有線設置 
          */
         public static final int device_params_wireuse_network_set_str=0x7f070096;
         public static final int device_params_wireuse_set_dns1_str=0x7f07009c;
@@ -1098,6 +1118,8 @@ public final class R {
         public static final int password_is_null=0x7f07001c;
         public static final int password_modify_error_str=0x7f070018;
         /**  modify password  
+ modify password  
+ modify password  
          */
         public static final int password_modify_security_botton_str=0x7f070010;
         public static final int password_modify_str=0x7f070012;
@@ -1121,6 +1143,8 @@ public final class R {
         public static final int play_back_start_above_start_time_str=0x7f070105;
         public static final int play_back_str=0x7f0700e7;
         /**  pull to flush 
+ pull to flush 
+ pull to flush 
          */
         public static final int pull_to_refresh_pull_label=0x7f070141;
         public static final int pull_to_refresh_refreshing_label=0x7f070143;
@@ -1152,6 +1176,8 @@ public final class R {
         public static final int system_settings_update_str=0x7f070117;
         public static final int tips_popup_dialog_message_str=0x7f070130;
         /**  operation popup tips dialog 
+ operation popup tips dialog 
+ operation popup tips dialog 
          */
         public static final int tips_popup_dialog_title_str=0x7f07012f;
         public static final int user_exit=0x7f070009;
@@ -1159,6 +1185,8 @@ public final class R {
         public static final int user_exit_message=0x7f07000d;
         public static final int user_exit_sure=0x7f07000e;
         /**  用户退出 
+ 用户退出 
+ 用戶退出 
          */
         public static final int user_exit_title=0x7f07000c;
         public static final int user_login=0x7f070007;
@@ -1225,12 +1253,16 @@ public final class R {
         public static final int webcam_check_version_result_success_message_str=0x7f070120;
         public static final int webcam_check_version_result_title_str=0x7f07011f;
         /**  update 
+ update 
+ update 
          */
         public static final int webcam_check_version_str=0x7f07011e;
         public static final int webcam_connect_init_error=0x7f07013c;
         public static final int webcam_error_code_bind_error=0x7f070136;
         public static final int webcam_error_code_connect_error=0x7f070135;
         /**  error code tips infor 
+ error code tips infor 
+ error code tips infor 
          */
         public static final int webcam_error_code_internel=0x7f070131;
         public static final int webcam_error_code_server_not_reached=0x7f070132;
@@ -1245,14 +1277,20 @@ public final class R {
         public static final int webcam_network_invalid_message_str=0x7f07011b;
         public static final int webcam_network_invalid_open=0x7f07011c;
         /**  network check 
+ network check 
+ network check 
          */
         public static final int webcam_network_invalid_title_str=0x7f07011a;
         public static final int webcam_takepic_error_str=0x7f07012a;
         /**  take picture 
+ take picture 
+ take picture 
          */
         public static final int webcam_takepic_success_str=0x7f070129;
         public static final int webcam_video_popup_menu_cancle=0x7f07012e;
         /**  long press video popmenu 
+ long press video popmenu 
+ long press video popmenu 
          */
         public static final int webcam_video_popup_menu_stop=0x7f07012d;
     }

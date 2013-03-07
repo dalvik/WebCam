@@ -115,15 +115,4 @@ public class WebTabWidget extends TabActivity {
 		super.onDestroy();
 	}
 	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		StatService.onResume(this);
-	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
-		StatService.onPause(this);
-	}
 }
