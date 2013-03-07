@@ -6,6 +6,7 @@ import android.media.AudioTrack;
 import android.util.Log;
 
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
+import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.gui.MyVideoView;
@@ -86,7 +87,8 @@ public class DecodeAudioThread extends DecoderFactory{
 							myVideoView.callBackStop();
 							stopPlay = true;
 							Log.d(TAG, "### audio data buffer is full! ---->");
-						} catch (InterruptedException e) {
+							throw new CamManagerException("audio data buffer is full!");
+						} catch (Exception e) {
 							stopPlay = true;
 							if(thread != null && !thread.isInterrupted()) {
 								thread.interrupt();

@@ -5,6 +5,7 @@ import java.util.Date;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -540,6 +541,11 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private void showToast(int id) {
 		ToastUtils.showToast(this, id);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 	
 	private class QueryCamera implements Runnable {

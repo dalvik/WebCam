@@ -173,10 +173,10 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
     @Override
     public void onClick(View v) {
         final int vis = mPager.getSystemUiVisibility();
-        if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+        /*if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
             mPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         } else {
             mPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        }
+        }*/
     }
 }

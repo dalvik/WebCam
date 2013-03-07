@@ -54,7 +54,7 @@ public class CamParasSetImp implements ICamParasSet {
 			   String cmdStr = CamCmdListHelper.GetCmd_Config+device.getUnDefine2();
 			   int res = UdtTools.sendCmdMsgById(device.getDeviceID(), cmdStr, cmdStr.length());
 			   Log.d(TAG, "### get web cam config result = " + res);
-			   if(res < 0) {
+			   if(res <= 0) {
 					//return -2;
 				   handler.sendEmptyMessage(Constants.QUERYCONFIGERROR);
 				   return;

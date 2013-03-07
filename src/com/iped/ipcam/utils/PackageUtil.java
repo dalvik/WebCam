@@ -212,7 +212,7 @@ public class PackageUtil {
 		String tem = CamCmdListHelper.CheckCmd_Pwd_State;
 		int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 		Log.d(TAG, "checkPwdState = " + res);
-		if(res <0) {
+		if(res <=0) {
 			return -2; // time out
 		}
 		int bufLength = 100;
@@ -236,7 +236,7 @@ public class PackageUtil {
 		String tem = (CamCmdListHelper.CheckCmd_PWD + pwd);
 		int res = UdtTools.sendCmdMsgById(id, tem, tem.length());
 		Log.d(TAG, "checkPwd = " + res);
-		if(res < 0) {
+		if(res <= 0) {
 			return -2;
 		}
 		int bufLength = 100;

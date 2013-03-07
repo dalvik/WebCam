@@ -215,8 +215,9 @@ public class FileUtil {
 				device.setDeviceRemoteVideoPort(Integer.parseInt(info[7]));
 				device.setDeviceRemoteAudioPort(Integer.parseInt(info[8]));
 				device.setUnDefine2(info[9].equals("null")?null:info[9]);
-				deviceList.add(device);
-				//System.out.println("get device form file "  + device);
+				if(!checkDeviceId(deviceList, device)) {
+					deviceList.add(device);
+				}
 			}
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "FileUtil fetchDeviceFromFile " + e.getStackTrace());
@@ -234,6 +235,15 @@ public class FileUtil {
 		return deviceList;
 	}
 
+	private static boolean checkDeviceId(List<Device> deviceList, Device device) {
+		for(Device d:deviceList) {
+			if(d.getDeviceID().equalsIgnoreCase(device.getDeviceID())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static String parentPath = File.separator + "IPED" + File.separator;
 	
 	public static String picForder = "Image" + File.separator;

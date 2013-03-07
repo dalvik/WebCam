@@ -223,7 +223,7 @@ public class VideoManagerImp implements IVideoManager {
 				StringBuffer sb = new StringBuffer();
 				while(true) {
 					res = UdtTools.recvCmdMsgById(id, buffTemp, bufLength);
-					if(res<0) {
+					if(res<=0) {
 						sendMessage(Constants.DISSMISVIDEOSEARCHDLG, R.string.play_back_auto_search_error_str);
 						break;
 					}

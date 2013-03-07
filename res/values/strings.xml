@@ -92,13 +92,13 @@
     	<string name="manu_add_str">Manul Add</string>	
     		<string name="device_manager_add_title_str">Add New Device</string>
     		<string name="device_manager_add_str">Device Name：</string>
-    		<string name="device_manager_add_hint_str">Please Input Deivce Name</string>
+    		<string name="device_manager_add_hint_str">Deivce Name</string>
     		<string name="device_manager_add_name_default_str"></string>
     		<string name="device_manager_local_net_para_str">LAN Parameters</string>
     		<string name="device_manager_new_addr_str">IP Address</string>
     		<string name="device_manager_new_addr_default_str">192.168.1.</string>
-    		<string name="device_manager_new_device_id">Device ID：</string>
-    		<string name="device_manager_new_device_id_hint">Input Device ID</string>
+    		<string name="device_manager_new_device_id">Device ID ：</string>
+    		<string name="device_manager_new_device_id_hint">Device ID</string>
     		<string name="device_manager_new_device_id_not_null">Device ID Can\'t Empty</string>
     		<string name="device_manager_new_device_id_not_number">Deivce ID Format Must Be Numberic</string>
     		<string name="device_manager_find_device_id_error">Query Device Error</string>

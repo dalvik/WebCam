@@ -139,6 +139,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint.setTextSize(18);
 		mpeg4Decoder = false;
 	}
+	
+	public void changeConfig(int w, int h) {
+		rect = new Rect(0, 0, w, h);
+	}
+	
 //TODO
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -231,7 +236,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		devicenName = device.getDeviceName();
 		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2());
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
-		if (res < 0) {
+		if (res <= 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			Log.d(TAG, "sendCmdMsgById result = " + res);
 			onStop();
@@ -516,6 +521,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	};
 
+	//TOTO why reconnect
 	private void initBCV(BCVInfo info) {
 		Message m = handler.obtainMessage();
 		Bundle bundle = new Bundle();
