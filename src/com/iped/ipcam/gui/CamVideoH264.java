@@ -939,6 +939,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			m_Dialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog);  
 		}
 		if(m_Dialog != null) {
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "### " + camManager.getSelectDevice().getDeviceID());
+			}
 			m_Dialog.setMessage(getResources().getString(textId, camManager.getSelectDevice().getDeviceID()));
 			if(!m_Dialog.isShowing()) {
 				m_Dialog.show();

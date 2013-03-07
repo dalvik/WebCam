@@ -83,7 +83,8 @@ public class DecodeAudioThread extends DecoderFactory{
 					synchronized (recvAudioBuf) {
 						try {
 							recvAudioBuf.wait(10);
-							recvBufIndex = recvDataLength; 
+							myVideoView.callBackStop();
+							stopPlay = true;
 							Log.d(TAG, "### audio data buffer is full! ---->");
 						} catch (InterruptedException e) {
 							stopPlay = true;
