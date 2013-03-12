@@ -115,6 +115,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean fullScreenFlag = false;
 	
+	private boolean bitmapLockFlag = false;
+
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -148,7 +150,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (video != null) {
+		if (video != null && !bitmapLockFlag) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
@@ -181,7 +183,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 						targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
 						targetHeinght = tmpHeight;
 					}
-					System.out.println("temWidth=" + temWidth + " "+ targetWidth + " tmpHeight= " + tmpHeight + " " + targetHeinght);
+					//System.out.println("temWidth=" + temWidth + " "+ targetWidth + " tmpHeight= " + tmpHeight + " " + targetHeinght);
 					if(temWidth>targetWidth) {
 						left = (temWidth - targetWidth)/2;
 						right = targetWidth;
@@ -220,7 +222,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			canvas.restore();
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
-			String text = "  More : hangzhouiped.taobao.com";
+			String text = "  ";
 			if(rect2 == null) {
 				rect2 = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
@@ -658,5 +660,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			stopPlay = true;
 			onStop();
 		}
+	}
+	
+	
+	public void setBitmapLockFlag(boolean bitmapLockFlag) {
+		this.bitmapLockFlag = bitmapLockFlag;
 	}
 }

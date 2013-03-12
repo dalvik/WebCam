@@ -220,12 +220,14 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
+					myVideoView.setBitmapLockFlag(true);
 					if(video != null && !video.isRecycled()) {
 						video.recycle();
 						video = null;
 					}
 					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					myVideoView.setImage(video);
+					myVideoView.setBitmapLockFlag(false);
 				}
 				if(flag) {
 					flag = false;
@@ -320,7 +322,11 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
 							//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
 							if(video != null) {
-								video.copyPixelsFromBuffer(sh);
+								try {
+									video.copyPixelsFromBuffer(sh);
+								} catch (Exception e) {
+									Log.e(TAG, "### copyPixelsFromBuffer exception!");
+								}
 								//frameCount = myVideoView.getFrameCount();
 								//frameCount++;
 							}

@@ -21,7 +21,7 @@ public class DecodeAudioThread extends DecoderFactory{
 	
 	private boolean stopPlay = false;
 	
-	private final static int RECEAUDIOBUFFERSIZE = 1600 * Command.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 4096 * Command.CHANEL * 1;
 	
 	private byte[] audioBuffer = new byte[RECEAUDIOBUFFERSIZE];
 	
@@ -157,7 +157,7 @@ public class DecodeAudioThread extends DecoderFactory{
 							Log.d(TAG, "### audio buffer is empty! ---->");
 						}
 						try {
-							pcmArr.wait(300);
+							pcmArr.wait(100);
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							release();
