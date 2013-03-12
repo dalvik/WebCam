@@ -55,7 +55,7 @@ public class DialogUtils {
                  } else if(!name.equalsIgnoreCase(pwd)) {
                	  	ToastUtils.showToast(context, R.string.password_not_equal);
                 } else {
-	               	int result = PackageUtil.setPwd(device, CamCmdListHelper.SetCmd_Pwd_State + ":PSWD=" + name + "\0");
+	               	int result = PackageUtil.setPwd(device, CamCmdListHelper.SetCmd_Pwd_State + ":PSWD=" + name);
 	               	if(result == 0) {
 	               		ToastUtils.showToast(context, R.string.device_manager_pwd_set_error);
 	               	} else if(result == 1) {
@@ -119,7 +119,7 @@ public class DialogUtils {
                   if(!newPwd1.equalsIgnoreCase(newPwd2)) {
                 	  ToastUtils.showToast(context, R.string.password_not_equal);
                  } else {
-                	 String common = CamCmdListHelper.SetCmd_Pwd_State + "PSWD=" + oldPwd + ":PSWD=" + newPwd1 + "\0";
+                	 String common = CamCmdListHelper.SetCmd_Pwd_State + "PSWD=" + oldPwd + ":PSWD=" + newPwd1;
                 	 String id = device.getDeviceID();
                 	 int res =  UdtTools.sendCmdMsgById(id, common, common.length());
                 	 if(res > 0 ) {

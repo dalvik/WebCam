@@ -766,6 +766,36 @@
 							    	android:enabled="false"/>
 				    	    </TableRow>
 				    	    
+				    	     <TableRow >
+				    	         
+				    	         <RadioGroup android:orientation="horizontal"
+				    	             android:gravity="center"
+				    	             android:layout_weight="1"
+				    	             android:id="@+id/device_params_monitor_intelligent_mode_radiogroup_id">
+				    	             <RadioButton 
+				    	              android:id="@+id/device_params_monitor_intelligent_mode_fluency_set_id" 
+				    	              android:layout_width="wrap_content"
+					    			  android:layout_height="fill_parent"
+					    			  android:checked="true"
+					    			  android:textColor="@color/black"
+					    			  android:button="@null"
+                       				  android:drawableLeft="@drawable/web_cam_radion_button_selector"
+					    			  android:text="@string/device_params_monitor_intelligent_mode_fluency_str"
+					    			  />
+				    	           
+				    	           <RadioButton 
+				    	              android:id="@+id/device_params_monitor_intelligent_mode_distinct_set_id" 
+				    	              android:layout_width="wrap_content"
+					    			  android:layout_height="fill_parent"
+					    			  android:checked="true"
+					    			  android:textColor="@color/black"
+					    			  android:button="@null"
+                       				  android:drawableLeft="@drawable/web_cam_radion_button_selector"
+					    			  android:text="@string/device_params_monitor_intelligent_mode_distinct_str"
+					    			  />
+				    	         </RadioGroup>
+				    	    </TableRow>
+				    	    
 				    	    <ImageView
 		                        android:layout_width="fill_parent"
 		                        android:layout_height="wrap_content"

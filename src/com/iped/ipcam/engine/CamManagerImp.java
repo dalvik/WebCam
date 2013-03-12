@@ -185,7 +185,6 @@ public class CamManagerImp implements ICamManager {
 		public void update() {
 			if(!stopFlag) {
 				handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
-				System.out.println("update=======>" + deviceList.size());
 			}
 		}
 		
@@ -205,7 +204,7 @@ public class CamManagerImp implements ICamManager {
 		@Override
 		public void run() {
 			stopFlag = false;
-			handler.postDelayed(fetchWebCamIdTask, 100);
+			handler.postDelayed(fetchWebCamIdTask, 1000);
 			UdtTools.startSearch();
 		}
 		
@@ -214,8 +213,8 @@ public class CamManagerImp implements ICamManager {
 			@Override
 			public void run() {
 				String id = UdtTools.fetchCamId();
+				Log.d(TAG, "cam id = " + id);
 				if(id != null) {
-					Log.d(TAG, "cam id = " + id);
 					searchCounter = 1;
 					addCam(id, id);
 					updateDeviceList();

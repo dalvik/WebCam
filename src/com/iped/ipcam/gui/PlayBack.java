@@ -10,6 +10,7 @@ import android.app.ListActivity;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.engine.IVideoManager;
@@ -120,6 +122,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				//hideProgress();
 				ProgressUtil.showProgress(R.string.video_clear_ing, PlayBack.this);
 				break;
+			case Constants.CONNECTERRORINFO:
+				String info = (String)msg.obj;
+				Toast.makeText(PlayBack.this, info, Toast.LENGTH_SHORT).show();
+				break;
 			default:
 				break;
 			}
@@ -179,7 +185,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		case DELETE:
 			String index = video.getIndex();
 			IVideoManager videoManager = CamMagFactory.getVideoManagerInstance();
-			videoManager.deleteFiles(handler, index, index+" ", video.getAddress());
+			videoManager.deleteFiles(handler, index, index, video.getAddress());
 			handler.sendEmptyMessage(Constants.DELETEFILES);
 			break;
 		case PLAYBACK:
@@ -422,7 +428,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				Video videoStart = videoAdapter.getItem(0);
 				Video videoEnd = videoAdapter.getItem(count-1);
 				
-				videoManager.deleteFiles(handler, videoStart.getIndex(), videoEnd.getIndex() + " ", videoStart.getAddress());
+				videoManager.deleteFiles(handler, videoStart.getIndex(), videoEnd.getIndex(), videoStart.getAddress());
 				Message msg = handler.obtainMessage();
 				handler.sendMessage(msg);
 				handler.sendEmptyMessage(Constants.CLEARFILES);
@@ -441,5 +447,22 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		ProgressUtil.dismissProgress();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 }

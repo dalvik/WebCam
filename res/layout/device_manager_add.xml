@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout01"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -13,13 +12,13 @@
     <ImageView android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/line"/>
-    
+  
     <TableLayout
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="3dip"
-        android:paddingTop="20dip"
-        android:stretchColumns="1,3" >
+        android:layout_weight="1"
+        android:paddingTop="20dip">
 
         <TableRow>
 
@@ -30,28 +29,15 @@
 
             <EditText
                 android:id="@+id/device_manager_add_name_id"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/device_manager_add_hint_str"
                 android:singleLine="true"
+                android:layout_weight="1"
                 android:text="@string/device_manager_add_name_default_str" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:textColor="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:visibility="gone"
-                android:textColor="@color/white" />
         </TableRow>
 
         <TableRow>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,25 +47,13 @@
                 android:id="@+id/device_manager_new_device_id_edittext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="@string/device_manager_new_device_id_hint"
                 android:inputType="numberDecimal"
                 android:singleLine="true" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:textColor="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:visibility="invisible"
-                android:textColor="@color/white" />
         </TableRow>
     </TableLayout>
- 
+    
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

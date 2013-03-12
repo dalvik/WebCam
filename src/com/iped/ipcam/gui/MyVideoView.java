@@ -39,7 +39,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
 
-	private final static int VIDEOSOCKETBUFLENGTH = 1024;//  342000;
+	private final static int VIDEOSOCKETBUFLENGTH = 4096;//  342000;
 
 	public final static int PLAYBACK_AUDIOBUFFERSIZE = 1024 * Command.CHANEL * 1;
 
@@ -115,6 +115,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean fullScreenFlag = false;
 	
+	private boolean bitmapLockFlag = false;
+
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -139,11 +141,16 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint.setTextSize(18);
 		mpeg4Decoder = false;
 	}
+	
+	public void changeConfig(int w, int h) {
+		rect = new Rect(0, 0, w, h);
+	}
+	
 //TODO
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (video != null) {
+		if (video != null && !bitmapLockFlag) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
@@ -176,7 +183,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 						targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
 						targetHeinght = tmpHeight;
 					}
-					System.out.println("temWidth=" + temWidth + " "+ targetWidth + " tmpHeight= " + tmpHeight + " " + targetHeinght);
+					//System.out.println("temWidth=" + temWidth + " "+ targetWidth + " tmpHeight= " + tmpHeight + " " + targetHeinght);
 					if(temWidth>targetWidth) {
 						left = (temWidth - targetWidth)/2;
 						right = targetWidth;
@@ -215,7 +222,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			canvas.restore();
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
-			String text = "  More : hangzhouiped.taobao.com";
+			String text = "  ";
 			if(rect2 == null) {
 				rect2 = new Rect(0, 0, getWidth(), getHeight() - 10);
 			}
@@ -227,12 +234,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 
 	public void run() {
-		System.out.println("Debug mode " + BuildConfig.DEBUG );
 		deviceId = device.getDeviceID();
 		devicenName = device.getDeviceName();
-		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2() + "\0");
+		String tem = (CamCmdListHelper.SetCmd_StartVideo_Tcp + device.getUnDefine2());
 		int res = UdtTools.sendCmdMsg(tem, tem.length());
-		if (res < 0) {
+		if (res <= 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			Log.d(TAG, "sendCmdMsgById result = " + res);
 			onStop();
@@ -241,7 +247,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		int bufLength = 50;
 		byte[] b = new byte[bufLength];
 		res = UdtTools.recvCmdMsg(b, bufLength);
-		if (res < 0) {
+		if (res <= 0) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			onStop();
 			Log.d(TAG, "recvCmdMsgById result = " + res);
@@ -252,7 +258,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if("tlk".equalsIgnoreCase(tlk)) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
-			UdtTools.freeConnection();
+			UdtTools.exit();
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -311,30 +317,45 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			decoderFactory.setOnMpegPlayListener(this);
 		}
 		int index = 0;
-		int headCount = 1;
 		boolean sleepFlag = false;
 		
 		boolean startFlag = true;
 		int headFlagCount = 0;
 		byte[] tim = new byte[50];
-		
+		int timeoutCounter = 0;
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 			dataRate += readLengthFromVideoSocket;
 			//Log.d(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
 			if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
-				if(BuildConfig.DEBUG && !DEBUG) {
-					Log.d(TAG, "### read over break....");
+				timeoutCounter++;
+				if(readLengthFromVideoSocket == -1) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.e(TAG, "### thread recv video data over break....");
+					}
+					break;
 				}
-				stopPlay = true;
-				break;
+				if(timeoutCounter>15) {
+					stopPlay = true;
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.e(TAG, "### recv video data over break....");
+					}
+					break;
+				}else {
+					if(BuildConfig.DEBUG && DEBUG) {
+						Log.e(TAG, "### recv video data timeout....");
+					}
+					continue;
+				}
 			}
+			timeoutCounter = 0;
 			int recvBufIndex = 0;
 			do{
 				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
 					synchronized (nalBuf) {
 						try {
-							nalBuf.wait(10);
+							nalBuf.wait(20);
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							onStop();
@@ -368,24 +389,20 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				    			tim[headFlagCount++] = b0;
 								if(headFlagCount >= 18) { 
 									startFlag = false;
-									//String time = new String(tim, 0, headFlagCount);
-									//System.out.println("### recv ========= " + time);
 									if(sleepFlag) {
 										sleepFlag = false; 
 						    			synchronized (nalBuf) {
 						    				try {
-						    					nalBuf.wait();
+						    					//Log.d(TAG, "3333");
+						    					nalBuf.wait(10000);
+						    					//Log.d(TAG, "444");
 						    				} catch (InterruptedException e) {
 						    					stopPlay = true;
 						    					onStop();
 						    					e.printStackTrace();
 						    				}
 						    			}
-						    		}/*else {
-						    			if(headCount++ % 3==0) {
-						    				sleepFlag = true;
-						    			}
-						    		}*/
+						    		}
 								}
 							}
 				    	}
@@ -407,14 +424,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### onStoped.");
 		}
-		if(audioThread != null) {
-			audioThread.onStop(true);
-		}
-		
-		if(audioPlayerThread != null && audioPlayerThread.isAlive()) {
-			audioPlayerThread.interrupt();
-			audioPlayerThread = null;
-		}
+		stopAudio();
 		
 		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
@@ -432,6 +442,17 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		flushBitmap();
 	}
 
+	private void stopAudio() {
+		if(audioThread != null) {
+			audioThread.onStop(true);
+		}
+		
+		if(audioPlayerThread != null && !audioPlayerThread.isInterrupted()) {
+			audioPlayerThread.interrupt();
+			audioPlayerThread = null;
+		}
+	}
+	
 	public boolean isStopPlay() {
 		return stopPlay;
 	}
@@ -439,6 +460,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void setStopPlay(boolean stopPlay, boolean isAutoStop) {
 		this.stopPlay = stopPlay;
 		this.isAutoStop = isAutoStop;
+		stopAudio();
 	}
 
 	private void release() {
@@ -501,6 +523,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	};
 
+	//TOTO why reconnect
 	private void initBCV(BCVInfo info) {
 		Message m = handler.obtainMessage();
 		Bundle bundle = new Bundle();
@@ -615,7 +638,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		
 		@Override
 		protected Void doInBackground(String... params) {
-			String item = CamCmdListHelper.SetVideoResol + params[0] + "\n";
+			String item = CamCmdListHelper.SetVideoResol + params[0];
 			int res = UdtTools.sendCmdMsg( item, item.length());
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
@@ -626,5 +649,21 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			}
 			return null;
 		}
+	}
+	
+	public void callBackStop() {
+		if(BuildConfig.DEBUG) {
+			Log.d(TAG, "### audio thread exit call back stop video thread");
+		}
+		//isAutoStop = true;
+		if(!stopPlay) {
+			stopPlay = true;
+			onStop();
+		}
+	}
+	
+	
+	public void setBitmapLockFlag(boolean bitmapLockFlag) {
+		this.bitmapLockFlag = bitmapLockFlag;
 	}
 }

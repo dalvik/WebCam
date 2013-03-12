@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.utils.AnimUtil;
 
 public class WebCam extends Activity implements OnClickListener{
@@ -191,5 +192,17 @@ public class WebCam extends Activity implements OnClickListener{
 		p.setTextSize(txtSize);
 		canvasTemp.drawText(txt, 2, txtSize - 2, p);
 		return mbmpTest;
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
 	}
 }

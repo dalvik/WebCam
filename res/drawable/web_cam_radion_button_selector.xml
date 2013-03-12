@@ -7,6 +7,8 @@
           android:drawable="@drawable/web_cam_radion_button_uncheck" />
     <item android:state_checked="false" android:state_focused="true"
           android:drawable="@drawable/web_cam_radion_button_focus" />
+        <item android:state_checked="false" android:state_enabled="false"
+          android:drawable="@drawable/web_cam_radion_button_disable" />
     <item android:state_checked="false" android:drawable="@drawable/web_cam_radion_button_uncheck" />
     <item android:state_checked="true" android:drawable="@drawable/web_cam_radion_button_checked" />
     

@@ -14,6 +14,8 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,6 +34,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.CamParasSetImp;
 import com.iped.ipcam.engine.ICamManager;
@@ -153,6 +156,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	
 	private ProgressDialog m_Dialog = null;
 	
+	private RadioGroup intelligenMonitorRadioGrop = null;
+	
+	private int monitorSetFlag = 0;
+	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -195,7 +202,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 							device.setDeviceRemoteCmdPort(port1);
 							int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 							if(checkPwd == 1) {
-								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2() + "\0", ip, port1);
+								cmd = PackageUtil.CMDPackage2(netUtil, CamCmdListHelper.GetCmd_Config + device.getUnDefine2(), ip, port1);
 								paraMap = new LinkedHashMap<String,String>();
 								ParaUtil.putParaByString(cmd, paraMap);
 								initializeEditText(paraMap);
@@ -262,7 +269,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 					int checkPwd = PackageUtil.checkPwd(device.getDeviceID(),device.getUnDefine2());
 					if(checkPwd == 1) {
 						camManager.updateCam(device);
-						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd + "\0", ip, port1);
+						cmd = PackageUtil.CMDPackage2(null, CamCmdListHelper.GetCmd_Config + pwd, ip, port1);
 						paraMap = new LinkedHashMap<String,String>();
 						ParaUtil.putParaByString(cmd, paraMap);
 						initializeEditText(paraMap);
@@ -351,12 +358,9 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		findViewById(R.id.device_params_set_commit_button_id).setOnClickListener(this);
 		findViewById(R.id.device_params_set_concle_button_id).setOnClickListener(this);
 
+		intelligenMonitorRadioGrop = (RadioGroup) findViewById(R.id.device_params_monitor_intelligent_mode_radiogroup_id);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
 
 	@Override
 	public void onClick(View v) {
@@ -415,7 +419,7 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			}, calendar2.get(Calendar.HOUR_OF_DAY), calendar2.get(Calendar.MINUTE), true).show();
 			break;
 		case R.id.device_params_other_set_system_time_id:
-			String command = CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis())+ "\0";
+			String command = CamCmdListHelper.SetCmd_Set_Time + DateUtil.formatTimeToDate3(System.currentTimeMillis());
 			int res = UdtTools.sendCmdMsgById(device.getDeviceID(), command, command.length());
 			if(res>0) {
 				ToastUtils.showToast(DeviceParamSets.this, R.string.device_params_other_set_system_success_str);
@@ -431,12 +435,12 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		}
 	}
 	
-	private void initializeEditText(Map<String, String> paraMap) {
+	private void initializeEditText(final Map<String, String> paraMap) {
 		paramBackButton.setOnClickListener(this);
 		deviceNameEditText.setText(device.getDeviceName());
 		deviceIdEditText.setText(paraMap.containsKey("cam_id")? paraMap.get("cam_id") : "");
 		deviceIdEditText.setEnabled(false);
-		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : "V12.005.13");
+		versionEditText.setText(paraMap.containsKey("version")? paraMap.get("version") : getCurrentVersion());
 		versionEditText.setEnabled(false);
 		tfCardEditText.setText(paraMap.containsKey("tfcard_maxsize")? FileUtil.formetFileSize(Long.parseLong(paraMap.get("tfcard_maxsize")) * 1024 * 1024) : "");
 		tfCardEditText.setEnabled(false);
@@ -552,22 +556,71 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 				recordFrameSizeOne.setSelection(0);
 			}
 		}
-		
+		/*
+		 * 0        有智能监控下的方案选择 :　更清晰 | 更流畅    有监控模式选择
+		 * 1   没有智能监控下的方案选择 :　更清晰 | 更流畅  没有监控模式选择
+		 * 2   没有智能监控下的方案选择 :　更清晰  | 更流畅 
+		 */
+		monitorSetFlag = 0;
+		if(paraMap.containsKey("model")) {
+			String model = paraMap.get("model");
+			if("IP2001".equalsIgnoreCase(model) 
+					|| "IP2002A".equalsIgnoreCase(model) || "IP2002C".equalsIgnoreCase(model)
+					|| "IP1001SA".equalsIgnoreCase(model)|| "IP1001SC".equalsIgnoreCase(model)
+					|| "IP2001C".equalsIgnoreCase(model)
+					) {
+				monitorSetFlag = 1;
+			} else if("IP1001S".equalsIgnoreCase(model)) {
+				monitorSetFlag = 2;
+			}
+			System.out.println("model=" + model);
+		}
+		if(monitorSetFlag == 1){
+			intelligenMonitorRadioGrop.setVisibility(View.GONE);
+			selfIntelMonitor.setEnabled(false);
+			selfSetMonitor.setEnabled(false);
+			selfSetMonitorOneRate.setEnabled(false);
+		} else if(monitorSetFlag == 2) {
+			intelligenMonitorRadioGrop.setVisibility(View.GONE);
+		}
 
 		//监控模式
 		if(paraMap.containsKey("mon_mode")) {
 			String s = paraMap.get("mon_mode");
-			if("normal".equals(s)) { //inteligent
-				selfSetMonitor.setChecked(true);
-				selfIntelMonitor.setChecked(false);
-			} else if("inteligent".equals(s)){
-				selfSetMonitor.setChecked(false);
-				selfIntelMonitor.setChecked(true);
+			if("inteligent".equalsIgnoreCase(s)){//inteligent normal
+				if(monitorSetFlag == 1){
+					selfSetMonitor.setChecked(false);
+					selfIntelMonitor.setChecked(false);
+				}else {
+					selfSetMonitor.setChecked(false);
+					selfIntelMonitor.setChecked(true);
+				}
+				intelligenMonitorRadioGrop.check(R.id.device_params_monitor_intelligent_mode_fluency_set_id);
+			}else if("inteligent2".equalsIgnoreCase(s)){
+				if(monitorSetFlag == 1){
+					selfSetMonitor.setChecked(false);
+					selfIntelMonitor.setChecked(false);
+				}else {
+					selfSetMonitor.setChecked(false);
+					selfIntelMonitor.setChecked(true);
+				}
+				intelligenMonitorRadioGrop.check(R.id.device_params_monitor_intelligent_mode_distinct_set_id);
 			} else {
-				selfSetMonitor.setChecked(false);
+				selfSetMonitor.setChecked(true);
 				selfIntelMonitor.setChecked(false);
 			}
 		}
+		
+		intelligenMonitorRadioGrop.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				if(checkedId == R.id.device_params_monitor_intelligent_mode_fluency_set_id) {
+					paraMap.put("mon_mode", "inteligent");
+				}else {
+					paraMap.put("mon_mode", "inteligent2");
+				}
+			}
+		});
 		
 		selfSetMonitor.setOnClickListener(new OnClickListener() {
 			
@@ -575,7 +628,10 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			public void onClick(View v) {
 				selfSetMonitor.setChecked(true);
 				selfIntelMonitor.setChecked(false);
-				System.out.println(selfSetMonitor.isChecked());
+				if(monitorSetFlag == 0) {
+					findViewById(R.id.device_params_monitor_intelligent_mode_fluency_set_id).setEnabled(false);
+					findViewById(R.id.device_params_monitor_intelligent_mode_distinct_set_id).setEnabled(false);
+				}
 			}
 		});
 		selfIntelMonitor.setOnClickListener(new OnClickListener() {
@@ -584,7 +640,11 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 			public void onClick(View v) {
 				selfSetMonitor.setChecked(false);
 				selfIntelMonitor.setChecked(true);	
-				System.out.println(selfSetMonitor.isChecked());
+				if(monitorSetFlag == 0) {
+					findViewById(R.id.device_params_monitor_intelligent_mode_fluency_set_id).setEnabled(true);
+					findViewById(R.id.device_params_monitor_intelligent_mode_distinct_set_id).setEnabled(true);
+				
+				}
 			}
 		});
 		
@@ -659,7 +719,8 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		ProgressUtil.dismissProgress();
-		UdtTools.close();
+		//UdtTools.freeConnectionById(device.getDeviceID());
+		UdtTools.freeCmdSocket();
 	}
 
 	private void lockWireuseCommont(boolean flag) {
@@ -1015,5 +1076,25 @@ public class DeviceParamSets extends Activity implements OnClickListener {
 		return s;
 	}
 	
+	private String getCurrentVersion() {
+		try {
+			PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			return packageInfo.versionName;
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		StatService.onResume(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
 }

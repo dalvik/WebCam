@@ -17,6 +17,10 @@ public class VideoQueue {
 	
 	private Object lock = new Object();
 	
+	private Object obj = new Object();
+	
+	private String TAG = "VideoQueue";
+	
 	public VideoQueue() {
 		jpegImageList = new LinkedList<JpegImage>();
 		timeList = new LinkedList<String>();
@@ -25,10 +29,17 @@ public class VideoQueue {
 	
 	public void addJpegImage(JpegImage image) {
 		if(jpegImageList.size()>=4) {
-			JpegImage i = jpegImageList.poll();
-			if(i.bitmap != null) {
-				i.bitmap.recycle();
-				i = null;
+			try{
+				JpegImage i = jpegImageList.poll();
+				if(i != null) {
+					if(i.bitmap != null) {
+						i.bitmap.recycle();
+						i = null;
+					}
+				}
+			}catch(Exception e) {
+				Log.e(TAG, "### addJpegImage = " + e.getLocalizedMessage());
+				jpegImageList.clear();
 			}
 		}
 		jpegImageList.add(image);
@@ -50,12 +61,16 @@ public class VideoQueue {
 	}
 	
 	public JpegImage removeImage() {
-		if(getImageListLength()>0) {
-			synchronized (lock) {
-				return jpegImageList.poll();
+		synchronized (obj) {
+			if(jpegImageList.size()>0) {
+				try{
+					return jpegImageList.poll();
+				}catch(Exception e) {
+					return null;
+				}
+			}else {
+				return null;
 			}
-		}else {
-			return null;
 		}
 	}
 	

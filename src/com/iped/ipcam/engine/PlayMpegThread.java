@@ -89,8 +89,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private static boolean flag = true;
 	
-	private int timeOutCount = 1;
-	
 	public PlayMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -120,27 +118,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			do{
 				if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 					synchronized (mpegBuf) {
-						if(timeOutCount++ % 1500 == 0) {
-							stopPlay = true;
-							if(BuildConfig.DEBUG && DEBUG) {
-								Log.d(TAG, "### timeout exit ----------->");
-							}
-							break;
-						}
 						try {
-							/*if(BuildConfig.DEBUG && DEBUG) {
-								Log.d(TAG, "### no data ....");
-							}*/
 							mpegBuf.wait(20);
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							showMpeg.setInerrupt();
-							Log.e(TAG, e.getLocalizedMessage());
+							Log.e(TAG, "play mpeg thread InterruptedException");
 							break;
 						}
 					}  
 				}else {
-					timeOutCount = 1;
 					byte b0 = nalBuf[indexForGet];
 					byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 					byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
@@ -233,12 +220,14 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
+					myVideoView.setBitmapLockFlag(true);
 					if(video != null && !video.isRecycled()) {
 						video.recycle();
 						video = null;
 					}
 					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					myVideoView.setImage(video);
+					myVideoView.setBitmapLockFlag(false);
 				}
 				if(flag) {
 					flag = false;
@@ -333,7 +322,11 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
 							//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
 							if(video != null) {
-								video.copyPixelsFromBuffer(sh);
+								try {
+									video.copyPixelsFromBuffer(sh);
+								} catch (Exception e) {
+									Log.e(TAG, "### copyPixelsFromBuffer exception!");
+								}
 								//frameCount = myVideoView.getFrameCount();
 								//frameCount++;
 							}

@@ -488,8 +488,8 @@ public final class R {
         public static final int button_shape=0x7f020000;
         /**  deivce select color 
          */
-        public static final int device_item_select=0x7f020075;
-        public static final int device_item_unselect=0x7f020076;
+        public static final int device_item_select=0x7f020076;
+        public static final int device_item_unselect=0x7f020077;
         public static final int drovik_progress=0x7f020001;
         public static final int empty_photo=0x7f020002;
         public static final int ic_customer_loading1=0x7f020003;
@@ -511,11 +511,11 @@ public final class R {
         public static final int item_download_pressed=0x7f020013;
         /**  黑色 
          */
-        public static final int lawngreen=0x7f020074;
+        public static final int lawngreen=0x7f020075;
         public static final int line=0x7f020014;
         /**  亮金黄色 
          */
-        public static final int linen=0x7f020073;
+        public static final int linen=0x7f020074;
         public static final int list_group_background=0x7f020015;
         public static final int list_head_background=0x7f020016;
         public static final int list_line=0x7f020017;
@@ -578,66 +578,67 @@ public final class R {
         public static final int web_cam_param_set_button_back_pressed=0x7f020050;
         public static final int web_cam_param_set_button_back_selector=0x7f020051;
         public static final int web_cam_radion_button_checked=0x7f020052;
-        public static final int web_cam_radion_button_focus=0x7f020053;
-        public static final int web_cam_radion_button_selector=0x7f020054;
-        public static final int web_cam_radion_button_uncheck=0x7f020055;
-        public static final int web_cam_right_disable=0x7f020056;
-        public static final int web_cam_right_focus=0x7f020057;
-        public static final int web_cam_right_menu_button_disable=0x7f020058;
-        public static final int web_cam_right_menu_button_focused=0x7f020059;
-        public static final int web_cam_right_menu_button_normal=0x7f02005a;
-        public static final int web_cam_right_menu_button_pressed=0x7f02005b;
-        public static final int web_cam_right_menu_button_selector=0x7f02005c;
-        public static final int web_cam_right_menu_down_button_selector=0x7f02005d;
-        public static final int web_cam_right_menu_left_button_selector=0x7f02005e;
-        public static final int web_cam_right_menu_right_button_selector=0x7f02005f;
-        public static final int web_cam_right_menu_up_button_selector=0x7f020060;
-        public static final int web_cam_right_normal=0x7f020061;
-        public static final int web_cam_right_pressed=0x7f020062;
-        public static final int web_cam_seek_thumb_bg=0x7f020063;
-        public static final int web_cam_seekbar_selector=0x7f020064;
-        public static final int web_cam_tab_normal=0x7f020065;
-        public static final int web_cam_tab_pressed=0x7f020066;
-        public static final int web_cam_tab_selector=0x7f020067;
-        public static final int web_cam_thumb=0x7f020068;
-        public static final int web_cam_up_disable=0x7f020069;
-        public static final int web_cam_up_focus=0x7f02006a;
-        public static final int web_cam_up_normal=0x7f02006b;
-        public static final int web_cam_up_pressed=0x7f02006c;
-        public static final int web_cam_video_view_button_disable=0x7f02006d;
-        public static final int web_cam_video_view_button_focused=0x7f02006e;
-        public static final int web_cam_video_view_button_normal=0x7f02006f;
-        public static final int web_cam_video_view_button_pressed=0x7f020070;
-        public static final int web_cam_video_view_button_selector=0x7f020071;
-        public static final int welcome_shape=0x7f020072;
+        public static final int web_cam_radion_button_disable=0x7f020053;
+        public static final int web_cam_radion_button_focus=0x7f020054;
+        public static final int web_cam_radion_button_selector=0x7f020055;
+        public static final int web_cam_radion_button_uncheck=0x7f020056;
+        public static final int web_cam_right_disable=0x7f020057;
+        public static final int web_cam_right_focus=0x7f020058;
+        public static final int web_cam_right_menu_button_disable=0x7f020059;
+        public static final int web_cam_right_menu_button_focused=0x7f02005a;
+        public static final int web_cam_right_menu_button_normal=0x7f02005b;
+        public static final int web_cam_right_menu_button_pressed=0x7f02005c;
+        public static final int web_cam_right_menu_button_selector=0x7f02005d;
+        public static final int web_cam_right_menu_down_button_selector=0x7f02005e;
+        public static final int web_cam_right_menu_left_button_selector=0x7f02005f;
+        public static final int web_cam_right_menu_right_button_selector=0x7f020060;
+        public static final int web_cam_right_menu_up_button_selector=0x7f020061;
+        public static final int web_cam_right_normal=0x7f020062;
+        public static final int web_cam_right_pressed=0x7f020063;
+        public static final int web_cam_seek_thumb_bg=0x7f020064;
+        public static final int web_cam_seekbar_selector=0x7f020065;
+        public static final int web_cam_tab_normal=0x7f020066;
+        public static final int web_cam_tab_pressed=0x7f020067;
+        public static final int web_cam_tab_selector=0x7f020068;
+        public static final int web_cam_thumb=0x7f020069;
+        public static final int web_cam_up_disable=0x7f02006a;
+        public static final int web_cam_up_focus=0x7f02006b;
+        public static final int web_cam_up_normal=0x7f02006c;
+        public static final int web_cam_up_pressed=0x7f02006d;
+        public static final int web_cam_video_view_button_disable=0x7f02006e;
+        public static final int web_cam_video_view_button_focused=0x7f02006f;
+        public static final int web_cam_video_view_button_normal=0x7f020070;
+        public static final int web_cam_video_view_button_pressed=0x7f020071;
+        public static final int web_cam_video_view_button_selector=0x7f020072;
+        public static final int welcome_shape=0x7f020073;
     }
     public static final class id {
         public static final int LinearLayout01=0x7f0b000a;
         public static final int RelativeLayout_Item=0x7f0b000e;
         public static final int SecondaryProgress=0x01010000;
-        public static final int add_apertrue=0x7f0b00b3;
-        public static final int add_foucs=0x7f0b00b0;
-        public static final int add_quality=0x7f0b00aa;
-        public static final int add_zoom=0x7f0b00ad;
-        public static final int all_image_gridview=0x7f0b0064;
-        public static final int app_icon=0x7f0b0062;
-        public static final int app_text=0x7f0b0063;
+        public static final int add_apertrue=0x7f0b00b6;
+        public static final int add_foucs=0x7f0b00b3;
+        public static final int add_quality=0x7f0b00ad;
+        public static final int add_zoom=0x7f0b00b0;
+        public static final int all_image_gridview=0x7f0b0067;
+        public static final int app_icon=0x7f0b0065;
+        public static final int app_text=0x7f0b0066;
         public static final int auto_search_button=0x7f0b001b;
-        public static final int body=0x7f0b007a;
-        public static final int book_back_button=0x7f0b005c;
-        public static final int book_search_button=0x7f0b005d;
+        public static final int body=0x7f0b007d;
+        public static final int book_back_button=0x7f0b005f;
+        public static final int book_search_button=0x7f0b0060;
         public static final int bottom_id=0x7f0b0007;
-        public static final int brightness_progressbar=0x7f0b00ac;
-        public static final int cancle_btn_exit=0x7f0b0086;
-        public static final int change_login_pwd=0x7f0b00d3;
+        public static final int brightness_progressbar=0x7f0b00af;
+        public static final int cancle_btn_exit=0x7f0b0089;
+        public static final int change_login_pwd=0x7f0b00d6;
         public static final int clear_all_button=0x7f0b001e;
-        public static final int clear_cache=0x7f0b00d5;
-        public static final int clear_progressbar=0x7f0b00a9;
-        public static final int common_back=0x7f0b00c5;
-        public static final int container=0x7f0b007f;
-        public static final int contrast_progressbar=0x7f0b00af;
-        public static final int copy_right=0x7f0b00cf;
-        public static final int currenttime=0x7f0b008b;
+        public static final int clear_cache=0x7f0b00d8;
+        public static final int clear_progressbar=0x7f0b00ac;
+        public static final int common_back=0x7f0b00c8;
+        public static final int container=0x7f0b0082;
+        public static final int contrast_progressbar=0x7f0b00b2;
+        public static final int copy_right=0x7f0b00d2;
+        public static final int currenttime=0x7f0b008e;
         public static final int device_audio_port=0x7f0b0019;
         public static final int device_gateway=0x7f0b0015;
         public static final int device_id=0x7f0b0016;
@@ -678,27 +679,30 @@ public final class R {
         public static final int device_params_apn_set_pwd_id=0x7f0b003f;
         public static final int device_params_apn_set_search_wireles_id=0x7f0b0040;
         public static final int device_params_apn_set_wireless_list_id=0x7f0b0041;
+        public static final int device_params_monitor_intelligent_mode_distinct_set_id=0x7f0b0049;
+        public static final int device_params_monitor_intelligent_mode_fluency_set_id=0x7f0b0048;
+        public static final int device_params_monitor_intelligent_mode_radiogroup_id=0x7f0b0047;
         public static final int device_params_monitor_intelligent_mode_set_id=0x7f0b0046;
-        public static final int device_params_monitor_one_frame_rate_id=0x7f0b0048;
-        public static final int device_params_monitor_one_frame_size_id=0x7f0b0049;
-        public static final int device_params_monitor_self_mode_set_id=0x7f0b0047;
-        public static final int device_params_other_modify_security_pwd_id=0x7f0b0056;
-        public static final int device_params_other_set_date_id=0x7f0b0053;
-        public static final int device_params_other_set_mobile_alarm_email_id=0x7f0b0051;
-        public static final int device_params_other_set_mobile_alarm_flag_close_id=0x7f0b004f;
-        public static final int device_params_other_set_mobile_alarm_flag_id=0x7f0b004d;
-        public static final int device_params_other_set_mobile_alarm_flag_open_id=0x7f0b004e;
-        public static final int device_params_other_set_mobile_alarm_offset_prompt_id=0x7f0b0050;
-        public static final int device_params_other_set_security_id=0x7f0b0052;
-        public static final int device_params_other_set_sound_close_flag_id=0x7f0b004c;
-        public static final int device_params_other_set_sound_open_flag_id=0x7f0b004b;
-        public static final int device_params_other_set_sound_open_id=0x7f0b004a;
-        public static final int device_params_other_set_system_time_id=0x7f0b0055;
-        public static final int device_params_other_set_time_id=0x7f0b0054;
+        public static final int device_params_monitor_one_frame_rate_id=0x7f0b004b;
+        public static final int device_params_monitor_one_frame_size_id=0x7f0b004c;
+        public static final int device_params_monitor_self_mode_set_id=0x7f0b004a;
+        public static final int device_params_other_modify_security_pwd_id=0x7f0b0059;
+        public static final int device_params_other_set_date_id=0x7f0b0056;
+        public static final int device_params_other_set_mobile_alarm_email_id=0x7f0b0054;
+        public static final int device_params_other_set_mobile_alarm_flag_close_id=0x7f0b0052;
+        public static final int device_params_other_set_mobile_alarm_flag_id=0x7f0b0050;
+        public static final int device_params_other_set_mobile_alarm_flag_open_id=0x7f0b0051;
+        public static final int device_params_other_set_mobile_alarm_offset_prompt_id=0x7f0b0053;
+        public static final int device_params_other_set_security_id=0x7f0b0055;
+        public static final int device_params_other_set_sound_close_flag_id=0x7f0b004f;
+        public static final int device_params_other_set_sound_open_flag_id=0x7f0b004e;
+        public static final int device_params_other_set_sound_open_id=0x7f0b004d;
+        public static final int device_params_other_set_system_time_id=0x7f0b0058;
+        public static final int device_params_other_set_time_id=0x7f0b0057;
         public static final int device_params_recorde_frame_speed_id=0x7f0b0045;
-        public static final int device_params_set_commit_button_id=0x7f0b0058;
-        public static final int device_params_set_concle_button_id=0x7f0b0059;
-        public static final int device_params_set_factory_button_id=0x7f0b0057;
+        public static final int device_params_set_commit_button_id=0x7f0b005b;
+        public static final int device_params_set_concle_button_id=0x7f0b005c;
+        public static final int device_params_set_factory_button_id=0x7f0b005a;
         public static final int device_params_set_recorde_frame_rate_one_id=0x7f0b0043;
         public static final int device_params_set_recorde_frame_size_id=0x7f0b0044;
         public static final int device_params_video_record_set_one_id=0x7f0b0042;
@@ -707,126 +711,126 @@ public final class R {
         public static final int device_type=0x7f0b0013;
         public static final int device_udp_port=0x7f0b0018;
         public static final int dir_preview_back_button=0x7f0b0004;
-        public static final int end_date_buttion=0x7f0b0097;
-        public static final int end_time_buttion=0x7f0b0098;
-        public static final int file_path=0x7f0b005e;
-        public static final int firstPassword=0x7f0b0067;
-        public static final int gridView=0x7f0b0061;
-        public static final int gridview=0x7f0b0080;
-        public static final int head_arrowImageView=0x7f0b0071;
-        public static final int head_contentLayout=0x7f0b0070;
-        public static final int head_lastUpdatedTextView=0x7f0b0074;
-        public static final int head_progressBar=0x7f0b0072;
-        public static final int head_tipsTextView=0x7f0b0073;
-        public static final int id_tv_loadingmsg=0x7f0b007c;
-        public static final int imageView=0x7f0b005f;
-        public static final int left=0x7f0b00a1;
-        public static final int left_down=0x7f0b00b4;
-        public static final int left_up=0x7f0b009e;
+        public static final int end_date_buttion=0x7f0b009a;
+        public static final int end_time_buttion=0x7f0b009b;
+        public static final int file_path=0x7f0b0061;
+        public static final int firstPassword=0x7f0b006a;
+        public static final int gridView=0x7f0b0064;
+        public static final int gridview=0x7f0b0083;
+        public static final int head_arrowImageView=0x7f0b0074;
+        public static final int head_contentLayout=0x7f0b0073;
+        public static final int head_lastUpdatedTextView=0x7f0b0077;
+        public static final int head_progressBar=0x7f0b0075;
+        public static final int head_tipsTextView=0x7f0b0076;
+        public static final int id_tv_loadingmsg=0x7f0b007f;
+        public static final int imageView=0x7f0b0062;
+        public static final int left=0x7f0b00a4;
+        public static final int left_down=0x7f0b00b7;
+        public static final int left_up=0x7f0b00a1;
         public static final int line1=0x7f0b0002;
         public static final int linearLayout=0x7f0b0012;
-        public static final int list_view_foot_more=0x7f0b0065;
-        public static final int list_view_foot_progress=0x7f0b0066;
-        public static final int loadingImageView=0x7f0b007b;
+        public static final int list_view_foot_more=0x7f0b0068;
+        public static final int list_view_foot_progress=0x7f0b0069;
+        public static final int loadingImageView=0x7f0b007e;
         public static final int loadingProgress=0x7f0b0006;
-        public static final int login_close_button=0x7f0b0087;
-        public static final int login_scrollview=0x7f0b0082;
-        public static final int login_uly=0x7f0b0084;
-        public static final int login_user_table=0x7f0b0083;
-        public static final int logindialog_space=0x7f0b0081;
-        public static final int main_scrolllayout=0x7f0b0075;
+        public static final int login_close_button=0x7f0b008a;
+        public static final int login_scrollview=0x7f0b0085;
+        public static final int login_uly=0x7f0b0087;
+        public static final int login_user_table=0x7f0b0086;
+        public static final int logindialog_space=0x7f0b0084;
+        public static final int main_scrolllayout=0x7f0b0078;
         public static final int manul_add_button=0x7f0b001c;
-        public static final int mid=0x7f0b00a2;
-        public static final int mid_down=0x7f0b00a4;
-        public static final int mid_up=0x7f0b009f;
-        public static final int minus_apertrue=0x7f0b00b1;
-        public static final int minus_foucs=0x7f0b00ae;
-        public static final int minus_quality=0x7f0b00a8;
-        public static final int minus_zoom=0x7f0b00ab;
-        public static final int nextImageView=0x7f0b0077;
-        public static final int pager=0x7f0b0060;
+        public static final int mid=0x7f0b00a5;
+        public static final int mid_down=0x7f0b00a7;
+        public static final int mid_up=0x7f0b00a2;
+        public static final int minus_apertrue=0x7f0b00b4;
+        public static final int minus_foucs=0x7f0b00b1;
+        public static final int minus_quality=0x7f0b00ab;
+        public static final int minus_zoom=0x7f0b00ae;
+        public static final int nextImageView=0x7f0b007a;
+        public static final int pager=0x7f0b0063;
         public static final int path_title=0x7f0b0005;
-        public static final int play_back_bottom=0x7f0b008a;
-        public static final int play_back_clear_all=0x7f0b0089;
-        public static final int play_back_seek_bar=0x7f0b008c;
-        public static final int play_back_video_address=0x7f0b0091;
-        public static final int play_back_video_search=0x7f0b0088;
-        public static final int play_back_video_search_name=0x7f0b0093;
-        public static final int play_back_video_size=0x7f0b0092;
-        public static final int preImageView=0x7f0b0076;
-        public static final int qelp_button_id=0x7f0b00a7;
-        public static final int qvga_button_id=0x7f0b00a5;
-        public static final int right=0x7f0b00a3;
-        public static final int right_down=0x7f0b00b5;
-        public static final int right_up=0x7f0b00a0;
-        public static final int scroll_view_id=0x7f0b009c;
-        public static final int search_device_id_list=0x7f0b0094;
-        public static final int secondPassword=0x7f0b006a;
-        public static final int send_audio=0x7f0b00b6;
-        public static final int set_wallpaper=0x7f0b00d4;
-        public static final int start_date_buttion=0x7f0b0095;
-        public static final int start_time_buttion=0x7f0b0096;
-        public static final int sure_btn_exit=0x7f0b0085;
-        public static final int system_settings_device_bin_addr_id=0x7f0b00bc;
-        public static final int system_settings_device_bin_update_id=0x7f0b00bd;
-        public static final int system_settings_device_ip_id=0x7f0b00bb;
-        public static final int system_settings_device_name_id=0x7f0b00ba;
-        public static final int system_settings_device_update_id=0x7f0b00be;
-        public static final int system_settings_preview_id=0x7f0b00b9;
-        public static final int system_settings_save_path_id=0x7f0b00b8;
+        public static final int play_back_bottom=0x7f0b008d;
+        public static final int play_back_clear_all=0x7f0b008c;
+        public static final int play_back_seek_bar=0x7f0b008f;
+        public static final int play_back_video_address=0x7f0b0094;
+        public static final int play_back_video_search=0x7f0b008b;
+        public static final int play_back_video_search_name=0x7f0b0096;
+        public static final int play_back_video_size=0x7f0b0095;
+        public static final int preImageView=0x7f0b0079;
+        public static final int qelp_button_id=0x7f0b00aa;
+        public static final int qvga_button_id=0x7f0b00a8;
+        public static final int right=0x7f0b00a6;
+        public static final int right_down=0x7f0b00b8;
+        public static final int right_up=0x7f0b00a3;
+        public static final int scroll_view_id=0x7f0b009f;
+        public static final int search_device_id_list=0x7f0b0097;
+        public static final int secondPassword=0x7f0b006d;
+        public static final int send_audio=0x7f0b00b9;
+        public static final int set_wallpaper=0x7f0b00d7;
+        public static final int start_date_buttion=0x7f0b0098;
+        public static final int start_time_buttion=0x7f0b0099;
+        public static final int sure_btn_exit=0x7f0b0088;
+        public static final int system_settings_device_bin_addr_id=0x7f0b00bf;
+        public static final int system_settings_device_bin_update_id=0x7f0b00c0;
+        public static final int system_settings_device_ip_id=0x7f0b00be;
+        public static final int system_settings_device_name_id=0x7f0b00bd;
+        public static final int system_settings_device_update_id=0x7f0b00c1;
+        public static final int system_settings_preview_id=0x7f0b00bc;
+        public static final int system_settings_save_path_id=0x7f0b00bb;
         public static final int system_settings_save_path_preview_cancle_id=0x7f0b0009;
         public static final int system_settings_save_path_preview_sure_id=0x7f0b0008;
-        public static final int thirdPassword=0x7f0b006d;
+        public static final int thirdPassword=0x7f0b0070;
         public static final int tips_message=0x7f0b000b;
-        public static final int tips_title=0x7f0b00bf;
-        public static final int topBar=0x7f0b00c4;
+        public static final int tips_title=0x7f0b00c2;
+        public static final int topBar=0x7f0b00c7;
         public static final int top_bar=0x7f0b0003;
-        public static final int top_title=0x7f0b00c6;
-        public static final int totaltime=0x7f0b008d;
-        public static final int update_progress=0x7f0b00c0;
-        public static final int user_check=0x7f0b00cb;
-        public static final int user_input=0x7f0b009d;
+        public static final int top_title=0x7f0b00c9;
+        public static final int totaltime=0x7f0b0090;
+        public static final int update_progress=0x7f0b00c3;
+        public static final int user_check=0x7f0b00ce;
+        public static final int user_input=0x7f0b00a0;
         public static final int user_oper=0x7f0b001a;
-        public static final int vga_button_id=0x7f0b00a6;
-        public static final int video_popup_gridview=0x7f0b00c1;
-        public static final int video_popup_menu_item_name=0x7f0b00c2;
-        public static final int video_preview_device_id=0x7f0b005b;
-        public static final int video_preview_device_name=0x7f0b005a;
-        public static final int video_preview_end_time=0x7f0b0090;
-        public static final int video_preview_list=0x7f0b00b7;
-        public static final int video_preview_start_time=0x7f0b008f;
-        public static final int video_preview_type=0x7f0b008e;
-        public static final int videoview=0x7f0b009b;
-        public static final int volume_progressbar=0x7f0b00b2;
+        public static final int vga_button_id=0x7f0b00a9;
+        public static final int video_popup_gridview=0x7f0b00c4;
+        public static final int video_popup_menu_item_name=0x7f0b00c5;
+        public static final int video_preview_device_id=0x7f0b005e;
+        public static final int video_preview_device_name=0x7f0b005d;
+        public static final int video_preview_end_time=0x7f0b0093;
+        public static final int video_preview_list=0x7f0b00ba;
+        public static final int video_preview_start_time=0x7f0b0092;
+        public static final int video_preview_type=0x7f0b0091;
+        public static final int videoview=0x7f0b009e;
+        public static final int volume_progressbar=0x7f0b00b5;
         public static final int waterFallContainer=0x7f0b0001;
         public static final int waterFallScrollView=0x7f0b0000;
-        public static final int waterfall_image=0x7f0b00c3;
+        public static final int waterfall_image=0x7f0b00c6;
         public static final int web_cam_cancl_add_new_device=0x7f0b0022;
-        public static final int web_cam_cancl_add_new_device_result=0x7f0b0079;
+        public static final int web_cam_cancl_add_new_device_result=0x7f0b007c;
         public static final int web_cam_cancl_button=0x7f0b000d;
-        public static final int web_cam_cancl_first_login=0x7f0b006c;
-        public static final int web_cam_cancl_modify=0x7f0b006f;
-        public static final int web_cam_cancl_play_back=0x7f0b009a;
-        public static final int web_cam_cancl_second_login=0x7f0b0069;
+        public static final int web_cam_cancl_first_login=0x7f0b006f;
+        public static final int web_cam_cancl_modify=0x7f0b0072;
+        public static final int web_cam_cancl_play_back=0x7f0b009d;
+        public static final int web_cam_cancl_second_login=0x7f0b006c;
         public static final int web_cam_sure_add_new_device=0x7f0b0021;
-        public static final int web_cam_sure_add_new_device_result=0x7f0b0078;
+        public static final int web_cam_sure_add_new_device_result=0x7f0b007b;
         public static final int web_cam_sure_button=0x7f0b000c;
-        public static final int web_cam_sure_fisrt_login=0x7f0b006b;
-        public static final int web_cam_sure_modify=0x7f0b006e;
-        public static final int web_cam_sure_play_back=0x7f0b0099;
-        public static final int web_cam_sure_second_login=0x7f0b0068;
-        public static final int web_cam_user_continue=0x7f0b007d;
-        public static final int web_cam_user_exit=0x7f0b007e;
-        public static final int web_version=0x7f0b00c7;
-        public static final int webview_keepuserpwd=0x7f0b00cc;
-        public static final int webview_password=0x7f0b00ca;
-        public static final int webview_userLogin=0x7f0b00cd;
-        public static final int webview_user_exit=0x7f0b00ce;
-        public static final int webview_username=0x7f0b00c9;
-        public static final int welcom_top_title=0x7f0b00c8;
-        public static final int wireless_proto=0x7f0b00d2;
-        public static final int wireless_signal_level=0x7f0b00d1;
-        public static final int wireless_ssid=0x7f0b00d0;
+        public static final int web_cam_sure_fisrt_login=0x7f0b006e;
+        public static final int web_cam_sure_modify=0x7f0b0071;
+        public static final int web_cam_sure_play_back=0x7f0b009c;
+        public static final int web_cam_sure_second_login=0x7f0b006b;
+        public static final int web_cam_user_continue=0x7f0b0080;
+        public static final int web_cam_user_exit=0x7f0b0081;
+        public static final int web_version=0x7f0b00ca;
+        public static final int webview_keepuserpwd=0x7f0b00cf;
+        public static final int webview_password=0x7f0b00cd;
+        public static final int webview_userLogin=0x7f0b00d0;
+        public static final int webview_user_exit=0x7f0b00d1;
+        public static final int webview_username=0x7f0b00cc;
+        public static final int welcom_top_title=0x7f0b00cb;
+        public static final int wireless_proto=0x7f0b00d5;
+        public static final int wireless_signal_level=0x7f0b00d4;
+        public static final int wireless_ssid=0x7f0b00d3;
     }
     public static final class layout {
         public static final int all_image_layout=0x7f030000;
@@ -878,15 +882,19 @@ public final class R {
         public static final int menu_image_detail=0x7f0a0001;
     }
     public static final class string {
-        public static final int accor_an_import_exception_str=0x7f070136;
+        public static final int accor_an_import_exception_str=0x7f070138;
         /**  用户登录 
+ 用户登录 
+ 用戶登錄 
          */
         public static final int app_name=0x7f070001;
         public static final int auto_search_tips_str=0x7f07004c;
         public static final int auto_serch_str=0x7f07004b;
-        public static final int blank_str=0x7f07013c;
+        public static final int blank_str=0x7f07013e;
         public static final int cancle_login_str=0x7f070020;
         /**  更改登录密码 
+ 更改登录密码 
+ 更改登錄密碼 
          */
         public static final int change_login_pass_str=0x7f07000b;
         public static final int clear_all_device_cancle_str=0x7f070078;
@@ -894,12 +902,14 @@ public final class R {
         public static final int clear_all_device_ok_str=0x7f070077;
         public static final int clear_all_device_title_str=0x7f070075;
         public static final int clear_all_str=0x7f070074;
-        public static final int clear_cache_complete_toast=0x7f070145;
-        public static final int clear_cache_menu=0x7f070144;
+        public static final int clear_cache_complete_toast=0x7f070147;
+        public static final int clear_cache_menu=0x7f070146;
         public static final int connection=0x7f070026;
         public static final int connection_error=0x7f070027;
-        public static final int cory_right=0x7f07013e;
+        public static final int cory_right=0x7f070140;
         /**  right menu 
+ right menu 
+ right menu 
          */
         public static final int default_activity_str=0x7f070025;
         public static final int device_audio_port_str=0x7f070083;
@@ -960,85 +970,97 @@ public final class R {
         public static final int device_params_apn_set_search_wireless_str=0x7f0700a9;
         public static final int device_params_apn_set_search_wireless_success_str=0x7f0700ab;
         /**  接入点设置 
+ 接入点设置 
+ 接入點設置 
          */
         public static final int device_params_apn_set_str=0x7f0700a6;
         public static final int device_params_apn_set_wireless_list_str=0x7f0700aa;
-        public static final int device_params_date_str=0x7f0700d3;
+        public static final int device_params_date_str=0x7f0700d5;
         public static final int device_params_device_address_str=0x7f07008b;
         public static final int device_params_device_name_str=0x7f070089;
-        public static final int device_params_dynamic_ip_str=0x7f0700da;
+        public static final int device_params_dynamic_ip_str=0x7f0700dc;
         public static final int device_params_info_no_device_str=0x7f070085;
         public static final int device_params_info_str=0x7f070086;
         public static final int device_params_inside_total_space_str=0x7f07008c;
+        public static final int device_params_monitor_intelligent_mode_distinct_str=0x7f0700b7;
+        public static final int device_params_monitor_intelligent_mode_fluency_str=0x7f0700b6;
         public static final int device_params_monitor_intelligent_mode_set_str=0x7f0700b5;
         public static final int device_params_monitor_self_mode_set_str=0x7f0700b4;
         /**  监控设置 
+ 监控设置 
+ 監控設置 
          */
         public static final int device_params_monitor_set_str=0x7f0700b3;
-        public static final int device_params_monitor_speed_str=0x7f0700d2;
+        public static final int device_params_monitor_speed_str=0x7f0700d4;
         public static final int device_params_network_intelligent_mode_str=0x7f070093;
         /**  网卡设置 
+ 网卡设置 
+ 網卡設置 
          */
         public static final int device_params_network_set_str=0x7f070092;
         public static final int device_params_network_wire_mode_str=0x7f070094;
         public static final int device_params_network_wireless_mode_str=0x7f070095;
-        public static final int device_params_no_device_select_str=0x7f0700d5;
-        public static final int device_params_not_online_str=0x7f0700d7;
-        public static final int device_params_other_set_mobile_alarm_email_str=0x7f0700bd;
-        public static final int device_params_other_set_mobile_alarm_offset_prompt_str=0x7f0700bc;
-        public static final int device_params_other_set_mobile_alarm_offset_str=0x7f0700bb;
-        public static final int device_params_other_set_mobile_alarm_str=0x7f0700ba;
-        public static final int device_params_other_set_security_str=0x7f0700be;
-        public static final int device_params_other_set_security_visit_password_str=0x7f0700c6;
-        public static final int device_params_other_set_sound_close_str=0x7f0700b9;
-        public static final int device_params_other_set_sound_open_str=0x7f0700b8;
-        public static final int device_params_other_set_sound_str=0x7f0700b7;
+        public static final int device_params_no_device_select_str=0x7f0700d7;
+        public static final int device_params_not_online_str=0x7f0700d9;
+        public static final int device_params_other_set_mobile_alarm_email_str=0x7f0700bf;
+        public static final int device_params_other_set_mobile_alarm_offset_prompt_str=0x7f0700be;
+        public static final int device_params_other_set_mobile_alarm_offset_str=0x7f0700bd;
+        public static final int device_params_other_set_mobile_alarm_str=0x7f0700bc;
+        public static final int device_params_other_set_security_str=0x7f0700c0;
+        public static final int device_params_other_set_security_visit_password_str=0x7f0700c8;
+        public static final int device_params_other_set_sound_close_str=0x7f0700bb;
+        public static final int device_params_other_set_sound_open_str=0x7f0700ba;
+        public static final int device_params_other_set_sound_str=0x7f0700b9;
         /**  其他设置 
+ 其他设置 
+ 其他設置 
          */
-        public static final int device_params_other_set_str=0x7f0700b6;
-        public static final int device_params_other_set_system_error_str=0x7f0700c5;
-        public static final int device_params_other_set_system_str=0x7f0700c3;
-        public static final int device_params_other_set_system_success_str=0x7f0700c4;
-        public static final int device_params_other_set_time_date_format_str=0x7f0700c1;
-        public static final int device_params_other_set_time_str=0x7f0700c0;
-        public static final int device_params_other_set_time_time_format_str=0x7f0700c2;
-        public static final int device_params_other_set_visit_password_str=0x7f0700bf;
+        public static final int device_params_other_set_str=0x7f0700b8;
+        public static final int device_params_other_set_system_error_str=0x7f0700c7;
+        public static final int device_params_other_set_system_str=0x7f0700c5;
+        public static final int device_params_other_set_system_success_str=0x7f0700c6;
+        public static final int device_params_other_set_time_date_format_str=0x7f0700c3;
+        public static final int device_params_other_set_time_str=0x7f0700c2;
+        public static final int device_params_other_set_time_time_format_str=0x7f0700c4;
+        public static final int device_params_other_set_visit_password_str=0x7f0700c1;
         public static final int device_params_outside_total_space_str=0x7f07008d;
-        public static final int device_params_recorde_comp_quar_str=0x7f0700d0;
-        public static final int device_params_recorde_comp_type_str=0x7f0700d1;
-        public static final int device_params_recorde_frame_size_str=0x7f0700ce;
-        public static final int device_params_recorde_frame_speed_str=0x7f0700cf;
-        public static final int device_params_recorde_real_speed_str=0x7f0700cd;
-        public static final int device_params_recorde_speed_str=0x7f0700cc;
+        public static final int device_params_recorde_comp_quar_str=0x7f0700d2;
+        public static final int device_params_recorde_comp_type_str=0x7f0700d3;
+        public static final int device_params_recorde_frame_size_str=0x7f0700d0;
+        public static final int device_params_recorde_frame_speed_str=0x7f0700d1;
+        public static final int device_params_recorde_real_speed_str=0x7f0700cf;
+        public static final int device_params_recorde_speed_str=0x7f0700ce;
         public static final int device_params_recorde_total_time_str=0x7f070091;
-        public static final int device_params_recorde_type_close_str=0x7f0700cb;
+        public static final int device_params_recorde_type_close_str=0x7f0700cd;
         public static final int device_params_recorde_type_inside_str=0x7f07008f;
         public static final int device_params_recorde_type_outsize_str=0x7f070090;
-        public static final int device_params_recorde_type_str=0x7f0700ca;
-        public static final int device_params_request_config_error_str=0x7f0700db;
-        public static final int device_params_request_config_str=0x7f0700d8;
-        public static final int device_params_request_error_str=0x7f0700d6;
-        public static final int device_params_reset_config_cancle_str=0x7f0700e2;
-        public static final int device_params_reset_config_error_str=0x7f0700e4;
-        public static final int device_params_reset_config_message_str=0x7f0700e0;
-        public static final int device_params_reset_config_success_str=0x7f0700e3;
-        public static final int device_params_reset_config_sure_str=0x7f0700e1;
-        public static final int device_params_reset_config_title_str=0x7f0700df;
-        public static final int device_params_reset_set_factory_para_str=0x7f0700c7;
-        public static final int device_params_set_cancle_str=0x7f0700c9;
-        public static final int device_params_set_config_error_str=0x7f0700de;
-        public static final int device_params_set_config_str=0x7f0700dc;
-        public static final int device_params_set_config_success_str=0x7f0700dd;
-        public static final int device_params_set_sure_str=0x7f0700c8;
+        public static final int device_params_recorde_type_str=0x7f0700cc;
+        public static final int device_params_request_config_error_str=0x7f0700dd;
+        public static final int device_params_request_config_str=0x7f0700da;
+        public static final int device_params_request_error_str=0x7f0700d8;
+        public static final int device_params_reset_config_cancle_str=0x7f0700e4;
+        public static final int device_params_reset_config_error_str=0x7f0700e6;
+        public static final int device_params_reset_config_message_str=0x7f0700e2;
+        public static final int device_params_reset_config_success_str=0x7f0700e5;
+        public static final int device_params_reset_config_sure_str=0x7f0700e3;
+        public static final int device_params_reset_config_title_str=0x7f0700e1;
+        public static final int device_params_reset_set_factory_para_str=0x7f0700c9;
+        public static final int device_params_set_cancle_str=0x7f0700cb;
+        public static final int device_params_set_config_error_str=0x7f0700e0;
+        public static final int device_params_set_config_str=0x7f0700de;
+        public static final int device_params_set_config_success_str=0x7f0700df;
+        public static final int device_params_set_sure_str=0x7f0700ca;
         public static final int device_params_sets_str=0x7f070084;
-        public static final int device_params_static_ip_str=0x7f0700d9;
+        public static final int device_params_static_ip_str=0x7f0700db;
         public static final int device_params_storage_device_str=0x7f07008e;
-        public static final int device_params_sync_date_str=0x7f0700d4;
+        public static final int device_params_sync_date_str=0x7f0700d6;
         public static final int device_params_version_str=0x7f070088;
         public static final int device_params_video_record_frame_rate_set_str=0x7f0700ae;
         public static final int device_params_video_record_frame_size_set_str=0x7f0700af;
         public static final int device_params_video_record_set_one_str=0x7f0700b0;
         /**  录制设置 
+ 录制设置 
+ 錄製設置 
          */
         public static final int device_params_video_record_set_str=0x7f0700ad;
         public static final int device_params_video_record_set_three_str=0x7f0700b2;
@@ -1047,6 +1069,8 @@ public final class R {
         public static final int device_params_wireless_getway_address_str=0x7f0700a2;
         public static final int device_params_wireless_ip_address_str=0x7f0700a1;
         /**  无线设置 
+ 无线设置 
+ 無線設置 
          */
         public static final int device_params_wireless_network_set_str=0x7f07009e;
         public static final int device_params_wireless_set_dns1_str=0x7f0700a4;
@@ -1057,6 +1081,8 @@ public final class R {
         public static final int device_params_wireuse_getway_address_str=0x7f07009a;
         public static final int device_params_wireuse_ip_address_str=0x7f070099;
         /**  有线设置 
+ 有线设置 
+ 有線設置 
          */
         public static final int device_params_wireuse_network_set_str=0x7f070096;
         public static final int device_params_wireuse_set_dns1_str=0x7f07009c;
@@ -1067,17 +1093,17 @@ public final class R {
         public static final int device_type_str=0x7f07007e;
         /**  Do not translate. Duration format for duration >= 1 hour 
          */
-        public static final int durationformatlong=0x7f0700ef;
+        public static final int durationformatlong=0x7f0700f1;
         /**  Do not translate. Duration format for duration < 1 hour 
          */
-        public static final int durationformatshort=0x7f0700ee;
-        public static final int exception_commit_button_str=0x7f070139;
-        public static final int exception_tips_message_str=0x7f070138;
-        public static final int exception_tips_title_str=0x7f070137;
-        public static final int file_cannotopen=0x7f07010c;
+        public static final int durationformatshort=0x7f0700f0;
+        public static final int exception_commit_button_str=0x7f07013b;
+        public static final int exception_tips_message_str=0x7f07013a;
+        public static final int exception_tips_title_str=0x7f070139;
+        public static final int file_cannotopen=0x7f07010e;
         public static final int full_device_online=0x7f07007d;
         public static final int hello=0x7f070000;
-        public static final int imageview_description=0x7f070148;
+        public static final int imageview_description=0x7f07014a;
         public static final int input_password=0x7f07001a;
         public static final int keep_user_pass=0x7f070006;
         public static final int login_dialog_str=0x7f070019;
@@ -1092,6 +1118,8 @@ public final class R {
         public static final int password_is_null=0x7f07001c;
         public static final int password_modify_error_str=0x7f070018;
         /**  modify password  
+ modify password  
+ modify password  
          */
         public static final int password_modify_security_botton_str=0x7f070010;
         public static final int password_modify_str=0x7f070012;
@@ -1099,60 +1127,66 @@ public final class R {
         public static final int password_modify_title_str=0x7f070011;
         public static final int password_not_equal=0x7f07001d;
         public static final int password_set_ok=0x7f07001e;
-        public static final int play_back_auto_cancle_button_str=0x7f070100;
-        public static final int play_back_auto_clear_all_str=0x7f0700e8;
-        public static final int play_back_auto_clear_no_files_str=0x7f0700e9;
-        public static final int play_back_auto_search_button_str=0x7f0700ff;
-        public static final int play_back_auto_search_error_str=0x7f070104;
-        public static final int play_back_auto_search_video_device_list=0x7f0700e7;
-        public static final int play_back_auto_search_video_str=0x7f0700e6;
-        public static final int play_back_clear_dlg_cancle_str=0x7f0700ed;
-        public static final int play_back_clear_dlg_message_str=0x7f0700eb;
-        public static final int play_back_clear_dlg_sure_str=0x7f0700ec;
-        public static final int play_back_clear_dlg_title_str=0x7f0700ea;
-        public static final int play_back_no_device_str=0x7f070102;
-        public static final int play_back_select_device_first_str=0x7f070101;
-        public static final int play_back_start_above_start_time_str=0x7f070103;
-        public static final int play_back_str=0x7f0700e5;
+        public static final int play_back_auto_cancle_button_str=0x7f070102;
+        public static final int play_back_auto_clear_all_str=0x7f0700ea;
+        public static final int play_back_auto_clear_no_files_str=0x7f0700eb;
+        public static final int play_back_auto_search_button_str=0x7f070101;
+        public static final int play_back_auto_search_error_str=0x7f070106;
+        public static final int play_back_auto_search_video_device_list=0x7f0700e9;
+        public static final int play_back_auto_search_video_str=0x7f0700e8;
+        public static final int play_back_clear_dlg_cancle_str=0x7f0700ef;
+        public static final int play_back_clear_dlg_message_str=0x7f0700ed;
+        public static final int play_back_clear_dlg_sure_str=0x7f0700ee;
+        public static final int play_back_clear_dlg_title_str=0x7f0700ec;
+        public static final int play_back_no_device_str=0x7f070104;
+        public static final int play_back_select_device_first_str=0x7f070103;
+        public static final int play_back_start_above_start_time_str=0x7f070105;
+        public static final int play_back_str=0x7f0700e7;
         /**  pull to flush 
+ pull to flush 
+ pull to flush 
          */
-        public static final int pull_to_refresh_pull_label=0x7f07013f;
-        public static final int pull_to_refresh_refreshing_label=0x7f070141;
-        public static final int pull_to_refresh_release_label=0x7f070140;
-        public static final int pull_to_refresh_tap_label=0x7f070142;
-        public static final int pull_to_refresh_update=0x7f070143;
+        public static final int pull_to_refresh_pull_label=0x7f070141;
+        public static final int pull_to_refresh_refreshing_label=0x7f070143;
+        public static final int pull_to_refresh_release_label=0x7f070142;
+        public static final int pull_to_refresh_tap_label=0x7f070144;
+        public static final int pull_to_refresh_update=0x7f070145;
         public static final int repeat_input_password=0x7f07001b;
         public static final int repeat_new_input_password=0x7f070016;
-        public static final int set_wall_paper_menu=0x7f070146;
-        public static final int set_wall_paper_menu_toast=0x7f070147;
-        public static final int sms_to_email_title_str=0x7f070135;
-        public static final int system_settings_device_bin_addr_hint_str=0x7f070114;
-        public static final int system_settings_device_bin_addr_str=0x7f070113;
-        public static final int system_settings_device_cancle_str=0x7f070117;
-        public static final int system_settings_device_ip_hint_str=0x7f070112;
-        public static final int system_settings_device_ip_str=0x7f070111;
-        public static final int system_settings_device_name_hint_str=0x7f070110;
-        public static final int system_settings_device_name_str=0x7f07010f;
-        public static final int system_settings_device_update_str=0x7f070116;
-        public static final int system_settings_preview_str=0x7f07010e;
-        public static final int system_settings_save_path_back_str=0x7f07010a;
-        public static final int system_settings_save_path_choice_str=0x7f07010b;
-        public static final int system_settings_save_path_hint_str=0x7f070106;
-        public static final int system_settings_save_path_preview_cancle_str=0x7f070109;
-        public static final int system_settings_save_path_preview_str=0x7f070107;
-        public static final int system_settings_save_path_preview_sure_str=0x7f070108;
-        public static final int system_settings_save_path_str=0x7f07010d;
-        public static final int system_settings_str=0x7f070105;
-        public static final int system_settings_update_str=0x7f070115;
-        public static final int tips_popup_dialog_message_str=0x7f07012e;
+        public static final int set_wall_paper_menu=0x7f070148;
+        public static final int set_wall_paper_menu_toast=0x7f070149;
+        public static final int sms_to_email_title_str=0x7f070137;
+        public static final int system_settings_device_bin_addr_hint_str=0x7f070116;
+        public static final int system_settings_device_bin_addr_str=0x7f070115;
+        public static final int system_settings_device_cancle_str=0x7f070119;
+        public static final int system_settings_device_ip_hint_str=0x7f070114;
+        public static final int system_settings_device_ip_str=0x7f070113;
+        public static final int system_settings_device_name_hint_str=0x7f070112;
+        public static final int system_settings_device_name_str=0x7f070111;
+        public static final int system_settings_device_update_str=0x7f070118;
+        public static final int system_settings_preview_str=0x7f070110;
+        public static final int system_settings_save_path_back_str=0x7f07010c;
+        public static final int system_settings_save_path_choice_str=0x7f07010d;
+        public static final int system_settings_save_path_hint_str=0x7f070108;
+        public static final int system_settings_save_path_preview_cancle_str=0x7f07010b;
+        public static final int system_settings_save_path_preview_str=0x7f070109;
+        public static final int system_settings_save_path_preview_sure_str=0x7f07010a;
+        public static final int system_settings_save_path_str=0x7f07010f;
+        public static final int system_settings_str=0x7f070107;
+        public static final int system_settings_update_str=0x7f070117;
+        public static final int tips_popup_dialog_message_str=0x7f070130;
         /**  operation popup tips dialog 
+ operation popup tips dialog 
+ operation popup tips dialog 
          */
-        public static final int tips_popup_dialog_title_str=0x7f07012d;
+        public static final int tips_popup_dialog_title_str=0x7f07012f;
         public static final int user_exit=0x7f070009;
         public static final int user_exit_continue=0x7f07000f;
         public static final int user_exit_message=0x7f07000d;
         public static final int user_exit_sure=0x7f07000e;
         /**  用户退出 
+ 用户退出 
+ 用戶退出 
          */
         public static final int user_exit_title=0x7f07000c;
         public static final int user_login=0x7f070007;
@@ -1160,29 +1194,29 @@ public final class R {
         public static final int user_name_hint=0x7f070003;
         public static final int user_or_password_is_not_correct_str=0x7f07000a;
         public static final int username_null=0x7f070008;
-        public static final int version=0x7f07013d;
-        public static final int video_clear_ing=0x7f0700f3;
-        public static final int video_delete=0x7f0700f1;
-        public static final int video_delete_error=0x7f0700f5;
-        public static final int video_delete_ing=0x7f0700f2;
-        public static final int video_delete_success=0x7f0700f4;
-        public static final int video_download=0x7f0700f0;
-        public static final int video_playback=0x7f0700f6;
+        public static final int version=0x7f07013f;
+        public static final int video_clear_ing=0x7f0700f5;
+        public static final int video_delete=0x7f0700f3;
+        public static final int video_delete_error=0x7f0700f7;
+        public static final int video_delete_ing=0x7f0700f4;
+        public static final int video_delete_success=0x7f0700f6;
+        public static final int video_download=0x7f0700f2;
+        public static final int video_playback=0x7f0700f8;
         public static final int video_preview_720p_str=0x7f070049;
         public static final int video_preview_add_apertrue=0x7f07003a;
         public static final int video_preview_add_foucs=0x7f070037;
         public static final int video_preview_add_zoom=0x7f070034;
-        public static final int video_preview_addr_str=0x7f0700fc;
-        public static final int video_preview_address_str=0x7f0700fa;
+        public static final int video_preview_addr_str=0x7f0700fe;
+        public static final int video_preview_address_str=0x7f0700fc;
         public static final int video_preview_brightness=0x7f07003c;
         public static final int video_preview_clear=0x7f07003b;
         public static final int video_preview_contrast=0x7f07003d;
-        public static final int video_preview_end_time_str=0x7f0700fe;
+        public static final int video_preview_end_time_str=0x7f070100;
         public static final int video_preview_left=0x7f07002c;
         public static final int video_preview_left_down=0x7f07002f;
         public static final int video_preview_left_mid=0x7f070030;
         public static final int video_preview_left_up=0x7f070029;
-        public static final int video_preview_length_str=0x7f0700fd;
+        public static final int video_preview_length_str=0x7f0700ff;
         public static final int video_preview_list_null=0x7f070028;
         public static final int video_preview_mid=0x7f07002d;
         public static final int video_preview_mid_up=0x7f07002a;
@@ -1192,13 +1226,13 @@ public final class R {
         public static final int video_preview_minus_foucs_str=0x7f070036;
         public static final int video_preview_minus_zoom=0x7f070032;
         public static final int video_preview_minus_zoom_str=0x7f070033;
-        public static final int video_preview_name_str=0x7f0700f8;
-        public static final int video_preview_no_video_str=0x7f0700f7;
+        public static final int video_preview_name_str=0x7f0700fa;
+        public static final int video_preview_no_video_str=0x7f0700f9;
         public static final int video_preview_qvga_str=0x7f070047;
         public static final int video_preview_right=0x7f07002e;
         public static final int video_preview_right_down=0x7f070031;
         public static final int video_preview_right_up=0x7f07002b;
-        public static final int video_preview_search_name_str=0x7f0700f9;
+        public static final int video_preview_search_name_str=0x7f0700fb;
         public static final int video_preview_send_audio_close=0x7f070044;
         public static final int video_preview_send_audio_close_error=0x7f070046;
         public static final int video_preview_send_audio_close_success=0x7f070045;
@@ -1207,48 +1241,58 @@ public final class R {
         public static final int video_preview_send_audio_open_error_tips=0x7f070041;
         public static final int video_preview_send_audio_open_success=0x7f070040;
         public static final int video_preview_send_audio_open_tips=0x7f070042;
-        public static final int video_preview_start_time_str=0x7f0700fb;
+        public static final int video_preview_start_time_str=0x7f0700fd;
         public static final int video_preview_vga_str=0x7f070048;
         public static final int video_preview_volume=0x7f07003e;
-        public static final int webcam_check_pwd_dialog_str=0x7f07013b;
-        public static final int webcam_check_version_dialog_cancle_button_str=0x7f070123;
-        public static final int webcam_check_version_dialog_ok_button_str=0x7f070122;
-        public static final int webcam_check_version_dialog_title_str=0x7f070121;
-        public static final int webcam_check_version_result_error_message_str=0x7f07011f;
-        public static final int webcam_check_version_result_ok_str=0x7f070120;
-        public static final int webcam_check_version_result_success_message_str=0x7f07011e;
-        public static final int webcam_check_version_result_title_str=0x7f07011d;
+        public static final int webcam_check_pwd_dialog_str=0x7f07013d;
+        public static final int webcam_check_version_dialog_cancle_button_str=0x7f070125;
+        public static final int webcam_check_version_dialog_ok_button_str=0x7f070124;
+        public static final int webcam_check_version_dialog_title_str=0x7f070123;
+        public static final int webcam_check_version_result_error_message_str=0x7f070121;
+        public static final int webcam_check_version_result_ok_str=0x7f070122;
+        public static final int webcam_check_version_result_success_message_str=0x7f070120;
+        public static final int webcam_check_version_result_title_str=0x7f07011f;
         /**  update 
+ update 
+ update 
          */
-        public static final int webcam_check_version_str=0x7f07011c;
-        public static final int webcam_connect_init_error=0x7f07013a;
-        public static final int webcam_error_code_bind_error=0x7f070134;
-        public static final int webcam_error_code_connect_error=0x7f070133;
+        public static final int webcam_check_version_str=0x7f07011e;
+        public static final int webcam_connect_init_error=0x7f07013c;
+        public static final int webcam_error_code_bind_error=0x7f070136;
+        public static final int webcam_error_code_connect_error=0x7f070135;
         /**  error code tips infor 
+ error code tips infor 
+ error code tips infor 
          */
-        public static final int webcam_error_code_internel=0x7f07012f;
-        public static final int webcam_error_code_server_not_reached=0x7f070130;
-        public static final int webcam_error_code_timeout=0x7f070131;
-        public static final int webcam_error_code_unlegal=0x7f070132;
-        public static final int webcam_load_pic_message_str=0x7f07012a;
-        public static final int webcam_load_pic_title_str=0x7f070129;
-        public static final int webcam_loading_new_cancle_str=0x7f070125;
-        public static final int webcam_loading_new_str=0x7f070124;
-        public static final int webcam_loading_str=0x7f070126;
-        public static final int webcam_network_invalid_cancle=0x7f07011b;
-        public static final int webcam_network_invalid_message_str=0x7f070119;
-        public static final int webcam_network_invalid_open=0x7f07011a;
+        public static final int webcam_error_code_internel=0x7f070131;
+        public static final int webcam_error_code_server_not_reached=0x7f070132;
+        public static final int webcam_error_code_timeout=0x7f070133;
+        public static final int webcam_error_code_unlegal=0x7f070134;
+        public static final int webcam_load_pic_message_str=0x7f07012c;
+        public static final int webcam_load_pic_title_str=0x7f07012b;
+        public static final int webcam_loading_new_cancle_str=0x7f070127;
+        public static final int webcam_loading_new_str=0x7f070126;
+        public static final int webcam_loading_str=0x7f070128;
+        public static final int webcam_network_invalid_cancle=0x7f07011d;
+        public static final int webcam_network_invalid_message_str=0x7f07011b;
+        public static final int webcam_network_invalid_open=0x7f07011c;
         /**  network check 
+ network check 
+ network check 
          */
-        public static final int webcam_network_invalid_title_str=0x7f070118;
-        public static final int webcam_takepic_error_str=0x7f070128;
+        public static final int webcam_network_invalid_title_str=0x7f07011a;
+        public static final int webcam_takepic_error_str=0x7f07012a;
         /**  take picture 
+ take picture 
+ take picture 
          */
-        public static final int webcam_takepic_success_str=0x7f070127;
-        public static final int webcam_video_popup_menu_cancle=0x7f07012c;
+        public static final int webcam_takepic_success_str=0x7f070129;
+        public static final int webcam_video_popup_menu_cancle=0x7f07012e;
         /**  long press video popmenu 
+ long press video popmenu 
+ long press video popmenu 
          */
-        public static final int webcam_video_popup_menu_stop=0x7f07012b;
+        public static final int webcam_video_popup_menu_stop=0x7f07012d;
     }
     public static final class style {
         public static final int Animation=0x7f090012;

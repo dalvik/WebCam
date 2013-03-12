@@ -9,14 +9,11 @@ public class UdtTools {
 		System.loadLibrary("pcm");
 		System.loadLibrary("xvid");
 	}
-	
-	public static  native int recvFile(String ip,String port, String remoteName,String localName);
-	public static native int sendFile(String sendFileName, String port);
+
 	// recv video and audio
 	public static native int initSocket(String remoteIp, int localVideoPort, int remoteVideoPort, int localAudioPort, int remoteAudioPort, int videoBufferLength, int audioBufferLength);
 	public static native int recvVideoData(byte[] buf, int bufferLength);
 	public static native int recvAudioData(int serverSendAudioBufferLength, byte[] clientRecvBuffer, int clientRecvBufferLength);
-	//public static native int release();
 	
 	// decode amr to pcm
 	public static native int initAmrDecoder();
@@ -38,16 +35,12 @@ public class UdtTools {
 	
 	public static native String fetchCamId();
 	
-	public static native int monitorSocket(String camId);
+	public static native String monitorSocket(String camId);
 	
-	public static native int monitorCmdSocket(String camId, String random);
+	public static native String monitorCmdSocket(String camId, String random);
 	
 	public static native int freeCmdSocket();
-	
-	public static native int checkCmdSocketEnable(String camId);
-	
-	//public static native int initialSocket(String camId, String random);
-	
+		
 	public static native int sendCmdMsg(String cmd, int cmdLength);
 	
 	public static native int sendCmdMsgById(String camId, String cmd, int cmdLength);
@@ -64,15 +57,15 @@ public class UdtTools {
 	
 	public static native int sendPTZMsg(byte[] comm);
 	
+	//app exit
 	public static native int close();
 	
+	//video thread interrupt
 	public static native int exit();
 	
 	public static native int startUp();
 	
 	public static native int cleanUp();
-	
-	public static native int freeConnection();
 	
 	//mpeg4 decoder
 	public static native int initXvidDecorer();

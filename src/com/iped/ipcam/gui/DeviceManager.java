@@ -5,6 +5,7 @@ import java.util.Date;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,9 +27,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
 import com.iped.ipcam.factory.ICustomDialog;
@@ -37,8 +39,8 @@ import com.iped.ipcam.utils.AnimUtil;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DeviceAdapter;
 import com.iped.ipcam.utils.DialogUtils;
-import com.iped.ipcam.utils.ErrorCode;
 import com.iped.ipcam.utils.FileUtil;
+import com.iped.ipcam.utils.MessageUtils;
 import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.RandomUtil;
 import com.iped.ipcam.utils.ToastUtils;
@@ -56,7 +58,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private TextView deviceListViewFootMore;
 	
-	private ProgressBar deviceListViewFootProgress;
+	//private ProgressBar deviceListViewFootProgress;
 	
 	private final int MENU_EDIT = Menu.FIRST;
 
@@ -111,6 +113,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	
 	private static final String TAG = "DeviceManager";
 
+
+	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message message) {
@@ -231,7 +235,10 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				handler.post(checkPwdRunnable);
 				//new CheckPwdThread().start();
 				break;
-			
+			case Constants.CONNECTERRORINFO:
+				String info = (String)message.obj;
+				Toast.makeText(DeviceManager.this, info, Toast.LENGTH_SHORT).show();
+				break;
 			default:
 				break;
 			}
@@ -279,7 +286,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		listView = (PullToRefreshListView)getListView();
 		deiceListViewFooter = getLayoutInflater().inflate(R.layout.layout_list_view_footer, null);
 		deviceListViewFootMore = (TextView) deiceListViewFooter.findViewById(R.id.list_view_foot_more);
-		deviceListViewFootProgress = (ProgressBar) deiceListViewFooter.findViewById(R.id.list_view_foot_progress);
+		//deviceListViewFootProgress = (ProgressBar) deiceListViewFooter.findViewById(R.id.list_view_foot_progress);
 		listView.addFooterView(deiceListViewFooter);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(itemClickListener);
@@ -520,13 +527,25 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 	protected void onResume() {
 		super.onResume();
+		StatService.onResume(this);
 		handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 		handler.sendMessageDelayed(
 				handler.obtainMessage(Constants.DEFAULTUSERSELECT), 50);
 	};
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		StatService.onPause(this);
+	}
+	
 	private void showToast(int id) {
 		ToastUtils.showToast(this, id);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 	
 	private class QueryCamera implements Runnable {
@@ -557,7 +576,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 
 		@Override
 		public void run() {
-				int res = UdtTools.checkCmdSocketEnable(ip);// ip 其实是设备的ID
+				int res = -1;//UdtTools.checkCmdSocketEnable(ip);// ip 其实是设备的ID
 				System.out.println("res=" + res);
 				if (res>0) {
 					deviceTmp = new Device();
@@ -572,9 +591,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				}else {
 					String random = RandomUtil.generalRandom();
 					//Log.d(TAG, "random = " + random);
-					int result = UdtTools.monitorCmdSocket(ip, random);
+					String result = UdtTools.monitorCmdSocket(ip, random);
 					Log.d(TAG, "monitor result = " + result);
-					if(result>=0) {
+					if("OK".equalsIgnoreCase(result)) {
 						deviceTmp = new Device();
 						deviceTmp.setDeviceName(name);
 						deviceTmp.setDeviceID(ip);
@@ -585,7 +604,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 						msg.what = Constants.SHOWRESULTDIALOG;
 						handler.sendMessage(msg);
 					}else {
-						Message msg = handler.obtainMessage();
+						//Toast.makeText(DeviceManager.this, result, Toast.LENGTH_SHORT).show();
+						/*Message msg = handler.obtainMessage();
 						int tips = 0;
 						switch (result) {
 						case ErrorCode.STUN_ERR_INTERNAL:
@@ -612,7 +632,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 						}
 						msg.arg1 = tips;
 						msg.what = Constants.SHOWTOASTMSG;
-						handler.sendMessage(msg);
+						handler.sendMessage(msg);*/
+						MessageUtils.sendErrorMessage(handler, result);
 					}
 				}
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
@@ -652,7 +673,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		public void run() {
 			//UdtTools.close();
 			String id = device.getDeviceID();
-			int res = UdtTools.checkCmdSocketEnable(id);
+			int res = -1;//UdtTools.checkCmdSocketEnable(id);
 			Log.d(TAG, "UdtTools checkCmdSocketEnable result = " + res);
 			if(res>0) {
 				handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -662,15 +683,15 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			}else {
 				String random = RandomUtil.generalRandom();
 				//Log.d(TAG, "random = " + random);
-				int result = UdtTools.monitorCmdSocket(id, random);
+				String result = UdtTools.monitorCmdSocket(id, random);
 				Log.d(TAG, "monitor result = " + result);
 				analyseResult(result, device);
 			}
 		}
 	};
 	
-	private void analyseResult(int result, Device device) {
-		switch (result) {
+	private void analyseResult(String result, Device device) {
+		/*switch (result) {
 		case ErrorCode.STUN_ERR_INTERNAL:
 			ToastUtils.showToast(this, R.string.webcam_error_code_internel);
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
@@ -697,11 +718,16 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			return;
 		default:
 			break;
+		}*/
+		if("OK".equalsIgnoreCase(result)) {
+			HandlerThread handlerThread = new HandlerThread("test1");
+			handlerThread.start();
+			Handler mHandler = new Handler(handlerThread.getLooper());
+			mHandler.post(checkPwdStateRunnable);
+		}else{
+			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			MessageUtils.sendErrorMessage(handler, result);
 		}
-		HandlerThread handlerThread = new HandlerThread("test1");
-		handlerThread.start();
-		Handler mHandler = new Handler(handlerThread.getLooper());
-		mHandler.post(checkPwdStateRunnable);
 	}
 	
 	private Runnable checkPwdStateRunnable = new Runnable() {
