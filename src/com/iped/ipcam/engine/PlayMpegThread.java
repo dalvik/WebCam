@@ -89,6 +89,12 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private static boolean flag = true;
 	
+	private Bitmap qvga  = null;
+	
+	private Bitmap vga = null;
+	
+	private Bitmap qp = null;
+	
 	public PlayMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -220,14 +226,42 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
-					myVideoView.setBitmapLockFlag(true);
-					if(video != null && !video.isRecycled()) {
-						video.recycle();
-						video = null;
-					}
-					video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+					/*if((imageWidth * imageHeight) == (352 * 288)) {
+						if(qvga == null) {
+							qvga = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+						}
+						this.video = qvga;
+						if(BuildConfig.DEBUG) {
+							System.out.println("### qvga " + imageWidth + " x " + imageHeight);
+						}
+					} else if((imageWidth * imageHeight) == (640 * 480)) {
+						if(vga == null) {
+							vga = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+						}
+						this.video = vga;
+						if(BuildConfig.DEBUG) {
+							System.out.println("### vga " + imageWidth + " x " + imageHeight);
+						}
+					} else if((imageWidth * imageHeight) == (1280 * 720)) {
+						if(qp == null) {
+							qp = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+						}
+						this.video = qp;
+						if(BuildConfig.DEBUG) {
+							System.out.println("### 720p " + imageWidth + " x " + imageHeight);
+						}
+					}*/
+					if(video == null) {
+						video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+					}else { 
+						Bitmap tmp = Bitmap.createScaledBitmap(video, imageWidth, imageHeight, false);
+						if(!video.isRecycled()) {
+							video.recycle();
+							video = null;
+						}
+						video = tmp;
+					}/**/
 					myVideoView.setImage(video);
-					myVideoView.setBitmapLockFlag(false);
 				}
 				if(flag) {
 					flag = false;
@@ -247,12 +281,46 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
 					}
 					rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
-					if(video != null && !video.isRecycled()) {
-						video.recycle();
-						video = null;
+					synchronized (lock) {
+						/*int wipe  = newImageWidth * newImageHeight;
+						if(wipe == (352 * 288)) {
+							if(qvga == null) {
+								qvga = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+							}
+							this.video = qvga;
+							if(BuildConfig.DEBUG) {
+								System.out.println("### qvga " + newImageWidth + " x " + newImageHeight);
+							}
+						} else if(wipe == (640 * 480)) {
+							if(vga == null) {
+								vga = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+							}
+							this.video = vga;
+							if(BuildConfig.DEBUG) {
+								System.out.println("### vga " + newImageWidth + " x " + newImageHeight);
+							}
+						} else if(wipe == (1280 * 720)) {
+							if(qp == null) {
+								qp = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+							}
+							this.video = qp;
+							if(BuildConfig.DEBUG) {
+								System.out.println("### 720p " + newImageWidth + " x " + newImageHeight);
+							}
+						}*/
+						if(video == null) {
+							video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+						}else {
+							//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+							Bitmap tmp = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
+							if(!video.isRecycled()) {
+								video.recycle();
+								video = null;
+							}
+							video = tmp;
+						}/**/
+						myVideoView.setImage(video);
 					}
-					video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-					myVideoView.setImage(video);
 					myVideoView.updateRect();
 					myVideoView.updateResulation(newImageWidth);
 					unusedBytes = (mpegDataLength - useBytes);
@@ -291,11 +359,12 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private void onStop() {
 		stopPlay = true;
-		UdtTools.freeDecorer();
-		/*if(video != null && !video.isRecycled()) {
+		if(video != null && !video.isRecycled()) {
 			video.recycle();
 			video = null;
-		}*/
+		}
+		myVideoView.setImage(null);
+		UdtTools.freeDecorer();
 		this.rgbDataBuf = null;
 		jpegByteBuf = null;
 		mpegBuf = null;

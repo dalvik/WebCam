@@ -35,7 +35,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private boolean DEBUG = true;
 	
-	private final static int DELAY_RECONNECT = 4* 1000;
+	private final static int DELAY_RECONNECT = 20* 1000;
 	
 	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
 
@@ -115,8 +115,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean fullScreenFlag = false;
 	
-	private boolean bitmapLockFlag = false;
-
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -146,11 +144,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		rect = new Rect(0, 0, w, h);
 	}
 	
-//TODO
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (video != null && !bitmapLockFlag) {
+		if (video != null) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
@@ -218,7 +215,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			if(reverseFlag) {
 				canvas.rotate(180,getWidth() /2, getHeight() /2);
 			}
-			canvas.drawBitmap(video, null, rect, textPaint);
+			if(!video.isRecycled()) {
+				canvas.drawBitmap(video, null, rect, textPaint);
+			}
 			canvas.restore();
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
@@ -277,7 +276,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			NALBUFLENGTH = 320 * 480 * 2;
 			mpeg4Decoder = false;
 		}
-		new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+		handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
 		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
@@ -569,6 +568,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	public void setImage(Bitmap video) {
+		this.video = null;
 		this.video = video;
 	}
 	
@@ -662,8 +662,4 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	}
 	
-	
-	public void setBitmapLockFlag(boolean bitmapLockFlag) {
-		this.bitmapLockFlag = bitmapLockFlag;
-	}
 }

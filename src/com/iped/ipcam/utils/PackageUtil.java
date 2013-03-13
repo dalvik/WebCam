@@ -36,7 +36,7 @@ public class PackageUtil {
 			datagramSocket.receive(rece);
 			int receLength = rece.getLength();
 			String receStr = new String(buffTemp, 0, receLength);
-			Log.d(TAG, "Receive inof //////////////" + receStr);
+			//Log.d(TAG, "Receive inof //////////////" + receStr);
 			return receStr;
 		} catch (SocketException e) {
 			// Log.d(TAG, "CamManagerImp isoffline : " +
@@ -96,7 +96,7 @@ public class PackageUtil {
 			byte[] ipByte = new byte[4];
 			System.arraycopy(receArr, 0, ipByte, 0, 4);
 			tmp = new String(receArr, 4, l - 4).trim();
-			Log.d(TAG, "Receive inof //////////////" + l + " " + tmp);
+			//Log.d(TAG, "Receive inof //////////////" + l + " " + tmp);
 			return tmp;
 			/*
 			 * int recvLength = 0; while(true) { datagramSocket.receive(rece);
@@ -138,7 +138,7 @@ public class PackageUtil {
 			byte[] ipByte = new byte[4];
 			System.arraycopy(receArr, 0, ipByte, 0, 4);
 			tmp = new String(receArr, 4, l - 4).trim();
-			Log.d(TAG, "Receive inof //////////////" + l + " " + tmp);
+			//Log.d(TAG, "Receive inof //////////////" + l + " " + tmp);
 			return tmp;
 		} catch (IOException e) {
 			Log.d(TAG, "PackageUtil CMDPackage2 : " + ip + " " + e.getMessage());

@@ -129,7 +129,7 @@ public class VideoQueue {
 	/** store mpeg4 **/
 	public void addMpegImage(MpegImage mpegImage) {
 		synchronized (lock) {
-			if(mpegImageList.size()>=4) {
+			if(mpegImageList.size()>=3) {
 				try{
 					MpegImage i = mpegImageList.poll();
 					i.rgb = null;
