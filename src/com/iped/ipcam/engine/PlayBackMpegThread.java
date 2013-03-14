@@ -167,7 +167,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		//Thread playAudioThread = new Thread(new PalyBackAudio());
 		//playAudioThread.start();
 		new Thread(new DecodeMpegThread()).start();
-		new Thread(new PlayMpegThread()).start();
+		new Thread(new DisplayMpegThread()).start();
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (mpegBuf) {
@@ -216,26 +216,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
 					if(dataType == 0) {
 						//Log.e(TAG, "### mpeg length = " + mpegDataIndex);
-						while(true) {
-							if(rawDataQueue.getMpegLength()<=10) {
-								byte[] b = new byte[mpegDataIndex];
-								System.arraycopy(mpegBuf, 0, b, 0, mpegDataIndex);
-								PlayBackMpegInfo pbmi = new PlayBackMpegInfo(b, mpegDataIndex);
-								rawDataQueue.addMpeg(pbmi);
-								break;
-							}else {
-								synchronized (mpegBuf) {
-									if(BuildConfig.DEBUG && DEBUG) {
-										Log.e(TAG, "### mpeg raw data buffer is full! ---->");
-									}
-									try {
-										mpegBuf.wait(50);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-								}
-							}
-						}
 						mpegDataIndex = 0;
 					}
 					dataType = -1;
@@ -579,9 +559,9 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		}
 	}
 	
-	private class PlayMpegThread implements Runnable {
+	private class DisplayMpegThread implements Runnable {
 		
-		public PlayMpegThread() {
+		public DisplayMpegThread() {
 			
 		}
 		
