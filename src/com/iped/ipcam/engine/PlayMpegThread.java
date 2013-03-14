@@ -95,14 +95,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private Bitmap qp = null;
 	
-	public PlayMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
+	public PlayMpegThread(boolean play,MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
 		this.video = video;
 		//this.frameCount = frameCount;
 		queue = new VideoQueue();
 		this.myVideoView = myVideoView;
-		myVideoView.setOnPutIndexListener(this);
+		if(play) {
+			myVideoView.setOnPutIndexListener(this);
+		}
 		jpegByteBuf = new byte[jpegByteBufLength]; 
 		mpegBuf = new byte[length];
 	}

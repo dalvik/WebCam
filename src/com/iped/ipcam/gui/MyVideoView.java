@@ -288,7 +288,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(!playBackFlag) {//不是回放
 			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
 			if(mpeg4Decoder) {
-				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
+				decoderFactory = new PlayMpegThread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
 				audioThread = new DecodeAudioThread(this);
