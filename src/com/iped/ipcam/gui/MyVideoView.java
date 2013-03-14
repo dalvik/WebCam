@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackJpegThread;
+import com.iped.ipcam.engine.PlayBackMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
@@ -276,7 +277,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			NALBUFLENGTH = 320 * 480 * 2;
 			mpeg4Decoder = false;
 		}
-		handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
+		
 		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
@@ -285,6 +286,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		frameCount  = 0;
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
+			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
 			if(mpeg4Decoder) {
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
@@ -308,7 +310,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}else { // 回放
 			realTimeFlag = false;
 			if(mpeg4Decoder) {
-				//decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				new Thread(decoderFactory).start();	
 			}else {
 				decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 				new Thread(decoderFactory).start();	
