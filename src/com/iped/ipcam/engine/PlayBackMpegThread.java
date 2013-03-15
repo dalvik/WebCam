@@ -130,6 +130,10 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	private int playBackIndexPut = 0;
 	
+	private boolean first = true;
+	
+	private int timeHeaderCount = 0;
+	
 	public PlayBackMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
@@ -156,7 +160,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		playMpegThread = new PlayMpegThread(false, myVideoView, play_back_mpegBuf, timeStr, video, frameCount);
 		new Thread(playMpegThread).start();
 		do{
-			if((indexForGet+10)%NALBUFLENGTH == indexForPut){
+			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (play_back_mpegBuf) {
 					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### mpeg video data buffer is empty! ---->");
@@ -204,41 +208,9 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						}
 					}
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
-					/*if(dataType == 0) {
-						while(true) {
-							if((playBackIndexPut +5) % NALBUFLENGTH == playMpegThread.getIndexForGet()) {	
-								synchronized (play_back_mpegBuf) {
-									try {
-										play_back_mpegBuf.wait(50);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-								}  
-							} else {
-								play_back_mpegBuf[playBackIndexPut] = b0;
-								playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-								
-								play_back_mpegBuf[playBackIndexPut] = b1;
-								playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-								
-								play_back_mpegBuf[playBackIndexPut] = b2;
-								playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-								
-								play_back_mpegBuf[playBackIndexPut] = b3;
-								playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-								
-								play_back_mpegBuf[playBackIndexPut] = b4;
-								playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-								
-								playMpegThread.updatePutIndex(playBackIndexPut);
-								break;
-							}
-						}
-					}*/
 					dataType = -1;
-					startFlag = true;
-					indexForGet+=4;
 					if(!initTableInfo) { // 完成接收索引表
+						startFlag = true;//完成接收索引表  接下来开始分离数据
 						insideHeaderFlag = true;// time info
 						audioBufferUsedLength = 0;
 						while(true) {
@@ -273,17 +245,17 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 					insideHeadCount = 0;//  收到0001c后将initTableInfo值0
 					andioStartFlag = false;
-					
-					if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
-					}
+					indexForGet+=4;
+					/*if(BuildConfig.DEBUG && DEBUG) {
+						Log.d(TAG, "### data start flag ->" + b0 + " " + b1 + " " + b2 + " " + b3 + " " + b4);
+					}*/
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 11 ) { // 0001b
 					dataType = 3;//audio
 					indexForGet+=4;
 					if(BuildConfig.DEBUG && DEBUG) {
 						Log.e(TAG, "### audio data start ------");
 					}
-				} else {
+				} else {// 处理数据的部分
 					if(insideHeaderFlag) {//首先接收时间戳
 						timeByte[insideHeadCount] = b0;
 						while(true) {
@@ -303,15 +275,21 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							}
 						}
 						insideHeadCount++;
-						if(insideHeadCount >= 18) { 
+						if(first) {
+							first = false;
+							timeHeaderCount = 26;
+						} else {
+							timeHeaderCount = 18;
+						}
+						if(insideHeadCount >= timeHeaderCount) { 
 							insideHeaderFlag = false;	
 							timeStr = new String(timeByte, 0, 14);
 							Log.d(TAG, "### timeStr = " + timeStr);
 						}
-					}else {//根据标记分离视频（mpeg4、jpeg）和音频数据
+					}else {//受到0001c之后，回放索引表接收完毕，时间戳接收完毕，开始修改数据类型（视频（mpeg4、jpeg）和音频数据）标记
 						if(startFlag) {
 							startFlag = false;
-							if(b0 == 0 &&  b1 == 0 &&  b2 == 0 && b3 == 0 && b4 == 0 && !insideHeaderFlag) {//mpeg4
+							if(b0 == 0 &&  b1 == 0 &&  b2 == 0 && b3 == 0 && b4 == 0) {//mpeg4
 								dataType = 0;//mpeg4
 								indexForGet+=9;
 								if(BuildConfig.DEBUG && DEBUG) {
@@ -323,27 +301,26 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 									Log.e(TAG, "### jpeg data start ------");
 								}
 							}
-							continue;
-						}
-						if(dataType == 0) {//mpeg4
-							do{
-								if((playBackIndexPut +1) % NALBUFLENGTH == playMpegThread.getIndexForGet()) {	
-									synchronized (play_back_mpegBuf) {
-										try {
-											play_back_mpegBuf.wait(10);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-									}  
-								} else {
-									play_back_mpegBuf[playBackIndexPut] = b0;
-									playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
-									playMpegThread.updatePutIndex(playBackIndexPut);
-									break;
-								}
-							}while(true);
-						} else if(dataType == 3){ //A audio 
-							/*if(b0 == 60) {
+						} else {
+							if(dataType == 0) {//mpeg4
+								do{
+									if((playBackIndexPut +1) % NALBUFLENGTH == playMpegThread.getIndexForGet()) {	
+										synchronized (play_back_mpegBuf) {
+											try {
+												play_back_mpegBuf.wait(10);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+										}  
+									} else {
+										play_back_mpegBuf[playBackIndexPut] = b0;
+										playBackIndexPut = (playBackIndexPut+1)%NALBUFLENGTH;
+										playMpegThread.updatePutIndex(playBackIndexPut);
+										break;
+									}
+								}while(true);
+							} else if(dataType == 3){ //A audio 
+								/*if(b0 == 60) {
 								andioStartFlag = true;
 							} 
 							if(andioStartFlag) {
@@ -358,10 +335,11 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 									}
 								}
 							}*/
-						} else {// jpeg do nothing
-							/*if(isMpeg4) { //mpeg4
+							} else {// jpeg do nothing
+								/*if(isMpeg4) { //mpeg4
 								
 							} */
+							}
 						}
 					}
 				}
