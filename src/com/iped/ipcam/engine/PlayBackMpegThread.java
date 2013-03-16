@@ -1,5 +1,8 @@
 package com.iped.ipcam.engine;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
@@ -8,6 +11,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -21,6 +25,7 @@ import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.pojo.MpegImage;
 import com.iped.ipcam.pojo.PlayBackMpegInfo;
+import com.iped.ipcam.utils.AudioUtil;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
@@ -35,8 +40,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	private String timeStr;
 	
 	private Bitmap video;
-	
-	private int frameCount;
 	
 	private MyVideoView myVideoView;
 	
@@ -88,33 +91,27 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	private int audioBufferUsedLength;
 	
-	private int MAX_FRAME = 32;
+	private int MAX_FRAME = 256;
 
 	private int TOTAL_FRAME_SIZE = 50 * MAX_FRAME;
 	
 	private boolean hasAudioData = false;
 	
-	private byte[] audioTmpBuffer = new byte[MyVideoView.PLAYBACK_AUDIOBUFFERSIZE * 10];
+	private byte[] amrBuffer = new byte[MyVideoView.PLAYBACK_AUDIOBUFFERSIZE * 10];
 	
 	private int audioTmpBufferUsed;
 	
-	private byte[] amrBuffer = new byte[TOTAL_FRAME_SIZE];
+	private byte[] audioData = new byte[TOTAL_FRAME_SIZE];
 	
 	private int rate = 1;
 	
 	private boolean andioStartFlag = false;
-	
-	private int mpegByteBufLength = 2 * 150 * 1024;
 	
 	private int length = 1 * 400 * 1024;
 	
 	//private byte[] jpegByteBuf = null; 
 	
 	private byte[] mpegBuf = null;
-	
-	private int jpegBufUsed = 0;
-	
-	private int tmpMpgBufUsed = 0;
 	
 	private int mpegDataIndex = 0;
 	
@@ -133,23 +130,18 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	// rgb data
 	private byte[] rgbDataBuf = null;
 	
-	//private int usedBytes = 0;
-	
-	//private int unusedBytes = 0;
-	
-	private int mpegPakages = 3;
-	
 	private boolean canStartFlag = false; //开始解码标记
 	
 	private int startFlagCount = 1;
 	
 	//private boolean mpegStartFlag = false; // mpeg4开始标记
 	
+	public static final int defineImageBufferLength = 5;
+	
 	public PlayBackMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
 		this.timeStr = timeStr;
 		this.video = video;
-		this.frameCount = frameCount;
 		this.myVideoView = myVideoView;
 		this.handler = handler;
 		myVideoView.setOnPutIndexListener(this);
@@ -164,16 +156,12 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	public void run() {
 		stopPlay = false;
 		initTableHeadCount = 0;
-		//Thread playAudioThread = new Thread(new PalyBackAudio());
-		//playAudioThread.start();
+		Thread playAudioThread = new Thread(new PalyBackAudio());
+		playAudioThread.start();
 		new Thread(new DecodeMpegThread()).start();
-		new Thread(new DisplayMpegThread()).start();
 		do{
 			if((indexForGet+5)%NALBUFLENGTH == indexForPut){
 				synchronized (mpegBuf) {
-					if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### mpeg video data buffer is empty! ---->");
-					}
 					try {
 						mpegBuf.wait(50);
 					} catch (InterruptedException e) {
@@ -181,7 +169,10 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 				}  
 			}else {
-				byte b0 = nalBuf[indexForGet];
+				if(indexForGet < 0 || indexForGet>=NALBUFLENGTH) {
+					System.out.println(indexForGet  + "  " + indexForPut);
+				}
+				byte b0 = nalBuf[indexForGet%NALBUFLENGTH];
 				byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 				byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
 				byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
@@ -195,9 +186,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							initTableInfo = false;
 						}
 						targetTableLength = 8 + t1Length + t2Length;
-						if(BuildConfig.DEBUG && DEBUG) {
-							Log.d(TAG, "t1Length=" + t1Length +  "  t2Length = " + t2Length + " targetTableLength = " + targetTableLength);
-						}
 					}
 					if(initTableHeadCount == targetTableLength) {//索引表接收完毕，更新拖动条信息
 						initTableInfo = false;
@@ -209,97 +197,100 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						message.setData(bundle);
 						message.what = PlayBackConstants.INIT_SEEK_BAR;
 						handler.sendMessage(message);
-						if(BuildConfig.DEBUG && DEBUG) {
-							Log.d(TAG, "### recv play back table header complete! ");
-						}
 					}
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
 					if(dataType == 0) {
-						//Log.e(TAG, "### mpeg length = " + mpegDataIndex);
-						mpegDataIndex = 0;
+						Log.e(TAG, "### mpeg length = " + mpegDataIndex);
+						byte[] tmp = new byte[mpegDataIndex];
+						System.arraycopy(mpegBuf, 0, tmp, 0, mpegDataIndex);
+						PlayBackMpegInfo pbmi = new PlayBackMpegInfo(tmp, mpegDataIndex, timeStr);
+						do {
+							if(rawDataQueue.getMpegLength()<defineImageBufferLength) {
+								rawDataQueue.addMpeg(pbmi);
+								mpegDataIndex = 0;
+								break;
+							}else {
+								synchronized (mpegBuf) {
+									try {
+										mpegBuf.wait(10);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+								}  
+							}
+						}while(true);
+					}
+					if(dataType == 3) {
+						audioTmpBufferUsed = audioBufferUsedLength;
+						audioBufferUsedLength = 0;
+						synchronized (amrBuffer) {
+							System.arraycopy(audioData, 0, amrBuffer, 0, audioTmpBufferUsed);
+							hasAudioData = true;
+							amrBuffer.notify();
+						}
+						//audioTmpBufferUsed = 0;
 					}
 					dataType = -1;
 					canStartFlag = true;
-					startFlag = true;
-					indexForGet+=4;
+					startFlag = true;//可以开始分离音视频数据了
 					if(!initTableInfo) { // 完成接收索引表
-						insideHeaderFlag = true;// time info
-						audioBufferUsedLength = 0;
-						mpegBuf[mpegDataIndex] = b0;
-						mpegBuf[mpegDataIndex + 1] = b1;
-						mpegBuf[mpegDataIndex + 2] = b2;
-						mpegBuf[mpegDataIndex + 3] = b3;
-						mpegBuf[mpegDataIndex + 4] = b4;
-						mpegDataIndex += 5;
+						insideHeaderFlag = true;//可以截取 time info
 					}
 					insideHeadCount = 0;//  收到0001c后将initTableInfo值0
 					andioStartFlag = false;
-					
-					if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
-					}
+					indexForGet+=4;
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 11 ) { // 0001b
 					dataType = 3;//audio
 					indexForGet+=4;
-					if(BuildConfig.DEBUG && DEBUG) {
-						Log.e(TAG, "### audio data start ------");
-					}
 				} else {
 					if(insideHeaderFlag) {//首先接收时间戳
 						timeByte[insideHeadCount] = b0;
-						mpegBuf[mpegDataIndex++] = b0;
 						insideHeadCount++;
 						if(insideHeadCount >= 18) { 
 							insideHeaderFlag = false;	
 							timeStr = new String(timeByte, 0, 14);
 							Log.d(TAG, "### timeStr = " + timeStr);
 						}
-					}else {//根据标记分离视频（mpeg4、jpeg）和音频数据
+					} else {//根据标记分离视频（mpeg4、jpeg）和音频数据
 						if(startFlag) {
 							startFlag = false;
-							if(b0 == 0 &&  b1 == 0 &&  b2 == 0 && b3 == 0 && b4 == 0 && !insideHeaderFlag) {//mpeg4
+							if(b0 == 0 &&  b1 == 0 &&  b2 == 0 && b3 == 0 && b4 == 0) {//mpeg4
 								dataType = 0;//mpeg4
-								indexForGet+=9;
-								if(BuildConfig.DEBUG && DEBUG) {
-									Log.e(TAG, "### mpeg data start ------");
-								}
-							} else { //jpeg
+								indexForGet+=8;
+							} else { 
 								dataType = 1;//jpeg
-								mpegDataIndex = 0;
+								//mpegDataIndex = 0;
 								if(BuildConfig.DEBUG && DEBUG) {
 									Log.e(TAG, "### jpeg data start ------");
 								}
 							}
-							continue;
-						}
-						if(dataType == 0) {//mpeg4
-							if(mpegDataIndex<length) {
-								mpegBuf[mpegDataIndex++] = b0;
-							}
-						} else if(dataType == 3){ //A audio 
-							/*if(b0 == 60) {
-								andioStartFlag = true;
-							} 
-							if(andioStartFlag) {
-								amrBuffer[audioBufferUsedLength++] = b0;
-								if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
-									audioTmpBufferUsed = audioBufferUsedLength;
-									audioBufferUsedLength = 0;
-									synchronized (audioTmpBuffer) {
-										System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
-										hasAudioData = true;
-										audioTmpBuffer.notify();
-									}
+						} else {
+							if(dataType == 0) {//mpeg4
+								if(mpegDataIndex<length) {
+									mpegBuf[mpegDataIndex++] = b0;
 								}
-							}*/
-						} else {// jpeg do nothing
-							/*if(isMpeg4) { //mpeg4
-								
-							} */
+							} else if(dataType == 3){ //A audio 
+								if(audioBufferUsedLength>= TOTAL_FRAME_SIZE) {
+									System.out.println("audioBufferUsedLength = " + audioBufferUsedLength);
+								}
+								audioData[audioBufferUsedLength++] = b0;
+								/*if(andioStartFlag) {
+									if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
+										audioTmpBufferUsed = audioBufferUsedLength;
+										audioBufferUsedLength = 0;
+										synchronized (audioTmpBuffer) {
+											System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
+											hasAudioData = true;
+											audioTmpBuffer.notify();
+										}
+									}
+								}*/
+							} else {// jpeg do nothing
+							}
 						}
 					}
 				}
-				indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
+				indexForGet = (indexForGet + 1)%NALBUFLENGTH; 
 			}
 		} while(!stopPlay);
 		/*if(playJpegThread != null && !playJpegThread.isInterrupted()) {
@@ -309,120 +300,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		//if(playAudioThread != null && !playAudioThread.isInterrupted()) {
 		//	playAudioThread.interrupt();
 		//}
-	}
-
-	private class AnalizeMpegRawData implements Runnable {
-		
-		
-		public AnalizeMpegRawData() {
-			
-		}
-		
-		@Override
-		public void run() {
-			while(!stopPlay) {
-				if(hasMpegRawData) {
-					hasMpegRawData = false;
-					if(rgbDataBuf == null && !stopPlay) {
-						int[] headInfo = UdtTools.initXvidHeader(mpegRawDataTmp, mpegRawDataLen);//length的长度即为out_buffer的长度，所以length要足够长。
-						int imageWidth = headInfo[0];
-						int imageHeight = headInfo[1];
-						//usedBytes = headInfo[2];
-						//unusedBytes = (mpegRawDataLen - usedBytes);
-						//if(unusedBytes<=0) {
-						//	unusedBytes = 0;
-						//}
-						//System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
-						//mpegDataIndex = unusedBytes;
-						if(imageWidth<=0) {
-							Log.d(TAG, "### imageWidth = " + imageWidth + "  xvid find header fail");
-							continue;
-						}
-						System.gc();
-						rgbDataBuf = new byte[imageWidth * imageHeight * 4];
-					//	Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
-						synchronized (lock2) {
-							if(video != null && !video.isRecycled()) {
-								video.recycle();
-								video = null;
-							}
-							video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
-							myVideoView.setImage(video);
-						}
-					}
-				}else {
-					synchronized (rawDataLock) {
-						try {
-							rawDataLock.wait();
-						} catch (InterruptedException e) {
-							stopPlay = false;
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	private class PalyBackAudio implements Runnable {
-		
-		private int pcmBufferLength = TOTAL_FRAME_SIZE * 10; //PLAYBACK_AUDIOBUFFERSIZE * Command.CHANEL * 50;
-		
-		private byte[] pcmArr = new byte[pcmBufferLength];
-		
-
-		private AudioTrack m_out_trk = null;
-		
-		public PalyBackAudio(){
-			int init = UdtTools.initAmrDecoder();
-			Log.d(TAG, "amr deocder init " + init);
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-			}
-			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					TalkBackThread.frequency, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, TalkBackThread.frequency,
-					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 5,
-					AudioTrack.MODE_STREAM);
-			m_out_trk.play();
-		}
-		
-		@Override
-		public void run() {
-			while(!stopPlay) {
-				if(hasAudioData) {
-					//Log.d(TAG, "audio decode =" + audioTmpBufferUsed);
-					UdtTools.amrDecoder(audioTmpBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
-					m_out_trk.write(pcmArr, 0, pcmBufferLength);
-					hasAudioData = false;
-					//Log.d(TAG, "del ==== " + del);
-				}else {
-					synchronized (audioTmpBuffer) {
-						try {
-							audioTmpBuffer.wait();
-						} catch (InterruptedException e) {
-							stopPlay = true;
-							release();
-							e.printStackTrace();
-						}
-					}
-					}
-			}
-			release();
-		}
-		
-		private void release() {
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-				UdtTools.exitAmrDecoder();
-			}
-		}
 	}
 
 	private class DecodeMpegThread implements Runnable {
@@ -435,23 +312,27 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		
 		private int usedBytes = 0;
 		
-		private int unusedBytes = 0;
+		private int remainBytes = 0;
 		
 		private String TAG = "DecodePlayBackMpeg";
 		
+		private boolean flag = true;
+		
 		public DecodeMpegThread()  {
-			playBackMpegData = new byte[playBackMpegDataLength];	
+			playBackMpegData = new byte[playBackMpegDataLength];
 		}
 		
 		@Override
 		public void run() {
 			int res = UdtTools.initXvidDecorer();
 			int packetNum = 1;
-			int dstPos = 0;
+			//int dstPos = 0;
 			if(res != 0) {
 				Log.d(TAG, "xvid init decoder error " + res);
 				return ;
 			}
+			Thread displayMpegThread = new Thread(new DisplayMpegThread());
+			displayMpegThread.start();
 			while(!stopPlay) {
 				if(rgbDataBuf == null) {//初始化头信息
 					while(true) {
@@ -460,23 +341,22 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							byte[] tmp = pbmi.getData();
 							int len = pbmi.getLen();
 							Log.d(TAG, "### get raw data = " +tmp.length + "  data len = " + len );
-							System.arraycopy(tmp, 0, playBackMpegData, dstPos, len);
-							dstPos+=len;
-							playBackMpegDataIndex = dstPos;
+							System.arraycopy(tmp, 0, playBackMpegData, playBackMpegDataIndex, len);
+							playBackMpegDataIndex+=len;
 							packetNum++;
 						}
-						if(packetNum%5 == 0) {
-							int[] headInfo = UdtTools.initXvidHeader(playBackMpegData, dstPos);//length的长度即为out_buffer的长度，所以length要足够长。
+						if(packetNum%3 == 0) {
+							int[] headInfo = UdtTools.initXvidHeader(playBackMpegData, playBackMpegDataIndex);//length的长度即为out_buffer的长度，所以length要足够长。
 							int imageWidth = headInfo[0];
 							int imageHeight = headInfo[1];
 							usedBytes = headInfo[2];
-							unusedBytes = (dstPos - usedBytes);
-							Log.d(TAG, "### decode mpeg4 res = " + imageWidth + "  " + imageHeight + "  " + unusedBytes);
-							if(unusedBytes<=0) {
-								unusedBytes = 0;
+							remainBytes = (playBackMpegDataIndex - usedBytes);
+							Log.d(TAG, "### decode mpeg4 res = " + imageWidth + "  " + imageHeight + "  " + remainBytes);
+							if(remainBytes<=0) {
+								remainBytes = 0;
 							}
-							System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, unusedBytes);
-							playBackMpegDataIndex = unusedBytes;//剩余的mpeg raw data
+							System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);//从用过的字节位置起，向左移动 remainBytes 个字节长度
+							playBackMpegDataIndex = remainBytes;//剩余的mpeg raw data
 							if(imageWidth<=0) {
 								Log.d(TAG, "### imageWidth = " + imageWidth + "  xvid find header fail");
 								continue;
@@ -501,61 +381,94 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						}
 					}
 				}else {//解码
+					/*if(!flag) {
+						flag = false;
+						usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
+						MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
+						queue.addMpegImage(mpegImage);
+						remainBytes = (playBackMpegDataIndex - usedBytes);
+						if(remainBytes<=0) {
+							remainBytes = 0;
+						}
+						System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
+						playBackMpegDataIndex = remainBytes;
+					}else {
+					}*/
 					PlayBackMpegInfo pbmi = rawDataQueue.getMpeg();
 					if(pbmi != null) {
 						byte[] tmp = pbmi.getData();
 						int len = pbmi.getLen();
-						if((playBackMpegDataLength - playBackMpegDataIndex)>len) {							
+						if(playBackMpegDataIndex + len < playBackMpegDataLength/3) {
 							System.arraycopy(tmp, 0, playBackMpegData, playBackMpegDataIndex, len);
 							playBackMpegDataIndex += len;
-							usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0); 
-							if(usedBytes>999999) {
-								int newImageWidth = usedBytes / 1000000;
-								int useBytes = usedBytes%1000000;
-								usedBytes = useBytes;
-								int newImageHeight = caculateImageHeight(newImageWidth);
-								if(BuildConfig.DEBUG && DEBUG) {
-									Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
-								}
-								rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
-								synchronized (lock) {
-									if(video == null) {
-										video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-									}else {
-										//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-										Bitmap tmp2 = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
-										if(!video.isRecycled()) {
-											video.recycle();
-											video = null;
-										}
-										video = tmp2;
-									}/**/
-									myVideoView.setImage(video);
-								}
-								myVideoView.updateRect();
-								myVideoView.updateResulation(newImageWidth);
-								unusedBytes = (playBackMpegDataIndex - useBytes);
-								if(unusedBytes<=0) {
-									unusedBytes = 0;
-								}
-								System.arraycopy(playBackMpegData, useBytes, playBackMpegData, 0, unusedBytes);
-								playBackMpegDataLength = unusedBytes;
-							} else {
-								MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
-								queue.addMpegImage(mpegImage);
-								unusedBytes = (playBackMpegDataIndex - usedBytes);
-								if(unusedBytes<=0) {
-									unusedBytes = 0;
-								}
-								System.arraycopy(mpegBuf, usedBytes, mpegBuf, 0, unusedBytes);
-								//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
-								playBackMpegDataIndex = unusedBytes;
+						}
+						System.out.println("playBackMpegDataIndex = " +playBackMpegDataIndex + "appen len=" + len );
+						usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
+						System.out.println("usedBytes = " + usedBytes);
+						if(usedBytes>999999) {
+							int newImageWidth = usedBytes / 1000000;
+							int useBytes = usedBytes%1000000;
+							usedBytes = useBytes;
+							int newImageHeight = caculateImageHeight(newImageWidth);
+							if(BuildConfig.DEBUG && DEBUG) {
+								Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
 							}
+							rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
+							synchronized (lock) {
+								if(video == null) {
+									video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+								}else {
+									//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+									Bitmap tmp2 = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
+									if(!video.isRecycled()) {
+										video.recycle();
+										video = null;
+									}
+									video = tmp2;
+								}
+								myVideoView.setImage(video);
+							}
+							myVideoView.updateRect();
+							myVideoView.updateResulation(newImageWidth);
+							remainBytes = (playBackMpegDataIndex - useBytes);
+							if(remainBytes<=0) {
+								remainBytes = 0;
+							}
+							System.arraycopy(playBackMpegData, useBytes, playBackMpegData, 0, remainBytes);
+							playBackMpegDataLength = remainBytes;
+						} else {
+							MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
+							queue.addMpegImage(mpegImage);
+							remainBytes = (playBackMpegDataIndex - usedBytes);
+							if(remainBytes<=0) {
+								remainBytes = 0;
+							}
+							System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
+							//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
+							playBackMpegDataIndex = remainBytes;
 						}
 					}
 				}
 			}
-			
+			if(displayMpegThread != null && !displayMpegThread.isInterrupted()) {
+				displayMpegThread.interrupt();
+			}
+			onStop();
+		}
+		
+		private void onStop() {
+			stopPlay = true;
+			myVideoView.setImage(null);
+			if(video != null && !video.isRecycled()) {
+				video.recycle();
+				video = null;
+			}
+			UdtTools.freeDecorer();
+			mpegBuf = null;
+			System.gc();
+			if(BuildConfig.DEBUG && DEBUG) {
+				Log.d(TAG, "### play mpeg thread exit ....");
+			}
 		}
 	}
 	
@@ -568,25 +481,18 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		@Override
 		public void run() {
 			while(!stopPlay) {
-				String oldTime = queue.pollTime();
-				if(null != oldTime) {
-					timeStr = oldTime.substring(0,14);
-					MpegImage mpegImage = queue.getMpegImage();
-					if(BuildConfig.DEBUG && !DEBUG) {
+				MpegImage mpegImage = queue.getMpegImage();
+				if(null != mpegImage) {
+					/*if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### show mpegImage = " + mpegImage );
-					}
-					if(mpegImage != null) {
-						byte[] tmpRgb = mpegImage.rgb;
-						ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
-						//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
-						if(video != null) {
-							try {
-								video.copyPixelsFromBuffer(sh);
-							} catch (Exception e) {
-								Log.e(TAG, "### copyPixelsFromBuffer exception!");
-							}
-							//frameCount = myVideoView.getFrameCount();
-							//frameCount++;
+					}*/
+					byte[] tmpRgb = mpegImage.rgb;
+					ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
+					if(video != null) {
+						try {
+							video.copyPixelsFromBuffer(sh);
+						} catch (Exception e) {
+							Log.e(TAG, "### copyPixelsFromBuffer exception!");
 						}
 					}
 					if(listener != null) {
@@ -601,11 +507,56 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							lock.wait(5);
 						} catch (InterruptedException e) {
 							stopPlay = true;
+							queue.clear();
 							e.printStackTrace();
 						}
 					}  
 				}
 			}
+		}
+	}
+
+	private class PalyBackAudio implements Runnable {
+		
+		private int pcmBufferLength = TOTAL_FRAME_SIZE * 10; //PLAYBACK_AUDIOBUFFERSIZE * Command.CHANEL * 50;
+		
+		private byte[] pcmArr = new byte[pcmBufferLength];
+		
+
+		private AudioTrack m_out_trk = null;
+		
+		public PalyBackAudio(){
+			int init = UdtTools.initAmrDecoder();
+			Log.d(TAG, "amr deocder init " + init);
+			m_out_trk = AudioUtil.getAudioTrackInstance();
+			m_out_trk.play();
+		}
+		
+		@Override
+		public void run() {
+			while(!stopPlay) {
+				if(hasAudioData) {
+					UdtTools.amrDecoder(amrBuffer, audioTmpBufferUsed, pcmArr, 0, Command.CHANEL);
+					m_out_trk.write(pcmArr, 0, pcmBufferLength);
+					hasAudioData = false;
+				}else {
+					synchronized (amrBuffer) {
+						try {
+							amrBuffer.wait();
+						} catch (InterruptedException e) {
+							stopPlay = true;
+							release();
+							e.printStackTrace();
+						}
+					}
+					}
+			}
+			release();
+		}
+		
+		private void release() {
+			AudioUtil.exitAudioTrack();
+			UdtTools.exitAmrDecoder();
 		}
 	}
 
