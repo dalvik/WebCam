@@ -571,7 +571,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	public void setImage(Bitmap video) {
-		this.video = null;
 		this.video = video;
 	}
 	

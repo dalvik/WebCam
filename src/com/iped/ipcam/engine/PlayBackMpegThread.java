@@ -105,8 +105,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	private int rate = 1;
 	
-	private boolean andioStartFlag = false;
-	
 	private int length = 1 * 400 * 1024;
 	
 	//private byte[] jpegByteBuf = null; 
@@ -172,7 +170,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				if(indexForGet < 0 || indexForGet>=NALBUFLENGTH) {
 					System.out.println(indexForGet  + "  " + indexForPut);
 				}
-				byte b0 = nalBuf[indexForGet%NALBUFLENGTH];
+				byte b0 = nalBuf[indexForGet];
 				byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 				byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
 				byte b3 = nalBuf[(indexForGet+3)%NALBUFLENGTH];
@@ -200,12 +198,12 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
 					if(dataType == 0) {
-						Log.e(TAG, "### mpeg length = " + mpegDataIndex);
+						//Log.e(TAG, "### mpeg length = " + mpegDataIndex + "  timeStr = " + timeStr);
 						byte[] tmp = new byte[mpegDataIndex];
 						System.arraycopy(mpegBuf, 0, tmp, 0, mpegDataIndex);
 						PlayBackMpegInfo pbmi = new PlayBackMpegInfo(tmp, mpegDataIndex, timeStr);
 						do {
-							if(rawDataQueue.getMpegLength()<defineImageBufferLength) {
+							if(rawDataQueue.getMpegLength()<=defineImageBufferLength) {
 								rawDataQueue.addMpeg(pbmi);
 								mpegDataIndex = 0;
 								break;
@@ -215,10 +213,11 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 										mpegBuf.wait(10);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
+										Log.d(TAG, "### PlayBackMpegThread wait for mpeg queue space interrupt.");
 									}
 								}  
 							}
-						}while(true);
+						}while(!stopPlay);
 					}
 					if(dataType == 3) {
 						audioTmpBufferUsed = audioBufferUsedLength;
@@ -228,7 +227,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							hasAudioData = true;
 							amrBuffer.notify();
 						}
-						//audioTmpBufferUsed = 0;
 					}
 					dataType = -1;
 					canStartFlag = true;
@@ -237,7 +235,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						insideHeaderFlag = true;//可以截取 time info
 					}
 					insideHeadCount = 0;//  收到0001c后将initTableInfo值0
-					andioStartFlag = false;
 					indexForGet+=4;
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 11 ) { // 0001b
 					dataType = 3;//audio
@@ -249,7 +246,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						if(insideHeadCount >= 18) { 
 							insideHeaderFlag = false;	
 							timeStr = new String(timeByte, 0, 14);
-							Log.d(TAG, "### timeStr = " + timeStr);
 						}
 					} else {//根据标记分离视频（mpeg4、jpeg）和音频数据
 						if(startFlag) {
@@ -259,32 +255,21 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 								indexForGet+=8;
 							} else { 
 								dataType = 1;//jpeg
-								//mpegDataIndex = 0;
 								if(BuildConfig.DEBUG && DEBUG) {
 									Log.e(TAG, "### jpeg data start ------");
 								}
 							}
 						} else {
 							if(dataType == 0) {//mpeg4
-								if(mpegDataIndex<length) {
-									mpegBuf[mpegDataIndex++] = b0;
+								if(mpegDataIndex>=length) {
+									Log.e(TAG, "### mpegDataIndex = " + mpegDataIndex);
 								}
+								mpegBuf[mpegDataIndex++] = b0;
 							} else if(dataType == 3){ //A audio 
 								if(audioBufferUsedLength>= TOTAL_FRAME_SIZE) {
 									System.out.println("audioBufferUsedLength = " + audioBufferUsedLength);
 								}
 								audioData[audioBufferUsedLength++] = b0;
-								/*if(andioStartFlag) {
-									if(audioBufferUsedLength >= TOTAL_FRAME_SIZE) {
-										audioTmpBufferUsed = audioBufferUsedLength;
-										audioBufferUsedLength = 0;
-										synchronized (audioTmpBuffer) {
-											System.arraycopy(amrBuffer, 0, audioTmpBuffer, 0, audioTmpBufferUsed);
-											hasAudioData = true;
-											audioTmpBuffer.notify();
-										}
-									}
-								}*/
 							} else {// jpeg do nothing
 							}
 						}
@@ -293,13 +278,12 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				indexForGet = (indexForGet + 1)%NALBUFLENGTH; 
 			}
 		} while(!stopPlay);
-		/*if(playJpegThread != null && !playJpegThread.isInterrupted()) {
-			playJpegThread.interrupt();
-		}*/
-		
-		//if(playAudioThread != null && !playAudioThread.isInterrupted()) {
-		//	playAudioThread.interrupt();
-		//}
+		if(playAudioThread != null && !playAudioThread.isInterrupted()) {
+			playAudioThread.interrupt();
+		}
+		if(!Thread.currentThread().isInterrupted()) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	private class DecodeMpegThread implements Runnable {
@@ -345,7 +329,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							playBackMpegDataIndex+=len;
 							packetNum++;
 						}
-						if(packetNum%3 == 0) {
+						if(packetNum%4 == 0) {
 							int[] headInfo = UdtTools.initXvidHeader(playBackMpegData, playBackMpegDataIndex);//length的长度即为out_buffer的长度，所以length要足够长。
 							int imageWidth = headInfo[0];
 							int imageHeight = headInfo[1];
@@ -381,19 +365,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						}
 					}
 				}else {//解码
-					/*if(!flag) {
-						flag = false;
-						usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
-						MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
-						queue.addMpegImage(mpegImage);
-						remainBytes = (playBackMpegDataIndex - usedBytes);
-						if(remainBytes<=0) {
-							remainBytes = 0;
-						}
-						System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
-						playBackMpegDataIndex = remainBytes;
-					}else {
-					}*/
 					PlayBackMpegInfo pbmi = rawDataQueue.getMpeg();
 					if(pbmi != null) {
 						byte[] tmp = pbmi.getData();
@@ -444,13 +415,15 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 								remainBytes = 0;
 							}
 							System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
-							//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
 							playBackMpegDataIndex = remainBytes;
 						}
 					}
 				}
 			}
 			if(displayMpegThread != null && !displayMpegThread.isInterrupted()) {
+				displayMpegThread.interrupt();
+			}
+			if(displayMpegThread != null && displayMpegThread.isInterrupted()) {
 				displayMpegThread.interrupt();
 			}
 			onStop();
@@ -464,7 +437,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				video = null;
 			}
 			UdtTools.freeDecorer();
-			mpegBuf = null;
 			System.gc();
 			if(BuildConfig.DEBUG && DEBUG) {
 				Log.d(TAG, "### play mpeg thread exit ....");
@@ -508,11 +480,13 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							queue.clear();
+							Log.d(TAG, "### DisplayMpegThread interrupt ---->");
 							e.printStackTrace();
 						}
 					}  
 				}
 			}
+			Log.d(TAG, "### DisplayMpegThread exit ---->");
 		}
 	}
 
@@ -552,6 +526,9 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 			}
 			release();
+			if(BuildConfig.DEBUG) {
+				Log.d(TAG, "PalyBackAudio Thread exit  ----> ");
+			}
 		}
 		
 		private void release() {
