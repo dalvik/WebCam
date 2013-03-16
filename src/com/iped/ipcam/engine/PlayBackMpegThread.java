@@ -134,7 +134,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	//private boolean mpegStartFlag = false; // mpeg4开始标记
 	
-	public static final int defineImageBufferLength = 5;
+	public static final int defineImageBufferLength = 1;
 	
 	public PlayBackMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
@@ -167,9 +167,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					}
 				}  
 			}else {
-				if(indexForGet < 0 || indexForGet>=NALBUFLENGTH) {
-					System.out.println(indexForGet  + "  " + indexForPut);
-				}
 				byte b0 = nalBuf[indexForGet];
 				byte b1 = nalBuf[(indexForGet+1)%NALBUFLENGTH];
 				byte b2 = nalBuf[(indexForGet+2)%NALBUFLENGTH];
@@ -228,7 +225,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							amrBuffer.notify();
 						}
 					}
-					dataType = -1;
+					//dataType = -1;
 					canStartFlag = true;
 					startFlag = true;//可以开始分离音视频数据了
 					if(!initTableInfo) { // 完成接收索引表
@@ -252,7 +249,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							startFlag = false;
 							if(b0 == 0 &&  b1 == 0 &&  b2 == 0 && b3 == 0 && b4 == 0) {//mpeg4
 								dataType = 0;//mpeg4
-								indexForGet+=8;
+								indexForGet+=8;//跳过9个0
 							} else { 
 								dataType = 1;//jpeg
 								if(BuildConfig.DEBUG && DEBUG) {
@@ -301,6 +298,8 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		private String TAG = "DecodePlayBackMpeg";
 		
 		private boolean flag = true;
+		
+		private int appendByteIndex = 0;
 		
 		public DecodeMpegThread()  {
 			playBackMpegData = new byte[playBackMpegDataLength];
@@ -369,13 +368,12 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					if(pbmi != null) {
 						byte[] tmp = pbmi.getData();
 						int len = pbmi.getLen();
-						if(playBackMpegDataIndex + len < playBackMpegDataLength/3) {
+						if((playBackMpegDataIndex + len) <= playBackMpegDataLength) {
 							System.arraycopy(tmp, 0, playBackMpegData, playBackMpegDataIndex, len);
 							playBackMpegDataIndex += len;
 						}
-						System.out.println("playBackMpegDataIndex = " +playBackMpegDataIndex + "appen len=" + len );
 						usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
-						System.out.println("usedBytes = " + usedBytes);
+//						System.out.println("playBackMpegDataIndex = " +playBackMpegDataIndex + "appen len=" + len +" usedBytes = " + usedBytes);
 						if(usedBytes>999999) {
 							int newImageWidth = usedBytes / 1000000;
 							int useBytes = usedBytes%1000000;
@@ -455,9 +453,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 			while(!stopPlay) {
 				MpegImage mpegImage = queue.getMpegImage();
 				if(null != mpegImage) {
-					/*if(BuildConfig.DEBUG && DEBUG) {
-						Log.d(TAG, "### show mpegImage = " + mpegImage );
-					}*/
 					byte[] tmpRgb = mpegImage.rgb;
 					ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
 					if(video != null) {

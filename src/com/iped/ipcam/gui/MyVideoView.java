@@ -567,6 +567,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void invalide(String timeStr) {
 		frameCount++;
 		this.timeStr = timeStr;
+		if(playBackFlag) {
+			Message msg = handler.obtainMessage();
+			msg.what = Constants.UPDATE_PLAY_BACK_TIME;
+			msg.obj = timeStr;
+			handler.sendMessage(msg);
+		}
 		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 	}
 	
