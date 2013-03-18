@@ -134,7 +134,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 	
 	//private boolean mpegStartFlag = false; // mpeg4开始标记
 	
-	public static final int defineImageBufferLength = 1;
+	public static final int defineImageBufferLength = 5;
 	
 	public PlayBackMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
@@ -225,7 +225,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							amrBuffer.notify();
 						}
 					}
-					//dataType = -1;
 					canStartFlag = true;
 					startFlag = true;//可以开始分离音视频数据了
 					if(!initTableInfo) { // 完成接收索引表
@@ -234,8 +233,30 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 					insideHeadCount = 0;//  收到0001c后将initTableInfo值0
 					indexForGet+=4;
 				}else if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 11 ) { // 0001b
+					if(dataType == 0) {
+						byte[] tmp = new byte[mpegDataIndex];
+						System.arraycopy(mpegBuf, 0, tmp, 0, mpegDataIndex);
+						PlayBackMpegInfo pbmi = new PlayBackMpegInfo(tmp, mpegDataIndex, timeStr);
+						do {
+							if(rawDataQueue.getMpegLength()<=defineImageBufferLength) {
+								rawDataQueue.addMpeg(pbmi);
+								mpegDataIndex = 0;
+								break;
+							}else {
+								synchronized (mpegBuf) {
+									try {
+										mpegBuf.wait(10);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+										Log.d(TAG, "### PlayBackMpegThread wait for mpeg queue space interrupt.");
+									}
+								}  
+							}
+						}while(!stopPlay);
+					}
 					dataType = 3;//audio
 					indexForGet+=4;
+					//Log.e(TAG, "### audo mpeg length = " + mpegDataIndex + "  timeStr = " + timeStr + " dataType = " + dataType);
 				} else {
 					if(insideHeaderFlag) {//首先接收时间戳
 						timeByte[insideHeadCount] = b0;
@@ -291,8 +312,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 		
 		private byte[] playBackMpegData = null;
 		
-		private int usedBytes = 0;
-		
 		private int remainBytes = 0;
 		
 		private String TAG = "DecodePlayBackMpeg";
@@ -332,7 +351,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 							int[] headInfo = UdtTools.initXvidHeader(playBackMpegData, playBackMpegDataIndex);//length的长度即为out_buffer的长度，所以length要足够长。
 							int imageWidth = headInfo[0];
 							int imageHeight = headInfo[1];
-							usedBytes = headInfo[2];
+							int usedBytes = headInfo[2];
 							remainBytes = (playBackMpegDataIndex - usedBytes);
 							Log.d(TAG, "### decode mpeg4 res = " + imageWidth + "  " + imageHeight + "  " + remainBytes);
 							if(remainBytes<=0) {
@@ -364,58 +383,73 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 						}
 					}
 				}else {//解码
-					PlayBackMpegInfo pbmi = rawDataQueue.getMpeg();
-					if(pbmi != null) {
-						byte[] tmp = pbmi.getData();
-						int len = pbmi.getLen();
-						if((playBackMpegDataIndex + len) <= playBackMpegDataLength) {
-							System.arraycopy(tmp, 0, playBackMpegData, playBackMpegDataIndex, len);
-							playBackMpegDataIndex += len;
+					if(!flag) {
+						flag = false;
+						int usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
+						MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
+						queue.addMpegImage(mpegImage);
+						remainBytes = (playBackMpegDataIndex - usedBytes);
+						if(remainBytes<=0) {
+							remainBytes = 0;
 						}
-						usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
-//						System.out.println("playBackMpegDataIndex = " +playBackMpegDataIndex + "appen len=" + len +" usedBytes = " + usedBytes);
-						if(usedBytes>999999) {
-							int newImageWidth = usedBytes / 1000000;
-							int useBytes = usedBytes%1000000;
-							usedBytes = useBytes;
-							int newImageHeight = caculateImageHeight(newImageWidth);
-							if(BuildConfig.DEBUG && DEBUG) {
-								Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
+						System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
+						playBackMpegDataIndex = remainBytes;
+					}else {
+						PlayBackMpegInfo pbmi = rawDataQueue.getMpeg();
+						if(pbmi != null) {
+							byte[] tmp = pbmi.getData();
+							int len = pbmi.getLen();
+							if((playBackMpegDataIndex + len) <= playBackMpegDataLength) {
+								System.arraycopy(tmp, 0, playBackMpegData, playBackMpegDataIndex, len);
+								playBackMpegDataIndex += len;
 							}
-							rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
-							synchronized (lock) {
-								if(video == null) {
-									video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-								}else {
-									//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-									Bitmap tmp2 = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
-									if(!video.isRecycled()) {
-										video.recycle();
-										video = null;
-									}
-									video = tmp2;
+							//System.out.println("playBackMpegDataIndex = " +playBackMpegDataIndex + "appen len=" + len);
+							int usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
+							//System.out.println("usedBytes = " + usedBytes);
+							if(usedBytes>999999) {
+								int newImageWidth = usedBytes / 1000000;
+								int useBytes = usedBytes%1000000;
+								usedBytes = useBytes;
+								int newImageHeight = caculateImageHeight(newImageWidth);
+								if(BuildConfig.DEBUG && DEBUG) {
+									Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
 								}
-								myVideoView.setImage(video);
+								rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
+								synchronized (lock) {
+									if(video == null) {
+										video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+									}else {
+										//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
+										Bitmap tmp2 = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
+										if(!video.isRecycled()) {
+											video.recycle();
+											video = null;
+										}
+										video = tmp2;
+									}
+									myVideoView.setImage(video);
+								}
+								myVideoView.updateRect();
+								myVideoView.updateResulation(newImageWidth);
+								remainBytes = (playBackMpegDataIndex - useBytes);
+								if(remainBytes<=0) {
+									remainBytes = 0;
+								}
+								System.arraycopy(playBackMpegData, useBytes, playBackMpegData, 0, remainBytes);
+								playBackMpegDataLength = remainBytes;
+							} else {
+								MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
+								queue.addMpegImage(mpegImage);
+								remainBytes = (playBackMpegDataIndex - usedBytes);
+								if(remainBytes<=0) {
+									remainBytes = 0;
+								}
+								System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
+								playBackMpegDataIndex = remainBytes;
 							}
-							myVideoView.updateRect();
-							myVideoView.updateResulation(newImageWidth);
-							remainBytes = (playBackMpegDataIndex - useBytes);
-							if(remainBytes<=0) {
-								remainBytes = 0;
-							}
-							System.arraycopy(playBackMpegData, useBytes, playBackMpegData, 0, remainBytes);
-							playBackMpegDataLength = remainBytes;
-						} else {
-							MpegImage mpegImage = new MpegImage(rgbDataBuf, timeStr);
-							queue.addMpegImage(mpegImage);
-							remainBytes = (playBackMpegDataIndex - usedBytes);
-							if(remainBytes<=0) {
-								remainBytes = 0;
-							}
-							System.arraycopy(playBackMpegData, usedBytes, playBackMpegData, 0, remainBytes);
-							playBackMpegDataIndex = remainBytes;
 						}
 					}
+					
 				}
 			}
 			if(displayMpegThread != null && !displayMpegThread.isInterrupted()) {
@@ -425,6 +459,7 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				displayMpegThread.interrupt();
 			}
 			onStop();
+			UdtTools.freeDecorer();
 		}
 		
 		private void onStop() {
@@ -434,7 +469,6 @@ public class PlayBackMpegThread extends DecoderFactory implements Runnable, OnPu
 				video.recycle();
 				video = null;
 			}
-			UdtTools.freeDecorer();
 			System.gc();
 			if(BuildConfig.DEBUG && DEBUG) {
 				Log.d(TAG, "### play mpeg thread exit ....");
