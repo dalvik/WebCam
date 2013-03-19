@@ -19,7 +19,7 @@ public class DecodeAudioThread extends DecoderFactory{
 	
 	private boolean stopPlay = false;
 	
-	private final static int RECEAUDIOBUFFERSIZE = 4096 * Command.CHANEL * 1;
+	private final static int RECEAUDIOBUFFERSIZE = 5120 * Command.CHANEL * 1;
 	
 	private final static int DECODE_AUDIO_DATA_LENGTH = 800;
 	
