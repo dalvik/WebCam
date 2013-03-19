@@ -352,10 +352,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				updateComponentByMode(mode);
 				break;
 			case CHANGE_DEFAULT_QUALITY:
-				String item = CamCmdListHelper.SetVideoResol + CamCmdListHelper.resolArr[1];
-				int res = UdtTools.sendCmdMsg( item, item.length());
-				if(BuildConfig.DEBUG) {
-					Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+				int qualityIndex = settings.getInt("QUALITY", -1);
+				if(qualityIndex == -1){
+					String item = CamCmdListHelper.SetVideoResol + CamCmdListHelper.resolArr[1];
+					int res = UdtTools.sendCmdMsg( item, item.length());
+					if(BuildConfig.DEBUG) {
+						Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+					}
 				}
 				break;
 			default:
@@ -398,7 +401,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         updeviceListReceiver = new UpdeviceListReceiver(); 
         registerReceiver(updeviceListReceiver, new IntentFilter(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
-        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false), settings.getInt("QUALITY", 1));
+        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
         myVideoView.setOnClickListener(this);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
@@ -913,7 +916,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false), settings.getInt("QUALITY", 1));
+        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
 	}
 	
 	@Override

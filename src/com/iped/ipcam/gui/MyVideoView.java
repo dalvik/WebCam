@@ -94,8 +94,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private boolean reverseFlag = false;
 	
-	private int videoChoice = 0;
-
 	private boolean playBackFlag = false; //回放标记
 	
 	private boolean mpeg4Decoder = false;
@@ -129,10 +127,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 	}
 
-	void init(Handler handler, int w, int h, boolean reverseFlag, int videoChoice) {
+	void init(Handler handler, int w, int h, boolean reverseFlag) {
 		this.handler = handler;
 		this.reverseFlag = reverseFlag;
-		this.videoChoice = videoChoice;
 		textPaint = new Paint();
 		textPaint.setColor(Color.RED);
 		matrix.setScale(-1, 1);
@@ -573,7 +570,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void invalide(String timeStr) {
 		frameCount++;
 		this.timeStr = timeStr;
-		System.out.println("time str = " + timeStr);
 		if(playBackFlag) {
 			Message msg = handler.obtainMessage();
 			msg.what = Constants.UPDATE_PLAY_BACK_TIME;

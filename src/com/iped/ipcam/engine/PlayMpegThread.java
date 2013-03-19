@@ -332,8 +332,21 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					System.arraycopy(playMpegBuf, useBytes, playMpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
 				} else {
-					MpegImage mpegImage = new MpegImage(rgbDataBuf, time,0, 0);
-					queue.addMpegImage(mpegImage);
+					do {
+						if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
+							synchronized (mpegBuf) {
+								try {
+									mpegBuf.wait(5);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+						} else  {
+							MpegImage mpegImage = new MpegImage(rgbDataBuf, time,0, 0);
+							queue.addMpegImage(mpegImage);
+							break;
+						}
+					}while(true);
 					unusedBytes = (mpegDataLength - usedBytes);
 					if(unusedBytes<=0) {
 						unusedBytes = 0;

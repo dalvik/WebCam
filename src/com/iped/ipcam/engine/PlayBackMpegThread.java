@@ -1,7 +1,5 @@
 package com.iped.ipcam.engine;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
@@ -124,8 +122,6 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 	//private boolean mpegStartFlag = false; // mpeg4开始标记
 	
 	public static final int defineImageBufferLength = 5;
-	
-	private static final int defintImageQueueLength = 3;
 	
 	public PlayBackMpegThread(MyVideoView myVideoView, byte[] nalBuf, String timeStr, Bitmap video, int frameCount, Handler handler){
 		this.nalBuf = nalBuf;
@@ -399,7 +395,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 						if(pbmi != null) {
 							if(pbmi.type == JPEG_DATA_TYPE) {
 								do {
-									if(queue.getMpegLength()>= defintImageQueueLength) {
+									if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
 										synchronized (mpegBuf) {
 											try {
 												mpegBuf.wait(5);
@@ -431,7 +427,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 						flag = false;
 						int usedBytes = UdtTools.xvidDecorer(playBackMpegData, playBackMpegDataIndex, rgbDataBuf, BuildConfig.DEBUG?1:0);
 						do {
-							if(queue.getMpegLength()>= defintImageQueueLength) {
+							if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
 								synchronized (mpegBuf) {
 									try {
 										mpegBuf.wait(5);
@@ -536,7 +532,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 						playBackMpegDataLength = remainBytes;
 					} else {
 						do {
-							if(queue.getMpegLength()>= defintImageQueueLength) {
+							if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
 								synchronized (mpegBuf) {
 									try {
 										mpegBuf.wait(5);
@@ -562,7 +558,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 					//byte[] jpeg = new byte[pbmi.type];
 					//sSystem.arraycopy(src, srcPos, dst, dstPos, playBackMpegDataLength)
 					do {
-						if(queue.getMpegLength()>= defintImageQueueLength) {
+						if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
 							synchronized (mpegBuf) {
 								try {
 									mpegBuf.wait(5);
@@ -656,7 +652,6 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 						}
 					}
 					
-					System.out.println("rate = " + rate);
 					if(listener != null) {
 						listener.invalide( t.substring(0,14));
 					}
