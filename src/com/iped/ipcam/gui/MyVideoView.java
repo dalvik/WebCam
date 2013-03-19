@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackJpegThread;
+import com.iped.ipcam.engine.PlayBackMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
@@ -35,7 +36,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	private boolean DEBUG = true;
 	
-	private final static int DELAY_RECONNECT = 4* 1000;
+	private final static int DELAY_RECONNECT = 20* 1000;
 	
 	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
 
@@ -117,8 +118,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean fullScreenFlag = false;
 	
-	private boolean bitmapLockFlag = false;
-
 	public MyVideoView(Context context) {
 		super(context);
 	}
@@ -150,11 +149,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		rect = new Rect(0, 0, w, h);
 	}
 	
-//TODO
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (video != null && !bitmapLockFlag) {
+		if (video != null) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
@@ -222,7 +220,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			if(reverseFlag) {
 				canvas.rotate(180,getWidth() /2, getHeight() /2);
 			}
-			canvas.drawBitmap(video, null, rect, textPaint);
+			if(!video.isRecycled()) {
+				canvas.drawBitmap(video, null, rect, textPaint);
+			}
 			canvas.restore();
 			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
@@ -281,7 +281,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			NALBUFLENGTH = 320 * 480 * 2;
 			mpeg4Decoder = false;
 		}
-		new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+		
 		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
 		nalBuf = new byte[NALBUFLENGTH];//>100k
@@ -290,8 +290,9 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		frameCount  = 0;
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
+			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
 			if(mpeg4Decoder) {
-				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
+				decoderFactory = new PlayMpegThread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
 				audioThread = new DecodeAudioThread(this);
@@ -313,7 +314,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}else { // 回放
 			realTimeFlag = false;
 			if(mpeg4Decoder) {
-				//decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				new Thread(decoderFactory).start();	
 			}else {
 				decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 				new Thread(decoderFactory).start();	
@@ -573,6 +575,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 	
 	public void setImage(Bitmap video) {
+		this.video = null;
 		this.video = video;
 	}
 	
@@ -666,8 +669,4 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	}
 	
-	
-	public void setBitmapLockFlag(boolean bitmapLockFlag) {
-		this.bitmapLockFlag = bitmapLockFlag;
-	}
 }

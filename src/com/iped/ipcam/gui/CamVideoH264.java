@@ -88,6 +88,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private static final int UPDATE_COMPONENT = 1302281010;
 	
+	public static final int CHANGE_DEFAULT_QUALITY = 1303131036;
+	
 	private MyVideoView myVideoView = null;
 	
 	private int screenWidth = 0;
@@ -348,6 +350,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case UPDATE_COMPONENT:
 				String mode = (String)msg.obj;
 				updateComponentByMode(mode);
+				break;
+			case CHANGE_DEFAULT_QUALITY:
+				String item = CamCmdListHelper.SetVideoResol + CamCmdListHelper.resolArr[1];
+				int res = UdtTools.sendCmdMsg( item, item.length());
+				if(BuildConfig.DEBUG) {
+					Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+				}
 				break;
 			default:
 				break;

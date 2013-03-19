@@ -2,8 +2,6 @@ package com.iped.ipcam.engine;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +15,7 @@ import com.iped.ipcam.gui.MyVideoView;
 import com.iped.ipcam.gui.MyVideoView.OnPutIndexListener;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.JpegImage;
+import com.iped.ipcam.utils.AudioUtil;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
@@ -254,24 +253,12 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 		
 		private byte[] pcmArr = new byte[pcmBufferLength];
 		
-
 		private AudioTrack m_out_trk = null;
 		
 		public PalyBackAudio(){
 			int init = UdtTools.initAmrDecoder();
 			Log.d(TAG, "amr deocder init " + init);
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-			}
-			int m_out_buf_size = android.media.AudioTrack.getMinBufferSize(
-					TalkBackThread.frequency, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT);
-			m_out_trk = new AudioTrack(AudioManager.STREAM_MUSIC, TalkBackThread.frequency,
-					AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, m_out_buf_size * 5,
-					AudioTrack.MODE_STREAM);
+			m_out_trk = AudioUtil.getAudioTrackInstance();
 			m_out_trk.play();
 		}
 		
@@ -300,12 +287,8 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 		}
 		
 		private void release() {
-			if (m_out_trk != null) {
-				m_out_trk.stop();
-				m_out_trk.release();
-				m_out_trk = null;
-				UdtTools.exitAmrDecoder();
-			}
+			AudioUtil.exitAudioTrack();
+			UdtTools.exitAmrDecoder();
 		}
 	}
 	private class PlayJpegThread implements Runnable {
