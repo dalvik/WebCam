@@ -7,9 +7,16 @@ public class MpegImage {
 	
 	public String time;
 	
-	public MpegImage(byte[] rgb, String time) {
+	public int dataType;
+	
+	public int dataLength;
+	
+	public MpegImage(byte[] rgb, String time, int dataType, int dataLength) {
+		super();
 		this.rgb = rgb;
 		this.time = time;
+		this.dataType = dataType;
+		this.dataLength = dataLength;
 	}
 
 	@Override

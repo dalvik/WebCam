@@ -121,4 +121,13 @@ public class DateUtil {
 			return 0;
 		}
 	}
+	
+	public static long formatTimeStrToMillionSecond(String timeStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		try {
+			return sdf.parse(timeStr).getTime();
+		} catch (ParseException e) {
+			return 0;
+		}
+	}
 }
