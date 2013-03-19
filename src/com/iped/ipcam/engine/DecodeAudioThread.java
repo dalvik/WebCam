@@ -4,7 +4,6 @@ import android.media.AudioTrack;
 import android.util.Log;
 
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
-import com.iped.ipcam.exception.CamManagerException;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.gui.BuildConfig;
 import com.iped.ipcam.gui.MyVideoView;

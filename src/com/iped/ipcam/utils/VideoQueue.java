@@ -129,14 +129,14 @@ public class VideoQueue {
 	/** store mpeg4 **/
 	public void addMpegImage(MpegImage mpegImage) {
 		synchronized (lock) {
-			if(mpegImageList.size()>=3) {
+			/*if(mpegImageList.size()>=3) {
 				try{
 					MpegImage i = mpegImageList.poll();
 					i.rgb = null;
 				} catch(Exception e) {
 					Log.d("VideoQueue", "### 4444 " + e.getLocalizedMessage());
 				}
-			}
+			}*/
 			mpegImageList.offer(mpegImage);
 		}
 	}
@@ -167,6 +167,8 @@ public class VideoQueue {
 	}
 	
 	public int getMpegLength() {
-		return  mpegImageList.size();
+		synchronized (lock) {
+			return  mpegImageList.size();
+		}
 	}
 }

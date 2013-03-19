@@ -286,7 +286,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		frameCount  = 0;
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
-			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1500);
+			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 3000);
 			if(mpeg4Decoder) {
 				decoderFactory = new PlayMpegThread(this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
@@ -442,6 +442,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 		release();
 		flushBitmap();
+		this.decoderFactory = null;
+		System.gc();
 	}
 
 	private void stopAudio() {
@@ -567,6 +569,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public void invalide(String timeStr) {
 		frameCount++;
 		this.timeStr = timeStr;
+		System.out.println("time str = " + timeStr);
 		if(playBackFlag) {
 			Message msg = handler.obtainMessage();
 			msg.what = Constants.UPDATE_PLAY_BACK_TIME;

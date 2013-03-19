@@ -330,7 +330,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					System.arraycopy(mpegBuf, useBytes, mpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
 				} else {
-					MpegImage mpegImage = new MpegImage(rgbDataBuf, time);
+					MpegImage mpegImage = new MpegImage(rgbDataBuf, time,0, 0);
 					queue.addMpegImage(mpegImage);
 					unusedBytes = (mpegDataLength - usedBytes);
 					if(unusedBytes<=0) {
@@ -358,6 +358,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	}
 	
 	private void onStop() {
+		System.gc();
 		stopPlay = true;
 		if(video != null && !video.isRecycled()) {
 			video.recycle();
