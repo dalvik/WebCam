@@ -92,6 +92,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private Matrix matrix = new Matrix();
 
 	private boolean reverseFlag = false;
+	
+	private int videoChoice = 0;
 
 	private boolean playBackFlag = false; //回放标记
 	
@@ -128,8 +130,10 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 	}
 
-	void init(Handler handler, int w, int h) {
+	void init(Handler handler, int w, int h, boolean reverseFlag, int videoChoice) {
 		this.handler = handler;
+		this.reverseFlag = reverseFlag;
+		this.videoChoice = videoChoice;
 		textPaint = new Paint();
 		textPaint.setColor(Color.RED);
 		matrix.setScale(-1, 1);

@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,6 +19,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.preference.Preference;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -182,6 +184,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 	private long distance = 0l;
 
+	private SharedPreferences settings = null;
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -371,6 +375,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		settings = getSharedPreferences(WebCam.class.getName(), 0);
 		DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
@@ -384,7 +389,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         updeviceListReceiver = new UpdeviceListReceiver(); 
         registerReceiver(updeviceListReceiver, new IntentFilter(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
-        myVideoView.init(mHandler,screenWidth, screenHeight);
+        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false), settings.getInt("QUALITY", 1));
         myVideoView.setOnClickListener(this);
         LinearLayout layout = (LinearLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
@@ -580,6 +585,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			break;
 		case R.id.mid:
+			settings.edit().putBoolean("REVERSE", !myVideoView.isReverseFlag()).commit();
 			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
 			break;
 		case R.id.minus_zoom:
@@ -751,18 +757,21 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			vga.setChecked(false);
 			qelp.setChecked(false);
 			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[0]);
+			settings.edit().putInt("QUALITY", 0).commit();
 			break;
 		case R.id.vga_button_id:
 			qvga.setChecked(false);
 			vga.setChecked(true);
 			qelp.setChecked(false);
 			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[1]);
+			settings.edit().putInt("QUALITY", 1).commit();
 			break;
 		case R.id.qelp_button_id:
 			qvga.setChecked(false);
 			vga.setChecked(false);
 			qelp.setChecked(true);
 			new AsynCheckResoluTask().execute(CamCmdListHelper.resolArr[2]);
+			settings.edit().putInt("QUALITY", 2).commit();
 			break;
 		default:
 			break;
@@ -895,7 +904,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        myVideoView.init(mHandler,screenWidth, screenHeight);
+        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false), settings.getInt("QUALITY", 1));
 	}
 	
 	@Override
