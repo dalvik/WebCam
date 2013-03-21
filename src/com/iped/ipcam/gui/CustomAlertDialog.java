@@ -8,6 +8,7 @@ public class CustomAlertDialog extends ICustomDialog {
 
 	public CustomAlertDialog(Context context, int theme) {
 		super(context, theme);
+		setCanceledOnTouchOutside(true);
 	}
 	
 }

@@ -22,6 +22,7 @@ public class CustomProgressDialog extends Dialog {
 		customProgressDialog = new CustomProgressDialog(context,theme);
 		customProgressDialog.setContentView(R.layout.layout_web_cam_custom_progress);
 		customProgressDialog.getWindow().getAttributes().gravity = Gravity.CENTER;
+		customProgressDialog.setCancelable(false);
 		return customProgressDialog;
 	}
  

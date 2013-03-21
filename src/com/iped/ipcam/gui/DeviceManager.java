@@ -449,7 +449,7 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		progressDialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog); 
 		progressDialog.setMessage(getResources().getString(R.string.auto_search_tips_str));
 		//progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		//progressDialog.setCancelable(false);
+		progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
 

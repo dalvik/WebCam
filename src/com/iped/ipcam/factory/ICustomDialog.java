@@ -22,6 +22,7 @@ public abstract class ICustomDialog extends Dialog {
 	
 	public void show() {
 		super.show();
+		setCancelable(false);
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindow().getWindowManager().getDefaultDisplay().getMetrics(metrics);	
 		WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
