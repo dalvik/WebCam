@@ -287,7 +287,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		frameCount  = 0;
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
-			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 3000);
+			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1000);
 			if(mpeg4Decoder) {
 				decoderFactory = new PlayMpegThread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
@@ -673,4 +673,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	}
 	
+	public void checkReset() {
+		decoderFactory.reset();
+	}
 }

@@ -119,6 +119,7 @@ public class VideoQueue {
 	public void clear() {
 		synchronized (lock) {
 			jpegImageList.clear();
+			mpegImageList.clear();
 		}
 	}
 	

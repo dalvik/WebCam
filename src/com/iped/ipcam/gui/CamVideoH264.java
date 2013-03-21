@@ -356,8 +356,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				if(qualityIndex == -1){
 					String item = CamCmdListHelper.SetVideoResol + CamCmdListHelper.resolArr[1];
 					int res = UdtTools.sendCmdMsg( item, item.length());
+					if(res > 0) {
+						myVideoView.checkReset();
+					}
 					if(BuildConfig.DEBUG) {
 						Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
+						System.out.println("### check resulation = " + item + " seek result = " + res );
 					}
 				}
 				break;

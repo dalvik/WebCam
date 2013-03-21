@@ -10,6 +10,11 @@ public abstract class DecoderFactory implements Runnable {
 	
 	public abstract void onStop(boolean stopPlay);
 	
+	
+	public void reset(){
+		
+	}
+	
 	public void checkResulation(int resulation) {
 		
 	}

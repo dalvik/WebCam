@@ -1,9 +1,13 @@
 package com.iped.ipcam.engine;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.iped.ipcam.factory.DecoderFactory;
@@ -13,6 +17,7 @@ import com.iped.ipcam.gui.MyVideoView.OnPutIndexListener;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.pojo.MpegImage;
+import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.VideoQueue;
 
 public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener {
@@ -83,17 +88,13 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private String jpegTimeTmp = "";
 	
-	private boolean checkResulationFlag = false;
+	private boolean checkResulationFlag = true;
 	
 	private boolean canStartFlag = false;
 	
 	private static boolean flag = true;
 	
-	private Bitmap qvga  = null;
-	
-	private Bitmap vga = null;
-	
-	private Bitmap qp = null;
+	private int imageWidth = 0;
 	
 	public PlayMpegThread(boolean play,MyVideoView myVideoView, byte[] mpegBuf, String timeStr, Bitmap video, int frameCount ) {
 		this.mpegBuf = mpegBuf;
@@ -188,11 +189,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 								startFlag = false;
 								time = new String(playMpegBuf, mpegDataLength-18, 18);
 								queue.addNewTime(time);
-								//System.out.println("### time ========= " + time);
-								/*if(BuildConfig.DEBUG && !DEBUG) {
-									//Log.d(TAG, "### recv time= " + time);
-									//System.out.println("### recv time= " + time);
-								}*/
 							}
 						} else {
 							if(canStartFlag) {
@@ -212,6 +208,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			if(rgbDataBuf == null && !stopPlay) {
 				int[] headInfo = UdtTools.initXvidHeader(playMpegBuf, length);//length的长度即为out_buffer的长度，所以length要足够长。
 				int imageWidth = headInfo[0];
+				this.imageWidth = imageWidth;
 				int imageHeight = headInfo[1];
 				usedBytes = headInfo[2];
 				unusedBytes = (mpegDataLength - usedBytes);
@@ -228,31 +225,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
-					/*if((imageWidth * imageHeight) == (352 * 288)) {
-						if(qvga == null) {
-							qvga = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
-						}
-						this.video = qvga;
-						if(BuildConfig.DEBUG) {
-							System.out.println("### qvga " + imageWidth + " x " + imageHeight);
-						}
-					} else if((imageWidth * imageHeight) == (640 * 480)) {
-						if(vga == null) {
-							vga = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
-						}
-						this.video = vga;
-						if(BuildConfig.DEBUG) {
-							System.out.println("### vga " + imageWidth + " x " + imageHeight);
-						}
-					} else if((imageWidth * imageHeight) == (1280 * 720)) {
-						if(qp == null) {
-							qp = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
-						}
-						this.video = qp;
-						if(BuildConfig.DEBUG) {
-							System.out.println("### 720p " + imageWidth + " x " + imageHeight);
-						}
-					}*/
 					if(video == null) {
 						video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					}else { 
@@ -270,6 +242,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					myVideoView.updateResulation(imageWidth);
 				}
 				mpegPakages = 2;
+				checkResulationFlag = true;
 			}else if(!stopPlay){
 				usedBytes = UdtTools.xvidDecorer(playMpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
 				//System.out.println("### decode ========= " + (SystemClock.currentThreadTimeMillis() - curr));
@@ -282,34 +255,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					if(BuildConfig.DEBUG && DEBUG) {
 						Log.d(TAG, "### return value " + usedBytes + " useBytes = " + useBytes + " newWidth = " + newImageWidth + " newHeight = "+ newImageHeight);
 					}
+					imageWidth = newImageWidth;
 					rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
 					synchronized (lock) {
-						/*int wipe  = newImageWidth * newImageHeight;
-						if(wipe == (352 * 288)) {
-							if(qvga == null) {
-								qvga = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-							}
-							this.video = qvga;
-							if(BuildConfig.DEBUG) {
-								System.out.println("### qvga " + newImageWidth + " x " + newImageHeight);
-							}
-						} else if(wipe == (640 * 480)) {
-							if(vga == null) {
-								vga = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-							}
-							this.video = vga;
-							if(BuildConfig.DEBUG) {
-								System.out.println("### vga " + newImageWidth + " x " + newImageHeight);
-							}
-						} else if(wipe == (1280 * 720)) {
-							if(qp == null) {
-								qp = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-							}
-							this.video = qp;
-							if(BuildConfig.DEBUG) {
-								System.out.println("### 720p " + newImageWidth + " x " + newImageHeight);
-							}
-						}*/
 						if(video == null) {
 							video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
 						}else {
@@ -331,6 +279,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					}
 					System.arraycopy(playMpegBuf, useBytes, playMpegBuf, 0, unusedBytes);
 					mpegDataLength = unusedBytes;
+					checkResulationFlag = true;
 				} else {
 					do {
 						if(queue.getMpegLength()>= VideoQueue.defintImageQueueLength) {
@@ -342,8 +291,10 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 								}
 							}
 						} else  {
-							MpegImage mpegImage = new MpegImage(rgbDataBuf, time,0, 0);
-							queue.addMpegImage(mpegImage);
+							if(checkResulationFlag) {
+								MpegImage mpegImage = new MpegImage(rgbDataBuf, time,0, 0);
+								queue.addMpegImage(mpegImage);
+							}
 							break;
 						}
 					}while(true);
@@ -355,21 +306,29 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
 					mpegDataLength = unusedBytes;
 				}
-				//System.out.println("unusedBytes = " + unusedBytes + " mpegDataLength = " + mpegDataLength + " usedBytes= " + usedBytes);
-				/*unusedBytes = (mpegDataLength - usedBytes);
-				if(usedBytes + unusedBytes >=length) {
-					unusedBytes = length - usedBytes;
-				}*/
 				if(unusedBytes<=0) {
 					unusedBytes = 0;
 				}
 				System.arraycopy(playMpegBuf, usedBytes, playMpegBuf, 0, unusedBytes);
 				mpegDataLength = unusedBytes;
 			}
-			//mpegDataLength = 0;
 		}
 		showMpeg.setInerrupt();
 		onStop();
+	}
+	
+	public void reset() {
+		/*indexForPut = 0;
+		indexForGet = 0;
+		mpegPakages = 3;
+		isMpeg4 = false;
+		startFlag = false;
+		canStartFlag = false;
+		queue.clear();*/
+		int imageHeight = caculateImageHeight(imageWidth);
+		if(imageHeight != 480) {
+			checkResulationFlag = false;
+		}
 	}
 	
 	private void onStop() {
