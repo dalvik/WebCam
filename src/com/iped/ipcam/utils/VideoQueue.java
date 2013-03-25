@@ -120,6 +120,7 @@ public class VideoQueue {
 		synchronized (lock) {
 			jpegImageList.clear();
 			mpegImageList.clear();
+			timeList.clear();
 		}
 	}
 	

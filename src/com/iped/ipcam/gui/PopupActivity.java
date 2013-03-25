@@ -30,7 +30,7 @@ public class PopupActivity extends Dialog {
 				while(true) {
 					if(count++/16 == 0) {
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(1500);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}

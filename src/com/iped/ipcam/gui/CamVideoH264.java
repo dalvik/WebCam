@@ -19,7 +19,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.preference.Preference;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -175,8 +174,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private RadioButton vga = null;
 	
 	private RadioButton qelp = null;
-	
-	private ConnectivityManager connectivityManager;
 	
 	private boolean seekingFlag = false;
 	
@@ -339,8 +336,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				PopupActivity popupActivity = new PopupActivity(CamVideoH264.this, R.style.thems_tips_popup_dailog);
 				popupActivity.show();
 				WindowManager.LayoutParams params = popupActivity.getWindow().getAttributes();
-				params.width = screenWidth*20/36;
-				params.height = screenHeight/2;
+				params.width = screenWidth*3/4;
+				params.height = screenHeight*3/4;
 				popupActivity.getWindow().setAttributes(params);
 				break;
 			case Constants.CONNECTERRORINFO:
@@ -380,13 +377,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		thread.start();
 	}
 	
-	private void stopPlayThread() {
+	/*private void stopPlayThread() {
 		myVideoView.setStopPlay(true, true);
 		if(thread != null && !thread.isInterrupted()) {
 			Log.d(TAG, "##############");
 			thread.isInterrupted();
 		}
-	}
+	}*/
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -435,11 +432,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	    }
 		mHandler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
 		popupMenu = new VideoPopupMenu(this, mHandler, videoPopMenuItem);
-		connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		IntentFilter connectFilter = new IntentFilter();
-		intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-		registerReceiver(connectionReceiver, connectFilter);
-		
 	}
 
 	private void registerListener(View view) {
@@ -953,8 +945,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			thread = null;
 		}
-    	
-		unregisterReceiver(connectionReceiver);
     }
 	
 	private void showProgressDlg(int textId) {
@@ -1057,7 +1047,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		
 		@Override
 		protected Void doInBackground(String... params) {
-			stopPlayThread();
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
@@ -1338,28 +1327,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		vga.setVisibility(flag);
 		qelp.setVisibility(flag);
 	}
-	
-	private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			NetworkInfo mobNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-			NetworkInfo wifiNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			if (mobNetInfo.isConnected() || wifiNetInfo.isConnected()) {//update
-				Log.i(TAG, "internet connect");
-				if(myVideoView.isActivated()) {
-					mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-					myVideoView.setPlayBackFlag(false);
-					updateComponent(true);
-					mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
-					new AsynMonitorSocketTask().execute("");
-				}
-			} else {
-				Log.i(TAG, "internet unconnect");
-				stopPlayThread();
-			}
-		}
-	};
 	
 	private void updateComponentByMode(String mode) {
 		if(BuildConfig.DEBUG){

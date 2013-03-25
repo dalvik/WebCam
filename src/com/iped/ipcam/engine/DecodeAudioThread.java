@@ -80,7 +80,7 @@ public class DecodeAudioThread extends DecoderFactory{
 			timeoutCounter = 0;
 			int recvBufIndex = 0;
 			do{
-				if((indexForPut +1) % recvAudioBufLen == indexForGet) {
+				if((indexForPut +1) % recvAudioBufLen == indexForGet && !stopPlay) {
 					synchronized (recvAudioBuf) {
 						try {
 							recvAudioBuf.wait(100);

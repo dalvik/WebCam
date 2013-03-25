@@ -26,7 +26,7 @@ public abstract class ICustomDialog extends Dialog {
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindow().getWindowManager().getDefaultDisplay().getMetrics(metrics);	
 		WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-		layoutParams.width = metrics.widthPixels * 20 / 36;
+		layoutParams.width = metrics.widthPixels * 3 / 4;
 		//layoutParams.height = metrics.heightPixels * 20 / 36;
 		getWindow().setAttributes(layoutParams);
 	}

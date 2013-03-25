@@ -90,8 +90,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 
 	// private int temHeigth;
 
-	private Matrix matrix = new Matrix();
-
 	private boolean reverseFlag = false;
 	
 	private boolean playBackFlag = false; //回放标记
@@ -123,7 +121,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	public MyVideoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		textPaint = new Paint();
-		matrix.setScale(-1, 1);
 		rect = new Rect(0, 0, getWidth(), getHeight() - 10);
 	}
 
@@ -132,7 +129,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		this.reverseFlag = reverseFlag;
 		textPaint = new Paint();
 		textPaint.setColor(Color.RED);
-		matrix.setScale(-1, 1);
 		rect = new Rect(0, 0, w, h);
 		bgPaint = new Paint();
 		bgPaint.setColor(Color.WHITE);
@@ -166,19 +162,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 					if(temWidth<=tmpHeight) {
 						targetWidth = temWidth;
 						targetHeinght = (int)((float)temWidth/imageviewWidth*imageViewHeight);
-						/*if(temWidth<=imageviewWidth) {
-							targetHeinght = (int)((float)temWidth/imageviewWidth*imageViewHeight);
-						}else {
-							targetHeinght = (int)((float)imageviewWidth/temWidth*imageViewHeight);
-						}*/
 					}else {
-						/*if(tmpHeight<=imageViewHeight) {
-							targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
-							targetHeinght = (int)((float)tmpHeight/imageViewHeight*tmpHeight);
-						}else {
-							targetWidth = (int)((float)imageViewHeight/tmpHeight*imageviewWidth);
-							targetHeinght = (int)((float)imageViewHeight/tmpHeight*tmpHeight);
-						}*/
 						targetWidth = (int)((float)tmpHeight/imageViewHeight*imageviewWidth);
 						targetHeinght = tmpHeight;
 					}
@@ -428,7 +412,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			Log.d(TAG, "### onStoped.");
 		}
 		stopAudio();
-		
 		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
@@ -476,11 +459,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	}
 
 	private void flushBitmap() {
-		if(video != null && !video.isRecycled()) {
-			video.recycle();
-			video = null;
+		if(this.video != null && !this.video.isRecycled()) {
+			this.video.recycle();
+			this.video = null;
 		}
 		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+		System.runFinalization();
 	}
 
 	public void onStart() {

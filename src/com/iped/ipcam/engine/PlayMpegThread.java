@@ -1,13 +1,9 @@
 package com.iped.ipcam.engine;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.iped.ipcam.factory.DecoderFactory;
@@ -17,7 +13,6 @@ import com.iped.ipcam.gui.MyVideoView.OnPutIndexListener;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.pojo.MpegImage;
-import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.VideoQueue;
 
 public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener {
@@ -46,13 +41,13 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private int headFlagCount = 0;
 	
-	private int jpegByteBufLength = 2 * 150 * 1024;
+	//private int jpegByteBufLength = 2 * 150 * 1024;
 	
-	private byte[] jpegByteBuf = null; 
+	//private byte[] jpegByteBuf = null; 
 	
-	private int jpegBufUsed = 0;
+	//private int jpegBufUsed = 0;
 	
-	private int tmpJpgBufUsed = 0;
+	//private int tmpJpgBufUsed = 0;
 	
 	private String time = "";
 	
@@ -86,8 +81,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private MyVideoView myVideoView;
 	
-	private String jpegTimeTmp = "";
-	
 	private boolean checkResulationFlag = true;
 	
 	private boolean canStartFlag = false;
@@ -100,13 +93,12 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		this.mpegBuf = mpegBuf;
 		this.timeStr = timeStr;
 		this.video = video;
-		//this.frameCount = frameCount;
 		queue = new VideoQueue();
 		this.myVideoView = myVideoView;
 		if(play) {
 			myVideoView.setOnPutIndexListener(this);
 		}
-		jpegByteBuf = new byte[jpegByteBufLength]; 
+		//jpegByteBuf = new byte[jpegByteBufLength]; 
 		playMpegBuf = new byte[length];
 	}
 	
@@ -161,12 +153,11 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
 						}
 					}else if(b0 == -1 &&  b1 == -40 &&  b2 == -1 && b3 == -37) {
-						jpegByteBuf[jpegBufUsed++] = -1;
+						//jpegByteBuf[jpegBufUsed++] = -1;
 						startFlag = false;
 						imageDataStart = true;
 						isMpeg4 = false;
-						jpegBufUsed = 1;
-						jpegTimeTmp  = time;
+						//jpegBufUsed = 1;
 						//System.out.println("jpeg code = " + jpegTimeTmp);
 					}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
 						//System.out.println("startFlagCount = " + startFlagCount);
@@ -193,8 +184,8 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						} else {
 							if(canStartFlag) {
 								if(imageDataStart) {
-									jpegByteBuf[jpegBufUsed++] = b0;
-									tmpJpgBufUsed = jpegBufUsed;
+									//jpegByteBuf[jpegBufUsed++] = b0;
+									//tmpJpgBufUsed = jpegBufUsed;
 								}else {
 									playMpegBuf[mpegDataLength++] = b0;
 								}
@@ -222,6 +213,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					continue;
 				}
 				System.gc();
+				System.runFinalization();
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
@@ -245,8 +237,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				checkResulationFlag = true;
 			}else if(!stopPlay){
 				usedBytes = UdtTools.xvidDecorer(playMpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
-				//System.out.println("### decode ========= " + (SystemClock.currentThreadTimeMillis() - curr));
-				//UdtTools.xvidDecorer(mpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
 				if(usedBytes>999999) {//(XDIM * 100000) + used_bytes;
 					int newImageWidth = usedBytes / 1000000;
 					int useBytes = usedBytes%1000000;
@@ -257,18 +247,15 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					}
 					imageWidth = newImageWidth;
 					rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
+					queue.clear();
 					synchronized (lock) {
-						if(video == null) {
-							video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-						}else {
-							//video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
-							Bitmap tmp = Bitmap.createScaledBitmap(video, newImageWidth, newImageHeight, false);
-							if(!video.isRecycled()) {
-								video.recycle();
-								video = null;
-							}
-							video = tmp;
-						}/**/
+						if(video != null && !video.isRecycled()) {
+							video.recycle();
+							System.gc();
+							System.runFinalization();
+							video = null;
+						}
+						video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
 						myVideoView.setImage(video);
 					}
 					myVideoView.updateRect();
@@ -332,6 +319,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	}
 	
 	private void onStop() {
+		queue.clear();
 		System.gc();
 		stopPlay = true;
 		if(video != null && !video.isRecycled()) {
@@ -339,11 +327,13 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			video = null;
 		}
 		myVideoView.setImage(null);
-		UdtTools.freeDecorer();
 		this.rgbDataBuf = null;
-		jpegByteBuf = null;
-		playMpegBuf = null;
+		//this.jpegByteBuf = null;
+		this.playMpegBuf = null;
+		this.listener = null;
 		System.gc();
+		System.runFinalization();
+		UdtTools.freeDecorer();
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### play mpeg thread exit ....");
 		}
@@ -356,53 +346,39 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				String oldTime = queue.pollTime();
 				if(null != oldTime) {
 					timeStr = oldTime.substring(0,14);
-					//if(!popuJpeg(oldTime)){
-						MpegImage mpegImage = queue.getMpegImage();
-						if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### show mpegImage = " + mpegImage );
-						}
-						if(mpegImage != null) {
-							byte[] tmpRgb = mpegImage.rgb;
-							ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
-							//Log.d(TAG, "timeStr=" + timeStr + " frameCount =" + frameCount);
-							if(video != null) {
-								try {
-									video.copyPixelsFromBuffer(sh);
-								} catch (Exception e) {
-									Log.e(TAG, "### copyPixelsFromBuffer exception!");
-								}
-								//frameCount = myVideoView.getFrameCount();
-								//frameCount++;
+					MpegImage mpegImage = queue.getMpegImage();
+					if(BuildConfig.DEBUG && !DEBUG) {
+						Log.d(TAG, "### show mpegImage = " + mpegImage );
+					}
+					if(mpegImage != null) {
+						byte[] tmpRgb = mpegImage.rgb;
+						ByteBuffer sh = ByteBuffer.wrap(tmpRgb);
+						if(video != null) {
+							try {
+								video.copyPixelsFromBuffer(sh);
+							} catch (Exception e) {
+								Log.e(TAG, "### copyPixelsFromBuffer exception!");
 							}
 						}
-						if(listener != null) {
-							listener.invalide( timeStr);
-						}
-					//}
+					}
+					if(listener != null) {
+						listener.invalide( timeStr);
+					}
 				} else {
 					synchronized (lock) {
-						/*if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### queue no image  ---->");
-						}*/
 						try {
 							lock.wait(10);
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							Log.e(TAG, e.getLocalizedMessage());
-							onStop();
 							break;
 						}
 					}  
 				}
 			}
-			if(rgbDataBuf != null) {
-				rgbDataBuf = null;
-				System.gc();
-			}
-			onStop();
 		}
 		
-		private void onStop() {
+/*		private void onStop() {
 			int imageRemain = queue.getMpegLength();
 			if(imageRemain>0) {
 				for(int i=0;i<imageRemain;i++) {
@@ -414,10 +390,12 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					}
 				}
 			}
+			System.gc();
+			System.runFinalization();
 			if(BuildConfig.DEBUG && DEBUG) {
 				Log.d(TAG, "### show mpeg image thread exit!");
 			}
-		}
+		}*/
 		
 		public boolean popuJpeg(String oldTime) {
 			JpegImage image = queue.getFirstImage();
