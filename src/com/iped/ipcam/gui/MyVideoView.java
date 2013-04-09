@@ -426,7 +426,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 		release();
 		flushBitmap();
-		this.decoderFactory = null;
 		System.gc();
 	}
 

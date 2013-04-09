@@ -2,15 +2,22 @@ package com.iped.ipcam.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
 import android.widget.Scroller;
 
 public class ScrollLayout extends ViewGroup {
-
+	private static final int SNAP_VELOCITY = 600;
+	private static final int TOUCH_STATE_REST = 0;
+	private static final int TOUCH_STATE_SCROLLING = 1;
+	
+	private VelocityTracker mVelocityTracker;
+	
 	private static final String TAG = "ScrollLayout";
+	
 	private Scroller mScroller;
 
 	private OnViewChangeListener mOnViewChangeListener;
@@ -21,8 +28,14 @@ public class ScrollLayout extends ViewGroup {
 	
 	private int mTouchSlop;
 	
+	private float mLastMotionX;
+	
+	private float mLastMotionY;
+	
 	private boolean isScroll = true;
 
+	private int mTouchState = TOUCH_STATE_REST;
+	
 	public void setIsScroll(boolean b) {
 		this.isScroll = b;
 	}
@@ -116,6 +129,118 @@ public class ScrollLayout extends ViewGroup {
         }
 	}
 
+	//TODO
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (mVelocityTracker == null) {
+			mVelocityTracker = VelocityTracker.obtain();
+		}
+		mVelocityTracker.addMovement(event);
+		final int action = event.getAction();
+		final float x = event.getX();
+		final float y = event.getY();
+		switch (action) {
+		case MotionEvent.ACTION_DOWN:
+			if (!mScroller.isFinished()) {
+				mScroller.abortAnimation();
+			}
+			mLastMotionX = x;
+			
+			//---------------New Code----------------------
+			mLastMotionY = y;
+			//---------------------------------------------
+			break;
+		case MotionEvent.ACTION_MOVE:
+			int deltaX = (int) (mLastMotionX - x);
+			//---------------New Code----------------------
+			int deltaY = (int) (mLastMotionY - y);
+			if(Math.abs(deltaX) < 200 && Math.abs(deltaY) > 10)
+				break;
+			mLastMotionY = y;
+			//-------------------------------------
+			
+			mLastMotionX = x;
+			scrollBy(deltaX, 0);
+			break;
+		case MotionEvent.ACTION_UP:
+			//Log.e(TAG, "event : up");
+			// if (mTouchState == TOUCH_STATE_SCROLLING) {
+			final VelocityTracker velocityTracker = mVelocityTracker;
+			velocityTracker.computeCurrentVelocity(1000);
+			int velocityX = (int) velocityTracker.getXVelocity();
+			//Log.e(TAG, "velocityX:" + velocityX);
+			if (velocityX > SNAP_VELOCITY && mCurScreen > 0) {
+				// Fling enough to move left
+				//Log.e(TAG, "snap left");
+				snapToScreen(mCurScreen - 1);
+			} else if (velocityX < -SNAP_VELOCITY
+					&& mCurScreen < getChildCount() - 1) {
+				// Fling enough to move right
+				//Log.e(TAG, "snap right");
+				snapToScreen(mCurScreen + 1);
+			} else {
+				snapToDestination();
+			}
+			if (mVelocityTracker != null) {
+				mVelocityTracker.recycle();
+				mVelocityTracker = null;
+			}
+			// }
+			mTouchState = TOUCH_STATE_REST;
+			break;
+		case MotionEvent.ACTION_CANCEL:
+			mTouchState = TOUCH_STATE_REST;
+			break;
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		//Log.e(TAG, "onInterceptTouchEvent-slop:" + mTouchSlop);
+		final int action = ev.getAction();
+		if ((action == MotionEvent.ACTION_MOVE)
+				&& (mTouchState != TOUCH_STATE_REST)) {
+			return true;
+		}
+		final float x = ev.getX();
+		final float y = ev.getY();
+		switch (action) {
+		case MotionEvent.ACTION_MOVE:
+			final int xDiff = (int) Math.abs(mLastMotionX - x);
+			if (xDiff > mTouchSlop) {
+				mTouchState = TOUCH_STATE_SCROLLING;
+			}
+			break;
+		case MotionEvent.ACTION_DOWN:
+			mLastMotionX = x;
+			mLastMotionY = y;
+			mTouchState = mScroller.isFinished() ? TOUCH_STATE_REST
+					: TOUCH_STATE_SCROLLING;
+			break;
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP:
+			mTouchState = TOUCH_STATE_REST;
+			break;
+		}
+		return mTouchState != TOUCH_STATE_REST;
+	}
+	
+	@Override
+	public void computeScroll() {
+		super.computeScroll();
+		if (mScroller.computeScrollOffset()) {
+			scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+			postInvalidate();
+		}
+	}
+	
+	public void snapToDestination() {
+		final int screenWidth = getWidth();
+		final int destScreen = (getScrollX() + screenWidth / 2) / screenWidth;
+		snapToScreen(destScreen);
+	}
+	
 	/**
 	 * ÉèÖÃÆÁÄ»ÇÐ»»¼àÌýÆ÷
 	 * 

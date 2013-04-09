@@ -308,8 +308,13 @@
   	
   	<!-- progress bar bg -->
   	<color name="web_cam_video_view_progress_bg">#B7B7B7</color>
-  	
+  	<color name="listitem_transparent">#00000000</color>
+	
   	<color name="grid_state_pressed">#BB7dbcd3</color>
     <color name="grid_state_focused">#777dbcd3</color>
     <color name="half_transparent">#aa000000</color>
+    <item type="drawable" name="main_background">#fff6f6f6</item>
+    <drawable name="alice">#FF4500</drawable>
+    <color name="frame_button_text_nor">#033a5c</color>
+    <color name="frame_button_text_select">#FFFFFF</color>
 </resources>

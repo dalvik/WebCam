@@ -124,6 +124,7 @@ public class WebCam extends Activity implements OnClickListener{
 	        	createShutcut(this, "com.iped.ipcam.gui");
 	        }
 			Intent intent = new Intent(WebCam.this, WebTabWidget.class);
+	        //Intent intent = new Intent(WebCam.this, Main.class);
 			startActivity(intent);
 			overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);	
 			WebCam.this.finish();
