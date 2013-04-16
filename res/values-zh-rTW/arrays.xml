@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="head_titles">
+	    <item>視頻監控</item>
+	    <item>視頻重播</item>
+    </string-array>
+</resources>

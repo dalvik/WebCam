@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:baselineAligned="false"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingBottom="1dip"
+        android:paddingLeft="1dip"
+        android:paddingTop="1dip" >
+
+        <com.iped.ipcam.view.LazyScrollView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/lazyScrollView"
+            android:layout_width="fill_parent"
+            android:scrollbars="none"
+            android:layout_height="fill_parent" >
+
+            <LinearLayout
+                android:id="@+id/waterFallContainer"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" >
+            </LinearLayout>
+        </com.iped.ipcam.view.LazyScrollView>
+    </LinearLayout>
+
+</LinearLayout>

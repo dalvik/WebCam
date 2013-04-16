@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    
+	<LinearLayout 
+		android:layout_width="fill_parent" 
+		android:layout_height="35.0dip"
+		android:orientation="horizontal" 
+		android:gravity="center_vertical">
+
+	    <Button
+     	    android:id="@+id/frame_btn_local"
+     	    style="@style/frame_button"
+     	    android:text="@string/auto_serch_str" />
+
+     	<ImageView android:layout_width="wrap_content" 
+     	    android:layout_height="fill_parent" 
+     	    android:background="@drawable/frame_button_cutline"/>
+     	
+     	<Button
+     	    android:id="@+id/frame_btn_beauty"
+     	    style="@style/frame_button"
+     	    android:text="@string/manu_add_str" />
+
+     	<ImageView android:layout_width="wrap_content" 
+     	    android:layout_height="fill_parent" 
+     	    android:background="@drawable/frame_button_cutline"/>
+     	
+     	<Button 
+     		android:id="@+id/frame_btn_scenery"
+     		style="@style/frame_button"
+         	android:text="@string/device_params_sets_str"/>
+     	
+     	<ImageView android:layout_width="wrap_content" 
+     	    android:layout_height="fill_parent" 
+     	    android:background="@drawable/frame_button_cutline"/>
+     	
+     	<Button 
+     		android:id="@+id/frame_btn_other"
+     		style="@style/frame_button"
+         	android:text="@string/clear_all_str"/>
+    </LinearLayout>
+
+	<com.iped.ipcam.view.PullToRefreshListView
+	  	android:id="@+id/frame_device_list_view"
+	    style="@style/widget_listview"/>
+	
+</LinearLayout>
