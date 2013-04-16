@@ -633,7 +633,13 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 						msg.arg1 = tips;
 						msg.what = Constants.SHOWTOASTMSG;
 						handler.sendMessage(msg);*/
-						MessageUtils.sendErrorMessage(handler, result);
+						if(result != null) {
+							if (result.contains("-8")) {
+								MessageUtils.sendErrorMessage(handler, getText(R.string.webcam_version_is_low).toString());
+							}else {
+								MessageUtils.sendErrorMessage(handler,result);
+							}
+						}
 					}
 				}
 				handler.sendEmptyMessage(Constants.HIDETEAUTOSEARCH);
@@ -725,8 +731,14 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			Handler mHandler = new Handler(handlerThread.getLooper());
 			mHandler.post(checkPwdStateRunnable);
 		}else{
+			if(result != null) {
+				if (result.contains("-8")) {
+					MessageUtils.sendErrorMessage(handler, getText(R.string.webcam_version_is_low).toString());
+				}else {
+					MessageUtils.sendErrorMessage(handler, result);
+				}
+			}
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			MessageUtils.sendErrorMessage(handler, result);
 		}
 	}
 	

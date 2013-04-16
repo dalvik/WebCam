@@ -19,16 +19,19 @@ import com.iped.ipcam.engine.DecodeAudioThread;
 import com.iped.ipcam.engine.DecodeJpegThread;
 import com.iped.ipcam.engine.PlayBackJpegThread;
 import com.iped.ipcam.engine.PlayBackMpegThread;
+import com.iped.ipcam.engine.PlayH264Thread;
 import com.iped.ipcam.engine.PlayMpegThread;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.engine.TalkBackThread;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
+import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
+import com.iped.ipcam.utils.DecodeType;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 
@@ -94,7 +97,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private boolean playBackFlag = false; //回放标记
 	
-	private boolean mpeg4Decoder = false;
+	private int decoderType = DecodeType.JPEG_DECODE.ordinal();// 0 jpeg 1 mpeg4 2 h264
 	
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	
@@ -135,7 +138,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint = new Paint();
 		infoPaint.setColor(Color.BLUE);
 		infoPaint.setTextSize(18);
-		mpeg4Decoder = false;
+		decoderType = DecodeType.JPEG_DECODE.ordinal();
 	}
 	
 	public void changeConfig(int w, int h) {
@@ -251,16 +254,19 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			String type = new String(b, 7, 5);
 			Log.d(TAG, "### video type = " + type);
 			if("mpeg4".equalsIgnoreCase(type)) {
-				mpeg4Decoder = true;
+				decoderType = DecodeType.MPEG4_DECODE.ordinal();
+				NALBUFLENGTH = 1024*20; //
+			}else if(type.contains("h264")) {
+				decoderType = DecodeType.H264_DECODE.ordinal();
 				NALBUFLENGTH = 1024*20; //
 			}else {
 				NALBUFLENGTH = 320 * 480 * 2;
-				mpeg4Decoder = false;
+				decoderType = DecodeType.JPEG_DECODE.ordinal();
 			}
 			info.setQuality(b[13]);
 		} else {
 			NALBUFLENGTH = 320 * 480 * 2;
-			mpeg4Decoder = false;
+			decoderType = DecodeType.JPEG_DECODE.ordinal();
 		}
 		
 		initBCV(info);
@@ -272,13 +278,21 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
 			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1000);
-			if(mpeg4Decoder) {
+			if(decoderType == DecodeType.MPEG4_DECODE.ordinal()) {
 				decoderFactory = new PlayMpegThread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
 				audioThread = new DecodeAudioThread(this);
 				audioPlayerThread = new Thread(audioThread);
 				audioPlayerThread.start();
+			}else if(decoderType == DecodeType.H264_DECODE.ordinal()) {
+				decoderFactory = new PlayH264Thread(true, this,nalBuf, timeStr, video, frameCount);
+				decoderFactory.setOnMpegPlayListener(this);
+				new Thread(decoderFactory).start();
+				audioThread = new DecodeAudioThread(this);
+				audioPlayerThread = new Thread(audioThread);
+				audioPlayerThread.start();
+				System.out.println("h264---------");
 			}else {
 				audioThread = new DecodeAudioThread(this);
 				audioPlayerThread = new Thread(audioThread);
@@ -294,9 +308,12 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			realTimeFlag= true;
 		}else { // 回放
 			realTimeFlag = false;
-			if(mpeg4Decoder) {
+			if(decoderType == DecodeType.MPEG4_DECODE.ordinal()) {
 				decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 				new Thread(decoderFactory).start();	
+			}else if(decoderType == DecodeType.H264_DECODE.ordinal()) {
+				//decoderFactory = new PlayBackMpegThread(this, nalBuf, timeStr, video, frameCount, handler);
+				//new Thread(decoderFactory).start();	
 			}else {
 				decoderFactory = new PlayBackJpegThread(this, nalBuf, timeStr, video, frameCount, handler);
 				new Thread(decoderFactory).start();	
@@ -313,7 +330,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 			dataRate += readLengthFromVideoSocket;
-			//Log.d(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
+			Log.e(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
 			if (readLengthFromVideoSocket <= 0) { // 读取完成
 				timeoutCounter++;
 				if(readLengthFromVideoSocket == -1) {

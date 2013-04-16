@@ -167,6 +167,5 @@ public class Constants {
 	public final static int BINDLOCALPORT2 = 60002;
 
 	public final static int BINDLOCALPORT3 = 60003;
-
-
+	
 }

@@ -401,6 +401,8 @@
         
         <string name="webcam_connect_init_error">系统初始化连接失败</string>
         <string name="webcam_check_pwd_dialog_str">正在校验 <xliff:g id="number">%1$s</xliff:g>，请稍后。。。</string>
+        
+         <string name="webcam_version_is_low">摄像机版本太低，请更新。</string>
     <string name="blank_str">More : hangzhouiped.taobao.com</string>
     <string name="version">12.0.8205</string>
     <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>

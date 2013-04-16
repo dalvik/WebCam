@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1115,7 +1113,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				checkPwdState();
 			}
 		} else {
-			MessageUtils.sendErrorMessage(mHandler,result);
+			if(result != null) {
+				if (result.contains("-8")) {
+					MessageUtils.sendErrorMessage(mHandler, getText(R.string.webcam_version_is_low).toString());
+				}else {
+					MessageUtils.sendErrorMessage(mHandler,result);
+				}
+			}
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 		}
 	}

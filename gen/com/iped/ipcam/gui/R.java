@@ -996,7 +996,7 @@ public final class R {
         public static final int app_name=0x7f080001;
         public static final int auto_search_tips_str=0x7f08004c;
         public static final int auto_serch_str=0x7f08004b;
-        public static final int blank_str=0x7f08013e;
+        public static final int blank_str=0x7f08013f;
         public static final int cancle_login_str=0x7f080020;
         /**  更改登录密码 
  更改登录密码 
@@ -1008,11 +1008,11 @@ public final class R {
         public static final int clear_all_device_ok_str=0x7f080077;
         public static final int clear_all_device_title_str=0x7f080075;
         public static final int clear_all_str=0x7f080074;
-        public static final int clear_cache_complete_toast=0x7f080147;
-        public static final int clear_cache_menu=0x7f080146;
+        public static final int clear_cache_complete_toast=0x7f080148;
+        public static final int clear_cache_menu=0x7f080147;
         public static final int connection=0x7f080026;
         public static final int connection_error=0x7f080027;
-        public static final int cory_right=0x7f080140;
+        public static final int cory_right=0x7f080141;
         /**  right menu 
  right menu 
  right menu 
@@ -1209,7 +1209,7 @@ public final class R {
         public static final int file_cannotopen=0x7f08010e;
         public static final int full_device_online=0x7f08007d;
         public static final int hello=0x7f080000;
-        public static final int imageview_description=0x7f08014a;
+        public static final int imageview_description=0x7f08014b;
         public static final int input_password=0x7f08001a;
         public static final int keep_user_pass=0x7f080006;
         public static final int login_dialog_str=0x7f080019;
@@ -1252,15 +1252,15 @@ public final class R {
  pull to flush 
  pull to flush 
          */
-        public static final int pull_to_refresh_pull_label=0x7f080141;
-        public static final int pull_to_refresh_refreshing_label=0x7f080143;
-        public static final int pull_to_refresh_release_label=0x7f080142;
-        public static final int pull_to_refresh_tap_label=0x7f080144;
-        public static final int pull_to_refresh_update=0x7f080145;
+        public static final int pull_to_refresh_pull_label=0x7f080142;
+        public static final int pull_to_refresh_refreshing_label=0x7f080144;
+        public static final int pull_to_refresh_release_label=0x7f080143;
+        public static final int pull_to_refresh_tap_label=0x7f080145;
+        public static final int pull_to_refresh_update=0x7f080146;
         public static final int repeat_input_password=0x7f08001b;
         public static final int repeat_new_input_password=0x7f080016;
-        public static final int set_wall_paper_menu=0x7f080148;
-        public static final int set_wall_paper_menu_toast=0x7f080149;
+        public static final int set_wall_paper_menu=0x7f080149;
+        public static final int set_wall_paper_menu_toast=0x7f08014a;
         public static final int sms_to_email_title_str=0x7f080137;
         public static final int system_settings_device_bin_addr_hint_str=0x7f080116;
         public static final int system_settings_device_bin_addr_str=0x7f080115;
@@ -1300,7 +1300,7 @@ public final class R {
         public static final int user_name_hint=0x7f080003;
         public static final int user_or_password_is_not_correct_str=0x7f08000a;
         public static final int username_null=0x7f080008;
-        public static final int version=0x7f08013f;
+        public static final int version=0x7f080140;
         public static final int video_clear_ing=0x7f0800f5;
         public static final int video_delete=0x7f0800f3;
         public static final int video_delete_error=0x7f0800f7;
@@ -1393,6 +1393,7 @@ public final class R {
  take picture 
          */
         public static final int webcam_takepic_success_str=0x7f080129;
+        public static final int webcam_version_is_low=0x7f08013e;
         public static final int webcam_video_popup_menu_cancle=0x7f08012e;
         /**  long press video popmenu 
  long press video popmenu 

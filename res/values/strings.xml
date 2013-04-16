@@ -405,6 +405,8 @@
         
         <string name="webcam_connect_init_error">System Initialize Failed</string>
         <string name="webcam_check_pwd_dialog_str">Waiting For Verify <xliff:g id="number">%1$s</xliff:g></string>
+        
+        <string name="webcam_version_is_low">Camera Version Is Too Low.</string>
     <string name="blank_str">More : hangzhouiped.taobao.com</string>
     <string name="version">12.0.8205</string>
     <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>
