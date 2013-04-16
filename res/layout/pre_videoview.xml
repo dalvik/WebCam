@@ -52,7 +52,14 @@
             android:background="@drawable/ic_launcher" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+         android:layout_centerInParent="true"
+        >
     <include layout="@layout/webcam_yuntai_control" />
+    </RelativeLayout>
+        
 
     <!-- <include layout="@layout/webcam_yuntai_control_menu" /> -->
 
