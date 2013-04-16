@@ -3,6 +3,7 @@
     android:id="@+id/container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+<<<<<<< Updated upstream
     android:baselineAligned="false"
     android:background="@drawable/device_item_unselect" 
     android:orientation="horizontal" >
@@ -21,6 +22,116 @@
             android:id="@+id/videoview"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"/>
+=======
+    android:background="@color/gray"
+    android:baselineAligned="true"
+    android:orientation="horizontal" >
+
+    <com.iped.ipcam.gui.MyVideoView
+        android:id="@+id/videoview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageButton
+            android:id="@+id/dir_control_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_launcher" />
+
+        <ImageButton
+            android:id="@+id/dir_control_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_launcher" />
+
+        <ImageButton
+            android:id="@+id/dir_control_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_launcher" />
+
+        <ImageButton
+            android:id="@+id/dir_control_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_launcher" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#20000000"
+        android:orientation="vertical" >
+
+        <TableLayout
+            android:id="@+id/user_input"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <TableRow>
+
+                <RadioButton
+                    android:id="@+id/qvga_button_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableBottom="@drawable/web_cam_radion_button_selector"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:text="@string/video_preview_qvga_str"
+                    android:textColor="@color/black"
+                    android:textSize="10dip" />
+
+                <RadioButton
+                    android:id="@+id/vga_button_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableBottom="@drawable/web_cam_radion_button_selector"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:text="@string/video_preview_vga_str"
+                    android:textColor="@color/black"
+                    android:textSize="10dip" />
+
+                <RadioButton
+                    android:id="@+id/qelp_button_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableBottom="@drawable/web_cam_radion_button_selector"
+                    android:gravity="center"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="5dp"
+                    android:text="@string/video_preview_720p_str"
+                    android:textColor="@color/black"
+                    android:textSize="10dip" />
+            </TableRow>
+        </TableLayout>
+
+        <include
+            layout="@layout/webcam_yuntai_control_menu" />
+    </RelativeLayout>
+
+    <include
+        layout="@layout/play_back_bottom"
+        android:visibility="gone" />
+>>>>>>> Stashed changes
 
         <include layout="@layout/play_back_bottom"/>
         
