@@ -984,8 +984,9 @@ public final class R {
         public static final int waterfallitem=0x7f03002b;
         public static final int web_cam_param_set_title_bar=0x7f03002c;
         public static final int web_tab_widget=0x7f03002d;
-        public static final int webview_login=0x7f03002e;
-        public static final int wireless_list_item=0x7f03002f;
+        public static final int webcam_yuntai_control_menu=0x7f03002e;
+        public static final int webview_login=0x7f03002f;
+        public static final int wireless_list_item=0x7f030030;
     }
     public static final class menu {
         public static final int list_options_menu=0x7f0a0000;
