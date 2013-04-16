@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -7,23 +7,54 @@
     android:background="@drawable/device_item_unselect" 
     android:orientation="horizontal" >
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="0dip"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1"
         android:paddingLeft="1dip"
         android:paddingTop="1dip"
         android:paddingBottom="1dip"
         android:orientation="vertical" >
-
+        
         <com.iped.ipcam.gui.MyVideoView
             android:id="@+id/videoview"
+            android:layout_centerInParent="true"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"/>
 
+        <ImageButton android:id="@+id/dir_control_left" 
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentLeft="true"
+        	android:layout_centerInParent="true"
+        	android:background="@drawable/ic_launcher"
+        />
+        
+        <ImageButton android:id="@+id/dir_control_top"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentTop="true"
+        	android:layout_centerInParent="true"
+        	android:background="@drawable/ic_launcher"
+        />
+        
+        <ImageButton  android:id="@+id/dir_control_right"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentRight="true"
+        	android:layout_centerInParent="true"
+        	android:background="@drawable/ic_launcher"
+        />
+        
+         <ImageButton android:id="@+id/dir_control_bottom"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentBottom="true"
+        	android:layout_centerInParent="true"
+        	android:background="@drawable/ic_launcher"
+        />
+        
         <include layout="@layout/play_back_bottom"/>
         
-    </LinearLayout>
+    </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>

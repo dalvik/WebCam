@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -97,7 +98,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private UpdeviceListReceiver updeviceListReceiver = null;
 	
-	private ControlPanel rightControlPanel = null;
+	//private ControlPanel rightControlPanel = null;
 	
 	private Thread thread = null;
 	
@@ -375,14 +376,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		thread.start();
 	}
 	
-	/*private void stopPlayThread() {
-		myVideoView.setStopPlay(true, true);
-		if(thread != null && !thread.isInterrupted()) {
-			Log.d(TAG, "##############");
-			thread.isInterrupted();
-		}
-	}*/
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -402,7 +395,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
         myVideoView.setOnClickListener(this);
-        LinearLayout layout = (LinearLayout) findViewById(R.id.container);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
         playBackSeekBar = (MySeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
         LayoutInflater factory = LayoutInflater.from(this);
@@ -415,9 +408,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         rightView.measure(w, h);
         int width =rightView.getMeasuredWidth(); //
         //int height = view.getMeasuredHeight();
-		rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
-		layout.addView(rightControlPanel);
-		rightControlPanel.fillPanelContainer(rightView);
+		//rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
+		//layout.addView(rightControlPanel);
+		//rightControlPanel.fillPanelContainer(rightView);
 		camManager = CamMagFactory.getCamManagerInstance();
 		list = camManager.getCamList();
 		listView.setOnItemClickListener(itemClickListener);
@@ -555,7 +548,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					//不是连续点击
 					firtick = System.currentTimeMillis();//重新获取前一次点击的时间
 					sectick = 0l;
-					rightControlPanel.onClick();
+					//rightControlPanel.onClick();
 				} 
 			}
 			return;
