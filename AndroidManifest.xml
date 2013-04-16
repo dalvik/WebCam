@@ -30,6 +30,7 @@
         <activity android:launchMode="singleInstance" 
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  
             android:name=".WebTabWidget" 
+            android:screenOrientation="portrait" 
             android:configChanges="orientation|keyboardHidden|screenSize"/>
 
         <activity
@@ -39,6 +40,8 @@
         
         <activity
             android:name=".CamVideoH264" 
+            android:screenOrientation="landscape" 
+            android:theme="@android:style/Theme.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         
         <activity 

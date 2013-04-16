@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="fill_parent"
     android:background="#20000000"
-    android:layout_gravity="center_vertical"
+    android:layout_gravity="right"
+    android:layout_alignParentRight="true"
     android:fillViewport="true" >
 
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:orientation="vertical" >
 
         <ScrollView
             android:id="@+id/scroll_view_id"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="fill_parent" >
 
             <TableLayout
                 android:id="@+id/user_input"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
                  
                 
@@ -132,36 +133,15 @@
 
                 <TableRow>
 
-                    <Button
-                        android:id="@+id/minus_foucs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dip"
-                        android:layout_marginBottom="3dip"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:background="@drawable/web_cam_opera_minus_selector"
-                        android:text="" />
-
-                    <com.iped.ipcam.gui.BCVControlProgressBar
-                        android:id="@+id/contrast_progressbar"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_gravity="center"
-                        android:layout_width="wrap_content"
-                        android:gravity="center"
-                        android:background="@drawable/device_item_unselect"
-                        android:layout_height="wrap_content" />
-
-                    <Button
-                        android:id="@+id/add_foucs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dip"
-                        android:layout_marginBottom="3dip"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:background="@drawable/web_cam_opera_plus_selector"
-                        android:text="" />
+                        <com.iped.ipcam.gui.MySeekBar
+                     		android:id="@+id/contrast_progressbar"
+		            		style="?android:attr/progressBarStyleHorizontal"
+		            		android:layout_gravity="center"
+	                       android:layout_width="fill_parent"
+	                       android:gravity="center"
+	                       android:background="@drawable/device_item_unselect"
+	                       android:layout_height="wrap_content" />
+                           
                 </TableRow>
                  
 

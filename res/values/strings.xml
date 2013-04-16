@@ -136,7 +136,8 @@
     		<string name="clear_all_device_cancle_str">Cancle</string>
     	<string name="device_edit_str">Cancle</string>	
     	<string name="device_del_str">Delete</string>	
-    	<string name="device_preview_str">PreView</string>	
+    	<string name="device_preview_str">PreView</string>
+    	<string name="device_para_set_str">Edit</string>	
     	<string name="no_device_online">No Device, Pull To Fresh</string>
     	<string name="full_device_online">Loading Success, Pull To Fresh</string>
     	<string name="device_type_str">Type：</string>

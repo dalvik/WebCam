@@ -137,6 +137,7 @@
     	<string name="device_edit_str">取消</string>	
     	<string name="device_del_str">刪除</string>	
     	<string name="device_preview_str">預覽</string>	
+    	<string name="device_para_set_str">編輯</string>	
     	<string name="no_device_online">沒有線上設備，下拉刷新</string>
     	<string name="full_device_online">載入完畢，下拉刷新</string>
     	<string name="device_type_str">類型：</string>

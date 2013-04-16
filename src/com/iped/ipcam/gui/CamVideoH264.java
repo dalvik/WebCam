@@ -98,7 +98,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private UpdeviceListReceiver updeviceListReceiver = null;
 	
-	//private ControlPanel rightControlPanel = null;
+	private ControlPanel rightControlPanel = null;
 	
 	private Thread thread = null;
 	
@@ -423,6 +423,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	    }
 		mHandler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
 		popupMenu = new VideoPopupMenu(this, mHandler, videoPopMenuItem);
+		//sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
 	}
 
 	private void registerListener(View view) {
@@ -944,7 +945,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//m_Dialog = new ProgressDialog(this);
 			m_Dialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog);  
 		}
-		if(m_Dialog != null) {
+		//TODO
+		if(m_Dialog != null && (!((Activity) CamVideoH264.this).isFinishing())) {
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### " + camManager.getSelectDevice().getDeviceID());
 			}
@@ -997,6 +999,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					new AsynMonitorSocketTask().execute("");
 				} else {
 					handleNetworkOpeartion(context);
+					CamVideoH264.this.finish();
 				}
 			}else if(WebCamActions.ACTION_PLAY_BACK.equals(intent.getAction())) {
 				Bundle bundle = intent.getExtras();

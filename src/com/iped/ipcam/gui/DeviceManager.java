@@ -65,7 +65,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	private final int MENU_DEL = Menu.FIRST + 1;
 
 	private final int MENU_PREVIEW = Menu.FIRST + 2;
-
+	
+	private final int MENU_ParaSet = Menu.FIRST + 3;
+	
 	private Button autoSearchButton = null;
 
 	private Button manulAddButton = null;
@@ -334,8 +336,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		}
 		menu.setHeaderTitle(device.getDeviceName());
 		menu.add(0, MENU_PREVIEW, 1, getString(R.string.device_preview_str));
-		menu.add(0, MENU_DEL, 2, getString(R.string.device_del_str));
-		menu.add(0, MENU_EDIT, 3, getString(R.string.device_edit_str));
+		menu.add(0, MENU_ParaSet, 2, getString(R.string.device_para_set_str));
+		menu.add(0, MENU_DEL, 3, getString(R.string.device_del_str));
+		menu.add(0, MENU_EDIT, 4, getString(R.string.device_edit_str));
 	}
 
 	@Override
@@ -358,6 +361,19 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 		case MENU_PREVIEW:
 			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 			sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
+			break;
+		case MENU_ParaSet:
+			device = camManager.getSelectDevice();
+			if(device == null) {
+				Log.d(TAG, "device = " + device);
+				ToastUtils.showToast(DeviceManager.this, R.string.device_params_info_no_device_str);
+				return false;
+			}
+			handler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
+			HandlerThread handlerThread = new HandlerThread("test");
+			handlerThread.start();
+			Handler myHandler = new Handler(handlerThread.getLooper());
+			myHandler.post(monitorSocketTask);
 			break;
 		default:
 			break;
@@ -488,6 +504,8 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			camManager.setSelectInde(index-1);
 			adapter.setChecked(index-1);
 			adapter.notifyDataSetChanged();	
+			Intent intent = new Intent(DeviceManager.this, CamVideoH264.class);
+			startActivity(intent);
 		}
 	};
 
