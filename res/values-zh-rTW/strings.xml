@@ -55,11 +55,11 @@
     	<string name="video_preview_mid_up"> ↑ </string>
     	<string name="video_preview_right_up">右上</string>
     	<string name="video_preview_left">←</string>
-    	<string name="video_preview_mid">翻轉</string>
+    	<string name="video_preview_revese">翻轉</string>
     	<string name="video_preview_right">→</string>
-    	<string name="video_preview_left_down">拍照</string>
+    	<string name="video_preview_take_picture">拍照</string>
     	<string name="video_preview_left_mid"> ↓ </string>
-    	<string name="video_preview_right_down">查看</string>
+    	<string name="video_preview_view_picture">查看</string>
     	<string name="video_preview_minus_zoom">﹣</string>
     	<string name="video_preview_minus_zoom_str">變倍</string>
     	<string name="video_preview_add_zoom">﹢</string>
@@ -402,6 +402,9 @@
         
         <string name="webcam_connect_init_error">系統初始化連接失敗</string>
         <string name="webcam_check_pwd_dialog_str">正在校驗 <xliff:g id="number">%1$s</xliff:g>，請稍後。。。</string>
+        <string name="webcam_version_is_low">攝像機版本太低，請更新。</string>
+        <string name="webcam_connection_break_str">網路連接斷開，準備重連，請稍等。</string>
+         
     <string name="blank_str">More : hangzhouiped.taobao.com</string>
     <string name="version">12.0.8205</string>
     <string name="cory_right">Copyright© www.iped.com.cn. All Rights Reserved</string>

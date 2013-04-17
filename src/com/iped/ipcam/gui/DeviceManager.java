@@ -137,7 +137,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 					deiceListViewFooter.setVisibility(View.VISIBLE);
 					deviceListViewFootMore.setText(getText(R.string.no_device_online));
 				}
-				handler.sendEmptyMessageDelayed(Constants.SEND_UPDATE_DEVICE_LIST_MSG, 200);
 				break;
 			case Constants.DEFAULTUSERSELECT:
 				listView.requestFocusFromTouch();
@@ -179,9 +178,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				String pass = (String) message.obj;
 				deviceTmp.setUnDefine2(pass);
 				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
-				break;
-			case Constants.SEND_UPDATE_DEVICE_LIST_MSG:
-				sendBroadcast(new Intent(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
 				break;
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
 				String random = RandomUtil.generalRandom();

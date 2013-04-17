@@ -22,4 +22,10 @@ public class Command {
 
 	public final static byte CHANEL = 1;
 
+	
+	public final static int NONE_STATE = 0;
+	public final static int DIRECT_CONTROL_STATE = 1;
+	public final static int RIGHT_CONTROL_STATE = 2;
+	public final static int HIDE_CONTROL_STATE = 3;
+	
 }

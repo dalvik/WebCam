@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
@@ -26,7 +25,6 @@ import com.iped.ipcam.engine.TalkBackThread;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
-import com.iped.ipcam.pojo.JpegImage;
 import com.iped.ipcam.utils.CamCmdListHelper;
 import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
@@ -34,6 +32,7 @@ import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DecodeType;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
+import com.iped.ipcam.utils.ToastUtils;
 
 public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListener {
 
@@ -139,6 +138,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint.setColor(Color.BLUE);
 		infoPaint.setTextSize(18);
 		decoderType = DecodeType.JPEG_DECODE.ordinal();
+		isAutoStop = true;
 	}
 	
 	public void changeConfig(int w, int h) {
@@ -330,7 +330,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		while (!Thread.currentThread().isInterrupted() && !stopPlay) {
 			readLengthFromVideoSocket = UdtTools.recvVideoMsg(videoSocketBuf, VIDEOSOCKETBUFLENGTH);
 			dataRate += readLengthFromVideoSocket;
-			Log.e(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
+			//Log.e(TAG, "### readLengthFromVideoSocket = " + readLengthFromVideoSocket);
 			if (readLengthFromVideoSocket <= 0) { // ¶ÁÈ¡Íê³É
 				timeoutCounter++;
 				if(readLengthFromVideoSocket == -1) {

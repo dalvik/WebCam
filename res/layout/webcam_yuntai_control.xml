@@ -2,11 +2,15 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <LinearLayout
+        android:id="@+id/right_control_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
-        android:orientation="vertical" >
+        android:background="@drawable/right_control_border"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="10dp" >
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -22,7 +26,8 @@
                 android:gravity="center"
                 android:paddingLeft="10dp"
                 android:text="@string/video_preview_qvga_str"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
+                android:focusable="false"
                 android:textSize="10dip" />
 
             <RadioButton
@@ -34,7 +39,8 @@
                 android:gravity="center"
                 android:paddingLeft="5dp"
                 android:text="@string/video_preview_vga_str"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
+                android:focusable="false"
                 android:textSize="10dip" />
 
             <RadioButton
@@ -44,98 +50,117 @@
                 android:button="@null"
                 android:drawableBottom="@drawable/web_cam_radion_button_selector"
                 android:gravity="center"
+                android:focusable="false"
                 android:paddingLeft="1dp"
                 android:paddingRight="5dp"
                 android:text="@string/video_preview_720p_str"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="10dip" />
         </LinearLayout>
 
-        <SeekBar
+        <com.iped.ipcam.gui.AdjustSeekBar
             android:id="@+id/clear_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:max="100"
+            android:padding="3dip" />
 
-        <SeekBar
+        <com.iped.ipcam.gui.AdjustSeekBar
             android:id="@+id/brightness_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:max="100"
+            android:padding="3dip" />
 
-        <SeekBar
+        <com.iped.ipcam.gui.AdjustSeekBar
             android:id="@+id/contrast_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:max="100"
+            android:padding="3dip" />
 
-        <SeekBar
+        <com.iped.ipcam.gui.AdjustSeekBar
             android:id="@+id/volume_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:max="100"
+            android:padding="3dip" />
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:orientation="vertical" >
 
-            <Button
-                android:id="@+id/left_down"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dip"
-                android:layout_marginTop="3dip"
-                android:background="@drawable/web_cam_video_view_button_selector"
-                android:gravity="center"
-                android:text="@string/video_preview_left_down"
-                android:textSize="10dip" />
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
 
-            <Button
-                android:id="@+id/right_down"
+                <Button
+                    android:id="@+id/video_preview_take_picture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/web_cam_video_view_button_selector"
+                    android:gravity="center"
+                    android:padding="3dip"
+                    android:text="@string/video_preview_take_picture" />
+
+                <Button
+                    android:id="@+id/video_preview_view_picture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/web_cam_video_view_button_selector"
+                    android:gravity="center"
+                    android:text="@string/video_preview_view_picture" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dip"
-                android:layout_marginTop="3dip"
-                android:background="@drawable/web_cam_video_view_button_selector"
-                android:gravity="center"
-                android:text="@string/video_preview_right_down"
-                android:textSize="10dip" />
-        </LinearLayout>
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+                <Button
+                    android:id="@+id/send_audio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/web_cam_video_view_button_selector"
+                    android:gravity="center"
+                    android:padding="3dip"
+                    android:text="@string/video_preview_send_audio_open" />
 
-            <Button
-                android:id="@+id/send_audio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dip"
-                android:layout_marginTop="3dip"
-                android:background="@drawable/web_cam_video_view_button_selector"
-                android:gravity="center"
-                android:text="@string/video_preview_send_audio_open"
-                android:textSize="10dip" />
-
-            <Button
-                android:id="@+id/mid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/web_cam_video_view_button_selector"
-                android:gravity="center"
-                android:text="@string/video_preview_mid"
-                android:textSize="12dp" />
+                <Button
+                    android:id="@+id/video_preview_reverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="1dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/web_cam_video_view_button_selector"
+                    android:gravity="center"
+                    android:padding="3dip"
+                    android:text="@string/video_preview_revese" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

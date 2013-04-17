@@ -190,7 +190,7 @@
                         android:gravity="center"
                         android:textSize="10dip"
                         android:background="@drawable/web_cam_video_view_button_selector"
-                        android:text="@string/video_preview_left_down"/>
+                        android:text="@string/video_preview_take_picture"/>
 
                       <Button
                         android:id="@+id/right_down"
@@ -201,7 +201,7 @@
                         android:gravity="center"
                         android:textSize="10dip"
                         android:background="@drawable/web_cam_video_view_button_selector"
-                        android:text="@string/video_preview_right_down"/>
+                        android:text="@string/video_preview_view_picture"/>
                       
                      <Button
                         android:id="@+id/send_audio"

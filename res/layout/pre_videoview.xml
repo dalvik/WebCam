@@ -3,7 +3,7 @@
     android:id="@+id/container"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
-    android:background="@color/gray"
+    android:background="@color/black"
     android:baselineAligned="true"
     android:orientation="vertical" >
 
@@ -11,53 +11,55 @@
         android:id="@+id/videoview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone" />
+        />
 
-    <RelativeLayout
+    <RelativeLayout android:id="@+id/direction_control_layout"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="gone" 
+         >
 
-        <ImageButton
+        <Button
             android:id="@+id/dir_control_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
-            android:background="@drawable/ic_launcher" />
+            android:background="@drawable/web_cam_dircetion_left_selector"/>
 
-        <ImageButton
+        <Button
             android:id="@+id/dir_control_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerInParent="true"
-            android:background="@drawable/ic_launcher" />
+            android:background="@drawable/web_cam_dircetion_up_selector" />
 
-        <ImageButton
+        <Button
             android:id="@+id/dir_control_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
-            android:background="@drawable/ic_launcher" />
+            android:background="@drawable/web_cam_dircetion_right_selector" />
 
-        <ImageButton
+        <Button
             android:id="@+id/dir_control_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerInParent="true"
-            android:background="@drawable/ic_launcher" />
+            android:background="@drawable/web_cam_dircetion_down_selector" />
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+         android:layout_width="fill_parent"
+         android:layout_height="fill_parent"
          android:layout_centerInParent="true"
         >
-    <include layout="@layout/webcam_yuntai_control" />
+    	<include 
+    	    layout="@layout/webcam_yuntai_control" />
     </RelativeLayout>
         
 

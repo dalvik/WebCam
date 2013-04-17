@@ -11,7 +11,7 @@ public class WebCamActions {
 	public final static String ACTION_PLAY_BACK = "iped.intent.action.PLAY_BACK";
 	
 	// 设备列表更新通知
-	public final static String SEND_DEVICE_LIST_UPDATE_ACTION = "android.intent.action.UPDATE_DEVICES_ACTION";
+	//public final static String SEND_DEVICE_LIST_UPDATE_ACTION = "android.intent.action.UPDATE_DEVICES_ACTION";
 
 	public final static String WEB_CAM_CLOSE_CONN_ACTION = "android.intent.action_SOCKET_CLOSE_ACTION";
 	

@@ -1,7 +1,5 @@
 package com.iped.ipcam.gui;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -21,19 +19,15 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -49,6 +43,7 @@ import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.ByteUtil;
 import com.iped.ipcam.utils.CamCmdListHelper;
+import com.iped.ipcam.utils.Command;
 import com.iped.ipcam.utils.Constants;
 import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DialogUtils;
@@ -59,27 +54,11 @@ import com.iped.ipcam.utils.PackageUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
 import com.iped.ipcam.utils.StringUtils;
 import com.iped.ipcam.utils.ToastUtils;
-import com.iped.ipcam.utils.VideoPreviewDeviceAdapter;
 import com.iped.ipcam.utils.WebCamActions;
 import com.iped.ipcam.utils.WinTaiCmd;
 import com.iped.ipcam.view.VideoPopupMenu;
 
 
-/**
-     H.264的功能分为两层，
-             视频编码层(VCL，Video Coding Layer)
-             网络提取层(NAL，Network Abstraction Layer)
-             在VCL和NAL之间定义了一个基于分组方式的接口，打包和相应的信令属于NAL的一部分。
-  	   这样，高效率编码和网络适应性的任务分别由VCL和NAL来完成。VCL数据是编码处理后的输出，它表示被压缩编码后的视频数据序列。
-  	   在VCL数据传输和存储之前，这些编码的VCL数据先被映射或封装进NAL单元中。
-     VCL包括基于块的运动补偿、混合编码和一些新特性。
-     NAL负责针对下层网络的特性对数据进行封装，包括成帧、发信号给逻辑信道、利用同步信息等。
-     NAL从VCL获得数据，包括头信息、段结构信息和实际载荷，NAL的任务就是正确地将它们映射到传输协议上。
-     NAL下面是各种具体的协议，
-             如H.323、H.324、RTP/UDP/IP等。NAL层的引入大大提高了H.264适应复杂信道的能力。 
- * @author Administrator
- *
- */
 public class CamVideoH264 extends Activity implements OnClickListener, OnTouchListener {
 	
 	//private VideoView videoView = null;
@@ -96,9 +75,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private IpPlayReceiver ipPlayReceiver = null;
 	
-	private UpdeviceListReceiver updeviceListReceiver = null;
-	
-	private ControlPanel rightControlPanel = null;
+	//private ControlPanel rightControlPanel = null;
 	
 	private Thread thread = null;
 	
@@ -106,33 +83,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private CustomProgressDialog m_Dialog = null;
 	
-	public static String currIpAddress = null;
-	
-	public static int currPort = 1234;
-	
-	public static int port1 = 1234;
-	
-	public static int port2 = -1;
-	
-	public static int port3 = -1;
-	
 	//private Device device = null;
-	
-	private ListView listView = null;
-	
-	private VideoPreviewDeviceAdapter previewDeviceAdapter = null;
 	
 	private ICamManager camManager = null;
 	
-	private List<Device> list;
+	private com.iped.ipcam.gui.AdjustSeekBar clearProgerss;
 	
-	private BCVControlProgressBar clearProgerss;
+	private com.iped.ipcam.gui.AdjustSeekBar brightnessProgerss;
 	
-	private BCVControlProgressBar brightnessProgerss;
+	private com.iped.ipcam.gui.AdjustSeekBar contrastProgressbar;
 	
-	private BCVControlProgressBar contrastProgressbar;
-	
-	private BCVControlProgressBar volumeProgressbar;
+	private com.iped.ipcam.gui.AdjustSeekBar volumeProgressbar;
 	
 	private String newPwd = "";
 	
@@ -158,7 +119,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private VideoPopupMenu popupMenu = null;
 	
-	private View rightView = null;
+	private View directViewControl = null;
+	
+	private View rightViewControl = null;
 	
 	private int playBackDeviceIndex = 0;
 	
@@ -184,6 +147,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 	private SharedPreferences settings = null;
 	
+	private int showControlViewStep = Command.NONE_STATE;
+	
+	private boolean canShowYunTai = true;
+	
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			//initThread();
@@ -200,10 +167,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				break;
 			case Constants.CONNECTERROR:
 				ToastUtils.showToast(CamVideoH264.this, msg.arg1);
+				finished();
 				//Toast.makeText(CamVideoH264.this, getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
 				break;
 			case Constants.SENDGETTHREEPORTMSG:
-				Button sendAudio = (Button) rightView.findViewById(R.id.send_audio);
+				Button sendAudio = (Button) rightViewControl.findViewById(R.id.send_audio);
 				sendAudio.setText(R.string.video_preview_send_audio_close);
 				break;
 			case Constants.SENDGETTHREEPORTTIMOUTMSG:
@@ -227,6 +195,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					sendBroadcast(intent2);
 				} else {
 					ToastUtils.showToast(CamVideoH264.this, R.string.device_manager_pwd_set_err);
+					finished();
 				}
 				break;
 			case Constants.SEND_UPDATE_BCV_INFO_MSG:
@@ -240,7 +209,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				}
 				break;
 			case Constants.WEB_CAM_CONNECT_INIT_MSG:
-				Button sendAudioButton = (Button) rightView.findViewById(R.id.send_audio);
+				Button sendAudioButton = (Button) rightViewControl.findViewById(R.id.send_audio);
 				UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOff, CamCmdListHelper.SetAudioTalkOff.length());
 				sendAudioButton.setText(R.string.video_preview_send_audio_open);
 				break;
@@ -272,6 +241,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				//new CheckPwdThread().start();
 				break;
 			case Constants.WEB_CAM_RECONNECT_MSG:
+				ToastUtils.showToast(CamVideoH264.this, R.string.webcam_connection_break_str);
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				new AsynMonitorSocketTask().execute("");
 				break;
@@ -327,6 +297,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				break;
 			case 7001:
 				myVideoView.setStopPlay(true, false);
+				finished();
 				break;
 			case MyVideoView.UPDATE_RESULATION:
 				updateResulation(msg.arg1);
@@ -379,6 +350,8 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		showControlViewStep = Command.NONE_STATE;
+		canShowYunTai = true; 
 		settings = getSharedPreferences(WebCam.class.getName(), 0);
 		DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -390,150 +363,85 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         intentFilter.addAction(WebCamActions.ACTION_PLAY_BACK);
         intentFilter.addAction(WebCamActions.WEB_CAM_CLOSE_CONN_ACTION);
         registerReceiver(ipPlayReceiver, intentFilter);
-        updeviceListReceiver = new UpdeviceListReceiver(); 
-        registerReceiver(updeviceListReceiver, new IntentFilter(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION));
         myVideoView = (MyVideoView) findViewById(R.id.videoview);
         myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
         myVideoView.setOnClickListener(this);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.container);
         playBackBottomlayout = (LinearLayout) layout.findViewById(R.id.play_back_bottom);
         playBackSeekBar = (MySeekBar) playBackBottomlayout.findViewById(R.id.play_back_seek_bar);
-        LayoutInflater factory = LayoutInflater.from(this);
-        rightView = factory.inflate(R.layout.reight_menu, null);
-        listView = (ListView)rightView.findViewById(R.id.video_preview_list);
-        registerListener(rightView);
+        directViewControl = findViewById(R.id.direction_control_layout);
+        registerDirectViewListener(directViewControl);
+        rightViewControl = findViewById(R.id.right_control_view);
+        registerRightControlListener(rightViewControl);
         updateComponent(false);
-        int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-        int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-        rightView.measure(w, h);
-        int width =rightView.getMeasuredWidth(); //
-        //int height = view.getMeasuredHeight();
-		//rightControlPanel = new ControlPanel(this, myVideoView,  width + ControlPanel.HANDLE_WIDTH, LayoutParams.FILL_PARENT);
-		//layout.addView(rightControlPanel);
-		//rightControlPanel.fillPanelContainer(rightView);
+        registerSeekBarProgressListener();
 		camManager = CamMagFactory.getCamManagerInstance();
-		list = camManager.getCamList();
-		listView.setOnItemClickListener(itemClickListener);
-		previewDeviceAdapter = new VideoPreviewDeviceAdapter(list, this);
-		listView.setAdapter(previewDeviceAdapter);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotDimScreen");
 		if(mWakeLock.isHeld() == false) {
 	       mWakeLock.acquire();
 	    }
 		mHandler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-		popupMenu = new VideoPopupMenu(this, mHandler, videoPopMenuItem);
-		//sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
+		sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
 	}
 
-	private void registerListener(View view) {
-		Button up = (Button) view.findViewById(R.id.mid_up); 
-		//up.setOnFocusChangeListener(this);
-		//up.setOnClickListener(this);
+	private void registerDirectViewListener(View view) {
+		Button up = (Button) view.findViewById(R.id.dir_control_left); 
 		up.setOnTouchListener(this);
 		
-		Button down = (Button) view.findViewById(R.id.mid_down);
-		//down.setOnClickListener(this);
-		//down.setOnFocusChangeListener(this);
+		Button down = (Button) view.findViewById(R.id.dir_control_top);
 		down.setOnTouchListener(this);
 		
-		Button left = (Button) view.findViewById(R.id.left);
-		//left.setOnClickListener(this);
-		//left.setOnFocusChangeListener(this);
+		Button left = (Button) view.findViewById(R.id.dir_control_right);
 		left.setOnTouchListener(this);
 		
-		Button right = (Button) view.findViewById(R.id.right);
-		//right.setOnClickListener(this);
-		//right.setOnFocusChangeListener(this);
+		Button right = (Button) view.findViewById(R.id.dir_control_bottom);
 		right.setOnTouchListener(this);
-		
-		Button leftDown = (Button) view.findViewById(R.id.left_down);
-		//right.setOnClickListener(this);
-		//right.setOnFocusChangeListener(this);
-		leftDown.setOnClickListener(this);
-		
-		view.findViewById(R.id.mid).setOnClickListener(this);
-		
-		Button RightDown = (Button) view.findViewById(R.id.right_down);
-		//right.setOnClickListener(this);
-		//right.setOnFocusChangeListener(this);
-		RightDown.setOnClickListener(this);
-		
-		Button sendAudio = (Button) view.findViewById(R.id.send_audio);
-		sendAudio.setOnClickListener(this);
+	}
+	
+	private void registerRightControlListener(View view) {
 		
 		qvga = (RadioButton) view.findViewById(R.id.qvga_button_id);
-		//qvga.setOnCheckedChangeListener(checkedChangeListener);
 		qvga.setOnClickListener(this);
 		vga = (RadioButton) view.findViewById(R.id.vga_button_id);
-		//vga.setOnCheckedChangeListener(checkedChangeListener);
 		vga.setOnClickListener(this);
 		qelp = (RadioButton) view.findViewById(R.id.qelp_button_id);
-		//qelp.setOnCheckedChangeListener(checkedChangeListener);
 		qelp.setOnClickListener(this);
 		
-		/**/
-		Button buttonMinusZoom = (Button) view.findViewById(R.id.minus_zoom); 
-		buttonMinusZoom.setOnClickListener(this);
 		///画面质量
-		clearProgerss = (BCVControlProgressBar) view.findViewById(R.id.clear_progressbar);
+		clearProgerss = (com.iped.ipcam.gui.AdjustSeekBar) view.findViewById(R.id.clear_progressbar);
 		clearProgerss.init(getText(R.string.video_preview_clear).toString());
 		clearProgerss.setProgress(0);
-		Button buttonAddQuality = (Button) view.findViewById(R.id.add_quality); 
-		buttonAddQuality.setOnClickListener(this);
-		Button buttonMinusQuality = (Button) view.findViewById(R.id.minus_quality); 
-		buttonMinusQuality.setOnClickListener(this);
 		
-		brightnessProgerss = (BCVControlProgressBar) view.findViewById(R.id.brightness_progressbar);
+		brightnessProgerss = (com.iped.ipcam.gui.AdjustSeekBar) view.findViewById(R.id.brightness_progressbar);
 		brightnessProgerss.init(getText(R.string.video_preview_brightness).toString());
 		brightnessProgerss.setProgress(0);
-		Button buttonAddZoom = (Button) view.findViewById(R.id.add_zoom); 
-		buttonAddZoom.setOnClickListener(this);
-		Button buttonMinusFocus = (Button) view.findViewById(R.id.minus_foucs); 
-		buttonMinusFocus.setOnClickListener(this);
-		contrastProgressbar = (BCVControlProgressBar) view.findViewById(R.id.contrast_progressbar);
+		contrastProgressbar = (com.iped.ipcam.gui.AdjustSeekBar) view.findViewById(R.id.contrast_progressbar);
 		contrastProgressbar.init(getText(R.string.video_preview_contrast).toString());
 		contrastProgressbar.setProgress(0);
-		Button buttonAddFocus = (Button) view.findViewById(R.id.add_foucs); 
-		buttonAddFocus.setOnClickListener(this);
-		Button buttonMinusApertrue = (Button) view.findViewById(R.id.minus_apertrue); 
-		buttonMinusApertrue.setOnClickListener(this);
 		
-		volumeProgressbar = (BCVControlProgressBar) view.findViewById(R.id.volume_progressbar);
+		volumeProgressbar = (com.iped.ipcam.gui.AdjustSeekBar) view.findViewById(R.id.volume_progressbar);
 		volumeProgressbar.init(getText(R.string.video_preview_volume).toString());
 		volumeProgressbar.setProgress(0);
 		
-		Button buttonAddApertrue = (Button) view.findViewById(R.id.add_apertrue); 
-		buttonAddApertrue.setOnClickListener(this);
+		Button takePicture = (Button) view.findViewById(R.id.video_preview_take_picture);
+		takePicture.setOnClickListener(this);
+		Button viewPicture = (Button) view.findViewById(R.id.video_preview_view_picture);
+		viewPicture.setOnClickListener(this);
+		Button sendAudio = (Button) view.findViewById(R.id.send_audio);
+		sendAudio.setOnClickListener(this);
+		Button reverse = (Button) view.findViewById(R.id.video_preview_reverse);
+		reverse.setOnClickListener(this);
+		
 	}
-	
-	private OnItemClickListener itemClickListener = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> arg0, View arg1, int index,
-				long arg3) {
-			listView.requestFocusFromTouch();
-			listView.setSelection(index);
-			camManager.setSelectInde(index);
-			if(!myVideoView.getPlayStatus()) {
-				myVideoView.setStopPlay(true, false);
-				return;
-			}
-			if(NetworkUtil.checkNetwokEnable(CamVideoH264.this)) {
-				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
-				myVideoView.setPlayBackFlag(false);
-				updateComponent(true);
-				mHandler.sendEmptyMessage(PlayBackConstants.HIDE_SEEKBAR_LAYOUT);
-				new AsynMonitorSocketTask().execute("");
-			} else {
-				handleNetworkOpeartion(CamVideoH264.this);
-			}
-		}
-	};
-	
 	
 	@Override
 	public void onClick(View v) {
+		if(myVideoView.isStopPlay()) {
+			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
+			return ;
+		}
+		reloadControlTask();
 		if(v.getId() == R.id.videoview) {
 			if(firtick == 0l){
 				firtick = System.currentTimeMillis();//前一次点击的时间
@@ -544,147 +452,67 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					// 时间范围自由设定，如果为true表明是连续点击；
 					firtick = 0l;
 					sectick = 0l;
+					myVideoView.invalidate();
 					myVideoView.zoomCanvas();
 				}else{
+					reloadControlTask();
+					if(showControlViewStep == Command.NONE_STATE) {
+						if(canShowYunTai) {
+							if(!directViewControl.isShown()) {
+								directViewControl.setVisibility(View.VISIBLE);
+							}
+							if(rightViewControl.isShown()) {
+								rightViewControl.setVisibility(View.INVISIBLE);
+							}
+							showControlViewStep = Command.DIRECT_CONTROL_STATE;
+						} else {
+							if(!rightViewControl.isShown()) {
+								rightViewControl.setVisibility(View.VISIBLE);
+							}
+							showControlViewStep = Command.HIDE_CONTROL_STATE;
+						}
+					} else if(showControlViewStep == Command.DIRECT_CONTROL_STATE) {
+						if(directViewControl.isShown()) {
+							directViewControl.setVisibility(View.INVISIBLE);
+						}
+						if(!rightViewControl.isShown()) {
+							rightViewControl.setVisibility(View.VISIBLE);
+						}
+						showControlViewStep = Command.HIDE_CONTROL_STATE;
+					} else if(showControlViewStep == Command.HIDE_CONTROL_STATE) {
+						if(directViewControl.isShown()) {
+							directViewControl.setVisibility(View.INVISIBLE);
+						}
+						if(rightViewControl.isShown()) {
+							rightViewControl.setVisibility(View.INVISIBLE);
+						}
+						showControlViewStep = Command.NONE_STATE;
+					}
 					//不是连续点击
 					firtick = System.currentTimeMillis();//重新获取前一次点击的时间
 					sectick = 0l;
-					//rightControlPanel.onClick();
 				} 
 			}
 			return;
 		}
-		if(v.getId() == R.id.right_down){
+		if(v.getId() == R.id.video_preview_view_picture){
 			startActivity(new Intent(this,ImageGrid.class));
 			return;
 		}
-		if(myVideoView.isStopPlay()) {
-			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
-			return ;
-		}
-		//PackageUtil.sendPTZCommond(myVideoView.getCmdSocket(), netUtil, device, WinTaiCmd.PTZ_CMD_LEFT.ordinal());
+		//TODO
 		switch(v.getId()) {
-		case R.id.add_quality:
-			int value0 = clearProgerss.getProgress();
-			value0 += 10;
-			if(value0 >=100) {
-				value0 = 100;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Quality, value0+"")>0){
-				clearProgerss.setProgress(value0);
-			}
-			break;
-		case R.id.minus_quality:
-			int value1 = clearProgerss.getProgress();
-			value1 -= 10;
-			if(value1 <=0) {
-				value1 = 0;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Quality, value1+"")>0){
-				clearProgerss.setProgress(value1);
-			}
-			break;
-		case R.id.mid:
+		case R.id.video_preview_reverse:
 			settings.edit().putBoolean("REVERSE", !myVideoView.isReverseFlag()).commit();
 			myVideoView.setReverseFlag(!myVideoView.isReverseFlag());
 			break;
-		case R.id.minus_zoom:
-			int value2 = brightnessProgerss.getProgress();
-			value2 -= 10;
-			if(value2 <=0) {
-				value2 = 0;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"")>0){
-				brightnessProgerss.setProgress(value2);
-			}
-			break;
-		case R.id.add_zoom:
-			int value = brightnessProgerss.getProgress();
-			value += 10;
-			if(value >=100) {
-				value = 100;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Brightness, value+"")>0) {
-				brightnessProgerss.setProgress(value);
-			}
-			break;
-		case R.id.minus_foucs:
-			int value3 = contrastProgressbar.getProgress();
-			value3 -= 10;
-			if(value3 <=0) {
-				value3 = 0;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"")>0) {
-				contrastProgressbar.setProgress(value3);
-			}
-			break;
-		case R.id.add_foucs:
-			int value4 = contrastProgressbar.getProgress();
-			value4 += 10;
-			if(value4 >=100) {
-				value4 = 100;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value4 +"")>0){
-				contrastProgressbar.setProgress(value4);
-			}
-			break;
-		case R.id.minus_apertrue:
-			final Button sendMinAudioVolume = (Button) rightView.findViewById(R.id.send_audio);
-			if(sendMinAudioVolume.getText().toString().equals(getText(R.string.video_preview_send_audio_close))) {
-				int vv = volumeProgressbar.getProgress();
-				if(--vv<1){
-					vv = 1;
-				}
-				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0];
-				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
-				int re = UdtTools.sendCmdMsg(item, item.length());
-				if(re>0) {
-					volumeProgressbar.setProgress(vv);
-				}
-				return;
-			}
-			int value5 = volumeProgressbar.getProgress();
-			value5 -= 10;
-			if(value5 <=0) {
-				value5 = 0;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Volume, value5+"")>0) {
-				volumeProgressbar.setProgress(value5);
-			}
-			break;
-		case R.id.add_apertrue:
-			final Button sendAddAudioVolume = (Button) rightView.findViewById(R.id.send_audio);
-			if(sendAddAudioVolume.getText().toString().equals(getText(R.string.video_preview_send_audio_close))) {
-				int vv = volumeProgressbar.getProgress();
-				if(++vv>3){
-					vv = 3;
-				}
-				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0];
-				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
-				int resu = UdtTools.sendCmdMsg(item, item.length());
-				if(resu>0) {
-					volumeProgressbar.setProgress(vv);
-				}
-				return;
-			}
-			int value6 = volumeProgressbar.getProgress();
-			value6 += 10;
-			if(value6 >=100) {
-				value6 = 100;
-			}
-			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(), CamCmdListHelper.SetCmp_Set_Volume,value6+"")>0){
-				volumeProgressbar.setProgress(value6);
-			}
-			
-			break;
-		case R.id.left_down:
+		case R.id.video_preview_take_picture:
 			if(myVideoView.takePic()) {
 				ToastUtils.showToast(this, R.string.webcam_takepic_success_str);
 			}else {
 				ToastUtils.showToast(this, R.string.webcam_takepic_error_str);
 			}
 			break;
-		case R.id.right_down:
+		case R.id.video_preview_view_picture:
 			//startActivity(new Intent(this,ImageViewer.class));
 			startActivity(new Intent(this,ImageGrid.class));
 			break;
@@ -692,7 +520,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			Log.d(TAG, "### open oper flag = "  + f);
 			if(f) {
 				f = false;
-				final Button sendAudio = (Button) rightView.findViewById(R.id.send_audio);
+				final Button sendAudio = (Button) rightViewControl.findViewById(R.id.send_audio);
 				if(sendAudio.getText().toString().equals(getText(R.string.video_preview_send_audio_open))) {// open
 					new Thread(new Runnable(){
 						public void run() {
@@ -775,7 +603,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			break;
 		default:
 			break;
-		}/**/
+		}
 	}
 	
 	private boolean f  = true;
@@ -787,10 +615,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//Toast.makeText(this, "return",Toast.LENGTH_SHORT).show();
 			return false;
 		}
+		reloadControlTask();
 		switch(v.getId()) {
-		case R.id.left_up:
-			break;
-		case R.id.mid_up:
+		case R.id.dir_control_top:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				if(!myVideoView.isReverseFlag()) {
 					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_UP.ordinal());
@@ -804,10 +631,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
-		case R.id.right_up:
-
-			break;
-		case R.id.left:
+		case R.id.dir_control_left:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				if(!myVideoView.isReverseFlag()) {
 					//PackageUtil.sendPTZCommond(WinTaiCmd.PTZ_CMD_LEFT.ordinal());
@@ -821,7 +645,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
-		case R.id.right:
+		case R.id.dir_control_right:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				if(!myVideoView.isReverseFlag()) {
 					//PackageUtil.sendPTZCommond( WinTaiCmd.PTZ_CMD_RIGHT.ordinal());
@@ -835,7 +659,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_STOP.ordinal()});
 			}
 			break;
-		case R.id.left_down:
+		case R.id.video_preview_take_picture:
 			if(f) {
 				f = false;
 				if(myVideoView.takePic()) {
@@ -846,7 +670,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				f = true;
 			}
 			break;
-		case R.id.mid_down:
+		case R.id.dir_control_bottom:
 			if(event.getAction() == MotionEvent.ACTION_DOWN) {
 				if(!myVideoView.isReverseFlag()) {
 					new AsynSendPTZ().execute(new Integer[]{WinTaiCmd.PTZ_CMD_DOWN.ordinal()});
@@ -861,19 +685,13 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			}
 			
 			break;
-		case R.id.right_down:
+		case R.id.video_preview_view_picture:
 			if(f) {
 				f = false;
 				//startActivity(new Intent(this,ImageViewer.class));
 				startActivity(new Intent(this, ImageGrid.class));
 				f = true;
 			}
-			//FileUtil.openImage(this);
-			//loadImage.initImage();
-			/*if(imageViewerDialog == null || !imageViewerDialog.isShowing()) {
-				imageViewerDialog = new ImageViewer(this, R.style.image_list_dialog);
-				imageViewerDialog.show();
-			}*/
 			break;
 			default:
 			break;
@@ -882,13 +700,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK) {
+			myVideoView.setStopPlay(true, false);
+			CamVideoH264.this.finish();
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
 		StatService.onResume(this);
-		previewDeviceAdapter = new VideoPreviewDeviceAdapter(camManager.getCamList(), CamVideoH264.this);
-		listView.setAdapter(previewDeviceAdapter);
-		ToastUtils.setListViewHeightBasedOnChildren(listView);
-		//Toast.makeText(CamVideoH264.this, "onResume", Toast.LENGTH_LONG).show();
 	}
 	
 	@Override
@@ -919,24 +742,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
     	if(mWakeLock.isHeld() == true) {
    		 	mWakeLock.release();
         }
-    	Log.d(TAG, "close---==== onDestroy");
-    	myVideoView.onStop();
+    	//myVideoView.onStop();
 		dismissProgressDlg();
 		if(ipPlayReceiver != null) {
 			unregisterReceiver(ipPlayReceiver);
 		}
-		if(updeviceListReceiver != null) {
-			unregisterReceiver(updeviceListReceiver);
-		}
-		
-		if(thread != null && !thread.isAlive()) {
-			try {
-				thread.join(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		mHandler.removeCallbacks(topMenuControlTask);
+		if(thread != null && !thread.interrupted()) {
+			thread.interrupt();
 			thread = null;
 		}
+		Log.d(TAG, "close---==== onDestroy");
     }
 	
 	private void showProgressDlg(int textId) {
@@ -945,7 +761,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//m_Dialog = new ProgressDialog(this);
 			m_Dialog = CustomProgressDialog.createDialog(this, R.style.CustomProgressDialog);  
 		}
-		//TODO
 		if(m_Dialog != null && (!((Activity) CamVideoH264.this).isFinishing())) {
 			if(BuildConfig.DEBUG) {
 				Log.d(TAG, "### " + camManager.getSelectDevice().getDeviceID());
@@ -970,18 +785,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	}
 	
-	private class UpdeviceListReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if(WebCamActions.SEND_DEVICE_LIST_UPDATE_ACTION.equals(intent.getAction())) {
-				previewDeviceAdapter = new VideoPreviewDeviceAdapter(camManager.getCamList(), CamVideoH264.this);
-				listView.setAdapter(previewDeviceAdapter);
-				ToastUtils.setListViewHeightBasedOnChildren(listView);
-				//Toast.makeText(CamVideoH264.this, "aaa", Toast.LENGTH_LONG).show();
-			}
-		}	
-	};
-
 	private class IpPlayReceiver extends BroadcastReceiver {
 
 		@Override
@@ -999,7 +802,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					new AsynMonitorSocketTask().execute("");
 				} else {
 					handleNetworkOpeartion(context);
-					CamVideoH264.this.finish();
 				}
 			}else if(WebCamActions.ACTION_PLAY_BACK.equals(intent.getAction())) {
 				Bundle bundle = intent.getExtras();
@@ -1021,19 +823,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void updateComponent(boolean flag) {
-		rightView.findViewById(R.id.mid_up).setEnabled(flag); 
-		rightView.findViewById(R.id.mid_down).setEnabled(flag);
-		rightView.findViewById(R.id.left).setEnabled(flag);
-		rightView.findViewById(R.id.right).setEnabled(flag);
-		//rightView.findViewById(R.id.mid).setEnabled(flag);
-		rightView.findViewById(R.id.minus_zoom).setEnabled(flag);
-		rightView.findViewById(R.id.add_zoom).setEnabled(flag);
-		rightView.findViewById(R.id.minus_foucs).setEnabled(flag);
-		rightView.findViewById(R.id.add_foucs).setEnabled(flag);
-		rightView.findViewById(R.id.minus_apertrue).setEnabled(flag);
-		rightView.findViewById(R.id.add_apertrue).setEnabled(flag);
-		rightView.findViewById(R.id.add_quality).setEnabled(flag);
-		rightView.findViewById(R.id.minus_quality).setEnabled(flag);
+		clearProgerss.setEnabled(flag);
+		brightnessProgerss.setEnabled(flag);
+		contrastProgressbar.setEnabled(flag);
+		volumeProgressbar.setEnabled(flag);
 		
 	}
 	
@@ -1068,37 +861,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void analyseResult(String result) {
-		/*switch (result) {
-		case ErrorCode.STUN_ERR_INTERNAL:
-			sendErrorMessage(R.string.webcam_error_code_internel);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		case ErrorCode.STUN_ERR_SERVER:
-			sendErrorMessage(R.string.webcam_error_code_server_not_reached);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		case ErrorCode.STUN_ERR_TIMEOUT:
-			sendErrorMessage(R.string.webcam_error_code_timeout);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		case ErrorCode.STUN_ERR_INVALIDID:
-			sendErrorMessage(R.string.webcam_error_code_unlegal);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		case ErrorCode.STUN_ERR_CONNECT:
-			sendErrorMessage(R.string.webcam_error_code_connect_error);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		case ErrorCode.STUN_ERR_BIND:
-			sendErrorMessage(R.string.webcam_error_code_bind_error);
-			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
-			return;
-		default:
-			break;
-		}*/
-		//mHandler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
-		//String random = RandomUtil.generalRandom();
-		//Log.d(TAG, "random = " + random);
 		if("OK".equalsIgnoreCase(result)) {
 			int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
 			if(initRes<0) {
@@ -1117,6 +879,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				}
 			}
 			mHandler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
+			CamVideoH264.this.finish();
 		}
 	}
 	
@@ -1201,9 +964,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
                             public void onClick(android.content.DialogInterface dialog, int which) {  
                             	Intent intent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
                             	context.startActivity(intent);
+            					CamVideoH264.this.finish();
                             }  
                         })
-                        .setNegativeButton(context.getResources().getString(R.string.webcam_network_invalid_cancle), null)
+                        .setNegativeButton(context.getResources().getString(R.string.webcam_network_invalid_cancle), new android.content.DialogInterface.OnClickListener() {  
+                            @Override  
+                            public void onClick(android.content.DialogInterface dialog, int which) {  
+            					CamVideoH264.this.finish();
+                            }  
+                        })
                         .create().show();
                 Looper.loop();  
             }  
@@ -1248,7 +1017,143 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			//System.out.println(progress + "####" + startTime+" "+ DateUtil.formatTimeToDate6(progress+startTime));
 		}
 	};
+	
+	private OnSeekBarChangeListener clearProgerssBarChangeListener = new OnSeekBarChangeListener() {
 
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+	
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			int value0 = clearProgerss.getProgress();
+			if(value0 >100) {
+				value0 = 100;
+			}
+			if(value0<0) {
+				value0 = 0;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Quality, value0+"")>0){
+				clearProgerss.setProgress(value0);
+			}
+			reloadControlTask();
+		}
+		
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			clearProgerss.setProgress(progress);
+		}
+	};
+	
+	private OnSeekBarChangeListener brightnessProgerssBarChangeListener = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+	
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			int value2 = brightnessProgerss.getProgress();
+			if(value2 <0) {
+				value2 = 0;
+			}
+			if(value2 >100) {
+				value2 = 100;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Brightness, value2+"")>0){
+				brightnessProgerss.setProgress(value2);
+			}
+			reloadControlTask();
+		}
+		
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			brightnessProgerss.setProgress(progress);
+		}
+	};
+	
+	private OnSeekBarChangeListener contrastProgressbarBarChangeListener = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+	
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			int value3 = contrastProgressbar.getProgress();
+			if(value3 <0) {
+				value3 = 0;
+			}
+			if(value3 > 100) {
+				value3 = 100;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Contrast, value3 +"")>0) {
+				contrastProgressbar.setProgress(value3);
+			}
+			reloadControlTask();
+		}
+		
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			contrastProgressbar.setProgress(progress);
+		}
+	};
+	
+	private OnSeekBarChangeListener volumeProgressbarChangeListener = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+	
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			final Button sendAddAudioVolume = (Button) rightViewControl.findViewById(R.id.send_audio);
+			if(sendAddAudioVolume.getText().toString().equals(getText(R.string.video_preview_send_audio_close))) {
+				int vv = volumeProgressbar.getProgress();
+				if(vv>3){
+					vv = 3;
+				}
+				if(vv<0) {
+					vv = 0;
+				}
+				String item = CamCmdListHelper.SetAudioTalkVolume + CamCmdListHelper.audioTalk[vv-1][1] + ":" + CamCmdListHelper.audioTalk[vv-1][0];
+				Log.d(TAG, "### Speak Audio " + item + "  vv = "+ (vv-1));
+				int resu = UdtTools.sendCmdMsg(item, item.length());
+				if(resu>0) {
+					volumeProgressbar.setProgress(vv);
+				}
+				return;
+			}
+			int value2 = volumeProgressbar.getProgress();
+			if(value2 <0) {
+				value2 = 0;
+			}
+			if(value2 > 100) {
+				value2 = 100;
+			}
+			if(PackageUtil.setBCV(camManager.getSelectDevice().getDeviceID(),CamCmdListHelper.SetCmp_Set_Volume, value2+"")>0){
+				volumeProgressbar.setProgress(value2);
+			}
+			reloadControlTask();
+		}
+		
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			volumeProgressbar.setProgress(progress);
+		}
+	};
+	
+	private void registerSeekBarProgressListener() {
+		clearProgerss.setOnSeekBarChangeListener(clearProgerssBarChangeListener);
+		brightnessProgerss.setOnSeekBarChangeListener(brightnessProgerssBarChangeListener);
+		contrastProgressbar.setOnSeekBarChangeListener(contrastProgressbarBarChangeListener);
+		volumeProgressbar.setOnSeekBarChangeListener(volumeProgressbarChangeListener);
+	}
+	
 	private class AsynPlayBackTask extends AsyncTask<Integer, Integer, Void> {
 		
 		@Override
@@ -1283,6 +1188,10 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public boolean onLongClick(View v) {
 			if(!myVideoView.getPlayStatus()) {
+
+				if(popupMenu == null) {
+					popupMenu = new VideoPopupMenu(CamVideoH264.this, mHandler, videoPopMenuItem);
+				}
 				if(!popupMenu.isShowing()) {
 					popupMenu.showAtLocation(myVideoView, Gravity.NO_GRAVITY, x_offSet-5, y_offSet-5);
 				}
@@ -1303,20 +1212,20 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void updateResulation(int id) {
 		 if(id == 0) {
+			updateControlButtion(View.VISIBLE);
 			qvga.setChecked(true);
 			vga.setChecked(false);
 			qelp.setChecked(false);
-			updateControlButtion(View.VISIBLE);
 		}else if(id == 1) {
-			qvga.setChecked(false);
-			vga.setChecked(true);
-			qelp.setChecked(false);
 			updateControlButtion(View.VISIBLE);
+			qvga.setChecked(false);
+			qelp.setChecked(false);
+			vga.setChecked(true);
 		}else if(id == 2) {
+			updateControlButtion(View.VISIBLE);
 			qvga.setChecked(false);
 			vga.setChecked(false);
 			qelp.setChecked(true);
-			updateControlButtion(View.VISIBLE);
 		} else {
 			updateControlButtion(View.GONE);
 		}
@@ -1398,19 +1307,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	}
 	
 	private void updateAudioTalk(boolean flag) {
-		rightView.findViewById(R.id.send_audio).setEnabled(flag);
+		rightViewControl.findViewById(R.id.send_audio).setEnabled(flag);
 	}
 	
 	private void updateQuality(boolean flag) {
-		rightView.findViewById(R.id.add_quality).setEnabled(flag);
-		rightView.findViewById(R.id.minus_quality).setEnabled(flag);
+		clearProgerss.setEnabled(flag);
 	}
 	
 	private void updateYuntai(boolean flag) {
-		rightView.findViewById(R.id.mid_up).setEnabled(flag);
-		rightView.findViewById(R.id.mid_down).setEnabled(flag);
-		rightView.findViewById(R.id.left).setEnabled(flag);
-		rightView.findViewById(R.id.right).setEnabled(flag);
+		canShowYunTai = flag;
 	}
 	
 	private void updateCIF(boolean flag) {
@@ -1423,5 +1328,29 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void updateVGA(boolean flag) {
 		vga.setEnabled(flag);
+	}
+	
+	private void reloadControlTask() {
+		mHandler.removeCallbacks(topMenuControlTask);
+		mHandler.postDelayed(topMenuControlTask, 5000);
+	}
+	
+	private Runnable topMenuControlTask = new Runnable() {
+		
+		@Override
+		public void run() {
+			if(rightViewControl.isShown()) {
+				rightViewControl.setVisibility(View.INVISIBLE);
+			} 
+			if (directViewControl.isShown()){
+				directViewControl.setVisibility(View.INVISIBLE);
+			}
+			showControlViewStep = Command.NONE_STATE;
+			mHandler.postDelayed(topMenuControlTask, 5000);
+		}
+	};
+	
+	private void finished() {
+		CamVideoH264.this.finish();
 	}
 }
