@@ -4,129 +4,155 @@
     android:versionCode="740"
     android:versionName="V7.4.0" >
 
-    <uses-sdk android:minSdkVersion="5" android:targetSdkVersion="15"/>
-    
-	
-    <!--  android:name=".WebTabWidget" -->
-        
-    <application 
-        android:icon="@drawable/ic_launcher"
+    <uses-sdk
+        android:minSdkVersion="5"
+        android:targetSdkVersion="15" />
+
+    <!-- android:name=".WebTabWidget" -->
+
+    <application
         android:anyDensity="false"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-        <activity 
-            android:label="@string/app_name"
+        <activity
+            android:name=".WebCam"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait" 
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:name=".WebCam">
-            <intent-filter >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <!-- android:theme="@style/main_exit_themes"android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
-        <activity android:launchMode="singleInstance" 
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  
-            android:name=".WebTabWidget" 
-            android:screenOrientation="portrait" 
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
 
+        <!-- android:theme="@style/main_exit_themes"android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
         <activity
-            android:name=".Main" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" 
+            android:name=".WebTabWidget"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity
-            android:name=".CamVideoH264" 
-            android:screenOrientation="landscape" 
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity 
-            android:name=".DeviceManager" 
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity  
-            android:name=".PlayBack"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name=".ImageViewer" android:configChanges="orientation|keyboardHidden|screenSize" />
-        
-        <activity android:name=".LeftVideoView" android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageGridActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageGrid"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetailActivity" 
-             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-             android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name="com.iped.ipcam.bitmapfun.ImageDetail" 
-             android:configChanges="orientation|keyboardHidden|screenSize"
-             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-         
-         <activity android:name="com.iped.ipcam.bitmapfun.FlingGalleryActivity"
+            android:name=".Main"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-         
-         <activity android:name="com.iped.ipcam.bitmapfun.ScrollyGalleryActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".CamVideoH264"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-                  
-        <activity 
-            android:name=".DeviceParamSets" 
-            android:configChanges="orientation|keyboardHidden|screenSize" 
-            android:screenOrientation="landscape" 
-            android:theme="@style/thems_param_set_activity">
-        	<intent-filter>
-        	    <action android:name="android.intent.action.QUERY_CONFIG_ACTION"/>
-        	    <category android:name="android.intent.category.DEFAULT"/>
-        	    <data android:mimeType="vnd.android.webcam.type/vnd.iped.webcam"/>
-        	</intent-filter>    
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar" >
+            <intent-filter>
+                <action android:name="iped.intent.action.IP_PLAY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="iped.intent.action.PLAY_BACK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
-        
-        <activity android:launchMode="singleInstance" 
+        <activity
+            android:name=".DeviceManager"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name=".PlayBack"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name=".ImageViewer"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name=".LeftVideoView"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.ImageGridActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.ImageGrid"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.ImageDetailActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.ImageDetail"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.FlingGalleryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name="com.iped.ipcam.bitmapfun.ScrollyGalleryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".DeviceParamSets"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@style/thems_param_set_activity" >
+            <intent-filter>
+                <action android:name="android.intent.action.QUERY_CONFIG_ACTION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.webcam.type/vnd.iped.webcam" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".SystemSettings"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-        
-        <activity android:name=".List1" android:theme="@android:style/Theme.Dialog"/>
-        
-        <activity android:name=".DirPreview" android:theme="@android:style/Theme.NoTitleBar"/>
-        
-        <activity android:name=".PopupActivity" android:configChanges="orientation|keyboardHidden|screenSize" android:theme="@style/thems_tips_popup_dailog"/>
-        
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".List1"
+            android:theme="@android:style/Theme.Dialog" />
+        <activity
+            android:name=".DirPreview"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name=".PopupActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/thems_tips_popup_dailog" />
         <activity
             android:name=".LogoutDialog"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"
             android:theme="@style/Theme.HalfTranslucent" />
-         
-        <meta-data android:name="BaiduMobAd_STAT_ID" android:value="baaed4bb33" />
-		<meta-data android:name="BaiduMobAd_CHANNEL" android:value="Baidu Market" />
-		<meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
-		<meta-data android:name="BaiduMobAd_SEND_STRATEGY" android:value="APP_START" />
-		<meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
-		<meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="true" />
-		
+
+        <meta-data
+            android:name="BaiduMobAd_STAT_ID"
+            android:value="baaed4bb33" />
+        <meta-data
+            android:name="BaiduMobAd_CHANNEL"
+            android:value="Baidu Market" />
+        <meta-data
+            android:name="BaiduMobAd_EXCEPTION_LOG"
+            android:value="true" />
+        <meta-data
+            android:name="BaiduMobAd_SEND_STRATEGY"
+            android:value="APP_START" />
+        <meta-data
+            android:name="BaiduMobAd_ONLY_WIFI"
+            android:value="false" />
+        <meta-data
+            android:name="BaiduMobAd_CELL_LOCATION"
+            android:value="true" />
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET"/> 
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
- 	<uses-permission android:name="android.permission.RESTART_PACKAGES"/>  
- 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
- 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
- 	<uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
- 	<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
- 	<uses-permission android:name="android.permission.DEVICE_POWER"/>
- 	<uses-permission android:name = "android.permission.SET_WALLPAPER"/>
- 	<uses-permission android:name="android.permission.READ_PHONE_STATE" /> 
- 	
- 	
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
 </manifest>

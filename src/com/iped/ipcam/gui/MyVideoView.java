@@ -439,7 +439,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				handler.sendEmptyMessageDelayed(Constants.WEB_CAM_RECONNECT_MSG, DELAY_RECONNECT);
 			}
 		}else {
-			
+			//handler.sendEmptyMessage(7001);
 		}
 		release();
 		flushBitmap();

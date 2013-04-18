@@ -134,6 +134,10 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 				indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
 			}
 		} while(!stopPlay);
+		if(video != null && !video.isRecycled()) {
+			video.recycle();
+			video = null;
+		}
 	}
 
 	private class PlayJpegThread implements Runnable {
@@ -170,6 +174,7 @@ public class DecodeJpegThread extends DecoderFactory implements Runnable, OnPutI
 					}  
 				}
 			}
+			queue.clear();
 		}
 	}
 	

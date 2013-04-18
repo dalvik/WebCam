@@ -245,6 +245,21 @@ public class PlayBackJpegThread extends DecoderFactory implements Runnable, OnPu
 		if(playAudioThread != null && !playAudioThread.isInterrupted()) {
 			playAudioThread.interrupt();
 		}
+		if(video != null && !video.isRecycled()) {
+			video.recycle();
+			video = null;
+		}
+		synchronized (lock) {
+			if(queue.getImageListLength()>0) {
+				JpegImage image = queue.removeImage();
+				if(image != null) {
+					if(image.bitmap != null && !image.bitmap.isRecycled()) {
+						image.bitmap.recycle();
+						image.bitmap = null;
+					}
+				}
+			}
+		}
 	}
 	
 	private class PalyBackAudio implements Runnable {

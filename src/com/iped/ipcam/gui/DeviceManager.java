@@ -355,8 +355,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			handler.sendEmptyMessage(Constants.UPDATEDEVICELIST);
 			break;
 		case MENU_PREVIEW:
-			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
-			sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
+			//WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+			startActivity(new Intent(WebCamActions.ACTION_IPPLAY));
+			//sendBroadcast(new Intent(WebCamActions.ACTION_IPPLAY));
 			break;
 		case MENU_ParaSet:
 			device = camManager.getSelectDevice();
@@ -500,8 +501,9 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 			camManager.setSelectInde(index-1);
 			adapter.setChecked(index-1);
 			adapter.notifyDataSetChanged();	
-			Intent intent = new Intent(DeviceManager.this, CamVideoH264.class);
-			startActivity(intent);
+			//Intent intent = new Intent(DeviceManager.this, CamVideoH264.class);
+			//startActivity(intent);
+			startActivity(new Intent(WebCamActions.ACTION_IPPLAY));
 		}
 	};
 

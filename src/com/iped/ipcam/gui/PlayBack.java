@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -142,6 +143,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 		videoAdapter = new VideoAdapter(videoManager.getVideoList(), this);
 		getListView().setAdapter(videoAdapter);
 		getListView().setOnItemLongClickListener(listener);
+		getListView().setOnItemClickListener(itemClickListener);
 		registerForContextMenu(getListView());
 		videoSearch = (Button) findViewById(R.id.play_back_video_search);
 		clearAll = (Button) findViewById(R.id.play_back_clear_all);
@@ -156,6 +158,35 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				int index, long arg3) {
 			selectIndex = index;
 			return false;
+		}
+	};
+	
+	private OnItemClickListener itemClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			selectIndex = position;
+			Video video = videoList.get(selectIndex);
+			if(video == null) {
+				return;
+			}
+			String videoIndex = video.getIndex() + "00000000";
+			Intent intent = new Intent();
+			Bundle bundle = new Bundle();
+			bundle.putString("PLVIDEOINDEX",videoIndex);
+			String start = video.getVideoStartTime();
+			String end = video.getVideoEndTime();
+			long startTime = DateUtil.formatTimeToDate(start).getTime();
+			if(end == null || end.trim().length()<=0) {
+				bundle.putLong("TOTALTIME", 0);
+			}else {
+				bundle.putLong("TOTALTIME", DateUtil.formatTimeToDate(end).getTime() - startTime);
+			}
+			bundle.putLong("STARTTIME", startTime);
+			bundle.putInt("PLAYBACKDEVICEINDEX", searchDviceIndexCurrent);
+			intent.putExtras(bundle);
+			intent.setAction(WebCamActions.ACTION_PLAY_BACK);
+			startActivity(intent);
 		}
 	};
 	
@@ -179,6 +210,9 @@ public class PlayBack extends ListActivity implements OnClickListener {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		Video video = videoList.get(selectIndex);
+		if(video == null) {
+			return false;
+		}
 		switch (item.getItemId()) {
 		case DOWNLOAD:
 			break;
@@ -189,7 +223,7 @@ public class PlayBack extends ListActivity implements OnClickListener {
 			handler.sendEmptyMessage(Constants.DELETEFILES);
 			break;
 		case PLAYBACK:
-			WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
+			//WebTabWidget.tabHost.setCurrentTabByTag(Constants.VIDEOPREVIEW);
 			String videoIndex = video.getIndex() + "00000000";
 			Intent intent = new Intent();
 			Bundle bundle = new Bundle();
@@ -203,11 +237,10 @@ public class PlayBack extends ListActivity implements OnClickListener {
 				bundle.putLong("TOTALTIME", DateUtil.formatTimeToDate(end).getTime() - startTime);
 			}
 			bundle.putLong("STARTTIME", startTime);
-			//bundle.putSerializable("IPPLAY", camManager.getSelectDevice());
 			bundle.putInt("PLAYBACKDEVICEINDEX", searchDviceIndexCurrent);
 			intent.putExtras(bundle);
 			intent.setAction(WebCamActions.ACTION_PLAY_BACK);
-			sendBroadcast(intent);
+			startActivity(intent);
 			break;
 		default:
 			break;
