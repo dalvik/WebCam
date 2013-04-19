@@ -110,7 +110,7 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 						} catch (InterruptedException e) {
 							stopPlay = true;
 							//showMpeg.setInerrupt();
-							Log.e(TAG, "play mpeg thread InterruptedException");
+							Log.e(TAG, "play h264 thread InterruptedException");
 							break;
 						}
 					}  
@@ -120,7 +120,7 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 					byte b2 = h264Buf[(indexForGet+2)%NALBUFLENGTH];
 					byte b3 = h264Buf[(indexForGet+3)%NALBUFLENGTH];
 					byte b4 = h264Buf[(indexForGet+4)%NALBUFLENGTH];
-					/*if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
+					if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
 						//System.out.println("notify");
 						myVideoView.notifyed();
 						canStartFlag = true;
@@ -135,8 +135,8 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 						isMpeg4 = true;
 						imageDataStart = false;
 						headFlagCount = 0;
-						if(BuildConfig.DEBUG && !DEBUG) {
-							Log.d(TAG, "### data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
+						if(BuildConfig.DEBUG && DEBUG) {
+							Log.d(TAG, "### h264 data start flag ->" + b0 + "  " + b1 + " " + b2 + " " + b3 + " " + b4);
 						}
 					}else if(b0 == -1 &&  b1 == -40 &&  b2 == -1 && b3 == -37) {
 						//jpegByteBuf[jpegBufUsed++] = -1;
@@ -145,7 +145,7 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 						isMpeg4 = false;
 						//jpegBufUsed = 1;
 						//System.out.println("jpeg code = " + jpegTimeTmp);
-					}else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
+					}/*else if(isMpeg4 && b0 == 0 &&  b1 == 0) {
 						//System.out.println("startFlagCount = " + startFlagCount);
 						if(startFlagCount++ % mpegPakages == 0 && canStartFlag){ //
 							startFlagCount = 1;

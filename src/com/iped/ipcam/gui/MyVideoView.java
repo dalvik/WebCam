@@ -32,7 +32,6 @@ import com.iped.ipcam.utils.DateUtil;
 import com.iped.ipcam.utils.DecodeType;
 import com.iped.ipcam.utils.FileUtil;
 import com.iped.ipcam.utils.PlayBackConstants;
-import com.iped.ipcam.utils.ToastUtils;
 
 public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListener {
 
@@ -208,7 +207,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				canvas.drawBitmap(video, null, rect, textPaint);
 			}
 			canvas.restore();
-			canvas.drawText(devicenName + "  " + deviceId + "  "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + "  " + frameCountTemp + " p/s  " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
+			canvas.drawText(devicenName + " " + deviceId + " "	+ DateUtil.formatTimeStrToTimeStr(timeStr) + " " + frameCountTemp + " fps " + dataRateTemp/1024 +" kbps", rect.left + 15, rect.top + 20, textPaint);
 		}else {
 			String text = "  ";
 			if(rect2 == null) {
