@@ -39,7 +39,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	
 	private final static int DELAY_RECONNECT = 20* 1000;
 	
-	public static int NALBUFLENGTH =0;//32 * 48; //320 * 480 * 2
+	public int recvBufferLength =0;//32 * 48; //320 * 480 * 2
 
 	private final static int VIDEOSOCKETBUFLENGTH = 4096;//  342000;
 
@@ -138,6 +138,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		infoPaint.setTextSize(18);
 		decoderType = DecodeType.JPEG_DECODE.ordinal();
 		isAutoStop = true;
+		stopPlay = false;
 	}
 	
 	public void changeConfig(int w, int h) {
@@ -147,7 +148,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (video != null) {
+		if (video != null && !video.isRecycled()) {
 			if (temWidth != getWidth()) {
 				temWidth = getWidth();
 				int tmpHeight = getHeight();
@@ -245,7 +246,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if("tlk".equalsIgnoreCase(tlk)) {
 			handler.sendEmptyMessage(Constants.WEB_CAM_HIDE_CHECK_PWD_DLG_MSG);
 			handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
-			UdtTools.exit();
+			onStop();
 			return;
 		}
 		BCVInfo info = new BCVInfo(b[3], b[4], b[5]);
@@ -254,46 +255,46 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			Log.d(TAG, "### video type = " + type);
 			if("mpeg4".equalsIgnoreCase(type)) {
 				decoderType = DecodeType.MPEG4_DECODE.ordinal();
-				NALBUFLENGTH = 1024*20; //
+				recvBufferLength = 1024*20; //
 			}else if(type.contains("h264")) {
 				decoderType = DecodeType.H264_DECODE.ordinal();
-				NALBUFLENGTH = 1024*20; //
+				recvBufferLength = 1024*20; //
 			}else {
-				NALBUFLENGTH = 320 * 480 * 2;
+				recvBufferLength = 320 * 480 * 2;
 				decoderType = DecodeType.JPEG_DECODE.ordinal();
 			}
 			info.setQuality(b[13]);
 		} else {
-			NALBUFLENGTH = 320 * 480 * 2;
+			recvBufferLength = 320 * 480 * 2;
 			decoderType = DecodeType.JPEG_DECODE.ordinal();
 		}
 		
 		initBCV(info);
 		videoSocketBuf = new byte[VIDEOSOCKETBUFLENGTH];
-		nalBuf = new byte[NALBUFLENGTH];//>100k
+		nalBuf = new byte[recvBufferLength];//>100k
 		indexForPut = 0;
 		temWidth = 1;
 		frameCount  = 0;
 		dataRate = 0;
 		if(!playBackFlag) {//不是回放
-			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 1000);
+			handler.sendEmptyMessageDelayed(CamVideoH264.CHANGE_DEFAULT_QUALITY, 3000);
 			if(decoderType == DecodeType.MPEG4_DECODE.ordinal()) {
 				decoderFactory = new PlayMpegThread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
-				audioThread = new DecodeAudioThread(this);
+				audioThread = new DecodeAudioThread();
 				audioPlayerThread = new Thread(audioThread);
 				audioPlayerThread.start();
 			}else if(decoderType == DecodeType.H264_DECODE.ordinal()) {
 				decoderFactory = new PlayH264Thread(true, this,nalBuf, timeStr, video, frameCount);
 				decoderFactory.setOnMpegPlayListener(this);
 				new Thread(decoderFactory).start();
-				audioThread = new DecodeAudioThread(this);
+				audioThread = new DecodeAudioThread();
 				audioPlayerThread = new Thread(audioThread);
 				audioPlayerThread.start();
 				System.out.println("h264---------");
 			}else {
-				audioThread = new DecodeAudioThread(this);
+				audioThread = new DecodeAudioThread();
 				audioPlayerThread = new Thread(audioThread);
 				audioPlayerThread.start();
 				decoderFactory = new DecodeJpegThread(this, nalBuf, timeStr, video, frameCount);
@@ -355,7 +356,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 			timeoutCounter = 0;
 			int recvBufIndex = 0;
 			do{
-				if((indexForPut +1) % NALBUFLENGTH == decoderFactory.getIndexForGet()) {
+				if((indexForPut +1) % recvBufferLength == decoderFactory.getIndexForGet()) {
 					synchronized (nalBuf) {
 						try {
 							nalBuf.wait(20);
@@ -368,7 +369,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 				}else {
 					byte b0 = videoSocketBuf[recvBufIndex];
 					nalBuf[indexForPut]= b0;  
-					indexForPut = (indexForPut+1)%NALBUFLENGTH;  
+					indexForPut = (indexForPut+1)%recvBufferLength;  
 					if(listener != null) {
 						listener.updatePutIndex(indexForPut);
 					}
@@ -396,9 +397,7 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 										sleepFlag = false; 
 						    			synchronized (nalBuf) {
 						    				try {
-						    					//Log.d(TAG, "3333");
 						    					nalBuf.wait(10000);
-						    					//Log.d(TAG, "444");
 						    				} catch (InterruptedException e) {
 						    					stopPlay = true;
 						    					onStop();
@@ -427,8 +426,8 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### onStoped.");
 		}
+		release();
 		stopAudio();
-		TalkBackThread.stopTalkBack();
 		if(decoderFactory != null) {
 			decoderFactory.onStop(stopPlay);
 		}
@@ -440,7 +439,6 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}else {
 			//handler.sendEmptyMessage(7001);
 		}
-		release();
 		flushBitmap();
 		System.gc();
 	}
@@ -469,21 +467,17 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 	private void release() {
 		handler.removeCallbacks(calculateFrameTask);
 		handler.sendEmptyMessage(PlayBackConstants.DISABLE_SEEKBAR);
-		handler.sendEmptyMessage(Constants.WEB_CAM_CONNECT_INIT_MSG);
-		UdtTools.exit();
+		UdtTools.close();
 	}
 
 	private void flushBitmap() {
-		if(this.video != null && !this.video.isRecycled()) {
-			this.video.recycle();
-			this.video = null;
+		if(video != null && !video.isRecycled()) {
+			video.recycle();
+			video = null;
+			Log.d(TAG, "### recycle and flush bitmp.");
 		}
 		postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
 		System.runFinalization();
-	}
-
-	public void onStart() {
-		stopPlay = false;
 	}
 
 	public boolean getPlayStatus() {
@@ -644,35 +638,11 @@ public class MyVideoView extends ImageView implements Runnable, OnMpegPlayListen
 		}
 	}
 	
-	private class AsynCheckResoluTask extends AsyncTask<String, String, Void> {
-		
-		@Override
-		protected Void doInBackground(String... params) {
-			String item = CamCmdListHelper.SetVideoResol + params[0];
-			int res = UdtTools.sendCmdMsg( item, item.length());
-			if(BuildConfig.DEBUG) {
-				Log.d(TAG, "### check resulation = " + item + " seek result = " + res );
-			}
-			//startActivity(new Intent(CamVideoH264.this, PopupActivity.class));
-			if(res>0) {
-				//handler.sendEmptyMessage(Constants.SHOW_POP_UP_TIPS_DIA_MSG);
-			}
-			return null;
-		}
-	}
-	
-	public void callBackStop() {
-		if(BuildConfig.DEBUG) {
-			Log.d(TAG, "### audio thread exit call back stop video thread");
-		}
-		//isAutoStop = true;
-		if(!stopPlay) {
-			stopPlay = true;
-			onStop();
-		}
-	}
-	
 	public void checkReset() {
 		decoderFactory.reset();
+	}
+
+	public int getRecvBufferLength() {
+		return recvBufferLength;
 	}
 }

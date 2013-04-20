@@ -27,8 +27,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private int length = 1 * 400 * 1024;
 	
-	//int bufNeedLength = length - 5;
-	
 	private byte[] playMpegBuf = null;
 	
 	private int usedBytes = length;
@@ -40,14 +38,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	private boolean startFlag = false;
 	
 	private int headFlagCount = 0;
-	
-	//private int jpegByteBufLength = 2 * 150 * 1024;
-	
-	//private byte[] jpegByteBuf = null; 
-	
-	//private int jpegBufUsed = 0;
-	
-	//private int tmpJpgBufUsed = 0;
 	
 	private String time = "";
 	
@@ -67,7 +57,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	
 	private int indexForGet = 0;
 	
-	private final static int NALBUFLENGTH = MyVideoView.NALBUFLENGTH;
+	private int recvBufferlength = 0;//MyVideoView.recvBufferLength;
 	
 	private boolean isMpeg4 = false;
 	
@@ -100,11 +90,12 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		}
 		//jpegByteBuf = new byte[jpegByteBufLength]; 
 		playMpegBuf = new byte[length];
+		stopPlay = false;
+		recvBufferlength = myVideoView.getRecvBufferLength();
 	}
 	
 	@Override
 	public void run() {
-		stopPlay = false;
 		int res = UdtTools.initXvidDecorer();
 		if(res != 0) {
 			stopPlay = true;
@@ -117,7 +108,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 		thread.start();
 		while(!stopPlay) {
 			do{
-				if((indexForGet+5)%NALBUFLENGTH == indexForPut){
+				if((indexForGet+5)%recvBufferlength == indexForPut){
 					synchronized (playMpegBuf) {
 						try {
 							playMpegBuf.wait(20);
@@ -130,10 +121,10 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					}  
 				}else {
 					byte b0 = mpegBuf[indexForGet];
-					byte b1 = mpegBuf[(indexForGet+1)%NALBUFLENGTH];
-					byte b2 = mpegBuf[(indexForGet+2)%NALBUFLENGTH];
-					byte b3 = mpegBuf[(indexForGet+3)%NALBUFLENGTH];
-					byte b4 = mpegBuf[(indexForGet+4)%NALBUFLENGTH];
+					byte b1 = mpegBuf[(indexForGet+1)%recvBufferlength];
+					byte b2 = mpegBuf[(indexForGet+2)%recvBufferlength];
+					byte b3 = mpegBuf[(indexForGet+3)%recvBufferlength];
+					byte b4 = mpegBuf[(indexForGet+4)%recvBufferlength];
 					if(b0 == 0 && b1 == 0 && b2 == 0 && b3 == 1 && b4 == 12 ) { // 0001C
 						//System.out.println("notify");
 						myVideoView.notifyed();
@@ -192,7 +183,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							}
 						}
 					} 
-					indexForGet = (indexForGet + 1)%NALBUFLENGTH;  
+					indexForGet = (indexForGet + 1)%recvBufferlength;  
 				}
 			} while(!stopPlay);
 			startFlag = false;
@@ -212,21 +203,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					Log.d(TAG, "### imageWidth = " + imageWidth + "  xvid find header fail");
 					continue;
 				}
-				System.gc();
-				System.runFinalization();
 				rgbDataBuf = new byte[imageWidth * imageHeight * 4];
 				Log.d(TAG, "### W = " + imageWidth + " H = " + imageHeight + " used_bytes = " + usedBytes + " rgb length = " + rgbDataBuf.length);
 				synchronized (lock) {
 					if(video == null) {
 						video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
 					}else { 
-						Bitmap tmp = Bitmap.createScaledBitmap(video, imageWidth, imageHeight, false);
-						if(!video.isRecycled()) {
-							video.recycle();
-							video = null;
-						}
-						video = tmp;
-					}/**/
+						video.recycle();
+						video = null;
+						video = Bitmap.createBitmap(imageWidth, imageHeight, Config.RGB_565);
+					}
 					myVideoView.setImage(video);
 				}
 				if(flag) {
@@ -236,7 +222,7 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 				mpegPakages = 2;
 				checkResulationFlag = true;
 			}else if(!stopPlay){
-				usedBytes = UdtTools.xvidDecorer(playMpegBuf, mpegDataLength, rgbDataBuf, BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
+				usedBytes = UdtTools.xvidDecorer(playMpegBuf, mpegDataLength, rgbDataBuf, !BuildConfig.DEBUG?1:0); //flag == 1 printf decode time
 				if(usedBytes>999999) {//(XDIM * 100000) + used_bytes;
 					int newImageWidth = usedBytes / 1000000;
 					int useBytes = usedBytes%1000000;
@@ -249,11 +235,10 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 					rgbDataBuf = new byte[newImageWidth * newImageHeight * 4];
 					queue.clear();
 					synchronized (lock) {
-						if(video != null && !video.isRecycled()) {
+						if(video != null) {
 							video.recycle();
-							System.gc();
-							System.runFinalization();
 							video = null;
+							System.gc();
 						}
 						video = Bitmap.createBitmap(newImageWidth, newImageHeight, Config.RGB_565);
 						myVideoView.setImage(video);
@@ -290,7 +275,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 						unusedBytes = 0;
 					}
 					System.arraycopy(playMpegBuf, usedBytes, playMpegBuf, 0, unusedBytes);
-					//System.out.println("### move ========= " + (SystemClock.currentThreadTimeMillis() - curr));
 					mpegDataLength = unusedBytes;
 				}
 				if(unusedBytes<=0) {
@@ -305,13 +289,6 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	}
 	
 	public void reset() {
-		/*indexForPut = 0;
-		indexForGet = 0;
-		mpegPakages = 3;
-		isMpeg4 = false;
-		startFlag = false;
-		canStartFlag = false;
-		queue.clear();*/
 		int imageHeight = caculateImageHeight(imageWidth);
 		if(imageHeight != 480) {
 			checkResulationFlag = false;
@@ -319,21 +296,9 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 	}
 	
 	private void onStop() {
-		queue.clear();
-		System.gc();
-		stopPlay = true;
-		if(video != null && !video.isRecycled()) {
-			video.recycle();
-			video = null;
-		}
-		myVideoView.setImage(null);
-		this.rgbDataBuf = null;
-		//this.jpegByteBuf = null;
-		this.playMpegBuf = null;
-		this.listener = null;
-		System.gc();
-		System.runFinalization();
 		UdtTools.freeDecorer();
+		queue.clear();
+		stopPlay = true;
 		if(BuildConfig.DEBUG && DEBUG) {
 			Log.d(TAG, "### play mpeg thread exit ....");
 		}
@@ -370,32 +335,15 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 							lock.wait(10);
 						} catch (InterruptedException e) {
 							stopPlay = true;
-							Log.e(TAG, e.getLocalizedMessage());
+							Log.e(TAG, "#### " + e.getLocalizedMessage());
+							playMpegThreaExit();
 							break;
 						}
 					}  
 				}
 			}
+			playMpegThreaExit();
 		}
-		
-/*		private void onStop() {
-			int imageRemain = queue.getMpegLength();
-			if(imageRemain>0) {
-				for(int i=0;i<imageRemain;i++) {
-					MpegImage image =queue.getMpegImage();
-					if(image.rgb != null) {
-						image.rgb = null;
-						image = null;
-						Log.d(TAG, "### play mpeg thread recycle remain mepg image!");
-					}
-				}
-			}
-			System.gc();
-			System.runFinalization();
-			if(BuildConfig.DEBUG && DEBUG) {
-				Log.d(TAG, "### show mpeg image thread exit!");
-			}
-		}*/
 		
 		public boolean popuJpeg(String oldTime) {
 			JpegImage image = queue.getFirstImage();
@@ -429,7 +377,16 @@ public class PlayMpegThread extends DecoderFactory implements OnPutIndexListener
 			if(!Thread.currentThread().isInterrupted()){
 				Thread.currentThread().interrupt();
 			}
-			stopPlay = true;
+		}
+		
+		private void playMpegThreaExit() {
+			if(video != null ) {
+				video.recycle();
+				video = null;
+				if(BuildConfig.DEBUG && DEBUG) {
+					Log.d(TAG, "### recycle mpeg bitmap");
+				}
+			}
 		}
 	}
 	

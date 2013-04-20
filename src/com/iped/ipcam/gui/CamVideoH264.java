@@ -2,12 +2,11 @@ package com.iped.ipcam.gui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,12 +17,10 @@ import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -39,6 +36,7 @@ import com.baidu.mobstat.StatService;
 import com.iped.ipcam.bitmapfun.ImageGrid;
 import com.iped.ipcam.engine.CamMagFactory;
 import com.iped.ipcam.engine.ICamManager;
+import com.iped.ipcam.engine.TalkBackThread;
 import com.iped.ipcam.pojo.BCVInfo;
 import com.iped.ipcam.pojo.Device;
 import com.iped.ipcam.utils.ByteUtil;
@@ -72,8 +70,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private int screenWidth = 0;
 	
 	private int screenHeight = 0;
-	
-	//private ControlPanel rightControlPanel = null;
 	
 	private Thread thread = null;
 	
@@ -113,10 +109,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 
 	private String TAG = "CamVideoH264";
 	
-	private int [] videoPopMenuItem = {R.string.webcam_video_popup_menu_stop, R.string.webcam_video_popup_menu_cancle};
-	
-	private VideoPopupMenu popupMenu = null;
-	
 	private View directViewControl = null;
 	
 	private View rightViewControl = null;
@@ -124,10 +116,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	private int playBackDeviceIndex = 0;
 	
 	private BCVInfo info = null;
-	
-	private int x_offSet = 0;
-	
-	private int y_offSet = 0;
 	
 	private RadioButton qvga = null;
 	
@@ -206,11 +194,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
 				}
 				break;
-			case Constants.WEB_CAM_CONNECT_INIT_MSG:
-				Button sendAudioButton = (Button) rightViewControl.findViewById(R.id.send_audio);
-				UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOff, CamCmdListHelper.SetAudioTalkOff.length());
-				sendAudioButton.setText(R.string.video_preview_send_audio_open);
-				break;
 			case Constants.WEB_CAM_CHECK_PWD_STATE_MSG:
 				ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_send_audio_open_tips);
 				break;
@@ -230,13 +213,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 				mHandler.sendEmptyMessage(Constants.WEB_CAM_SHOW_CHECK_PWD_DLG_MSG);
 				newPwd = (String) msg.obj;
 				new AsynCheckPwdTask().execute(0);
-				/*HandlerThread handlerThread = new HandlerThread("test5");
-				handlerThread.start();
-				Handler handler = new Handler();
-				handler.post(checkPwdRunnable);*/
-				//mHandler.removeCallbacks(checkPwdRunnable);
-				//mHandler.post(checkPwdRunnable);
-				//new CheckPwdThread().start();
 				break;
 			case Constants.WEB_CAM_RECONNECT_MSG:
 				ToastUtils.showToast(CamVideoH264.this, R.string.webcam_connection_break_str);
@@ -265,9 +241,17 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			case PlayBackConstants.HIDE_SEEKBAR_LAYOUT:
 				playBackBottomlayout.setVisibility(View.GONE);
 				playBackBottomlayout.invalidate();
+				Button takePicture = (Button) findViewById(R.id.video_preview_take_picture);
+				takePicture.setEnabled(true);
+				Button viewPicture = (Button) findViewById(R.id.video_preview_view_picture);
+				viewPicture.setEnabled(true);
 				break;
 			case PlayBackConstants.SHOW_SEEKBAR_LAYOUT:
 				playBackBottomlayout.setVisibility(View.VISIBLE);
+				Button takePicture1 = (Button) findViewById(R.id.video_preview_take_picture);
+				takePicture1.setEnabled(false);
+				Button viewPicture1 = (Button) findViewById(R.id.video_preview_view_picture);
+				viewPicture1.setEnabled(false);
 				break;
 			case PlayBackConstants.DISABLE_SEEKBAR:
 				playBackSeekBar.init(0);
@@ -330,6 +314,9 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					}
 				}
 				break;
+			case Constants.ERRORTIPS:
+				ToastUtils.showToast(CamVideoH264.this, msg.arg1);
+				break;
 			default:
 				break;
 			}
@@ -338,9 +325,6 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void startThread() {
 		myVideoView.setDevice(camManager.getSelectDevice());
-		//myVideoView.setOnLongClickListener(longClickListener);
-		myVideoView.setOnTouchListener(videoViewOnTouch);
-		myVideoView.onStart();
 		thread = new Thread(myVideoView);
 		thread.start();
 	}
@@ -546,7 +530,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 						public void run() {
 							int res = UdtTools.sendCmdMsg(CamCmdListHelper.SetAudioTalkOn, CamCmdListHelper.SetAudioTalkOn.length());
 							Message m = mHandler.obtainMessage();
-							m.what = Constants.CONNECTERROR;
+							m.what = Constants.ERRORTIPS;
 							if(res > 0) {
 								int length = 20;
 								byte[] recv = new byte[length];
@@ -565,11 +549,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 										volumeProgressbar.setProgress(1);
 									}else if("talk_busy".equalsIgnoreCase(result)){
 										m.arg1 = R.string.video_preview_send_audio_open_error_tips;
+										//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_send_audio_open_error_tips);
 									}else {
 										m.arg1 = R.string.video_preview_send_audio_open_error;
+										//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_send_audio_open_error);
 									}
 								}else {
 									m.arg1 = R.string.video_preview_send_audio_open_error;
+									//ToastUtils.showToast(CamVideoH264.this, R.string.video_preview_send_audio_open_error);
 								}
 							}else {
 								m.arg1 = R.string.video_preview_send_audio_open_error;
@@ -582,7 +569,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 					String item = CamCmdListHelper.SetAudioTalkOff;
 					int res = UdtTools.sendCmdMsg(item , item.length());
 					Message m = mHandler.obtainMessage();
-					m.what = Constants.CONNECTERROR;
+					m.what = Constants.ERRORTIPS;
 					if(res > 0) {
 						sendAudio.setText(R.string.video_preview_send_audio_open);
 						m.arg1 = R.string.video_preview_send_audio_close_success;
@@ -590,9 +577,11 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 						if(info != null) {
 							volumeProgressbar.setMax(100);
 							volumeProgressbar.setProgress(info.getVolume()>0?info.getVolume():0);
+							//ToastUtils.showToast(this, R.string.video_preview_send_audio_close_success);
 						}
 					}else {
 						m.arg1 = R.string.video_preview_send_audio_close_error;
+						//ToastUtils.showToast(this, R.string.video_preview_send_audio_close_error);
 					}
 					f = true;
 					mHandler.sendMessage(m);
@@ -722,7 +711,15 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
+			final Button sendAudio = (Button) rightViewControl.findViewById(R.id.send_audio);
+			if(!sendAudio.getText().toString().equals(getText(R.string.video_preview_send_audio_open))) {// close
+				TalkBackThread.stopTalkBack();
+			}
 			myVideoView.setStopPlay(true, false);
+			if(thread != null && !thread.isInterrupted()) {
+				thread.interrupt();
+				thread = null;
+			}
 			CamVideoH264.this.finish();
 		}
 		return super.onKeyDown(keyCode, event);
@@ -747,7 +744,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        myVideoView.init(mHandler,screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
+        myVideoView.init(mHandler, screenWidth, screenHeight, settings.getBoolean("REVERSE", false));
 	}
 	
 	@Override
@@ -759,17 +756,12 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	@Override
     protected void onDestroy() {
     	super.onDestroy();
-    	if(mWakeLock.isHeld() == true) {
-   		 	mWakeLock.release();
-        }
     	//myVideoView.onStop();
 		dismissProgressDlg();
-		mHandler.removeCallbacks(topMenuControlTask);
-		if(thread != null && !thread.interrupted()) {
-			thread.interrupt();
-			thread = null;
+		if(mWakeLock.isHeld() == true) {
+			mWakeLock.release();
 		}
-		myVideoView.destroyDrawingCache();
+		mHandler.removeCallbacks(topMenuControlTask);
 		Log.d(TAG, "close---==== onDestroy");
     }
 	
@@ -991,11 +983,7 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
-			//Log.d(TAG, "change" + progress);
-			//currentTextView.setText(StringUtils.makeTimeString(CamVideoH264.this, progress));
-			//currentTextView.setText(DateUtil.formatTimeToDate6(progress*1000+startTime));
 			playBackSeekBar.setProgress(progress);
-			//System.out.println(progress + "####" + startTime+" "+ DateUtil.formatTimeToDate6(progress+startTime));
 		}
 	};
 	
@@ -1181,34 +1169,59 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 		}
 	};*/
 	
-	private OnTouchListener videoViewOnTouch = new OnTouchListener() {
-		
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			x_offSet = (int)event.getX();
-			y_offSet = (int) event.getY();
-			return false;
-		}
-	};
-	
 	private void updateResulation(int id) {
 		 if(id == 0) {
 			updateControlButtion(View.VISIBLE);
 			qvga.setChecked(true);
+			updateQvgaText(true);
 			vga.setChecked(false);
+			updateVgaText(false);
 			qelp.setChecked(false);
+			updateQelpText(false);
 		}else if(id == 1) {
 			updateControlButtion(View.VISIBLE);
 			qvga.setChecked(false);
+			updateQvgaText(false);
 			qelp.setChecked(false);
+			updateQelpText(false);
 			vga.setChecked(true);
+			updateVgaText(false);
 		}else if(id == 2) {
 			updateControlButtion(View.VISIBLE);
 			qvga.setChecked(false);
+			updateQvgaText(false);
 			vga.setChecked(false);
+			updateVgaText(false);
 			qelp.setChecked(true);
+			updateQelpText(true);
 		} else {
-			updateControlButtion(View.GONE);
+			//updateControlButtion(View.GONE);
+			updateCIF(false);
+			updateHD(false);
+			updateVGA(false);
+		}
+	}
+	
+	public void updateQvgaText(boolean flag){
+		if(flag) {
+			qvga.setTextColor(Color.WHITE);
+		}else {
+			qvga.setTextColor(Color.GRAY);
+		}
+	}
+	
+	public void updateVgaText(boolean flag){
+		if(flag) {
+			vga.setTextColor(Color.WHITE);
+		}else {
+			vga.setTextColor(Color.GRAY);
+		}
+	}
+	public void updateQelpText(boolean flag){
+		if(flag) {
+			qelp.setTextColor(Color.WHITE);
+		}else {
+			qelp.setTextColor(Color.GRAY);
 		}
 	}
 	
@@ -1232,8 +1245,14 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			 * # 没有cif分辨率（355*288）
 			 */
 			updateQuality(false);// 画质调节
-			updateAudioTalk(true);
 			updateYuntai(true);
+			if(!myVideoView.isPlayBackFlag()) {
+				updateAudioTalk(true);
+				enableCheck(true);
+			}else {
+				updateAudioTalk(false);
+				enableCheck(false);
+			}
 		}else if("IP2001".equalsIgnoreCase(mode) || "IP2001C".equalsIgnoreCase(mode) || "IP2001A".equalsIgnoreCase(mode)) {
 			/*
 			 * [IP2001]
@@ -1242,20 +1261,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			 * # 没有QVGA分辨率
 			 * 
 			 */
-			updateAudioTalk(true);
+			
 			updateYuntai(true);
 			updateCIF(false);
 			updateHD(true);
 			updateVGA(true);
-		}else if("IP1001S".equalsIgnoreCase(mode)) {
-			/*
-			 * [IP1001S]
-			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
-			 * # 没有cif分辨率
-			 */
-			updateCIF(false);
-			updateAudioTalk(true);
-			updateYuntai(true);
+			if(!myVideoView.isPlayBackFlag()) {
+				updateAudioTalk(true);
+				enableCheck(true);
+			}else {
+				updateAudioTalk(false);
+				enableCheck(false);
+			}
 		}else if("IP2002A".equalsIgnoreCase(mode) || "IP2002C".equalsIgnoreCase(mode)) {
 			/*
 			 * [IP2002A]
@@ -1266,12 +1283,19 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			 * # 没有云台功能
 			 * # 没有wifi
 			 */
-			updateAudioTalk(false);
+			
 			updateYuntai(false);
 			updateCIF(true);
 			updateHD(true);
 			updateVGA(true);
-		}else if("IP1001SC".equalsIgnoreCase(mode) || "IP1001SA".equalsIgnoreCase(mode)) {
+			if(!myVideoView.isPlayBackFlag()) {
+				updateAudioTalk(false);
+				enableCheck(true);
+			}else {
+				updateAudioTalk(false);
+				enableCheck(false);
+			}
+		}else if("IP1001SC".equalsIgnoreCase(mode) || "IP1001SA".equalsIgnoreCase(mode) || "IP1001S".equalsIgnoreCase(mode)) {
 			/*
 			 * [IP1001SC]
 			 * # 没有智能监控下的方案选择 :　更清晰 | 更流畅
@@ -1279,11 +1303,18 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 			 * # 没有高清分辨率
 			 * # 没有QVGA分辨率
 			 */
-			updateAudioTalk(true);
 			updateYuntai(true);
 			updateHD(false);
 			updateVGA(true);
-			updateCIF(false);
+			updateCIF(true);
+			if(!myVideoView.isPlayBackFlag()) {
+				updateAudioTalk(true);
+				enableCheck(true);
+				qelp.setEnabled(false);
+			}else {
+				updateAudioTalk(false);
+				enableCheck(false);
+			}
 		}	
 	}
 	
@@ -1301,16 +1332,24 @@ public class CamVideoH264 extends Activity implements OnClickListener, OnTouchLi
 	
 	private void updateCIF(boolean flag) {
 		qvga.setEnabled(flag);
+		updateQvgaText(flag);
 	}
 	
 	private void updateHD(boolean flag) {
 		qelp.setEnabled(flag);
+		updateQelpText(flag);
 	}
 	
 	private void updateVGA(boolean flag) {
 		vga.setEnabled(flag);
+		updateVgaText(flag);
 	}
 	
+	private void enableCheck(boolean flag) {
+		qvga.setEnabled(flag);
+		vga.setEnabled(flag);
+		qelp.setEnabled(flag);
+	}
 	private void reloadControlTask() {
 		mHandler.removeCallbacks(topMenuControlTask);
 		mHandler.postDelayed(topMenuControlTask, 5000);

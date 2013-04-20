@@ -6,7 +6,6 @@ import android.util.Log;
 import com.iped.ipcam.engine.PlayMpegThread.OnMpegPlayListener;
 import com.iped.ipcam.factory.DecoderFactory;
 import com.iped.ipcam.gui.BuildConfig;
-import com.iped.ipcam.gui.MyVideoView;
 import com.iped.ipcam.gui.UdtTools;
 import com.iped.ipcam.utils.AudioUtil;
 import com.iped.ipcam.utils.Command;
@@ -37,18 +36,16 @@ public class DecodeAudioThread extends DecoderFactory{
 	private byte[] recvAudioBuf = null; 
 	private int indexForPut = 0; // put索引 （下一个要写入的位置）
 	private int indexForGet = 0;
-	private MyVideoView myVideoView;
 	
-	public DecodeAudioThread(MyVideoView myVideoView) {
+	public DecodeAudioThread() {
 		recvAudioBuf = new byte[recvAudioBufLen];
-		this.myVideoView = myVideoView;
 	}
 	
 	
 	@Override
 	public void run() {
-		Thread thread = new Thread(new PlaySoundThread());
-		thread.start();
+		Thread threadPlaySound = new Thread(new PlaySoundThread());
+		threadPlaySound.start();
 		int recvDataLength = -1;
 		int timeoutCounter = 0;
 		while (!stopPlay) {
@@ -61,7 +58,6 @@ public class DecodeAudioThread extends DecoderFactory{
 					if(BuildConfig.DEBUG && DEBUG) {
 						Log.e(TAG, "### thread recv audio over! recvDataLength = " + recvDataLength );
 					}
-					myVideoView.callBackStop();
 					break;
 				}
 				if(timeoutCounter>15) {
@@ -84,14 +80,13 @@ public class DecodeAudioThread extends DecoderFactory{
 					synchronized (recvAudioBuf) {
 						try {
 							recvAudioBuf.wait(100);
-							//myVideoView.callBackStop();
 							//stopPlay = true;
 							Log.e(TAG, "### audio data buffer is full! ---->");
 							//throw new CamManagerException("audio data buffer is full!");
 						} catch (Exception e) {
 							stopPlay = true;
-							if(thread != null && !thread.isInterrupted()) {
-								thread.interrupt();
+							if(threadPlaySound != null && !threadPlaySound.isInterrupted()) {
+								threadPlaySound.interrupt();
 							}
 							e.printStackTrace();
 						}
@@ -103,8 +98,8 @@ public class DecodeAudioThread extends DecoderFactory{
 				}
 			}while(recvDataLength>recvBufIndex && !stopPlay);
 		}
-		if(thread != null && !thread.isInterrupted()) {
-			thread.interrupt();
+		if(threadPlaySound != null && !threadPlaySound.isInterrupted()) {
+			threadPlaySound.interrupt();
 		}
 	}
 
@@ -177,7 +172,6 @@ public class DecodeAudioThread extends DecoderFactory{
 				}
 			} while(!stopPlay);
 			release();
-			//myVideoView.callBackStop();
 		}
 		
 		private void release()  {

@@ -59,6 +59,8 @@ public class Constants {
 
 	public final static int CLEARFILES = 2070;
 
+	public final static int ERRORTIPS = 2080;
+	
 	// ------------------------------------------- config
 
 	public final static int SHOWQUERYCONFIGDLG = 2080;

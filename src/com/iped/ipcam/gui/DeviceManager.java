@@ -179,17 +179,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 				deviceTmp.setUnDefine2(pass);
 				FileUtil.persistentDevice(DeviceManager.this,camManager.getCamList());
 				break;
-			case Constants.WEB_CAM_CONNECT_INIT_MSG:
-				String random = RandomUtil.generalRandom();
-				Log.d(TAG, "random = " + random);
-				int initRes = 1;//UdtTools.initialSocket(device.getDeviceID(),random);
-				if(initRes<0) {
-					Log.d(TAG, "initialSocket init error!");
-					ToastUtils.showToast(DeviceManager.this, R.string.webcam_connect_init_error);
-				}else {
-					handler.sendEmptyMessage(Constants.WEB_CAM_CHECK_PWD_STATE_MSG);
-				}
-				break;
 			case Constants.WEB_CAM_CHECK_PWD_STATE_MSG:
 				int resu = PackageUtil.checkPwdState(device.getDeviceID());
 				Log.d(TAG, "device manager checkPwdState result = " + resu);
@@ -247,7 +236,6 @@ public class DeviceManager extends ListActivity implements OnClickListener, OnIt
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		UdtTools.startUp();
 		setContentView(R.layout.device_manager);
 		autoSearchButton = (Button) findViewById(R.id.auto_search_button);
 		manulAddButton = (Button) findViewById(R.id.manul_add_button);

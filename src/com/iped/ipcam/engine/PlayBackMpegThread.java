@@ -53,7 +53,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 	
 	private int indexForGet = 0;
 	
-	private final static int NALBUFLENGTH = MyVideoView.NALBUFLENGTH;
+	private int NALBUFLENGTH = 0;
 	
 	private OnMpegPlayListener listener;
 	
@@ -134,6 +134,7 @@ public class PlayBackMpegThread extends DecoderFactory implements OnPutIndexList
 		rawDataQueue = new PlayBackMpegQueue();
 		//jpegByteBuf = new byte[jpegByteBufLength]; 
 		mpegBuf = new byte[length];
+		NALBUFLENGTH = myVideoView.getRecvBufferLength();
 	}
 	
 	

@@ -59,7 +59,7 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 	
 	private int indexForGet = 0;
 	
-	private final static int NALBUFLENGTH = MyVideoView.NALBUFLENGTH;
+	private int NALBUFLENGTH = 0;
 	
 	private boolean isMpeg4 = false;
 	
@@ -92,6 +92,7 @@ public class PlayH264Thread extends DecoderFactory implements OnPutIndexListener
 		}
 		//jpegByteBuf = new byte[jpegByteBufLength]; 
 		playH264Buf = new byte[length];
+		NALBUFLENGTH = myVideoView.getRecvBufferLength();
 	}
 	
 	@Override
