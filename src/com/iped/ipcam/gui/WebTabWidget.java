@@ -20,6 +20,7 @@ public class WebTabWidget extends TabActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		UdtTools.startUp();
 		setContentView(R.layout.web_tab_widget);
 		ExceptionHandler crashHandler = ExceptionHandler.getInstance();    
 		crashHandler.init(this);

@@ -61,7 +61,7 @@ public class UdtTools {
 	public static native int close();
 	
 	//video thread interrupt
-	public static native int exit();
+	//public static native int exit();
 	
 	public static native int startUp();
 	
@@ -76,6 +76,6 @@ public class UdtTools {
 	
 	public static native void freeDecorer();
 	
-	public static native int[] decodeYUV420SP(byte[] data, int width, int height);
+	//public static native int[] decodeYUV420SP(byte[] data, int width, int height);
 	
 }
